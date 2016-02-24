@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/img/board.JPG</file>
+        <file>res/img/E.png</file>
+        <file>res/img/H.png</file>
+        <file>res/img/K.png</file>
+        <file>res/img/P.png</file>
+        <file>res/img/Q.png</file>
+        <file>res/img/R.png</file>
+        <file>res/img/w_e.png</file>
+        <file>res/img/w_f.png</file>
+        <file>res/img/w_h.png</file>
+        <file>res/img/w_k.png</file>
+        <file>res/img/w_p.png</file>
+        <file>res/img/w_q.png</file>
+        <file>res/img/w_r.png</file>
+        <file>res/app.qml</file>
+        <file>res/Figure.qml</file>
+        <file>res/StartModel.qml</file>
+    </qresource>
+</RCC>
