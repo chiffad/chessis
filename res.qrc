@@ -15,7 +15,5 @@
         <file>res/img/w_q.png</file>
         <file>res/img/w_r.png</file>
         <file>res/app.qml</file>
-        <file>res/Figure.qml</file>
-        <file>res/StartModel.qml</file>
     </qresource>
 </RCC>

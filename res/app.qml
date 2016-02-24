@@ -3,7 +3,6 @@ import Integration 1.0
 
 Item
 {
-
   id: root
   width: bOARD_SIZE //+ oUTPUT_SIZE
   height: bOARD_SIZE
@@ -21,7 +20,7 @@ Item
 
   ListModel
   {
-    id: figureModel
+    id: _figureModel
 
     ListElement{ name:'R'; xCoord: 0; yCoord: 0; visible: true }
     ListElement{ name:'H'; xCoord: 1; yCoord: 0; visible: true }
@@ -60,7 +59,7 @@ Item
 
   Image
   {
-    id: board
+    id: _board
     source: "img/board.JPG"
     width: bOARD_SIZE
     height: bOARD_SIZE
@@ -68,12 +67,14 @@ Item
 
   Repeater
   {
-    id: rep
-    model: figureModel
+    id: _rep
 
-    delegate: Figure
+    model: _figureModel
+
+    Image
     {
-      id: delegateFigure
+      id: _delegateFigure
+      Drag.active: _dragArea.drag.active
 
       width: cELL_SIZE
       height: width
@@ -85,14 +86,24 @@ Item
 
       MouseArea
       {
+        id: _dragArea
+
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        drag.minimumX: 0
+        drag.minimumY: 0
+        drag.maximumX: bOARD_SIZE - cELL_SIZE
+        drag.maximumY: bOARD_SIZE - cELL_SIZE
+        drag.target: parent
+
         onPressed:
         {
-          integration.move(delegateFigure.x, delegateFigure.y)
+          integration.move(_delegateFigure.x / cELL_SIZE, _delegateFigure.y / cELL_SIZE)
         }
 
         onReleased:
         {
-          integration.move(delegateFigure.x, delegateFigure.y)
+          integration.move(_delegateFigure.x / cELL_SIZE, _delegateFigure.y / cELL_SIZE)
         }
       }
     }
