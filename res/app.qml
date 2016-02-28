@@ -103,7 +103,17 @@ Item
 
         onReleased:
         {
-          integration.move(_delegateFigure.x / cELL_SIZE, _delegateFigure.y / cELL_SIZE)
+          if(integration.move(_delegateFigure.x / cELL_SIZE, _delegateFigure.y / cELL_SIZE))
+          {
+            xCoord: _delegateFigure.x / cELL_SIZE
+            yCoord: _delegateFigure.y / cELL_SIZE
+          }
+
+          else
+          {
+            _delegateFigure.x = xCoord * cELL_SIZE
+            _delegateFigure.y = yCoord * cELL_SIZE
+          }
         }
       }
     }

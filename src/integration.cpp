@@ -27,14 +27,15 @@ void Integr::set_coord_y(const int& val)
 
 bool Integr::move(int x, int y)
 {
-  qDebug()<<x<<""<<y;
   static bool is_from = true;
   if(is_from)
   {
     board->from.x = x;
     board->from.y = y;
-    is_from = false;
+    if(char(board->get_field(board->from)) != FREE_FIELD)
+      is_from = false;
   }
+
   else
   {
     is_from = true;
@@ -43,9 +44,9 @@ bool Integr::move(int x, int y)
     qDebug()<<"from: "<<board->from.x<<""<<board->from.y;
     qDebug()<<"to: "<<board->to.x<<""<<board->to.y;
     qDebug()<<"fig: "<<char(board->get_field(board->from));
+    qDebug()<<"fig: "<<char(board->get_field(board->to));
 
-    board->move(board->from, board->to);
-    return true;
+    return board->move(board->from, board->to);
   }
   return false;
 }

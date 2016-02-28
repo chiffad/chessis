@@ -14,8 +14,8 @@ Board::Board()
     for(int j = 0; j < Y_SIZE; ++j)
     {
       _field[i][j] = FREE_FIELD;
-      //if(j == 1) _field[i][j] = B_PAWN;
-      //if(j == 6) _field[i][j] = W_PAWN;
+      if(j == 1) _field[i][j] = B_PAWN;
+      if(j == 6) _field[i][j] = W_PAWN;
     }
   _field[0][0] = B_ROOK;
   _field[7][0] = B_ROOK;
