@@ -25,6 +25,13 @@ void Integr::set_coord_y(const int& val)
   coord.y = val;
 }
 
+unsigned int Integr::correct_img_coord(unsigned int coord)
+{
+  const int CELL_SIZE = 560 / 8;
+  const int IMG_MID = 40;
+  return int((coord + IMG_MID) / CELL_SIZE) * CELL_SIZE;
+}
+
 bool Integr::move(int x, int y)
 {
   static bool is_from = true;

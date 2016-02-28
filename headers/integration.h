@@ -28,6 +28,7 @@ signals:
 public slots:
   void back_move();
   bool move(int x, int y);
+  unsigned int correct_img_coord(unsigned int coord);
 
 private:
   Board* board;

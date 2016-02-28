@@ -7,11 +7,9 @@ Item
   width: bOARD_SIZE //+ oUTPUT_SIZE
   height: bOARD_SIZE
 
-  property int bOARD_SIZE: 560
-  property int oUTPUT_SIZE: 200
-  property int cELL_SIZE: bOARD_SIZE/8
-  property int fIG_LEFT: 32
-  property int cELL_NUM: 64
+  readonly property int bOARD_SIZE: 560
+  readonly property int oUTPUT_SIZE: 200
+  readonly property int cELL_SIZE: bOARD_SIZE / 8
 
   IntegrationClass
   {
@@ -98,21 +96,26 @@ Item
 
         onPressed:
         {
-          integration.move(_delegateFigure.x / cELL_SIZE, _delegateFigure.y / cELL_SIZE)
+          integration.move(integration.correct_img_coord(parent.x) / cELL_SIZE,
+                           integration.correct_img_coord(parent.y) / cELL_SIZE)
         }
 
         onReleased:
         {
-          if(integration.move(_delegateFigure.x / cELL_SIZE, _delegateFigure.y / cELL_SIZE))
+          if(integration.move(integration.correct_img_coord(parent.x) / cELL_SIZE,
+                              integration.correct_img_coord(parent.y) / cELL_SIZE))
           {
-            xCoord: _delegateFigure.x / cELL_SIZE
-            yCoord: _delegateFigure.y / cELL_SIZE
+            xCoord: integration.correct_img_coord(parent.x) / cELL_SIZE
+            yCoord: integration.correct_img_coord(parent.x) / cELL_SIZE
+
+            parent.x = integration.correct_img_coord(parent.x)
+            parent.y = integration.correct_img_coord(parent.y)
           }
 
           else
           {
-            _delegateFigure.x = xCoord * cELL_SIZE
-            _delegateFigure.y = yCoord * cELL_SIZE
+            parent.x = xCoord * cELL_SIZE
+            parent.y = yCoord * cELL_SIZE
           }
         }
       }
