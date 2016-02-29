@@ -1,7 +1,7 @@
 #include "headers/integration.h"
 #include "headers/chess.h"
 #include <QPainter>
-#include <QString>
+#include <string>
 
 Integr::Integr(QObject *parent)
     : QObject(parent)
@@ -20,11 +20,6 @@ void Integr::set_coord_x(const int& val)
   coord.x = val;
 }
 
-void Integr::set_coord_y(const int& val)
-{
-  coord.y = val;
-}
-
 unsigned int Integr::correct_img_coord(unsigned int coord)
 {
   const int CELL_SIZE = 560 / 8;
@@ -32,7 +27,7 @@ unsigned int Integr::correct_img_coord(unsigned int coord)
   return int((coord + IMG_MID) / CELL_SIZE) * CELL_SIZE;
 }
 
-bool Integr::move(int x, int y)
+bool Integr::move(unsigned int x, unsigned int y)
 {
   static bool is_from = true;
   if(is_from)
@@ -57,3 +52,36 @@ bool Integr::move(int x, int y)
   }
   return false;
 }
+
+bool Integr::is_not_beaten(unsigned int x, unsigned int y, std::string fig)
+{
+  coord.x = x;;
+  coord.y = y;
+  if(char(board->get_field(coord)) != correct_figure(fig))
+    return false;
+
+  else return true;
+}
+
+char correct_figure(std::string fig)
+{
+  if(fig.length() == 1)
+    return fig;
+
+  if(fig.length() == 3)
+    return fig[3];
+
+  return '';
+}
+
+
+
+
+
+
+
+
+
+
+
+
