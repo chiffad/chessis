@@ -16,45 +16,6 @@ Item
     id: integration
   }
 
-  ListModel
-  {
-    id: _figureModel
-
-    ListElement{ name:'R'; xCoord: 0; yCoord: 0; figVisible: true }
-    ListElement{ name:'H'; xCoord: 1; yCoord: 0; figVisible: true }
-    ListElement{ name:'E'; xCoord: 2; yCoord: 0; figVisible: true }
-    ListElement{ name:'Q'; xCoord: 3; yCoord: 0; figVisible: true }
-    ListElement{ name:'K'; xCoord: 4; yCoord: 0; figVisible: true }
-    ListElement{ name:'E'; xCoord: 5; yCoord: 0; figVisible: true }
-    ListElement{ name:'H'; xCoord: 6; yCoord: 0; figVisible: true }
-    ListElement{ name:'R'; xCoord: 7; yCoord: 0; figVisible: true }
-    ListElement{ name:'P'; xCoord: 0; yCoord: 1; figVisible: true }
-    ListElement{ name:'P'; xCoord: 1; yCoord: 1; figVisible: true }
-    ListElement{ name:'P'; xCoord: 2; yCoord: 1; figVisible: true }
-    ListElement{ name:'P'; xCoord: 3; yCoord: 1; figVisible: true }
-    ListElement{ name:'P'; xCoord: 4; yCoord: 1; figVisible: true }
-    ListElement{ name:'P'; xCoord: 5; yCoord: 1; figVisible: true }
-    ListElement{ name:'P'; xCoord: 6; yCoord: 1; figVisible: true }
-    ListElement{ name:'P'; xCoord: 7; yCoord: 1; figVisible: true }
-
-    ListElement{ name:'w_p'; xCoord: 0; yCoord: 6; figVisible: true }
-    ListElement{ name:'w_p'; xCoord: 1; yCoord: 6; figVisible: true }
-    ListElement{ name:'w_p'; xCoord: 2; yCoord: 6; figVisible: true }
-    ListElement{ name:'w_p'; xCoord: 3; yCoord: 6; figVisible: true }
-    ListElement{ name:'w_p'; xCoord: 4; yCoord: 6; figVisible: true }
-    ListElement{ name:'w_p'; xCoord: 5; yCoord: 6; figVisible: true }
-    ListElement{ name:'w_p'; xCoord: 6; yCoord: 6; figVisible: true }
-    ListElement{ name:'w_p'; xCoord: 7; yCoord: 6; figVisible: true }
-    ListElement{ name:'w_r'; xCoord: 0; yCoord: 7; figVisible: true }
-    ListElement{ name:'w_h'; xCoord: 1; yCoord: 7; figVisible: true }
-    ListElement{ name:'w_e'; xCoord: 2; yCoord: 7; figVisible: true }
-    ListElement{ name:'w_q'; xCoord: 3; yCoord: 7; figVisible: true }
-    ListElement{ name:'w_k'; xCoord: 4; yCoord: 7; figVisible: true }
-    ListElement{ name:'w_e'; xCoord: 5; yCoord: 7; figVisible: true }
-    ListElement{ name:'w_h'; xCoord: 6; yCoord: 7; figVisible: true }
-    ListElement{ name:'w_r'; xCoord: 7; yCoord: 7; figVisible: true }
-  }
-
   Image
   {
     id: _board
@@ -67,56 +28,39 @@ Item
   {
     id: _rep
 
-    model: _figureModel
-
-    Image
+    model: FigureModel {}
+    delegate: FigureDelegate
     {
       id: _delegateFigure
-      visible: figVisible = integration.is_not_beaten(xCoord, yCoord)
-
-      width: cELL_SIZE
-      height: width
-
-      x: xCoord * cELL_SIZE
-      y: yCoord * cELL_SIZE
-
-      source: 'img/' + name +'.png'
-
-      Drag.active: _dragArea.drag.active
 
       MouseArea
       {
         id: _dragArea
 
         anchors.fill: parent
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
         drag.minimumX: 0
         drag.minimumY: 0
         drag.target: parent
 
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+
         onPressed:
         {
-          integration.move(integration.correct_img_coord(parent.x) / cELL_SIZE,
-                           integration.correct_img_coord(parent.y) / cELL_SIZE)
+          integration.move(integration.correct_img_coord(parent.x),
+                           integration.correct_img_coord(parent.y))
         }
 
         onReleased:
         {
-          if(integration.move(integration.correct_img_coord(parent.x) / cELL_SIZE,
-                              integration.correct_img_coord(parent.y) / cELL_SIZE))
+          if(integration.move(integration.correct_img_coord(xCoord),
+                              integration.correct_img_coord(yCoord)))
           {
-            xCoord: integration.correct_img_coord(parent.x) / cELL_SIZE
-            yCoord: integration.correct_img_coord(parent.x) / cELL_SIZE
-
-            parent.x = integration.correct_img_coord(parent.x)
-            parent.y = integration.correct_img_coord(parent.y)
+            xCoord: integration.correct_img_coord(parent.x)
+            yCoord: integration.correct_img_coord(parent.x)
           }
 
-          else
-          {
-            parent.x = xCoord * cELL_SIZE
-            parent.y = yCoord * cELL_SIZE
-          }
+          //parent.x = xCoord * cELL_SIZE
+          //parent.y = yCoord * cELL_SIZE
         }
       }
     }

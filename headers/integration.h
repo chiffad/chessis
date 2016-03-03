@@ -3,6 +3,7 @@
 
 #include <QtQuick/QQuickPaintedItem>
 #include <QObject>
+#include <QString>
 #include "headers/chess.h"
 
 class Integr : public QObject
@@ -24,7 +25,7 @@ signals:
 public slots:
   void back_move();
   bool move(unsigned int x, unsigned int y);
-  bool is_not_beaten(unsigned int x, unsigned int y);
+  bool is_not_beaten(unsigned int x, unsigned int y, QString fig);
   unsigned int correct_img_coord(unsigned int coord);
 
 private:

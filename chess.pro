@@ -1,5 +1,6 @@
-QT += qml quick
-QT += widgets
+QT += qml quick \
+      widgets \
+      core
 
 HEADERS += headers/integration.h\
            headers/chess.h
