@@ -28,10 +28,20 @@ Item
   {
     id: _rep
 
-    model: FigureModel {}
-    delegate: FigureDelegate
+    model: FigureModel {id: _figureModel}
+
+    //property alias somecoords: _figureModel.get(index).xCoord
+
+    FigureDelegate
     {
-      id: _delegateFigure
+      id: _figureDelegate
+
+      x: xCoord * cELL_SIZE
+      y: yCoord * cELL_SIZE
+
+      source: 'img/' + name +'.png'
+
+      visible: isNotBeaten
 
       MouseArea
       {
@@ -52,15 +62,15 @@ Item
 
         onReleased:
         {
-          if(integration.move(integration.correct_img_coord(xCoord),
-                              integration.correct_img_coord(yCoord)))
+          if(integration.move(integration.correct_img_coord(parent.x),
+                              integration.correct_img_coord(parent.y)))
           {
-            xCoord: integration.correct_img_coord(parent.x)
-            yCoord: integration.correct_img_coord(parent.x)
+            _figureModel.get(index).xCoord = integration.correct_img_coord(parent.x)
+            _figureModel.get(index).yCoord = integration.correct_img_coord(parent.y)
           }
 
-          //parent.x = xCoord * cELL_SIZE
-          //parent.y = yCoord * cELL_SIZE
+          parent.x = _figureModel.get(index).xCoord * cELL_SIZE
+          parent.y = _figureModel.get(index).yCoord * cELL_SIZE
         }
       }
     }

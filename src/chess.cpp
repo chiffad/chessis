@@ -47,13 +47,11 @@ Board::Board()
 bool Board::move(Coord const& fr, Coord const& t)
 {
   _f = fr; _t = t;
-  /*if(right_move_turn() && step_ver(fr, t)) field_change();
+  if(right_move_turn() && step_ver(fr, t)) field_change();
   else return false;
   if(!is_check(get_color(t))) return true;
   back_move();
-  return false;*/
-  field_change();
-  return true;
+  return false;
 }
 
 bool Board::right_move_turn() const

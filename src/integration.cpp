@@ -54,7 +54,7 @@ bool Integr::move(unsigned int x, unsigned int y)
   return false;
 }
 
-QChar correct_figure(QString fig)
+/*QChar correct_figure(QString fig)
 {
   return fig[fig.length() - 1];
 }
@@ -67,7 +67,7 @@ bool Integr::is_not_beaten(unsigned int x, unsigned int y, QString fig)
     return false;
 
   else return true;
-}
+}*/
 
 
 
