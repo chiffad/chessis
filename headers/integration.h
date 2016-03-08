@@ -15,12 +15,12 @@ public:
   ~Integr(){delete board;}
 
 public:
-  Q_PROPERTY(int coord_x READ coord_x WRITE set_coord_x NOTIFY x_y_changed())
-  int coord_x()const{return coord.x;}
-  void set_coord_x(const int& val);
+  Q_PROPERTY(bool is_visible READ is_visible WRITE set_visible NOTIFY visible_changed)
+  bool is_visible() const{return figure_visible;}
+  void set_visible(bool visible);
 
 signals:
-  void x_y_changed();
+  void visible_changed();
 
 public slots:
   void back_move();
@@ -31,6 +31,7 @@ public slots:
 private:
   Board* board;
   Board::Coord coord;
+  bool figure_visible;
 };
 #endif
 

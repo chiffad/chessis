@@ -16,9 +16,10 @@ void Integr::back_move()
   //board->back_move();
 }
 
-void Integr::set_coord_x(const int& val)
+void Integr::set_visible(bool visible)
 {
-  coord.x = val;
+  figure_visible = visible;
+  emit visible_changed();
 }
 
 unsigned int Integr::correct_img_coord(unsigned int coord)
@@ -48,8 +49,11 @@ bool Integr::move(unsigned int x, unsigned int y)
     qDebug()<<"to: "<<board->to.x<<""<<board->to.y;
     qDebug()<<"fig: "<<char(board->get_field(board->from));
     qDebug()<<"fig: "<<char(board->get_field(board->to));
-
-    return board->move(board->from, board->to);
+    if(char(board->get_field(board->to)) != FREE_FIELD && board->move(board->from, board->to))
+    {
+      Integr.set_visible(faalse);
+      return true;
+    }
   }
   return false;
 }

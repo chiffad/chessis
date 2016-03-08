@@ -14,6 +14,7 @@ Item
   IntegrationClass
   {
     id: integration
+    is_visible: true
   }
 
   Image
@@ -30,8 +31,6 @@ Item
 
     model: FigureModel {id: _figureModel}
 
-    //property alias somecoords: _figureModel.get(index).xCoord
-
     FigureDelegate
     {
       id: _figureDelegate
@@ -41,7 +40,7 @@ Item
 
       source: 'img/' + name +'.png'
 
-      visible: isNotBeaten
+      visible: {isNotBeaten = integration.is_visible; return integration.is_visible}
 
       MouseArea
       {
