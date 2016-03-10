@@ -26,6 +26,8 @@ public slots:
   void back_move();
   bool move(unsigned int x, unsigned int y);
   //bool is_not_beaten(unsigned int x, unsigned int y, QString fig);
+  bool is_free_field(unsigned int x, unsigned int y);
+  bool is_found_figure_index(unsigned int x, unsigned int y);
   unsigned int correct_img_coord(unsigned int coord);
 
 private:

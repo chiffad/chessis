@@ -61,9 +61,20 @@ Item
 
         onReleased:
         {
+          _figureDelegate.isFreeField = integration.is_free_field(parent.x, parent.y)
+
           if(integration.move(integration.correct_img_coord(parent.x),
                               integration.correct_img_coord(parent.y)))
           {
+            if(!_figureDelegate.isFreeField)
+            {
+              for(indexFigureOnFeeld = 0;
+                  !integration.is_found_figure_index(_figureModel.get(indexFigureOnFeeld).xCoord,
+                                                     _figureModel.get(indexFigureOnFeeld).yCoord);
+                  ++indexFigureOnFeeld)
+              _figureModel.get(index).isNotBeaten = false
+
+            }
             _figureModel.get(index).xCoord = integration.correct_img_coord(parent.x)
             _figureModel.get(index).yCoord = integration.correct_img_coord(parent.y)
           }

@@ -58,6 +58,16 @@ bool Integr::move(unsigned int x, unsigned int y)
   return false;
 }
 
+bool Integr::is_free_field(unsigned int x, unsigned int y)
+{
+  coord.x = x;
+  coord.y = y;
+  if(board->get_field(coord) != FREE_FIELD)
+    return false;
+
+  return true;
+}
+
 /*QChar correct_figure(QString fig)
 {
   return fig[fig.length() - 1];
