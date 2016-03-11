@@ -10,7 +10,7 @@ Integr::Integr(QObject *parent)
   board = new Board();
 }
 
-void Integr::back_move()
+/*void Integr::back_move()
 {
   qDebug()<<"back_move!";
   //board->back_move();
@@ -20,9 +20,9 @@ void Integr::set_visible(bool visible)
 {
   figure_visible = visible;
   emit visible_changed();
-}
+}*/
 
-unsigned int Integr::correct_img_coord(unsigned int coord)
+unsigned int Integr::correct_figure_coord(unsigned int coord)
 {
   const int CELL_SIZE = 560 / 8;
   const int IMG_MID = 40;
@@ -49,11 +49,8 @@ bool Integr::move(unsigned int x, unsigned int y)
     qDebug()<<"to: "<<board->to.x<<""<<board->to.y;
     qDebug()<<"fig: "<<char(board->get_field(board->from));
     qDebug()<<"fig: "<<char(board->get_field(board->to));
-    if(char(board->get_field(board->to)) != FREE_FIELD && board->move(board->from, board->to))
-    {
-      Integr.set_visible(faalse);
-      return true;
-    }
+
+    return  board->move(board->from, board->to);
   }
   return false;
 }
@@ -68,25 +65,14 @@ bool Integr::is_free_field(unsigned int x, unsigned int y)
   return true;
 }
 
-/*QChar correct_figure(QString fig)
+bool Integr::is_the_same_coord(unsigned int x_candidate, unsigned int y_candidate,
+                               unsigned int x, unsigned int y)
 {
-  return fig[fig.length() - 1];
+  if(x_candidate == x && y_candidate == y)
+    return true;
+
+  else return false;
 }
-
-bool Integr::is_not_beaten(unsigned int x, unsigned int y, QString fig)
-{
-  coord.x = x;;
-  coord.y = y;
-  if(char(board->get_field(coord)) != correct_figure(fig))
-    return false;
-
-  else return true;
-}*/
-
-
-
-
-
 
 
 

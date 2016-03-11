@@ -14,7 +14,6 @@ Item
   IntegrationClass
   {
     id: integration
-    is_visible: true
   }
 
   Image
@@ -40,7 +39,7 @@ Item
 
       source: 'img/' + name +'.png'
 
-      visible: {isNotBeaten = integration.is_visible; return integration.is_visible}
+      visible: isNotBeaten
 
       MouseArea
       {
@@ -61,22 +60,25 @@ Item
 
         onReleased:
         {
-          _figureDelegate.isFreeField = integration.is_free_field(parent.x, parent.y)
+          _figureDelegate.isFreeField = integration.is_free_field(integration.correct_img_coord(parent.x),
+                                                                  integration.correct_img_coord(parent.y))
 
           if(integration.move(integration.correct_img_coord(parent.x),
                               integration.correct_img_coord(parent.y)))
           {
             if(!_figureDelegate.isFreeField)
             {
-              for(indexFigureOnFeeld = 0;
-                  !integration.is_found_figure_index(_figureModel.get(indexFigureOnFeeld).xCoord,
-                                                     _figureModel.get(indexFigureOnFeeld).yCoord);
-                  ++indexFigureOnFeeld)
-              _figureModel.get(index).isNotBeaten = false
+              for(_figureDelegate.indexFigureOnFeeld = 0;
+                  !integration.is_the_same_coord(_figureModel.get(indexFigureOnFeeld).xCoord,
+                                                 _figureModel.get(indexFigureOnFeeld).yCoord,
+                                                 integration.correct_figure_coord(parent.x),
+                                                 integration.correct_figure_coord(parent.y));
+                  ++_figureDelegate.indexFigureOnFeeld);
 
+              _figureModel.get(indexFigureOnFeeld).isNotBeaten = false
             }
-            _figureModel.get(index).xCoord = integration.correct_img_coord(parent.x)
-            _figureModel.get(index).yCoord = integration.correct_img_coord(parent.y)
+            _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
+            _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)
           }
 
           parent.x = _figureModel.get(index).xCoord * cELL_SIZE
