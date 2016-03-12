@@ -21,7 +21,7 @@ Item
     id: _board
     source: "img/board.JPG"
     width: bOARD_SIZE
-    height: bOARD_SIZE
+    height: bOARD_SIZE    
   }
 
   Repeater
@@ -53,9 +53,15 @@ Item
         acceptedButtons: Qt.LeftButton | Qt.RightButton
 
         onPressed:
-        {
+        { 
           integration.move(integration.correct_img_coord(parent.x),
                            integration.correct_img_coord(parent.y))
+          CellHighlight
+          {
+            x: parent.x
+            y: parent.y
+            visible: _dragArea.containsMouse
+          }
         }
 
         onReleased:
@@ -79,6 +85,13 @@ Item
             }
             _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
             _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)
+          }
+
+          CellHighlight
+          {
+            x: parent.x
+            y: parent.y
+            visible: _dragArea.containsMouse
           }
 
           parent.x = _figureModel.get(index).xCoord * cELL_SIZE

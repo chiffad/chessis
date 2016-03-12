@@ -17,5 +17,6 @@
         <file>res/app.qml</file>
         <file>res/FigureDelegate.qml</file>
         <file>res/FigureModel.qml</file>
+        <file>res/CellHighlight.qml</file>
     </qresource>
 </RCC>
