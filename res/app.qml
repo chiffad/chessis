@@ -24,6 +24,10 @@ Item
     height: bOARD_SIZE    
   }
 
+  CellHighlight{id: _startCellHighlight}
+
+  CellHighlight{id: _endCellHighlight}
+
   Repeater
   {
     id: _rep
@@ -32,7 +36,7 @@ Item
 
     FigureDelegate
     {
-      id: _figureDelegate
+      id: _figure
 
       x: xCoord * cELL_SIZE
       y: yCoord * cELL_SIZE
@@ -54,44 +58,39 @@ Item
 
         onPressed:
         { 
-          integration.move(integration.correct_img_coord(parent.x),
-                           integration.correct_img_coord(parent.y))
-          CellHighlight
-          {
-            x: parent.x
-            y: parent.y
-            visible: _dragArea.containsMouse
-          }
+          _figure.z = 1
+
+          integration.move(parent.x, parent.y)
+
+          _startCellHighlightx = parent.x
+          _startCellHighlighty = parent.y
         }
 
         onReleased:
         {
-          _figureDelegate.isFreeField = integration.is_free_field(integration.correct_img_coord(parent.x),
-                                                                  integration.correct_img_coord(parent.y))
+          _figure.z = 0
 
-          if(integration.move(integration.correct_img_coord(parent.x),
-                              integration.correct_img_coord(parent.y)))
+          _endCellHighlight.x = parent.x
+          _endCellHighlight.y = parent.y
+
+          _figure.isFreeField = integration.is_free_field(parent.x, parent.y)
+
+          if(integration.move(parent.x, parent.y))
           {
-            if(!_figureDelegate.isFreeField)
+            if(!_figure.isFreeField)
             {
-              for(_figureDelegate.indexFigureOnFeeld = 0;
+              _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
+              _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)
+
+                for(_figure.indexFigureOnFeeld = 0;
                   !integration.is_the_same_coord(_figureModel.get(indexFigureOnFeeld).xCoord,
                                                  _figureModel.get(indexFigureOnFeeld).yCoord,
-                                                 integration.correct_figure_coord(parent.x),
-                                                 integration.correct_figure_coord(parent.y));
-                  ++_figureDelegate.indexFigureOnFeeld);
+                                                 parent.x,
+                                                 parent.y);
+                  ++_figure.indexFigureOnFeeld);
 
               _figureModel.get(indexFigureOnFeeld).isNotBeaten = false
             }
-            _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
-            _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)
-          }
-
-          CellHighlight
-          {
-            x: parent.x
-            y: parent.y
-            visible: _dragArea.containsMouse
           }
 
           parent.x = _figureModel.get(index).xCoord * cELL_SIZE

@@ -34,8 +34,8 @@ bool Integr::move(unsigned int x, unsigned int y)
   static bool is_from = true;
   if(is_from)
   {
-    board->from.x = x;
-    board->from.y = y;
+    board->from.x = correct_figure_coord(x);
+    board->from.y = correct_figure_coord(y);
     if(char(board->get_field(board->from)) != FREE_FIELD)
       is_from = false;
   }
@@ -57,8 +57,8 @@ bool Integr::move(unsigned int x, unsigned int y)
 
 bool Integr::is_free_field(unsigned int x, unsigned int y)
 {
-  coord.x = x;
-  coord.y = y;
+  coord.x = correct_figure_coord(x);
+  coord.y = correct_figure_coord(y);
   if(board->get_field(coord) != FREE_FIELD)
     return false;
 
@@ -68,7 +68,7 @@ bool Integr::is_free_field(unsigned int x, unsigned int y)
 bool Integr::is_the_same_coord(unsigned int x_candidate, unsigned int y_candidate,
                                unsigned int x, unsigned int y)
 {
-  if(x_candidate == x && y_candidate == y)
+  if(x_candidate == correct_figure_coord(x) && y_candidate == correct_figure_coord(y))
     return true;
 
   else return false;

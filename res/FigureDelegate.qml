@@ -2,11 +2,12 @@ import QtQuick 2.0
 
 Image
 {
-  width: cELL_SIZE
-  height: width
-
   property bool isFreeField
   property int indexFigureOnFeeld
+
+  width: cELL_SIZE
+  height: width
+  z: 0
 
   Drag.active: _dragArea.drag.active
 }

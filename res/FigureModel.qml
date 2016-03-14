@@ -1,7 +1,6 @@
 import QtQuick 2.0
 
 ListModel {
-
     ListElement {name: "R"; xCoord: 0; yCoord: 0; isNotBeaten: true}
     ListElement {name: "H"; xCoord: 1; yCoord: 0; isNotBeaten: true}
     ListElement {name: "E"; xCoord: 2; yCoord: 0; isNotBeaten: true}
