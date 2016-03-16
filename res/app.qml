@@ -30,8 +30,6 @@ Item
 
   Repeater
   {
-    id: _rep
-
     model: FigureModel {id: _figureModel}
 
     FigureDelegate
@@ -62,32 +60,32 @@ Item
 
           integration.move(parent.x, parent.y)
 
-          _startCellHighlightx = parent.x
-          _startCellHighlighty = parent.y
+         // _startCellHighlight.x = parent.x
+          //_startCellHighlight.y = parent.y
         }
 
         onReleased:
         {
           _figure.z = 0
 
-          _endCellHighlight.x = parent.x
-          _endCellHighlight.y = parent.y
+          //_endCellHighlight.x = parent.x
+          //_endCellHighlight.y = parent.y
 
           _figure.isFreeField = integration.is_free_field(parent.x, parent.y)
 
           if(integration.move(parent.x, parent.y))
-          {
-            if(!_figure.isFreeField)
-            {
-              _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
-              _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)
+          {   
+            _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
+            _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)
 
-                for(_figure.indexFigureOnFeeld = 0;
-                  !integration.is_the_same_coord(_figureModel.get(indexFigureOnFeeld).xCoord,
-                                                 _figureModel.get(indexFigureOnFeeld).yCoord,
-                                                 parent.x,
-                                                 parent.y);
-                  ++_figure.indexFigureOnFeeld);
+            if(!_figure.isFreeField)
+            {   
+              for(_figure.indexFigureOnFeeld = 0;
+                 !integration.is_the_same_coord(_figureModel.get(indexFigureOnFeeld).xCoord,
+                                                _figureModel.get(indexFigureOnFeeld).yCoord,
+                                                parent.x,
+                                                parent.y);
+                 ++_figure.indexFigureOnFeeld);
 
               _figureModel.get(indexFigureOnFeeld).isNotBeaten = false
             }
