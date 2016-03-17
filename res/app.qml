@@ -19,7 +19,8 @@ Item
   Image
   {
     id: _board
-    source: "img/board.JPG"
+    z: -1
+    source: "img/board.png"
     width: bOARD_SIZE
     height: bOARD_SIZE    
   }
@@ -56,20 +57,22 @@ Item
 
         onPressed:
         { 
-          _figure.z = 1
+          _figure.z = 2
 
           integration.move(parent.x, parent.y)
 
-         // _startCellHighlight.x = parent.x
-          //_startCellHighlight.y = parent.y
+          _startCellHighlight.x = integration.correct_figure_coord(parent.x) * cELL_SIZE
+          _startCellHighlight.y = integration.correct_figure_coord(parent.y) * cELL_SIZE
+          _startCellHighlight.visible = true
         }
 
         onReleased:
         {
-          _figure.z = 0
+          _figure.z = 1
 
-          //_endCellHighlight.x = parent.x
-          //_endCellHighlight.y = parent.y
+          _endCellHighlight.x = integration.correct_figure_coord(parent.x) * cELL_SIZE
+          _endCellHighlight.y = integration.correct_figure_coord(parent.y) * cELL_SIZE
+          _endCellHighlight.visible = true
 
           _figure.isFreeField = integration.is_free_field(parent.x, parent.y)
 

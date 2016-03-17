@@ -7,7 +7,7 @@ Image
 
   width: cELL_SIZE
   height: width
-  z: 0
+  z: 1
 
   Drag.active: _dragArea.drag.active
 }

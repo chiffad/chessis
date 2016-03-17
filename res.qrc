@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/img/board.JPG</file>
         <file>res/img/E.png</file>
         <file>res/img/H.png</file>
         <file>res/img/K.png</file>
@@ -8,7 +7,6 @@
         <file>res/img/Q.png</file>
         <file>res/img/R.png</file>
         <file>res/img/w_e.png</file>
-        <file>res/img/w_f.png</file>
         <file>res/img/w_h.png</file>
         <file>res/img/w_k.png</file>
         <file>res/img/w_p.png</file>
@@ -18,5 +16,6 @@
         <file>res/FigureDelegate.qml</file>
         <file>res/FigureModel.qml</file>
         <file>res/CellHighlight.qml</file>
+        <file>res/img/board.png</file>
     </qresource>
 </RCC>

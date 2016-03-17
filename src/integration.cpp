@@ -45,6 +45,10 @@ bool Integr::move(unsigned int x, unsigned int y)
     is_from = true;
     board->to.x = correct_figure_coord(x);
     board->to.y = correct_figure_coord(y);
+
+    if(board->from.x == board->to.x && board->from.y == board->to.y)
+      return false;
+
     qDebug()<<"from: "<<board->from.x<<""<<board->from.y;
     qDebug()<<"to: "<<board->to.x<<""<<board->to.y;
     qDebug()<<"fig: "<<char(board->get_field(board->from));
