@@ -62,7 +62,6 @@ bool Board::right_move_turn() const
   if(_move_num > 1 && get_color(_f)
     == moves[_move_num - 1]._color)
   {
-    std::cout<<"another player turn!"<<std::endl;
     return false;
   }
   return true;
@@ -238,7 +237,6 @@ bool Board::is_mate(COLOR color)
             }
           }
       }
-  std::cout<<"!!!!mate!!!!"<<std::endl;
   return true;
 }
 

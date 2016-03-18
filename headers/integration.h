@@ -23,7 +23,7 @@ signals:
   //void visible_changed();
 
 public slots:
-  //void back_move();
+  void back_move();
   bool move(unsigned int x, unsigned int y);
   bool is_free_field(unsigned int x, unsigned int y);
   bool is_the_same_coord(unsigned int x_candidate, unsigned int y_candidate,

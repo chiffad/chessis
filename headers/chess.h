@@ -26,6 +26,7 @@ public:
    unsigned int get_current_move() const {return _move_num;}
    FIGURES get_field(Coord const& c) const {return FIGURES(_field[c.x][c.y]);}
    COLOR get_prev_color() const {return moves[_move_num - 1]._color;}
+   const char* get_board() const {return _field};
 
 private:
    struct Moves

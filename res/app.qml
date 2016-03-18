@@ -44,6 +44,12 @@ Item
 
       visible: isNotBeaten
 
+      /*onBackMoveChanges
+      {
+
+
+      }*/
+
       MouseArea
       {
         id: _dragArea
@@ -78,9 +84,6 @@ Item
 
           if(integration.move(parent.x, parent.y))
           {   
-            _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
-            _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)
-
             if(!_figure.isFreeField)
             {   
               for(_figure.indexFigureOnFeeld = 0;
@@ -92,6 +95,9 @@ Item
 
               _figureModel.get(indexFigureOnFeeld).isNotBeaten = false
             }
+
+            _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
+            _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)
           }
 
           parent.x = _figureModel.get(index).xCoord * cELL_SIZE
