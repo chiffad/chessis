@@ -3,6 +3,7 @@ import QtQuick 2.0
 Image
 {
   property bool __isFreeField
+  property int indexFigureOnFeeld
 
   width: cELL_SIZE
   height: width
@@ -10,18 +11,20 @@ Image
 
   Drag.active: _dragArea.drag.active
 
-
-  function __getIndex(x, y)
+  function getIndex(x, y)
   {
-    var indexFigureOnFeeld = 1;
-    while(indexFigureOnFeeld <= _figureModel.count)
-    {
-      if(_figureModel.get(indexFigureOnFeeld).xCoord == x
-         && _figureModel.get(indexFigureOnFeeld).yCoord == y)
-        break;
+    var correctX = integration.correct_figure_coord(x)
+    var correctY = integration.correct_figure_coord(y)
 
-      ++indexFigureOnFeeld;
+    for(indexFigureOnFeeld = 0; indexFigureOnFeeld <= _figureModel.count; ++indexFigureOnFeeld)
+    {
+      if(_figureModel.get(indexFigureOnFeeld).xCoord == correctX
+         && _figureModel.get(indexFigureOnFeeld).yCoord == correctY)
+        break;
     }
+    if(indexFigureOnFeeld > _figureModel.count)
+      indexFigureOnFeeld = _figureModel.count;
+
     return indexFigureOnFeeld;
   }
 }

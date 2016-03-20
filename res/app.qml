@@ -80,8 +80,8 @@ Item
             _endCellHighlight.visible = true
 
             if(!_figure.__isFreeField)
-              _figureModel.get(__getIndex(parent.x, parent.y)).isNotBeaten = false
-
+              _figureModel.remove(getIndex(parent.x, parent.y))
+               // _figureModel.get(getIndex(parent.x, parent.y)).isNotBeaten = false
 
             _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
             _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)

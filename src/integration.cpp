@@ -13,18 +13,9 @@ Integr::Integr(QObject *parent)
 /*void Integr::back_move()
 {
   qDebug()<<"back_move!";
-  //QString before_back_move_board = board->get_board();
 
   board->back_move();
 
-  //QString after_back_move_board = board->get_board();
-
-  for(int x = 0; x < X_SIZE; ++x)
-    for(int y = 0; x < Y_SIZE; ++y)
-    {
-      //if(before_back_move_board[x][y] != after_back_move_board[x][y])
-      //{}
-    }
 }*/
 
 /*
@@ -81,7 +72,7 @@ bool Integr::is_free_field(unsigned int x, unsigned int y)
   return true;
 }
 
-void Integr:: see(int x)
+int Integr::see (int x)
 {
     qDebug()<<x;
 

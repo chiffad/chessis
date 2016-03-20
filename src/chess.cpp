@@ -243,12 +243,12 @@ void Board::back_move()
 {
   if(_move_num > 0)
   {
-    const int Prev_move = _move_num - 1;
-    moves[_move_num]._color = get_color(moves[Prev_move]._prev_from);
-    _field[moves[Prev_move]._prev_from.x][moves[Prev_move]._prev_from.y] = 
-    _field[moves[Prev_move]._prev_to.x][moves[Prev_move]._prev_to.y];
-    _field[moves[Prev_move]._prev_to.x][moves[Prev_move]._prev_to.y] = moves[_move_num]._fig_on_field;    
-    _move_num = Prev_move;
+    const int PREV_MOVE = _move_num - 1;
+    moves[_move_num]._color = get_color(moves[PREV_MOVE]._prev_from);
+    _field[moves[PREV_MOVE]._prev_from.x][moves[PREV_MOVE]._prev_from.y] =
+    _field[moves[PREV_MOVE]._prev_to.x][moves[PREV_MOVE]._prev_to.y];
+    _field[moves[PREV_MOVE]._prev_to.x][moves[PREV_MOVE]._prev_to.y] = moves[_move_num]._fig_on_field;
+    _move_num = PREV_MOVE;
   }
 }
 
