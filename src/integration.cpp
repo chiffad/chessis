@@ -63,8 +63,8 @@ bool Integr::move(unsigned int x, unsigned int y)
 
     qDebug()<<"from: "<<board->from.x<<""<<board->from.y;
     qDebug()<<"to: "<<board->to.x<<""<<board->to.y;
-    qDebug()<<"fig: "<<char(board->get_field(board->from));
-    qDebug()<<"fig: "<<char(board->get_field(board->to));
+    qDebug()<<"fig from: "<<char(board->get_field(board->from));
+    qDebug()<<"fig to: "<<char(board->get_field(board->to));
 
     return  board->move(board->from, board->to);
   }
@@ -79,6 +79,12 @@ bool Integr::is_free_field(unsigned int x, unsigned int y)
     return false;
 
   return true;
+}
+
+void Integr:: see(int x)
+{
+    qDebug()<<x;
+
 }
 
 bool Integr::is_the_same_coord(unsigned int x_candidate, unsigned int y_candidate,

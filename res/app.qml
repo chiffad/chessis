@@ -44,12 +44,6 @@ Item
 
       visible: isNotBeaten
 
-      /*onBackMoveChanges
-      {
-
-
-      }*/
-
       MouseArea
       {
         id: _dragArea
@@ -70,31 +64,24 @@ Item
           _startCellHighlight.x = integration.correct_figure_coord(parent.x) * cELL_SIZE
           _startCellHighlight.y = integration.correct_figure_coord(parent.y) * cELL_SIZE
           _startCellHighlight.visible = true
+          _endCellHighlight.visible = false
         }
 
         onReleased:
         {
           _figure.z = 1
 
-          _endCellHighlight.x = integration.correct_figure_coord(parent.x) * cELL_SIZE
-          _endCellHighlight.y = integration.correct_figure_coord(parent.y) * cELL_SIZE
-          _endCellHighlight.visible = true
-
-          _figure.isFreeField = integration.is_free_field(parent.x, parent.y)
+          _figure.__isFreeField = integration.is_free_field(parent.x, parent.y)
 
           if(integration.move(parent.x, parent.y))
           {   
-            if(!_figure.isFreeField)
-            {   
-              for(_figure.indexFigureOnFeeld = 0;
-                 !integration.is_the_same_coord(_figureModel.get(indexFigureOnFeeld).xCoord,
-                                                _figureModel.get(indexFigureOnFeeld).yCoord,
-                                                parent.x,
-                                                parent.y);
-                 ++_figure.indexFigureOnFeeld);
+            _endCellHighlight.x = integration.correct_figure_coord(parent.x) * cELL_SIZE
+            _endCellHighlight.y = integration.correct_figure_coord(parent.y) * cELL_SIZE
+            _endCellHighlight.visible = true
 
-              _figureModel.get(indexFigureOnFeeld).isNotBeaten = false
-            }
+            if(!_figure.__isFreeField)
+              _figureModel.get(__getIndex(parent.x, parent.y)).isNotBeaten = false
+
 
             _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
             _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)

@@ -47,23 +47,21 @@ Board::Board()
 bool Board::move(Coord const& fr, Coord const& t)
 {
   _f = fr; _t = t;
-  /*if(right_move_turn() && step_ver(fr, t)) field_change();
+  if(right_move_turn() && step_ver(fr, t)) field_change();
   else return false;
-  if(!is_check(get_color(t))) return true;
+  if(!is_check(get_color(t)))
+  {
+    next_move();
+    return true;
+  }
   back_move();
-  return false;*/
-  field_change();
-
-  return true;
+  return false;
 }
 
 bool Board::right_move_turn() const
 {
-  if(_move_num > 1 && get_color(_f)
-    == moves[_move_num - 1]._color)
-  {
+  if(_move_num > 1 && get_color(_f) == moves[_move_num - 1]._color)
     return false;
-  }
   return true;
 }                                                                                                  
 
@@ -89,7 +87,7 @@ void Board::field_change()
 
 COLOR Board::get_color(Coord const& c) const
 {
-  if(_field[c.x][c.y] > W_FIG) 
+  if(_field[c.x][c.y] < W_FIG)
     return W_FIG;
   return B_FIG;
 }
@@ -109,8 +107,8 @@ bool Board::step_ver(Coord const& f, Coord const& t) const
   else if(get_figure(f) == KING && dy == 0 && abs(dx) == 2);
   else if(get_figure(f) == HORSE && abs(dx*dy) == 2);
   else if(get_figure(f) == KING && (abs(dx) <= 1 && abs(dy) <= 1));
-  else if(_field[f.x][f.y] == B_PAWN  && dy == 1 && abs(dx) <= 1);
-  else if(_field[f.x][f.y] == W_PAWN && dy == -1 && abs(dx) <= 1);
+  else if(_field[f.x][f.y] == B_PAWN && dy <= 2 && abs(dx) <= 1);
+  else if(_field[f.x][f.y] == W_PAWN && dy >= -2 && abs(dx) <= 1);
   else return false;
   return step_ver_2(f, t);
 }
@@ -122,10 +120,13 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
 
   if(get_figure(f) == PAWN)
   {
+    int direction = dy/ abs(dy);
     if(_field[t.x][t.y] != FREE_FIELD && abs(dx) == 1 && 
       get_color(f) != get_color(t)) return true;
-    if(_field[t.x][t.y] == FREE_FIELD && abs(dx) == 0) return true;
-    return false;
+    if(_field[t.x][t.y] == FREE_FIELD && abs(dx) == 0 && (abs(dy) == 1
+    || (abs(dy) == 2 && _field[t.x][f.y + direction] == FREE_FIELD && (f.y == 6 || f.y == 1))))
+      return true;
+    else return false;
   }
 
   if(get_figure(f) == KING && abs(dx) == 2 && dy == 0)
@@ -198,18 +199,17 @@ bool Board::is_check(COLOR color) const
       {
         for(f.x = 0; f.x < X_SIZE; ++f.x)
           for(f.y = 0; f.y < Y_SIZE; ++f.y)
-           if(get_color(f) != color)
-           {
-       	     if(step_ver(f, t))
-               return true;
-           }
+            if(get_color(f) != color)
+            {
+              if(step_ver(f, t))
+                return true;
+            }
         return false;
       }
 }
 
 bool Board::is_mate(COLOR color)
 {
-  if(_move_num < 2) {next_move(); return false;}
   Coord f;
   Coord t;
   for(f.x = 0; f.x < X_SIZE; ++f.x)
@@ -229,7 +229,6 @@ bool Board::is_mate(COLOR color)
               {
                 _field[f.x][f.y] = fig_from;
                 _field[t.x][t.y] = fig_to;
-                next_move();
                 return false;
               }
               _field[f.x][f.y] = fig_from;
