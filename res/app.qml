@@ -65,6 +65,11 @@ Item
           _startCellHighlight.y = integration.correct_figure_coord(parent.y) * cELL_SIZE
           _startCellHighlight.visible = true
           _endCellHighlight.visible = false
+
+          if(integration.back_move_signal_emmit)
+          {
+            _figureModel.remove(__getIndex(integration.prev_to_coord("x"), integration.prev_to_coord("y")))
+          }
         }
 
         onReleased:
@@ -80,7 +85,7 @@ Item
             _endCellHighlight.visible = true
 
             if(!_figure.__isFreeField)
-              _figureModel.remove(getIndex(parent.x, parent.y))
+              _figureModel.remove(__getIndex(parent.x, parent.y))
                // _figureModel.get(getIndex(parent.x, parent.y)).isNotBeaten = false
 
             _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
