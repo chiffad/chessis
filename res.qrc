@@ -17,5 +17,8 @@
         <file>res/FigureModel.qml</file>
         <file>res/CellHighlight.qml</file>
         <file>res/img/board.png</file>
+        <file>res/Menu.qml</file>
+        <file>res/MoveTurn.qml</file>
+        <file>res/MoveOutput.qml</file>
     </qresource>
 </RCC>

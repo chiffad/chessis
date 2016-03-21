@@ -15,11 +15,12 @@ public:
   ~Integr(){delete board;}
 
 public:
-  Q_PROPERTY(bool back_move_signal READ back_move_signal NOTIFY back_move_signal_emmit)
-  bool back_move_signal() const{return true;}
+  Q_PROPERTY(QString move_turn_color READ move_turn_color WRITE set_move_turn_color NOTIFY move_turn_color_changed)
+  QString move_turn_color() const {return move_color;}
+  void set_move_turn_color(int color);
 
 signals:
-  void back_move_signal_emmit();
+  void move_turn_color_changed();
 
 public slots:
   void back_move();
@@ -29,11 +30,14 @@ public slots:
 
   const int prev_to_coord(QString selected_coord) const;
   const int prev_from_coord(QString selected_coord) const;
+  const QString figure_on_field_move_to();
 
   int see(int x);
+
 private:
   Board* board;
   Board::Coord coord;
+  QString move_color;
 };
 #endif
 

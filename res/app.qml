@@ -4,16 +4,17 @@ import Integration 1.0
 Item
 {
   id: root
-  width: bOARD_SIZE //+ oUTPUT_SIZE
+  width: bOARD_SIZE + mENU_SIZE
   height: bOARD_SIZE
 
   readonly property int bOARD_SIZE: 560
-  readonly property int oUTPUT_SIZE: 200
+  readonly property int mENU_SIZE: 200
   readonly property int cELL_SIZE: bOARD_SIZE / 8
-
+  readonly property int w_COLOR: 'a'
   IntegrationClass
   {
     id: integration
+    move_turn_color: w_COLOR
   }
 
   Image
@@ -23,6 +24,13 @@ Item
     source: "img/board.png"
     width: bOARD_SIZE
     height: bOARD_SIZE    
+  }
+
+  Menu
+  {
+    width: mENU_SIZE
+    height: parent.height
+    anchors.left: _figure.right
   }
 
   CellHighlight{id: _startCellHighlight}
@@ -56,44 +64,60 @@ Item
         acceptedButtons: Qt.LeftButton | Qt.RightButton
 
         onPressed:
-        { 
-          _figure.z = 2
-
-          integration.move(parent.x, parent.y)
-
-          _startCellHighlight.x = integration.correct_figure_coord(parent.x) * cELL_SIZE
-          _startCellHighlight.y = integration.correct_figure_coord(parent.y) * cELL_SIZE
-          _startCellHighlight.visible = true
-          _endCellHighlight.visible = false
-
-          if(integration.back_move_signal_emmit)
+        {    
+          if(pressedButtons === Qt.RightButton)
           {
-            _figureModel.remove(__getIndex(integration.prev_to_coord("x"), integration.prev_to_coord("y")))
+            var FREE_FIELD = "."
+            var addIndex = _figureModel.count + 1;
+            var newIndex = __getIndex(integration.prev_to_coord("x"), integration.prev_to_coord("y"))
+            _figureModel.get(newIndex).xCoord = integration.prev_from_coord("x")
+            _figureModel.get(newIndex).yCoord = integration.prev_from_coord("y")
+            if(integration.figure_on_field_move_to() !== FREE_FIELD)
+              _figureModel.insert(addIndex, {"name": integration.figure_on_field_move_to(),
+                                             "xCoord": integration.prev_to_coord("x"),
+                                             "yCoord": integration.prev_to_coord("y"),
+                                             "isNotBeaten": true} )
+            integration.back_move();
+          }
+
+          else
+          {
+            _figure.z = 2
+
+            integration.move(parent.x, parent.y)
+
+            _startCellHighlight.x = integration.correct_figure_coord(parent.x) * cELL_SIZE
+            _startCellHighlight.y = integration.correct_figure_coord(parent.y) * cELL_SIZE
+            _startCellHighlight.visible = true
+            _endCellHighlight.visible = false
           }
         }
 
         onReleased:
         {
-          _figure.z = 1
+          if(pressedButtons === Qt.LeftButton)
+          {
+            _figure.z = 1
 
-          _figure.__isFreeField = integration.is_free_field(parent.x, parent.y)
+            _figure.__isFreeField = integration.is_free_field(parent.x, parent.y)
 
-          if(integration.move(parent.x, parent.y))
-          {   
-            _endCellHighlight.x = integration.correct_figure_coord(parent.x) * cELL_SIZE
-            _endCellHighlight.y = integration.correct_figure_coord(parent.y) * cELL_SIZE
-            _endCellHighlight.visible = true
+            if(integration.move(parent.x, parent.y))
+            {
+              _endCellHighlight.x = integration.correct_figure_coord(parent.x) * cELL_SIZE
+              _endCellHighlight.y = integration.correct_figure_coord(parent.y) * cELL_SIZE
+              _endCellHighlight.visible = true
 
-            if(!_figure.__isFreeField)
-              _figureModel.remove(__getIndex(parent.x, parent.y))
-               // _figureModel.get(getIndex(parent.x, parent.y)).isNotBeaten = false
+              if(!_figure.__isFreeField)
+                _figureModel.remove(__getIndex(parent.x, parent.y))
+                 //_figureModel.get(__getIndex(parent.x, parent.y)).isNotBeaten = false
 
-            _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
-            _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)
+              _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)
+              _figureModel.get(index).yCoord = integration.correct_figure_coord(parent.y)
+            }
+
+            parent.x = _figureModel.get(index).xCoord * cELL_SIZE
+            parent.y = _figureModel.get(index).yCoord * cELL_SIZE
           }
-
-          parent.x = _figureModel.get(index).xCoord * cELL_SIZE
-          parent.y = _figureModel.get(index).yCoord * cELL_SIZE
         }
       }
     }
