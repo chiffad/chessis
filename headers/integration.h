@@ -17,7 +17,7 @@ public:
 public:
   Q_PROPERTY(QString move_turn_color READ move_turn_color WRITE set_move_turn_color NOTIFY move_turn_color_changed)
   QString move_turn_color() const {return move_color;}
-  void set_move_turn_color(int color);
+  void set_move_turn_color(QString color);
 
 signals:
   void move_turn_color_changed();
@@ -30,7 +30,7 @@ public slots:
 
   const int prev_to_coord(QString selected_coord) const;
   const int prev_from_coord(QString selected_coord) const;
-  const QString figure_on_field_move_to();
+  QString figure_on_field_move_to();
 
   int see(int x);
 

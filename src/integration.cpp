@@ -11,11 +11,11 @@ Integr::Integr(QObject *parent)
   board = new Board();
 }
 
-void Integr::set_move_turn_color(int color)
+void Integr::set_move_turn_color(QString color)
 {
-  if(color == W_FIG)
-    move_color = "img/K.png";
-  else move_color = "img/w_k.png";
+  if(color == "white")
+    move_color = "img/w_k.png";
+  else move_color = "img/K.png";
 
   emit move_turn_color_changed();
 }
@@ -57,6 +57,7 @@ bool Integr::move(unsigned int x, unsigned int y)
 
 void Integr::back_move()
 {
+  qDebug()<<"back move";
   board->back_move();
 }
 
@@ -86,15 +87,15 @@ const int Integr::prev_from_coord(QString selected_coord) const
   else return from_coord.x;
 }
 
-const QString Integr::figure_on_field_move_to()
+QString Integr::figure_on_field_move_to()
 {
-  QString figure_letter = board->figure_on_field_move_to();
+  QChar figure_letter = board->figure_on_field_move_to();
 
   if(board->figure_on_field_move_to() == FREE_FIELD)
-    return FREE_FIELD;
+    return ".";
 
   if(board->figure_on_field_move_to() != toupper(board->figure_on_field_move_to()))
-    figure_letter = "w_" + figure_letter;
+    return "w_" + QString(figure_letter);
 
   return figure_letter;
 }

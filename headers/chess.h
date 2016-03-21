@@ -26,7 +26,8 @@ public:
    unsigned int get_current_move() const {return _move_num;}
    FIGURES get_field(Coord const& c) const {return FIGURES(_field[c.x][c.y]);}
    COLOR get_prev_color() const {return moves[_move_num - 1]._color;}
-   const char figure_on_field_move_to() const { return moves[_move_num]._fig_on_field;}
+
+   char figure_on_field_move_to() const { return moves[_move_num]._fig_on_field;}
    Coord const& prev_from_coord() const {return moves[_move_num - 1]._prev_from;}
    Coord const& prev_to_coord() const {return moves[_move_num - 1]._prev_to;}
 
