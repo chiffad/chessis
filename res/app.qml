@@ -5,58 +5,110 @@ import Integration 1.0
 Item
 {
   id: root
-  width: bOARD_SIZE + mENU_SIZE
+  width: cELL_NUMERATION_SIZE + bOARD_SIZE + mENU_SIZE
   height: bOARD_SIZE
 
   readonly property int bOARD_SIZE: 560
   readonly property int mENU_SIZE: 200
   readonly property int cELL_SIZE: bOARD_SIZE / 8
+  readonly property int cELL_NUMERATION_SIZE: 5
 
   IntegrationClass
   {
     id: integration
     move_turn_color: "white"
+    w_move_in_letter: ""
+    b_move_in_letter: ""
   }
 
   Image
   {
     id: _board
     z: -1
+
+    anchors.left: _verticalCellNumeration.right
+    anchors.bottom: _horizontalCellNumeration.top
+
     source: "img/board.png"
     width: bOARD_SIZE
     height: bOARD_SIZE    
   }
 
-  /*Menu
+  ListView
+  {
+    id: _verticalCellNumeration
+    model: 8
+
+    delegate: Rectangle
+    {
+      anchors.left: parent.left
+      width: cELL_NUMERATION_SIZE
+      height: cELL_SIZE
+
+      Text
+      {
+        anchors.verticalCenter: parent.verticalCenter
+        font.pointSize: 3
+        text: _verticalCellNumeration.currentIndex
+      }
+    }
+  }
+
+  ListView
+  {
+    id: _horizontalCellNumeration
+    orientation: ListView.Horizontal
+    model: 8
+
+    delegate: Rectangle
+    {
+      anchors.left: parent.left
+      anchors.bottom: parent.bottom
+      width: cELL_NUMERATION_SIZE
+      height: cELL_SIZE
+
+      Text
+      {
+        anchors.verticalCenter: parent.verticalCenter
+        font.pointSize: 3
+        text: integration.letter_return(_horizontalCellNumeration.currentIndex)
+      }
+    }
+  }
+
+  MenuLayout
   {
     width: mENU_SIZE
     height: parent.height
-    anchors.left: _figure.right
-  }*/
-
-  Button
-  {
     anchors.left: _board.right
-    anchors.top: parent.top
 
-    width: 100
-    height: 50
-
-    text: "Back move"
-
-    onClicked:
+    Button
     {
-      var FREE_FIELD = "."
-      var addIndex = _figureModel.count + 1;
-      var newIndex = _figure.__getIndex(integration.prev_to_coord("x"), integration.prev_to_coord("y"))
-      _figureModel.get(newIndex).xCoord = integration.prev_from_coord("x")
-      _figureModel.get(newIndex).yCoord = integration.prev_from_coord("y")
-      if(integration.figure_on_field_move_to() !== FREE_FIELD)
-        _figureModel.insert(addIndex, {"name": integration.figure_on_field_move_to(),
-                                       "xCoord": integration.prev_to_coord("x"),
-                                       "yCoord": integration.prev_to_coord("y"),
-                                       "isNotBeaten": true} )
-      integration.back_move();
+      id: _back_move_button
+      anchors.left: parent.left
+      anchors.top: parent.top
+      anchors.topMargin: parent.bORDER_WIDTH
+      anchors.leftMargin: parent.bORDER_WIDTH
+
+      width: 100
+      height: parent.height/10
+
+      text: "Back move"
+
+      onClicked:
+      {
+        var FREE_FIELD = "."
+        var addIndex = _figureModel.count + 1;
+        var newIndex =_figureDelegate.asdasd //_figureDelegate.__getIndex(integration.prev_to_coord("x"), integration.prev_to_coord("y"))
+        //_figureModel.get(newIndex).xCoord = integration.prev_from_coord("x")
+        //_figureModel.get(newIndex).yCoord = integration.prev_from_coord("y")
+        if(integration.figure_on_field_move_to() !== FREE_FIELD)
+          _figureModel.append({"name": integration.figure_on_field_move_to(),
+                               "xCoord": integration.prev_to_coord("x"),
+                               "yCoord": integration.prev_to_coord("y"),
+                               "isNotBeaten": true} )
+        integration.back_move();
+      }
     }
   }
 
@@ -66,16 +118,17 @@ Item
 
   Repeater
   {
+    id: _repeater
     model: FigureModel {id: _figureModel}
 
-    FigureDelegate
+    delegate: FigureDelegate
     {
-      id: _figure
-
+      id: _figureDelegate
+      property int asdasd: 0
       x: xCoord * cELL_SIZE
       y: yCoord * cELL_SIZE
 
-      source: 'img/' + name +'.png'
+      source: 'img/' + model.name +'.png'
 
       visible: isNotBeaten
 
@@ -90,7 +143,7 @@ Item
 
         onPressed:
         {    
-          _figure.z = 2
+          _figureDelegate.z = 2
 
           integration.move(parent.x, parent.y)
 
@@ -102,9 +155,9 @@ Item
 
         onReleased:
         {
-          _figure.z = 1
+          _figureDelegate.z = 1
 
-          _figure.__isFreeField = integration.is_free_field(parent.x, parent.y)
+          _figureDelegate.__isFreeField = integration.is_free_field(parent.x, parent.y)
 
           if(integration.move(parent.x, parent.y))
           {
@@ -112,7 +165,7 @@ Item
             _endCellHighlight.y = integration.correct_figure_coord(parent.y) * cELL_SIZE
             _endCellHighlight.visible = true
 
-            if(!_figure.__isFreeField)
+            if(!_figureDelegate.__isFreeField)
               _figureModel.remove(__getIndex(parent.x, parent.y))
 
             _figureModel.get(index).xCoord = integration.correct_figure_coord(parent.x)

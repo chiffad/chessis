@@ -1,28 +1,50 @@
 import QtQuick 2.0
+import QtQml.Models 2.2
 
 Rectangle
 {
   color: "darkkhaki"
   border.width: bORDER_WIDTH
   border.color: "black"
-  radius: 5
+  radius: 10
 
-  signal newMove
+  ListModel{id: _movesHistory}
 
-  Rectangle
+  ListView
   {
-    id: _moveNumber
-    anchors.left: parent.left
-    width: 10
+    width: parent.width
+    height: parent.height
 
-    border.width: 2
-    border.color: Qt.darker(parent.color)
+    model: _movesHistory
 
-  }
-  ListModel
-  {
+    delegate: Rectangle
+    {
+      id: _moveNumber
+      anchors.left: parent.left
+      width: 10
 
+      border.width: 2
+      border.color: Qt.darker(parent.color)
 
+      Text
+      {
+        text: model.moveNum
+      }
+
+      Text
+      {
+        text: model.whiteMove
+      }
+
+      Text
+      {
+        text: model.blackMove
+      }
+
+      _movesHistory.append({"moveNum": count + 1})
+      _movesHistory.model.setProperty(count, "whiteMove", integration.w_move_lette)
+      _movesHistory.midel.setProperty(count, "blackMove", integration.b_move_lette)
+    }
   }
 }
 

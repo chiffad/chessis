@@ -20,6 +20,24 @@ void Integr::set_move_turn_color(QString color)
   emit move_turn_color_changed();
 }
 
+void Integr::set_w_move_in_letter(QString c)
+{
+  const int a_LETTER = 97;
+  QChar letter = a_LETTER + board->to.x + 1;
+  w_move_letter = QString(letter) + QString(board->to.y + 1);
+
+  emit w_move_in_letter_changed();
+}
+
+void Integr::set_b_move_in_letter(QString c)
+{
+  const int a_LETTER = 97;
+  QChar letter = a_LETTER + board->to.x + 1;
+  b_move_letter = QString(letter) + QString(board->to.y + 1);
+
+  emit b_move_in_letter_changed();
+}
+
 unsigned int Integr::correct_figure_coord(unsigned int coord)
 {
   const int CELL_SIZE = 560 / 8;
@@ -71,7 +89,7 @@ bool Integr::is_free_field(unsigned int x, unsigned int y)
   return true;
 }
 
-const int Integr::prev_to_coord(QString selected_coord) const
+const int Integr::prev_to_coord(QString selected_coord)
 {
   Board::Coord to_coord = board->prev_to_coord();
   if(selected_coord == "y")
@@ -79,7 +97,7 @@ const int Integr::prev_to_coord(QString selected_coord) const
   else return to_coord.x;
 }
 
-const int Integr::prev_from_coord(QString selected_coord) const
+const int Integr::prev_from_coord(QString selected_coord)
 {
   Board::Coord from_coord = board->prev_from_coord();
   if(selected_coord == "y")
@@ -98,6 +116,13 @@ QString Integr::figure_on_field_move_to()
     return "w_" + QString(figure_letter);
 
   return figure_letter;
+}
+
+QChar Integr::letter_return(int number)
+{
+  int a = 'a';
+  a += number;
+  return a;
 }
 
 int Integr::see (int x)
