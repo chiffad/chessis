@@ -40,8 +40,8 @@ public slots:
   unsigned int correct_figure_coord(unsigned int coord);
   QChar letter_return(int number);
 
-  const int prev_to_coord(QString selected_coord);
-  const int prev_from_coord(QString selected_coord);
+  const int prev_to_coord(QString selected_coord) const;
+  const int prev_from_coord(QString selected_coord) const;
   QString figure_on_field_move_to();
 
   int see(int x);

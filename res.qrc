@@ -20,5 +20,6 @@
         <file>res/MenuLayout.qml</file>
         <file>res/MoveTurn.qml</file>
         <file>res/MoveOutput.qml</file>
+        <file>res/BoardInit.qml</file>
     </qresource>
 </RCC>

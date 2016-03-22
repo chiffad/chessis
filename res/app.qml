@@ -5,13 +5,12 @@ import Integration 1.0
 Item
 {
   id: root
-  width: cELL_NUMERATION_SIZE + bOARD_SIZE + mENU_SIZE
+  width: bOARD_SIZE + mENU_SIZE
   height: bOARD_SIZE
 
   readonly property int bOARD_SIZE: 560
   readonly property int mENU_SIZE: 200
   readonly property int cELL_SIZE: bOARD_SIZE / 8
-  readonly property int cELL_NUMERATION_SIZE: 5
 
   IntegrationClass
   {
@@ -21,99 +20,16 @@ Item
     b_move_in_letter: ""
   }
 
-  Image
-  {
-    id: _board
-    z: -1
-
-    anchors.left: _verticalCellNumeration.right
-    anchors.bottom: _horizontalCellNumeration.top
-
-    source: "img/board.png"
-    width: bOARD_SIZE
-    height: bOARD_SIZE    
-  }
-
-  ListView
-  {
-    id: _verticalCellNumeration
-    model: 8
-
-    delegate: Rectangle
-    {
-      anchors.left: parent.left
-      width: cELL_NUMERATION_SIZE
-      height: cELL_SIZE
-
-      Text
-      {
-        anchors.verticalCenter: parent.verticalCenter
-        font.pointSize: 3
-        text: _verticalCellNumeration.currentIndex
-      }
-    }
-  }
-
-  ListView
-  {
-    id: _horizontalCellNumeration
-    orientation: ListView.Horizontal
-    model: 8
-
-    delegate: Rectangle
-    {
-      anchors.left: parent.left
-      anchors.bottom: parent.bottom
-      width: cELL_NUMERATION_SIZE
-      height: cELL_SIZE
-
-      Text
-      {
-        anchors.verticalCenter: parent.verticalCenter
-        font.pointSize: 3
-        text: integration.letter_return(_horizontalCellNumeration.currentIndex)
-      }
-    }
-  }
+  BoardInit{id: _board}
 
   MenuLayout
   {
     width: mENU_SIZE
     height: parent.height
     anchors.left: _board.right
-
-    Button
-    {
-      id: _back_move_button
-      anchors.left: parent.left
-      anchors.top: parent.top
-      anchors.topMargin: parent.bORDER_WIDTH
-      anchors.leftMargin: parent.bORDER_WIDTH
-
-      width: 100
-      height: parent.height/10
-
-      text: "Back move"
-
-      onClicked:
-      {
-        var FREE_FIELD = "."
-        var addIndex = _figureModel.count + 1;
-        var newIndex =_figureDelegate.asdasd //_figureDelegate.__getIndex(integration.prev_to_coord("x"), integration.prev_to_coord("y"))
-        //_figureModel.get(newIndex).xCoord = integration.prev_from_coord("x")
-        //_figureModel.get(newIndex).yCoord = integration.prev_from_coord("y")
-        if(integration.figure_on_field_move_to() !== FREE_FIELD)
-          _figureModel.append({"name": integration.figure_on_field_move_to(),
-                               "xCoord": integration.prev_to_coord("x"),
-                               "yCoord": integration.prev_to_coord("y"),
-                               "isNotBeaten": true} )
-        integration.back_move();
-      }
-    }
   }
 
   CellHighlight{id: _startCellHighlight}
-
   CellHighlight{id: _endCellHighlight}
 
   Repeater
@@ -124,7 +40,7 @@ Item
     delegate: FigureDelegate
     {
       id: _figureDelegate
-      property int asdasd: 0
+
       x: xCoord * cELL_SIZE
       y: yCoord * cELL_SIZE
 

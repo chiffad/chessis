@@ -66,6 +66,9 @@ bool Integr::move(unsigned int x, unsigned int y)
       return false;
     if(board->move(board->from, board->to))
     {
+      if(board->get_prev_color() == W_FIG)
+        set_move_turn_color("white");
+      else set_move_turn_color("black");
 
       return true;
     }
@@ -89,7 +92,7 @@ bool Integr::is_free_field(unsigned int x, unsigned int y)
   return true;
 }
 
-const int Integr::prev_to_coord(QString selected_coord)
+const int Integr::prev_to_coord(QString selected_coord) const
 {
   Board::Coord to_coord = board->prev_to_coord();
   if(selected_coord == "y")
@@ -97,7 +100,7 @@ const int Integr::prev_to_coord(QString selected_coord)
   else return to_coord.x;
 }
 
-const int Integr::prev_from_coord(QString selected_coord)
+const int Integr::prev_from_coord(QString selected_coord) const
 {
   Board::Coord from_coord = board->prev_from_coord();
   if(selected_coord == "y")

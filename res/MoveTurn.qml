@@ -17,7 +17,6 @@ Rectangle
 
     Text
     {
-      //anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
       font.family: "Helvetica"
       font.pointSize: 14
@@ -29,12 +28,16 @@ Rectangle
 
   Image
   {
+    id: _image
     anchors.left: _text.right
     anchors.verticalCenter: parent.verticalCenter
     anchors.topMargin: 3
     anchors.rightMargin: 3
 
-    source: Integration.move_turn_color
+    width: cELL_SIZE
+    height: width
+
+    source: integration.move_turn_color
   }
 }
 

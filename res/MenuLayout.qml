@@ -11,7 +11,7 @@ Rectangle
   border.width: bORDER_WIDTH
   border.color: "black"
 
-  /*Button
+  Button
   {
     id: _back_move_button
     anchors.left: parent.left
@@ -28,9 +28,9 @@ Rectangle
     {
       var FREE_FIELD = "."
       var addIndex = _figureModel.count + 1;
-      var newIndex = _figure.__getIndex(integration.prev_to_coord("x"), integration.prev_to_coord("y"))
-      _figureModel.get(newIndex).xCoord = integration.prev_from_coord("x")
-      _figureModel.get(newIndex).yCoord = integration.prev_from_coord("y")
+      var correctIndex = _figureDelegate.__getIndex(integration.prev_to_coord("x"), integration.prev_to_coord("y"))
+      _figureModel.get(correctIndex).xCoord = integration.prev_from_coord("x")
+      _figureModel.get(correctIndex).yCoord = integration.prev_from_coord("y")
       if(integration.figure_on_field_move_to() !== FREE_FIELD)
         _figureModel.append({"name": integration.figure_on_field_move_to(),
                              "xCoord": integration.prev_to_coord("x"),
@@ -38,16 +38,17 @@ Rectangle
                              "isNotBeaten": true} )
       integration.back_move();
     }
-  }*/
+  }
 
-  /*MoveTurn
+  MoveTurn
   {
+    id: _moveTurn
     anchors.left: parent.left
     anchors.top: _back_move_button.bottom
     anchors.topMargin: mARGIN
     width: parent.width
     height: parent.height/8
-  }*/
+  }
 
   /*MoveOutput
   {
