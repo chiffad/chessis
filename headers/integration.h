@@ -19,7 +19,11 @@ public:
   int y() const {return m_y;}
   int visible() const {return m_visible;}
 
-private:
+  void set_name(const QString new_name) {m_name = new_name;}
+  void set_coord(const Board::Coord& new_coord) {m_x = new_coord.x; m_y = new_coord.y;}
+  void set_visible(const bool new_visible) {m_visible = new_visible;}
+
+public:
   QString m_name;
   int m_x;
   int m_y;
@@ -47,42 +51,31 @@ public:
 
 protected:
   QHash<int, QByteArray> roleNames() const;
+
 private:
   QList<Figure> m_figure;
+
 public:
-  Q_PROPERTY(QString move_turn_color READ move_turn_color WRITE set_move_turn_color NOTIFY move_turn_color_changed)
-  QString move_turn_color() const {return move_color;}
-  void set_move_turn_color(QString color);
+  Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
+  const QString move_turn_color() const {return move_color;}
 
-  Q_PROPERTY(QString w_move_in_letter READ w_move_in_letter WRITE set_w_move_in_letter NOTIFY w_move_in_letter_changed)
-  QString w_move_in_letter() const {return w_move_letter;}
-  void set_w_move_in_letter(QString c);
+  Q_PROPERTY(QString convert_move_coord_in_letter READ convert_move_coord_in_letter NOTIFY convert_move_coord_in_letter_changed)
+  const QString convert_move_coord_in_letter() const {return convert_coord_in_letter;}
 
-  Q_PROPERTY(QString b_move_in_letter READ b_move_in_letter WRITE set_b_move_in_letter NOTIFY b_move_in_letter_changed)
-  QString b_move_in_letter() const {return b_move_letter;}
-  void set_b_move_in_letter(QString c);
 signals:
   void move_turn_color_changed();
-  void w_move_in_letter_changed();
-  void b_move_in_letter_changed();
+  void convert_move_coord_in_letter_changed();
+
 public slots:
   void back_move();
-  bool move(unsigned int x, unsigned int y);
-  bool is_free_field(unsigned int x, unsigned int y);
-  unsigned int correct_figure_coord(unsigned int coord);
-  QChar letter_return(int number);
+  void move(const unsigned int x, const unsigned int y);
+  const QChar letter_return(const int number);
 
-  const int prev_to_coord(QString selected_coord) const;
-  const int prev_from_coord(QString selected_coord) const;
-  QString figure_on_field_move_to();
-
-  int see(int x);
 private:
   Board* board;
   Board::Coord coord;
   QString move_color;
-  QString w_move_letter;
-  QString b_move_letter;
+  QString convert_coord_in_letter;
 };
 #endif
 

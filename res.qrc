@@ -1,11 +1,11 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/img/E.png</file>
-        <file>res/img/H.png</file>
-        <file>res/img/K.png</file>
-        <file>res/img/P.png</file>
-        <file>res/img/Q.png</file>
-        <file>res/img/R.png</file>
+        <file>res/img/b_E.png</file>
+        <file>res/img/b_H.png</file>
+        <file>res/img/b_K.png</file>
+        <file>res/img/b_P.png</file>
+        <file>res/img/b_Q.png</file>
+        <file>res/img/b_R.png</file>
         <file>res/img/w_e.png</file>
         <file>res/img/w_h.png</file>
         <file>res/img/w_k.png</file>
@@ -14,7 +14,6 @@
         <file>res/img/w_r.png</file>
         <file>res/app.qml</file>
         <file>res/FigureDelegate.qml</file>
-        <file>res/FigureModel.qml</file>
         <file>res/CellHighlight.qml</file>
         <file>res/img/board.png</file>
         <file>res/MenuLayout.qml</file>

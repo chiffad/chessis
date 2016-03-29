@@ -10,7 +10,7 @@ Item
 
   Image
   {
-    z: -1
+    z: bOARD_Z
 
     source: "img/board.png"
     width: parent.width

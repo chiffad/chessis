@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
   QQuickView view;
   view.setResizeMode(QQuickView::SizeRootObjectToView);
   QQmlContext *ctxt = view.rootContext();
-  ctxt->setContextProperty("FeModel", &model);
+  ctxt->setContextProperty("FegureModel", &model);
 
   view.setSource(QUrl("qrc:///res/app.qml"));
   view.show();

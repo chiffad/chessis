@@ -21,6 +21,11 @@ void CppIntegration::addFigure(const Figure &figure)
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_figure << figure;
     endInsertRows();
+
+    //qDebug()<<m_figure[0].name();
+    //m_figure.at(0).set_name("woo");
+    // m_figure.at(0).value(int i)
+    //m_figure[0].set_name("woo");
 }
 
 int CppIntegration::rowCount(const QModelIndex & parent) const {
@@ -53,41 +58,14 @@ QHash<int, QByteArray> CppIntegration::roleNames() const {
     return roles;
 }
 
-void CppIntegration::set_move_turn_color(QString color)
-{
-  if(color == "white")
-    move_color = "img/w_k.png";
-  else move_color = "img/K.png";
-
-  emit move_turn_color_changed();
-}
-
-void CppIntegration::set_w_move_in_letter(QString c)
-{
-  const int a_LETTER = 97;
-  QChar letter = a_LETTER + board->to.x + 1;
-  w_move_letter = QString(letter) + QString(board->to.y + 1);
-
-  emit w_move_in_letter_changed();
-}
-
-void CppIntegration::set_b_move_in_letter(QString c)
-{
-  const int a_LETTER = 97;
-  QChar letter = a_LETTER + board->to.x + 1;
-  b_move_letter = QString(letter) + QString(board->to.y + 1);
-
-  emit b_move_in_letter_changed();
-}
-
-unsigned int CppIntegration::correct_figure_coord(unsigned int coord)
+const unsigned int correct_figure_coord(const unsigned int coord)
 {
   const int CELL_SIZE = 560 / 8;
   const int IMG_MID = 40;
   return (coord + IMG_MID) / CELL_SIZE;
 }
 
-bool CppIntegration::move(unsigned int x, unsigned int y)
+void CppIntegration::move(unsigned int x, unsigned int y)
 {
   static bool is_from = true;
   if(is_from)
@@ -104,18 +82,22 @@ bool CppIntegration::move(unsigned int x, unsigned int y)
     board->to.x = correct_figure_coord(x);
     board->to.y = correct_figure_coord(y);
 
-    if(board->from.x == board->to.x && board->from.y == board->to.y)
-      return false;
     if(board->move(board->from, board->to))
     {
       if(board->get_prev_color() == W_FIG)
-        set_move_turn_color("white");
-      else set_move_turn_color("black");
+        move_color = "white";
 
-      return true;
+      else  move_color = "black";
+
+      convert_coord_in_letter = letter_return(board->to.x +1) + (board->to.y + 1);
+      emit move_in_letter_changed();
+
+      emit move_turn_color_changed();
+
+      m_figure[0].set_coord(board->to);
     }
+    else m_figure[0].set_coord(board->from);
   }
-  return false;
 }
 
 void CppIntegration::back_move()
@@ -124,57 +106,13 @@ void CppIntegration::back_move()
   board->back_move();
 }
 
-bool CppIntegration::is_free_field(unsigned int x, unsigned int y)
+const QString CppIntegration::letter_return(const int number)
 {
-  coord.x = correct_figure_coord(x);
-  coord.y = correct_figure_coord(y);
-  if(board->get_field(coord) != FREE_FIELD)
-    return false;
-
-  return true;
+  int letter = 'a';
+  letter += number;
+  return letter;
 }
 
-const int CppIntegration::prev_to_coord(QString selected_coord) const
-{
-  Board::Coord to_coord = board->prev_to_coord();
-  if(selected_coord == "y")
-    return to_coord.y;
-  else return to_coord.x;
-}
-
-const int CppIntegration::prev_from_coord(QString selected_coord) const
-{
-  Board::Coord from_coord = board->prev_from_coord();
-  if(selected_coord == "y")
-    return from_coord.y;
-  else return from_coord.x;
-}
-
-QString CppIntegration::figure_on_field_move_to()
-{
-  QChar figure_letter = board->figure_on_field_move_to();
-
-  if(board->figure_on_field_move_to() == FREE_FIELD)
-    return ".";
-
-  if(board->figure_on_field_move_to() != toupper(board->figure_on_field_move_to()))
-    return "w_" + QString(figure_letter);
-
-  return figure_letter;
-}
-
-QChar CppIntegration::letter_return(int number)
-{
-  int a = 'a';
-  a += number;
-  return a;
-}
-
-int CppIntegration::see (int x)
-{
-    qDebug()<<x;
-
-}
 
 
 
