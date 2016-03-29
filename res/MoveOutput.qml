@@ -41,9 +41,9 @@ Rectangle
         text: model.blackMove
       }
 
-      _movesHistory.append({"moveNum": count + 1})
-      _movesHistory.model.setProperty(count, "whiteMove", integration.w_move_lette)
-      _movesHistory.midel.setProperty(count, "blackMove", integration.b_move_lette)
+      //_movesHistory.append({"moveNum": count + 1})
+      //_movesHistory.model.setProperty(count, "whiteMove", integration.w_move_lette)
+     //_movesHistory.midel.setProperty(count, "blackMove", integration.b_move_lette)
     }
   }
 }

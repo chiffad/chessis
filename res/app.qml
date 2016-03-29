@@ -12,7 +12,14 @@ Item
   readonly property int mENU_SIZE: 200
   readonly property int cELL_SIZE: bOARD_SIZE / 8
 
-  IntegrationClass
+  ListView {
+      width: 200; height: 250
+
+      model: FeModel
+      delegate: Text { text: figure_name}
+  }
+
+  /*IntegrationClass
   {
     id: integration
     move_turn_color: "white"
@@ -20,7 +27,7 @@ Item
     b_move_in_letter: ""
   }
 
-  BoardInit{id: _board}
+  //BoardInit{id: _board}
 
   MenuLayout
   {
@@ -29,8 +36,8 @@ Item
     anchors.left: _board.right
   }
 
-  CellHighlight{id: _startCellHighlight}
-  CellHighlight{id: _endCellHighlight}
+  //CellHighlight{id: _startCellHighlight}
+  //CellHighlight{id: _endCellHighlight}
 
   Repeater
   {
@@ -93,5 +100,5 @@ Item
         }
       }
     }
-  }
+  }*/
 }
