@@ -16,12 +16,12 @@ Item
   readonly property int pASSIVE_FIGURE_Z: 2
   readonly property int aCTIVE_FIGURE_Z: 3
 
-  /*IntegrationClass
+  IntegrationClass
   {
     id: integration
-    w_move_in_letter: ""
-    b_move_in_letter: ""
-  }*/
+    //w_move_in_letter: ""
+    //b_move_in_letter: ""
+  }
 
   BoardInit{id: _board}
 

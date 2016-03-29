@@ -18,44 +18,48 @@ CppIntegration::CppIntegration(QObject *parent)
 
 void CppIntegration::addFigure(const Figure &figure)
 {
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_figure << figure;
-    endInsertRows();
+  beginInsertRows(QModelIndex(), rowCount(), rowCount());
+  m_figure << figure;
+  endInsertRows();
 
-    //qDebug()<<m_figure[0].name();
-    //m_figure.at(0).set_name("woo");
-    // m_figure.at(0).value(int i)
-    //m_figure[0].set_name("woo");
+  //qDebug()<<m_figure[0].name();
+  //m_figure.at(0).set_name("woo");
+  // m_figure.at(0).value(int i)
+  //m_figure[0].set_name("w_e");
+  //qDebug()<<m_figure.count();
 }
 
-int CppIntegration::rowCount(const QModelIndex & parent) const {
-    Q_UNUSED(parent);
-    return m_figure.count();
+int CppIntegration::rowCount(const QModelIndex & parent) const
+{
+  Q_UNUSED(parent);
+  return m_figure.count();
 }
 
-QVariant CppIntegration::data(const QModelIndex & index, int role) const {
-    if (index.row() < 0 || index.row() >= m_figure.count())
-        return QVariant();
-
-    const Figure &figure = m_figure[index.row()];
-    if (role == NameRole)
-        return figure.name();
-    else if (role == XRole)
-        return figure.x();
-    else if (role == YRole)
-        return figure.y();
-    else if (role == VisibleRole)
-        return figure.visible();
+QVariant CppIntegration::data(const QModelIndex & index, int role) const
+{
+  if (index.row() < 0 || index.row() >= m_figure.count())
     return QVariant();
+
+  const Figure &figure = m_figure[index.row()];
+  if (role == NameRole)
+    return figure.name();
+  else if (role == XRole)
+    return figure.x();
+  else if (role == YRole)
+    return figure.y();
+  else if (role == VisibleRole)
+    return figure.visible();
+  return QVariant();
 }
 
-QHash<int, QByteArray> CppIntegration::roleNames() const {
-    QHash<int, QByteArray> roles;
-    roles[NameRole] = "figure_name";
-    roles[XRole] = "x_coord";
-    roles[YRole] = "y_coord";
-    roles[VisibleRole] = "figure_visible";
-    return roles;
+QHash<int, QByteArray> CppIntegration::roleNames() const
+{
+  QHash<int, QByteArray> roles;
+  roles[NameRole] = "figure_name";
+  roles[XRole] = "x_coord";
+  roles[YRole] = "y_coord";
+  roles[VisibleRole] = "figure_visible";
+  return roles;
 }
 
 const unsigned int correct_figure_coord(const unsigned int coord)
@@ -90,13 +94,15 @@ void CppIntegration::move(unsigned int x, unsigned int y)
       else  move_color = "black";
 
       convert_coord_in_letter = letter_return(board->to.x +1) + (board->to.y + 1);
-      emit move_in_letter_changed();
+      emit convert_move_coord_in_letter_changed();
 
       emit move_turn_color_changed();
 
-      m_figure[0].set_coord(board->to);
+      //m_figure[0].set_coord(board->to);
     }
-    else m_figure[0].set_coord(board->from);
+    //else m_figure[0].set_coord(board->from);
+
+    qDebug()<<"here";//m_figure.count();
   }
 }
 
@@ -110,7 +116,7 @@ const QString CppIntegration::letter_return(const int number)
 {
   int letter = 'a';
   letter += number;
-  return letter;
+  return QChar(letter);
 }
 
 

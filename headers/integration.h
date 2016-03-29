@@ -36,10 +36,10 @@ class CppIntegration : public QAbstractListModel
 
 public:
   enum FigureRoles {
-      NameRole = Qt::UserRole + 1,
-      XRole,
-      YRole,
-      VisibleRole
+      NameRole = Qt::UserRole + 3,
+      XRole = Qt::UserRole + 2,
+      YRole = Qt::UserRole + 1,
+      VisibleRole = Qt::UserRole
   };
 
   explicit CppIntegration(QObject *parent = 0);
@@ -69,7 +69,7 @@ signals:
 public slots:
   void back_move();
   void move(const unsigned int x, const unsigned int y);
-  const QChar letter_return(const int number);
+  const QString letter_return(const int number);
 
 private:
   Board* board;

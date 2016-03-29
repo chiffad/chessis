@@ -49,6 +49,9 @@ int main(int argc, char *argv[])
   model.addFigure(Figure("b_P", 6, 1, true));
   model.addFigure(Figure("b_P", 7, 1, true));
 
+  model.move(1,1);
+  model.move(1,2);
+
   QQuickView view;
   view.setResizeMode(QQuickView::SizeRootObjectToView);
   QQmlContext *ctxt = view.rootContext();
