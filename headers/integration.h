@@ -7,6 +7,7 @@
 #include <QChar>
 #include <QAbstractListModel>
 #include <QStringList>
+#include <QAbstractItemModel>
 #include "headers/chess.h"
 
 class Figure

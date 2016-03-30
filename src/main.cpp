@@ -7,6 +7,10 @@
 #include <qqml.h>
 #include <QtQuick/qquickitem.h>
 #include <QtQuick/qquickview.h>
+#include <QQmlEngine>
+#include <QApplication>
+#include <QQmlComponent>
+#include <QQmlProperty>
 
 int main(int argc, char *argv[])
 {
@@ -47,6 +51,12 @@ int main(int argc, char *argv[])
   model.addFigure(Figure("b_P", 6, 1, true));
   model.addFigure(Figure("b_P", 7, 1, true));
 
+
+  /*QQmlEngine engine;
+  engine.rootContext()->setContextProperty("FigureModel", &model);
+  QQmlComponent component(&engine, QUrl::fromLocalFile("qrc:///res/app.qml"));
+  component.create();
+*/
   QQuickView view;
   view.setResizeMode(QQuickView::SizeRootObjectToView);
   QQmlContext *ctxt = view.rootContext();
@@ -57,4 +67,3 @@ int main(int argc, char *argv[])
 
   return app.exec();
 }
-

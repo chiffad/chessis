@@ -117,7 +117,6 @@ void CppIntegration::set_new_figure_coord(const Board::Coord& old_coord, const B
   if(INDEX < rowCount())
     m_figures_model[INDEX].set_coord(new_coord);
   else qDebug()<<"index out of range";
-  QAbstractItemModel::dataChanged();
 }
 
 void CppIntegration::back_move()
