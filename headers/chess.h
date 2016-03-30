@@ -17,6 +17,7 @@ public:
      int x;
      int y;
    }from, to;
+
    Board();
    bool move(Coord const& fr, Coord const& t);
    void back_move();

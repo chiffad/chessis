@@ -12,14 +12,14 @@
 class Figure
 {
 public:
-  Figure(const QString &name, const int x, const int y, const bool visible);
+  Figure(const QString& name, const int x, const int y, const bool visible);
 
   QString name() const {return m_name;}
   int x() const {return m_x;}
   int y() const {return m_y;}
   int visible() const {return m_visible;}
 
-  void set_name(const QString new_name) {m_name = new_name;}
+  void set_name(const QString& new_name) {m_name = new_name;}
   void set_coord(const Board::Coord& new_coord) {m_x = new_coord.x; m_y = new_coord.y;}
   void set_visible(const bool new_visible) {m_visible = new_visible;}
 
@@ -30,10 +30,10 @@ public:
   bool m_visible;
 };
 
+
 class CppIntegration : public QAbstractListModel
 {
   Q_OBJECT
-
 public:
   enum FigureRoles {
       NameRole = Qt::UserRole + 3,
@@ -52,9 +52,6 @@ public:
 protected:
   QHash<int, QByteArray> roleNames() const;
 
-private:
-  QList<Figure> m_figure;
-
 public:
   Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
   const QString move_turn_color() const {return move_color;}
@@ -72,10 +69,16 @@ public slots:
   const QString letter_return(const int number);
 
 private:
+  const int get_index(const Board::Coord& c) const;
+  void set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord);
+
+private:
+  QList<Figure> m_figures_model;
   Board* board;
   Board::Coord coord;
   QString move_color;
   QString convert_coord_in_letter;
 };
+
 #endif
 

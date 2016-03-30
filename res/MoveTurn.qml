@@ -37,7 +37,7 @@ Rectangle
     width: cELL_SIZE
     height: width
 
-    source: integration.move_turn_color
+    source: FigureModel.move_turn_color
   }
 }
 

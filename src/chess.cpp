@@ -43,7 +43,7 @@ Board::Board()
   moves[_move_num]._b_r_rook_m = false;
   next_move();
 }
-  
+
 bool Board::move(Coord const& fr, Coord const& t)
 {
   _f = fr; _t = t;

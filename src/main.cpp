@@ -12,8 +12,6 @@ int main(int argc, char *argv[])
 {
   QGuiApplication app(argc, argv);
 
-  qmlRegisterType<CppIntegration>("Integration", 1, 0, "IntegrationClass");
-
   CppIntegration model;
   model.addFigure(Figure("w_r", 0, 7, true));
   model.addFigure(Figure("w_h", 1, 7, true));
@@ -49,13 +47,10 @@ int main(int argc, char *argv[])
   model.addFigure(Figure("b_P", 6, 1, true));
   model.addFigure(Figure("b_P", 7, 1, true));
 
-  model.move(1,1);
-  model.move(1,2);
-
   QQuickView view;
   view.setResizeMode(QQuickView::SizeRootObjectToView);
   QQmlContext *ctxt = view.rootContext();
-  ctxt->setContextProperty("FegureModel", &model);
+  ctxt->setContextProperty("FigureModel", &model);
 
   view.setSource(QUrl("qrc:///res/app.qml"));
   view.show();

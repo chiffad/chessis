@@ -1,6 +1,5 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.4
-import Integration 1.0
 
 Item
 {
@@ -15,13 +14,6 @@ Item
   readonly property int cELL_HILIGHT_Z: 1
   readonly property int pASSIVE_FIGURE_Z: 2
   readonly property int aCTIVE_FIGURE_Z: 3
-
-  IntegrationClass
-  {
-    id: integration
-    //w_move_in_letter: ""
-    //b_move_in_letter: ""
-  }
 
   BoardInit{id: _board}
 
@@ -38,7 +30,7 @@ Item
   Repeater
   {
     id: _repeater
-    model: FegureModel
+    model: FigureModel
 
     delegate: FigureDelegate
     {
@@ -62,10 +54,11 @@ Item
         {    
           _figureDelegate.z = aCTIVE_FIGURE_Z
 
-          integration.move(parent.x, parent.y)
+          FigureModel.move(parent.x, parent.y)
 
           _startCellHighlight.x = parent.x
           _startCellHighlight.y = parent.y
+          _startCellHighlight.visible = true
           _endCellHighlight.visible = false
         }
 
@@ -73,7 +66,7 @@ Item
         {
           _figureDelegate.z = pASSIVE_FIGURE_Z
 
-          integration.move(parent.x, parent.y)
+          FigureModel.move(parent.x, parent.y)
 
           _endCellHighlight.x = parent.x
           _endCellHighlight.y = parent.y

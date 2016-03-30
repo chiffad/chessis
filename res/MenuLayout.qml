@@ -26,17 +26,7 @@ Rectangle
 
     onClicked:
     {
-      var FREE_FIELD = "."
-      var addIndex = _figureModel.count + 1;
-      var correctIndex = _figureDelegate.__getIndex(integration.prev_to_coord("x"), integration.prev_to_coord("y"))
-      _figureModel.get(correctIndex).xCoord = integration.prev_from_coord("x")
-      _figureModel.get(correctIndex).yCoord = integration.prev_from_coord("y")
-      if(integration.figure_on_field_move_to() !== FREE_FIELD)
-        _figureModel.append({"name": integration.figure_on_field_move_to(),
-                             "xCoord": integration.prev_to_coord("x"),
-                             "yCoord": integration.prev_to_coord("y"),
-                             "isNotBeaten": true} )
-      integration.back_move();
+      FigureModel.back_move();
     }
   }
 
@@ -50,7 +40,7 @@ Rectangle
     height: parent.height/8
   }
 
-  /*MoveOutput
+  MoveOutput
   {
     anchors.left: parent.left
     anchors.top: _moveTurn.bottom
@@ -58,6 +48,6 @@ Rectangle
 
     width: parent.width
     height: parent.height/4
-  }*/
+  }
 }
 
