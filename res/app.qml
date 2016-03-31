@@ -1,9 +1,10 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.4
 
-Item
+ApplicationWindow
 {
   id: root
+  visible: true
   width: bOARD_SIZE + mENU_SIZE
   height: bOARD_SIZE
 

@@ -24,13 +24,13 @@ public:
    bool is_mate(COLOR color);
    int  get_figure(Coord const& c) const;
    COLOR get_color(Coord const& c) const;
-   unsigned int get_current_move() const {return _move_num;}
-   FIGURES get_field(Coord const& c) const {return FIGURES(_field[c.x][c.y]);}
-   COLOR get_prev_color() const {return moves[_move_num - 1]._color;}
+   unsigned int get_current_move() const;
+   FIGURES get_field(Coord const& c) const;
+   COLOR get_prev_color() const;
 
-   char figure_on_field_move_to() const { return moves[_move_num]._fig_on_field;}
-   Coord const& prev_from_coord() const {return moves[_move_num - 1]._prev_from;}
-   Coord const& prev_to_coord() const {return moves[_move_num - 1]._prev_to;}
+   char figure_on_field_move_to() const;
+   Coord const& prev_from_coord() const;
+   Coord const& prev_to_coord() const;
 
 private:
    struct Moves

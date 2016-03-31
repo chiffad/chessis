@@ -16,6 +16,16 @@ CppIntegration::CppIntegration(QObject *parent)
   board = new Board();
 }
 
+ QString CppIntegration::move_turn_color() const
+ {
+   return move_color;
+ }
+
+ QString CppIntegration::convert_move_coord_in_letter() const
+ {
+   return convert_coord_in_letter;
+ }
+
 void CppIntegration::addFigure(const Figure &figure)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());
@@ -56,17 +66,17 @@ QHash<int, QByteArray> CppIntegration::roleNames() const
   return roles;
 }
 
-const int CppIntegration::get_index(const Board::Coord& c) const
+int CppIntegration::get_index(const Board::Coord& coord) const
 {
   int index;
   for(index = 0; index <= rowCount(); ++index)
-    if(m_figures_model[index].x() == c.x && m_figures_model[index].y() == c.y)
+    if(m_figures_model[index].x() == coord.x && m_figures_model[index].y() == coord.y)
       break;
 
   return index;
 }
 
-const unsigned int correct_figure_coord(const unsigned int coord)
+unsigned int correct_figure_coord(const unsigned int coord)
 {
   const int CELL_SIZE = 560 / 8;
   const int IMG_MID = 40;
@@ -125,7 +135,7 @@ void CppIntegration::back_move()
   board->back_move();
 }
 
-const QString CppIntegration::letter_return(const int number)
+QString CppIntegration::letter_return(const int number)
 {
   int letter = 'a';
   letter += number;

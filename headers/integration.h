@@ -2,11 +2,8 @@
 #define PIECHART_H
 
 #include <QtQuick/QQuickPaintedItem>
-#include <QObject>
 #include <QString>
-#include <QChar>
 #include <QAbstractListModel>
-#include <QStringList>
 #include <QAbstractItemModel>
 #include "headers/chess.h"
 
@@ -31,7 +28,6 @@ public:
   bool m_visible;
 };
 
-
 class CppIntegration : public QAbstractListModel
 {
   Q_OBJECT
@@ -55,10 +51,10 @@ protected:
 
 public:
   Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
-  const QString move_turn_color() const {return move_color;}
+  QString move_turn_color() const;
 
   Q_PROPERTY(QString convert_move_coord_in_letter READ convert_move_coord_in_letter NOTIFY convert_move_coord_in_letter_changed)
-  const QString convert_move_coord_in_letter() const {return convert_coord_in_letter;}
+  QString convert_move_coord_in_letter() const;
 
 signals:
   void move_turn_color_changed();
@@ -67,16 +63,15 @@ signals:
 public slots:
   void back_move();
   void move(const unsigned int x, const unsigned int y);
-  const QString letter_return(const int number);
+  QString letter_return(const int number);
 
 private:
-  const int get_index(const Board::Coord& c) const;
+  int get_index(const Board::Coord& coord) const;
   void set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord);
 
 private:
   QList<Figure> m_figures_model;
   Board* board;
-  Board::Coord coord;
   QString move_color;
   QString convert_coord_in_letter;
 };

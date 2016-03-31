@@ -44,6 +44,36 @@ Board::Board()
   next_move();
 }
 
+unsigned int Board::get_current_move() const
+{
+  return _move_num;
+}
+
+FIGURES Board::get_field(Coord const& c) const
+{
+  return FIGURES(_field[c.x][c.y]);
+}
+
+COLOR Board::get_prev_color() const
+{
+  return moves[_move_num - 1]._color;
+}
+
+char Board::figure_on_field_move_to() const
+{
+  return moves[_move_num]._fig_on_field;
+}
+
+Board::Coord const& Board::prev_from_coord() const
+{
+  return moves[_move_num - 1]._prev_from;
+}
+
+Board::Coord const& Board::prev_to_coord() const
+{
+  return moves[_move_num - 1]._prev_to;
+}
+
 bool Board::move(Coord const& fr, Coord const& t)
 {
   _f = fr; _t = t;
@@ -191,8 +221,11 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
 bool Board::is_check(COLOR color) const
 {
   if(_move_num < 2) return false;
+
   Coord f;
   Coord t;
+  bool m_is_check;
+
   for(t.x = 0; t.x < X_SIZE; ++t.x)
     for(t.y = 0; t.y < Y_SIZE; ++t.y)
       if(get_figure(t) == KING && get_color(t) == color)
@@ -202,16 +235,24 @@ bool Board::is_check(COLOR color) const
             if(get_color(f) != color)
             {
               if(step_ver(f, t))
-                return true;
+              {
+                m_is_check = true;
+                break;
+              }
             }
-        return false;
+        m_is_check = false;
+        break;
       }
+
+  return m_is_check;
 }
 
 bool Board::is_mate(COLOR color)
 {
   Coord f;
   Coord t;
+  bool m_is_mate = true;
+
   for(f.x = 0; f.x < X_SIZE; ++f.x)
     for(f.y = 0; f.y < Y_SIZE; ++f.y)
       if(_field[f.x][f.y] != FREE_FIELD && get_color(f) == color)
@@ -229,14 +270,15 @@ bool Board::is_mate(COLOR color)
               {
                 _field[f.x][f.y] = fig_from;
                 _field[t.x][t.y] = fig_to;
-                return false;
+                m_is_mate = false;
+                break;
               }
               _field[f.x][f.y] = fig_from;
               _field[t.x][t.y] = fig_to;
             }
           }
       }
-  return true;
+  return m_is_mate;
 }
 
 void Board::back_move() 
