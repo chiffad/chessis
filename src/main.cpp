@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
   QGuiApplication app(argc, argv);
 
-  CppIntegration model;
+  ChessIntegration model;
   model.addFigure(Figure("w_r", 0, 7, true));
   model.addFigure(Figure("w_h", 1, 7, true));
   model.addFigure(Figure("w_e", 2, 7, true));

@@ -4,7 +4,6 @@
 #include <QtQuick/QQuickPaintedItem>
 #include <QString>
 #include <QAbstractListModel>
-#include <QAbstractItemModel>
 #include "headers/chess.h"
 
 class Figure
@@ -28,7 +27,7 @@ public:
   bool m_visible;
 };
 
-class CppIntegration : public QAbstractListModel
+class ChessIntegration : public QAbstractListModel
 {
   Q_OBJECT
 public:
@@ -39,8 +38,8 @@ public:
       VisibleRole = Qt::UserRole
   };
 
-  explicit CppIntegration(QObject *parent = 0);
-  ~CppIntegration(){delete board;}
+  explicit ChessIntegration(QObject *parent = 0);
+  ~ChessIntegration(){delete board;}
 
   void addFigure(const Figure &figure);
   int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -53,8 +52,8 @@ public:
   Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
   QString move_turn_color() const;
 
-  Q_PROPERTY(QString convert_move_coord_in_letter READ convert_move_coord_in_letter NOTIFY convert_move_coord_in_letter_changed)
-  QString convert_move_coord_in_letter() const;
+  Q_PROPERTY(QString convert_number_in_letter READ convert_number_in_letter NOTIFY convert_move_coord_in_letter_changed)
+  QString convert_number_in_letter() const;
 
 signals:
   void move_turn_color_changed();

@@ -2,6 +2,7 @@
 #include <QString>
 #include <QChar>
 #include <ctype.h>
+#include <QModelIndex>
 #include "headers/integration.h"
 #include "headers/chess.h"
 
@@ -10,36 +11,36 @@ Figure::Figure(const QString& name, const int x, const int y, const bool visible
 {
 }
 
-CppIntegration::CppIntegration(QObject *parent)
+ChessIntegration::ChessIntegration(QObject *parent)
     : QAbstractListModel(parent)
 {
   board = new Board();
 }
 
- QString CppIntegration::move_turn_color() const
+ QString ChessIntegration::move_turn_color() const
  {
    return move_color;
  }
 
- QString CppIntegration::convert_move_coord_in_letter() const
+ QString ChessIntegration::convert_number_in_letter() const
  {
    return convert_coord_in_letter;
  }
 
-void CppIntegration::addFigure(const Figure &figure)
+void ChessIntegration::addFigure(const Figure &figure)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());
   m_figures_model << figure;
   endInsertRows();
 }
 
-int CppIntegration::rowCount(const QModelIndex & parent) const
+int ChessIntegration::rowCount(const QModelIndex & parent) const
 {
   Q_UNUSED(parent);
   return m_figures_model.count();
 }
 
-QVariant CppIntegration::data(const QModelIndex & index, int role) const
+QVariant ChessIntegration::data(const QModelIndex & index, int role) const
 {
   if (index.row() < 0 || index.row() >= m_figures_model.count())
     return QVariant();
@@ -56,7 +57,7 @@ QVariant CppIntegration::data(const QModelIndex & index, int role) const
   return QVariant();
 }
 
-QHash<int, QByteArray> CppIntegration::roleNames() const
+QHash<int, QByteArray> ChessIntegration::roleNames() const
 {
   QHash<int, QByteArray> roles;
   roles[NameRole] = "figure_name";
@@ -66,13 +67,14 @@ QHash<int, QByteArray> CppIntegration::roleNames() const
   return roles;
 }
 
-int CppIntegration::get_index(const Board::Coord& coord) const
+int ChessIntegration::get_index(const Board::Coord& coord) const
 {
   int index;
-  for(index = 0; index <= rowCount(); ++index)
+  for(index = 0; index < rowCount(); ++index)
+  {
     if(m_figures_model[index].x() == coord.x && m_figures_model[index].y() == coord.y)
       break;
-
+  }
   return index;
 }
 
@@ -83,7 +85,7 @@ unsigned int correct_figure_coord(const unsigned int coord)
   return (coord + IMG_MID) / CELL_SIZE;
 }
 
-void CppIntegration::move(unsigned int x, unsigned int y)
+void ChessIntegration::move(unsigned int x, unsigned int y)
 {
   static bool is_from = true;
   if(is_from)
@@ -118,24 +120,33 @@ void CppIntegration::move(unsigned int x, unsigned int y)
   }
 }
 
-void CppIntegration::set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord)
+void ChessIntegration::set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord)
 {
   if(board->get_field(new_coord) != FREE_FIELD && old_coord.x != new_coord.x && old_coord.y != new_coord.y)
-    m_figures_model[get_index(new_coord)].set_visible(false);
+  {
+    const int NEW_INDEX = get_index(new_coord);
+    beginInsertRows(QModelIndex(), NEW_INDEX, NEW_INDEX);
+    m_figures_model[NEW_INDEX].set_visible(false);
+    endInsertRows();
+  }
 
   const int INDEX = get_index(old_coord);
   if(INDEX < rowCount())
+  {
+    beginInsertRows(QModelIndex(), INDEX, INDEX);
     m_figures_model[INDEX].set_coord(new_coord);
+    endInsertRows();
+  }
   else qDebug()<<"index out of range";
 }
 
-void CppIntegration::back_move()
+void ChessIntegration::back_move()
 {
   qDebug()<<"back move";
   board->back_move();
 }
 
-QString CppIntegration::letter_return(const int number)
+QString ChessIntegration::letter_return(const int number)
 {
   int letter = 'a';
   letter += number;
