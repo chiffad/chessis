@@ -61,11 +61,9 @@ signals:
   void move_turn_color_changed();
  // void history_move_changed();
 
-public slots:
-  void back_move();
-  void move(const unsigned int x, const unsigned int y, Qt::MouseButtons button_clicked);
-
 private:
+  void back_move();
+  void move(const unsigned int x, const unsigned int y);
   int get_index(const Board::Coord& coord) const;
   void set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord, bool back_move = false);
   void correct_figure_coord(Board::Coord& coord, const unsigned int x, const unsigned int y);

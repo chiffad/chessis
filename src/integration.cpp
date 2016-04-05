@@ -18,33 +18,36 @@ ChessIntegration::ChessIntegration(QObject *parent)
   board = new Board();
 }
 
-void ChessIntegration::move(unsigned int x, unsigned int y, Qt::MouseButtons button_clicked)
+void ChessIntegration::mouse_event(const QMouseEvent* event)
 {
-  if(button_clicked == Qt::RightButton)
+  if(event == Qt::LeftButton)
+    move(event->x(), event->y());
+
+  else if(Qt::RightButton)
     back_move();
+}
 
-  else if()
+void ChessIntegration::move(unsigned int x, unsigned int y)
+{
+  static bool is_from = true;
+  if(is_from)
   {
-    static bool is_from = true;
-    if(is_from)
-    {
-      correct_figure_coord(board->from,x,y);
-      if(char(board->get_field(board->from)) != FREE_FIELD)
-        is_from = false;
-    }
+    correct_figure_coord(board->from,x,y);
+    if(char(board->get_field(board->from)) != FREE_FIELD)
+      is_from = false;
+  }
 
-    else
+  else
+  {
+    is_from = true;
+    correct_figure_coord(board->to, x, y);
+    if(board->move(board->from, board->to))
     {
-      is_from = true;
-      correct_figure_coord(board->to, x, y);
-      if(board->move(board->from, board->to))
-      {
-        switch_move_color();
-        //add_to_moves_history(board->from, board->to);
-        set_new_figure_coord(board->from, board->to);
-      }
-      else set_new_figure_coord(board->from, board->from);
+      switch_move_color();
+      //add_to_moves_history(board->from, board->to);
+      set_new_figure_coord(board->from, board->to);
     }
+    else set_new_figure_coord(board->from, board->from);
   }
 }
 

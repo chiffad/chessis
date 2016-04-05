@@ -54,9 +54,6 @@ ApplicationWindow
         onPressed:
         {    
           _figureDelegate.z = aCTIVE_FIGURE_Z
-
-          FigureModel.move(parent.x, parent.y)
-
           _startCellHighlight.x = parent.x
           _startCellHighlight.y = parent.y
           _startCellHighlight.visible = true
@@ -66,9 +63,6 @@ ApplicationWindow
         onReleased:
         {
           _figureDelegate.z = pASSIVE_FIGURE_Z
-
-          FigureModel.move(parent.x, parent.y)
-
           _endCellHighlight.x = parent.x
           _endCellHighlight.y = parent.y
           _endCellHighlight.visible = true
