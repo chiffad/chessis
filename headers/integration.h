@@ -52,12 +52,12 @@ public:
   Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
   QString move_turn_color() const;
 
-  Q_PROPERTY(QString convert_number_in_letter READ convert_number_in_letter NOTIFY convert_move_coord_in_letter_changed)
-  QString convert_number_in_letter() const;
+  Q_PROPERTY(QString coord_in_simbols READ coord_in_simbols NOTIFY coord_in_simbols_changed)
+  QString coord_in_simbols() const;
 
 signals:
   void move_turn_color_changed();
-  void convert_move_coord_in_letter_changed();
+  void coord_in_simbols_changed();
 
 public slots:
   void back_move();
@@ -67,12 +67,13 @@ public slots:
 private:
   int get_index(const Board::Coord& coord) const;
   void set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord);
+  void switch_move_color();
 
 private:
-  QList<Figure> m_figures_model;
   Board* board;
-  QString move_color;
-  QString convert_coord_in_letter;
+  QString m_move_color;
+  QString m_convert_coord_in_letter;
+  QList<Figure> m_figures_model;
 };
 
 #endif
