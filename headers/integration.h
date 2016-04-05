@@ -67,6 +67,7 @@ public slots:
 private:
   int get_index(const Board::Coord& coord) const;
   void set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord);
+  void emit_data_change(const int INDEX);
   void switch_move_color();
 
 private:

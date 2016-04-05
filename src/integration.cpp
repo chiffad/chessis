@@ -126,23 +126,28 @@ void ChessIntegration::switch_move_color()
 
 void ChessIntegration::set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord)
 {
+  const int INDEX;
   if(board->get_field(new_coord) != FREE_FIELD && old_coord.x != new_coord.x && old_coord.y != new_coord.y)
   {
-    const int NEW_INDEX = get_index(new_coord);
-    m_figures_model.beginInsertRows(QModelIndex(), NEW_INDEX, NEW_INDEX);
-    m_figures_model[NEW_INDEX].set_visible(false);
-    m_figures_model.endInsertRows();
-   // emit m_figures_model.dataChanged();
+    INDEX = get_index(new_coord);
+    m_figures_model[INDEX].set_visible(false);
+    emit_data_change(INDEX);
   }
 
-  const int INDEX = get_index(old_coord);
+  INDEX = get_index(old_coord);
   if(INDEX < rowCount())
   {
-    m_figures_model.beginInsertRows(QModelIndex(), INDEX, INDEX);
     m_figures_model[INDEX].set_coord(new_coord);
-    m_figures_model.endInsertRows();
+    emit_data_change(INDEX);
   }
   else qDebug()<<"index out of range";
+}
+
+void ChessIntegration::emit_data_change(const int INDEX)
+{
+  QModelIndex topLeft = index(INDEX, 0);
+  QModelIndex bottomRight = index(INDEX, 0);
+  emit dataChanged(topLeft, bottomRight);
 }
 
 void ChessIntegration::back_move()
