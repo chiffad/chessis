@@ -20,12 +20,13 @@ ChessIntegration::ChessIntegration(QObject *parent)
 
 void ChessIntegration::mouse_event(const QMouseEvent* event)
 {
-   qDebug()<<"mouse_event";
-  if(event == Qt::LeftButton)
+  qDebug()<<"mouse_event";
+  const int BOARD_SIZE = 560;
+  if(event->buttons() == Qt::LeftButton && event->x() <= BOARD_SIZE && event->y() <= BOARD_SIZE)
     move(event->x(), event->y());
 
-  else if(event == Qt::RightButton)
-    back_move();
+ // else if(event->buttons() == Qt::RightButton)
+   // back_move();
 }
 
 void ChessIntegration::move(unsigned int x, unsigned int y)
@@ -83,35 +84,29 @@ void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned 
 
 void ChessIntegration::set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord, bool back_move)
 {
-  const int INDEX;
+  int index;
   if(!back_move && board->get_field(new_coord) != FREE_FIELD && old_coord.x != new_coord.x && old_coord.y != new_coord.y)
   {
-    INDEX = get_index(new_coord);
-    m_figures_model[INDEX].set_visible(false);
-    emit_data_changed(INDEX);
+    index = get_index(new_coord);
+    m_figures_model[index].set_visible(false);
+    emit_data_changed(index);
   }
 
   else if(board->get_field(old_coord) != FREE_FIELD)
   {
-    INDEX = get_index(old_coord);
-    m_figures_model[INDEX].set_visible(true);
-    emit_data_changed(INDEX);
+    index = get_index(old_coord);
+    m_figures_model[index].set_visible(true);
+    emit_data_changed(index);
   }
 
-  INDEX = get_index(old_coord);
-  if(INDEX < rowCount())
+  index = get_index(old_coord);
+  if(index < rowCount())
   {
-    m_figures_model[INDEX].set_coord(new_coord);
-    emit_data_changed(INDEX);
+    m_figures_model[index].set_coord(new_coord);
+    emit_data_changed(index);
   }
+  else qDebug()<<"out of range";
 }
-
-/*void ChessIntegration::add_to_moves_history(const Board::Coord& coord_from, const Board::Coord& coord_to)
-{
-  const int a_LETTER = 'a';
-  m_history_move = QChar(a_LETTER + coord_from.x) + QString::setNum(coord_from.y) + '-' + QChar(a_LETTER + coord_to.x) + QString::setNum(coord_to.y);
-  emit history_move_changed();
-}*/
 
 void ChessIntegration::switch_move_color()
 {
@@ -134,9 +129,20 @@ QString ChessIntegration::move_turn_color() const
   return m_move_color;
 }
 
-QString ChessIntegration::history_move() const
+QStringList ChessIntegration::moves_history() const
 {
-  return m_history_move;
+  return m_moves_history;
+}
+
+void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to)
+{
+  const int a_LETTER = 'a';
+  QString move;
+  if(m_move_color == "black") move.setNum(m_moves_history.count() / 2 + m_moves_history.count() % 2);
+  move += QChar(a_LETTER + coord_from.x) + coord_from.y + '-' + QChar(a_LETTER + coord_to.x) + coord_to.y;
+
+  m_moves_history.append(move);
+  emit moves_history_changed();
 }
 
 void ChessIntegration::addFigure(const Figure &figure)

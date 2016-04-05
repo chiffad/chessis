@@ -5,6 +5,7 @@
 #include <QString>
 #include <QAbstractListModel>
 #include <QMouseEvent>
+#include <QStringList>
 #include "headers/chess.h"
 
 class Figure
@@ -54,27 +55,27 @@ public:
   Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
   QString move_turn_color() const;
 
- // Q_PROPERTY(QString history_move READ history_move NOTIFY history_move_changed)
- // QString history_move() const;
+  Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)
+  QStringList moves_history() const;
 
 signals:
   void move_turn_color_changed();
- // void history_move_changed();
+  void moves_history_changed();
 
 private:
   void back_move();
   void move(const unsigned int x, const unsigned int y);
-  int get_index(const Board::Coord& coord) const;
   void set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord, bool back_move = false);
   void correct_figure_coord(Board::Coord& coord, const unsigned int x, const unsigned int y);
   void emit_data_changed(const int INDEX);
-  //void add_to_moves_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
   void switch_move_color();
+  void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
+  int get_index(const Board::Coord& coord) const;
 
 private:
   Board* board;
   QString m_move_color;
-  QString m_history_move;
   QList<Figure> m_figures_model;
+  QStringList m_moves_history;
 };
 #endif

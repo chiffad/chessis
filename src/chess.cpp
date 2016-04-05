@@ -59,11 +59,6 @@ COLOR Board::get_prev_color() const
   return moves[_move_num - 1]._color;
 }
 
-char Board::figure_on_field_move_to() const
-{
-  return moves[_move_num]._fig_on_field;
-}
-
 Board::Coord const& Board::prev_from_coord() const
 {
   return moves[_move_num - 1]._prev_from;

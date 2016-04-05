@@ -28,7 +28,6 @@ public:
    FIGURES get_field(Coord const& c) const;
    COLOR get_prev_color() const;
 
-   char figure_on_field_move_to() const;
    Coord const& prev_from_coord() const;
    Coord const& prev_to_coord() const;
 
