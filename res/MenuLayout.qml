@@ -50,4 +50,3 @@ Rectangle
     height: parent.height/4
   }
 }
-

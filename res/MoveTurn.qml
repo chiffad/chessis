@@ -40,4 +40,3 @@ Rectangle
     source: FigureModel.move_turn_color
   }
 }
-

@@ -8,4 +8,3 @@ Image
 
   Drag.active: _dragArea.drag.active
 }
-
