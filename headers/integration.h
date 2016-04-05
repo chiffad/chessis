@@ -67,7 +67,7 @@ private:
   int get_index(const Board::Coord& coord) const;
   void set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord, bool back_move = false);
   void correct_figure_coord(Board::Coord& coord, const unsigned int x, const unsigned int y);
-  void emit_data_change(const int INDEX);
+  void emit_data_changed(const int INDEX);
   //void add_to_moves_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
   void switch_move_color();
 

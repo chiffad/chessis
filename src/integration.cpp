@@ -20,15 +20,17 @@ ChessIntegration::ChessIntegration(QObject *parent)
 
 void ChessIntegration::mouse_event(const QMouseEvent* event)
 {
+   qDebug()<<"mouse_event";
   if(event == Qt::LeftButton)
     move(event->x(), event->y());
 
-  else if(Qt::RightButton)
+  else if(event == Qt::RightButton)
     back_move();
 }
 
 void ChessIntegration::move(unsigned int x, unsigned int y)
 {
+    qDebug()<<"move";
   static bool is_from = true;
   if(is_from)
   {
@@ -86,21 +88,21 @@ void ChessIntegration::set_new_figure_coord(const Board::Coord& old_coord, const
   {
     INDEX = get_index(new_coord);
     m_figures_model[INDEX].set_visible(false);
-    emit_data_change(INDEX);
+    emit_data_changed(INDEX);
   }
 
   else if(board->get_field(old_coord) != FREE_FIELD)
   {
     INDEX = get_index(old_coord);
     m_figures_model[INDEX].set_visible(true);
-    emit_data_change(INDEX);
+    emit_data_changed(INDEX);
   }
 
   INDEX = get_index(old_coord);
   if(INDEX < rowCount())
   {
     m_figures_model[INDEX].set_coord(new_coord);
-    emit_data_change(INDEX);
+    emit_data_changed(INDEX);
   }
 }
 
@@ -120,7 +122,7 @@ void ChessIntegration::switch_move_color()
   emit move_turn_color_changed();
 }
 
-void ChessIntegration::emit_data_change(const int INDEX)
+void ChessIntegration::emit_data_changed(const int INDEX)
 {
   QModelIndex topLeft = index(INDEX, 0);
   QModelIndex bottomRight = index(INDEX, 0);
