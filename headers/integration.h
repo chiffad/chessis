@@ -4,11 +4,65 @@
 #include <QtQuick/QQuickPaintedItem>
 #include <QString>
 #include <QAbstractListModel>
-#include <QMouseEvent>
 #include <QStringList>
 #include "headers/chess.h"
 
-class Figure
+class ChessIntegration : public QAbstractListModel
+{
+  Q_OBJECT
+public:
+  class Figure;
+public:
+  enum FigureRoles {
+      NameRole = Qt::UserRole + 3,
+      XRole = Qt::UserRole + 2,
+      YRole = Qt::UserRole + 1,
+      VisibleRole = Qt::UserRole
+  };
+
+  explicit ChessIntegration(QObject *parent = 0);
+  ~ChessIntegration(){delete board;}
+
+  void addFigure(const Figure &figure);
+  int rowCount(const QModelIndex & parent = QModelIndex()) const;
+  QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+
+protected:
+  QHash<int, QByteArray> roleNames() const;
+
+public:
+  //Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
+  //QString move_turn_color() const;
+
+  //Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)
+  //QStringList moves_history() const;
+
+  Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
+  bool is_check_mate() const;
+
+  Q_INVOKABLE void move(const unsigned x, const unsigned y);
+
+signals:
+  //void move_turn_color_changed();
+  //void moves_history_changed();
+  void check_mate();
+
+private:
+  //void back_move();
+  void set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord, bool back_move = false);
+  void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y);
+  void emit_data_changed(const int INDEX);
+  //void switch_move_color();
+  //void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
+  int get_index(const Board::Coord& coord) const;
+
+private:
+  Board* board;
+  QString m_move_color;
+  QList<Figure> m_figures_model;
+};
+
+class ChessIntegration::Figure
 {
 public:
   Figure(const QString& name, const int x, const int y, const bool visible);
@@ -28,54 +82,5 @@ public:
   int m_y;
   bool m_visible;
 };
-
-class ChessIntegration : public QAbstractListModel
-{
-  Q_OBJECT
-public:
-  enum FigureRoles {
-      NameRole = Qt::UserRole + 3,
-      XRole = Qt::UserRole + 2,
-      YRole = Qt::UserRole + 1,
-      VisibleRole = Qt::UserRole
-  };
-
-  explicit ChessIntegration(QObject *parent = 0);
-  ~ChessIntegration(){delete board;}
-
-  void addFigure(const Figure &figure);
-  int rowCount(const QModelIndex & parent = QModelIndex()) const;
-  QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-
-protected:
-  QHash<int, QByteArray> roleNames() const;
-  void mouse_event(const QMouseEvent* event);
-
-public:
-  Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
-  QString move_turn_color() const;
-
-  Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)
-  QStringList moves_history() const;
-
-signals:
-  void move_turn_color_changed();
-  void moves_history_changed();
-
-private:
-  void back_move();
-  void move(const unsigned int x, const unsigned int y);
-  void set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord, bool back_move = false);
-  void correct_figure_coord(Board::Coord& coord, const unsigned int x, const unsigned int y);
-  void emit_data_changed(const int INDEX);
-  void switch_move_color();
-  void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
-  int get_index(const Board::Coord& coord) const;
-
-private:
-  Board* board;
-  QString m_move_color;
-  QList<Figure> m_figures_model;
-  QStringList m_moves_history;
-};
 #endif
+

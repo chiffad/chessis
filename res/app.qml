@@ -15,6 +15,7 @@ ApplicationWindow
   readonly property int cELL_HILIGHT_Z: 1
   readonly property int pASSIVE_FIGURE_Z: 2
   readonly property int aCTIVE_FIGURE_Z: 3
+  readonly property int cHECK_MATE_IMG_Z: 4
 
   BoardInit{id: _board}
 
@@ -54,6 +55,7 @@ ApplicationWindow
         onPressed:
         {    
           _figureDelegate.z = aCTIVE_FIGURE_Z
+          FigureModel.move(parent.x, parent.y)
           _startCellHighlight.x = parent.x
           _startCellHighlight.y = parent.y
           _startCellHighlight.visible = true
@@ -63,11 +65,22 @@ ApplicationWindow
         onReleased:
         {
           _figureDelegate.z = pASSIVE_FIGURE_Z
+          FigureModel.move(parent.x, parent.y)
           _endCellHighlight.x = parent.x
           _endCellHighlight.y = parent.y
           _endCellHighlight.visible = true
         }
       }
     }
+  }
+
+  Image
+  {
+    source: "img/checkMate.png"
+    z: cHECK_MATE_IMG_Z
+    width: _board.width
+    height: _board.height / 2
+    anchors.centerIn: _board
+    visible: FigureModel.check_mate
   }
 }

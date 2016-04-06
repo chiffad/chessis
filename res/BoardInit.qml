@@ -41,7 +41,7 @@ Item
       y: bOARD_SIZE - 2*cELL_NUMERATION_SIZE
 
       font.pointSize: cELL_NUMERATION_SIZE
-      text: FigureModel.letter_return(index)
+      text: 'a'+ index
     }
   }
 }

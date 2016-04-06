@@ -3,11 +3,10 @@
 #include <QChar>
 #include <ctype.h>
 #include <QModelIndex>
-#include <QMouseEvent>
 #include "headers/integration.h"
 #include "headers/chess.h"
 
-Figure::Figure(const QString& name, const int x, const int y, const bool visible)
+ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
     : m_name(name), m_x(x), m_y(y), m_visible(visible)
 {
 }
@@ -18,20 +17,8 @@ ChessIntegration::ChessIntegration(QObject *parent)
   board = new Board();
 }
 
-void ChessIntegration::mouse_event(const QMouseEvent* event)
+void ChessIntegration::move(const unsigned x, const unsigned y)
 {
-  qDebug()<<"mouse_event";
-  const int BOARD_SIZE = 560;
-  if(event->buttons() == Qt::LeftButton && event->x() <= BOARD_SIZE && event->y() <= BOARD_SIZE)
-    move(event->x(), event->y());
-
- // else if(event->buttons() == Qt::RightButton)
-   // back_move();
-}
-
-void ChessIntegration::move(unsigned int x, unsigned int y)
-{
-    qDebug()<<"move";
   static bool is_from = true;
   if(is_from)
   {
@@ -46,35 +33,35 @@ void ChessIntegration::move(unsigned int x, unsigned int y)
     correct_figure_coord(board->to, x, y);
     if(board->move(board->from, board->to))
     {
-      switch_move_color();
-      //add_to_moves_history(board->from, board->to);
+      //switch_move_color();
+      //add_to_history(board->from, board->to);
       set_new_figure_coord(board->from, board->to);
     }
     else set_new_figure_coord(board->from, board->from);
   }
+  if(is_check_mate()) emit check_mate();
 }
 
-void ChessIntegration::back_move()
+/*void ChessIntegration::back_move()
 {
   qDebug()<<"back move";
   const Board::Coord lase_from_coord = board->from;
   const Board::Coord lase_to_coord = board->to;
   board->back_move();
   set_new_figure_coord(lase_to_coord, lase_from_coord, true);
-}
+}*/
 
 int ChessIntegration::get_index(const Board::Coord& coord) const
 {
   int index;
   for(index = 0; index < rowCount(); ++index)
-  {
     if(m_figures_model[index].x() == coord.x && m_figures_model[index].y() == coord.y)
       break;
-  }
+
   return index;
 }
 
-void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned int x, const unsigned int y)
+void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y)
 {
   const int CELL_SIZE = 560 / 8;
   const int IMG_MID = 40;
@@ -92,7 +79,7 @@ void ChessIntegration::set_new_figure_coord(const Board::Coord& old_coord, const
     emit_data_changed(index);
   }
 
-  else if(board->get_field(old_coord) != FREE_FIELD)
+  if(back_move && board->get_field(old_coord) != FREE_FIELD)
   {
     index = get_index(old_coord);
     m_figures_model[index].set_visible(true);
@@ -108,14 +95,14 @@ void ChessIntegration::set_new_figure_coord(const Board::Coord& old_coord, const
   else qDebug()<<"out of range";
 }
 
-void ChessIntegration::switch_move_color()
+/*void ChessIntegration::switch_move_color()
 {
   if(board->get_prev_color() == W_FIG)
     m_move_color = "white";
   else  m_move_color = "black";
 
   emit move_turn_color_changed();
-}
+}*/
 
 void ChessIntegration::emit_data_changed(const int INDEX)
 {
@@ -124,17 +111,22 @@ void ChessIntegration::emit_data_changed(const int INDEX)
   emit dataChanged(topLeft, bottomRight);
 }
 
-QString ChessIntegration::move_turn_color() const
+/*QString ChessIntegration::move_turn_color() const
 {
   return m_move_color;
-}
+}*/
 
-QStringList ChessIntegration::moves_history() const
+/*QStringList ChessIntegration::moves_history() const
 {
   return m_moves_history;
+}*/
+
+bool ChessIntegration::is_check_mate() const
+{
+  return board->is_mate(board->get_color(board->prev_to_coord()));
 }
 
-void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to)
+/*void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to)
 {
   const int a_LETTER = 'a';
   QString move;
@@ -143,7 +135,7 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
 
   m_moves_history.append(move);
   emit moves_history_changed();
-}
+}*/
 
 void ChessIntegration::addFigure(const Figure &figure)
 {
@@ -184,3 +176,5 @@ QHash<int, QByteArray> ChessIntegration::roleNames() const
   roles[VisibleRole] = "figure_visible";
   return roles;
 }
+
+

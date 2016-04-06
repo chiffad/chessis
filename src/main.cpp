@@ -1,48 +1,37 @@
-#include "headers/integration.h"
 #include <qqmlcontext.h>
 #include <QQmlApplicationEngine>
 #include <QApplication>
 #include <QQmlComponent>
 #include <QQmlProperty>
+#include <QChar>
+#include <QString>
+#include "headers/integration.h"
+
+QString figure(int index, QString color)
+{
+  QChar fig;
+  if(index == 0 || index == 7) fig = 'r';
+  if(index == 1 || index == 6) fig = 'h';
+  if(index == 2 || index == 5) fig = 'e';
+  if(index == 3) fig = 'q';
+  if(index == 4) fig = 'k';
+
+  if(color == "b_") return color + fig.toUpper();
+  else return color + fig;
+}
 
 int main(int argc, char *argv[])
 {
   QGuiApplication app(argc, argv);
 
   ChessIntegration model;
-  model.addFigure(Figure("w_r", 0, 7, true));
-  model.addFigure(Figure("w_h", 1, 7, true));
-  model.addFigure(Figure("w_e", 2, 7, true));
-  model.addFigure(Figure("w_q", 3, 7, true));
-  model.addFigure(Figure("w_k", 4, 7, true));
-  model.addFigure(Figure("w_e", 5, 7, true));
-  model.addFigure(Figure("w_h", 6, 7, true));
-  model.addFigure(Figure("w_r", 7, 7, true));
-  model.addFigure(Figure("w_p", 0, 6, true));
-  model.addFigure(Figure("w_p", 1, 6, true));
-  model.addFigure(Figure("w_p", 2, 6, true));
-  model.addFigure(Figure("w_p", 3, 6, true));
-  model.addFigure(Figure("w_p", 4, 6, true));
-  model.addFigure(Figure("w_p", 5, 6, true));
-  model.addFigure(Figure("w_p", 6, 6, true));
-  model.addFigure(Figure("w_p", 7, 6, true));
-
-  model.addFigure(Figure("b_R", 0, 0, true));
-  model.addFigure(Figure("b_H", 1, 0, true));
-  model.addFigure(Figure("b_E", 2, 0, true));
-  model.addFigure(Figure("b_Q", 3, 0, true));
-  model.addFigure(Figure("b_K", 4, 0, true));
-  model.addFigure(Figure("b_E", 5, 0, true));
-  model.addFigure(Figure("b_H", 6, 0, true));
-  model.addFigure(Figure("b_R", 7, 0, true));
-  model.addFigure(Figure("b_P", 0, 1, true));
-  model.addFigure(Figure("b_P", 1, 1, true));
-  model.addFigure(Figure("b_P", 2, 1, true));
-  model.addFigure(Figure("b_P", 3, 1, true));
-  model.addFigure(Figure("b_P", 4, 1, true));
-  model.addFigure(Figure("b_P", 5, 1, true));
-  model.addFigure(Figure("b_P", 6, 1, true));
-  model.addFigure(Figure("b_P", 7, 1, true));
+  for(int i = 0; i <= 7; ++i)
+  {
+    model.addFigure(ChessIntegration::Figure(figure(i, "w_"), i, 7, true));
+    model.addFigure(ChessIntegration::Figure(figure(i, "b_"), i, 0, true));
+    model.addFigure(ChessIntegration::Figure("w_p", i, 6, true));
+    model.addFigure(ChessIntegration::Figure("b_P", i, 1, true));
+  }
 
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("FigureModel", &model);

@@ -20,5 +20,6 @@
         <file>res/MoveTurn.qml</file>
         <file>res/MoveOutput.qml</file>
         <file>res/BoardInit.qml</file>
+        <file>res/img/checkMate.png</file>
     </qresource>
 </RCC>
