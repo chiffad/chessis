@@ -44,7 +44,7 @@ Board::Board()
   next_move();
 }
 
-unsigned int Board::get_current_move() const
+unsigned Board::get_current_move() const
 {
   return _move_num;
 }
@@ -129,9 +129,8 @@ bool Board::step_ver(Coord const& f, Coord const& t) const
   
   if((get_figure(f) == ROOK || get_figure(f) == QUEEN) && (dx*dy == 0));
   else if((get_figure(f) == ELEPHANT || get_figure(f) == QUEEN) && (abs(dx) == abs(dy)));
-  else if(get_figure(f) == KING && dy == 0 && abs(dx) == 2);
   else if(get_figure(f) == HORSE && abs(dx*dy) == 2);
-  else if(get_figure(f) == KING && (abs(dx) <= 1 && abs(dy) <= 1));
+  else if(get_figure(f) == KING && ((abs(dx) <= 1 && abs(dy) <= 1) || (dy == 0 && abs(dx) == 2)));
   else if(_field[f.x][f.y] == B_PAWN && dy <= 2 && abs(dx) <= 1);
   else if(_field[f.x][f.y] == W_PAWN && dy >= -2 && abs(dx) <= 1);
   else return false;
@@ -156,23 +155,13 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
 
   if(get_figure(f) == KING && abs(dx) == 2 && dy == 0)
   {
-    if((get_color(f) == W_FIG) && (!moves[_move_num]._w_king_m))
+    if(is_king_and_rook_not_moved(get_color(f), true))
     {
-      if(dx == 2 && (!moves[_move_num]._w_r_rook_m) && _field[f.x + 1][f.y] == FREE_FIELD 
-         && _field[f.x + 2][f.y] == FREE_FIELD) 
-      return true;
-      if(dx == -2 && (!moves[_move_num]._w_l_rook_m)&& _field[f.x - 1][f.y] == FREE_FIELD 
-         && _field[f.x - 2][f.y] == FREE_FIELD && _field[f.x - 3][f.y] == FREE_FIELD) 
-      return true;
-    }
-    if((get_color(f) == B_FIG) && (!moves[_move_num]._b_king_m))
-    {
-      if(dx == 2 && (!moves[_move_num]._b_r_rook_m) && _field[f.x + 1][f.y] == FREE_FIELD 
-         && _field[f.x + 2][f.y] == FREE_FIELD  && _field[f.x + 3][f.y] == FREE_FIELD) 
-      return true;
-      if(dx == -2 && (!moves[_move_num]._b_l_rook_m)&& _field[f.x - 1][f.y] == FREE_FIELD 
-         && _field[f.x - 2][f.y] == FREE_FIELD) 
-      return true;
+      if(dx == 2 && _field[f.x + 1][f.y] == FREE_FIELD && _field[f.x + 2][f.y] == FREE_FIELD)
+       return true;
+      if(dx == -2 &&_field[f.x - 1][f.y] == FREE_FIELD && _field[f.x - 2][f.y] == FREE_FIELD
+         && _field[f.x - 3][f.y] == FREE_FIELD)
+        return true;
     }
     return false;
   }
@@ -211,6 +200,28 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
     return false;
   }
   return true;
+}
+
+bool Board::is_king_and_rook_not_moved(COLOR color, bool on_left_side) const
+{
+  if(color == W_FIG && !moves[_move_num]._w_king_m)
+  {
+    if(on_left_side && !moves[_move_num]._w_l_rook_m)
+      return true;
+
+    if(!on_left_side && !moves[_move_num]._w_r_rook_m)
+      return true;
+  }
+
+  else if(color == B_FIG && !moves[_move_num]._b_king_m)
+  {
+    if(on_left_side && !moves[_move_num]._b_l_rook_m)
+      return true;
+
+    if(!on_left_side && !moves[_move_num]._b_r_rook_m)
+      return true;
+  }
+  return false;
 }
 
 bool Board::is_check(COLOR color) const

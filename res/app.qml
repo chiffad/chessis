@@ -76,11 +76,18 @@ ApplicationWindow
 
   Image
   {
+    id: _checkMate
     source: "img/checkMate.png"
     z: cHECK_MATE_IMG_Z
     width: _board.width
     height: _board.height / 2
     anchors.centerIn: _board
-    visible: FigureModel.check_mate
+    visible: FigureModel.is_check_mate
+
+    MouseArea
+    {
+      anchors.fill: parent
+      onClicked: parent.visible = false
+    }
   }
 }

@@ -3,6 +3,7 @@
 
 #include <QtQuick/QQuickPaintedItem>
 #include <QString>
+#include <QChar>
 #include <QAbstractListModel>
 #include <QStringList>
 #include "headers/chess.h"
@@ -41,6 +42,7 @@ public:
   bool is_check_mate() const;
 
   Q_INVOKABLE void move(const unsigned x, const unsigned y);
+  Q_INVOKABLE QChar letter_return();
 
 signals:
   //void move_turn_color_changed();

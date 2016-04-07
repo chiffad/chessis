@@ -24,7 +24,7 @@ public:
    bool is_mate(COLOR color);
    int  get_figure(Coord const& c) const;
    COLOR get_color(Coord const& c) const;
-   unsigned int get_current_move() const;
+   unsigned get_current_move() const;
    FIGURES get_field(Coord const& c) const;
    COLOR get_prev_color() const;
 
@@ -57,5 +57,6 @@ private:
    bool is_check(COLOR color) const;
    bool step_ver(Coord const& f, Coord const& t) const;
    bool step_ver_2(Coord const& f, Coord const& t) const;
+   bool is_king_and_rook_not_moved(COLOR color, bool on_left_side) const;
 };
 #endif //_VILVIVYVKCKYVLVUYFDKYUFYTF

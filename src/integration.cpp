@@ -20,26 +20,28 @@ ChessIntegration::ChessIntegration(QObject *parent)
 void ChessIntegration::move(const unsigned x, const unsigned y)
 {
   static bool is_from = true;
-  if(is_from)
+  if(!is_check_mate())
   {
-    correct_figure_coord(board->from,x,y);
-    if(char(board->get_field(board->from)) != FREE_FIELD)
-      is_from = false;
-  }
-
-  else
-  {
-    is_from = true;
-    correct_figure_coord(board->to, x, y);
-    if(board->move(board->from, board->to))
+    if(is_from && char(board->get_field(board->from)) != FREE_FIELD)
     {
-      //switch_move_color();
-      //add_to_history(board->from, board->to);
-      set_new_figure_coord(board->from, board->to);
+      is_from = false;
+      correct_figure_coord(board->from,x,y);
     }
-    else set_new_figure_coord(board->from, board->from);
+
+    else
+    {
+      is_from = true;
+      correct_figure_coord(board->to, x, y);
+      if(board->move(board->from, board->to))
+      {
+        //switch_move_color();
+        //add_to_history(board->from, board->to);
+        set_new_figure_coord(board->from, board->to);
+      }
+      else set_new_figure_coord(board->from, board->from);
+    }
   }
-  if(is_check_mate()) emit check_mate();
+  else emit check_mate();
 }
 
 /*void ChessIntegration::back_move()
@@ -123,6 +125,7 @@ void ChessIntegration::emit_data_changed(const int INDEX)
 
 bool ChessIntegration::is_check_mate() const
 {
+  if(board->get_current_move() < 2) return false;
   return board->is_mate(board->get_color(board->prev_to_coord()));
 }
 
