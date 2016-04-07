@@ -32,8 +32,8 @@ protected:
   QHash<int, QByteArray> roleNames() const;
 
 public:
-  //Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
-  //QString move_turn_color() const;
+  //Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed) // work!
+  //QString move_turn_color() const; // work!
 
   //Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)
   //QStringList moves_history() const;
@@ -42,21 +42,21 @@ public:
   bool is_check_mate() const;
 
   Q_INVOKABLE void move(const unsigned x, const unsigned y);
-  Q_INVOKABLE QChar letter_return();
+  Q_INVOKABLE void back_move();
+  //Q_INVOKABLE QChar letter_return();
 
 signals:
-  //void move_turn_color_changed();
+  //void move_turn_color_changed(); // work!
   //void moves_history_changed();
   void check_mate();
 
 private:
-  //void back_move();
   void set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord, bool back_move = false);
   void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y);
   void emit_data_changed(const int INDEX);
-  //void switch_move_color();
+  //void switch_move_color();// work!S
   //void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
-  int get_index(const Board::Coord& coord) const;
+  int get_index(const Board::Coord& coord, int index = 0) const;
 
 private:
   Board* board;
@@ -72,7 +72,7 @@ public:
   QString name() const {return m_name;}
   int x() const {return m_x;}
   int y() const {return m_y;}
-  int visible() const {return m_visible;}
+  bool visible() const {return m_visible;}
 
   void set_name(const QString& new_name) {m_name = new_name;}
   void set_coord(const Board::Coord& new_coord) {m_x = new_coord.x; m_y = new_coord.y;}

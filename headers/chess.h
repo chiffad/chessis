@@ -20,7 +20,7 @@ public:
 
    Board();
    bool move(Coord const& fr, Coord const& t);
-   void back_move();
+   bool back_move();
    bool is_mate(COLOR color);
    int  get_figure(Coord const& c) const;
    COLOR get_color(Coord const& c) const;
@@ -30,6 +30,7 @@ public:
 
    Coord const& prev_from_coord() const;
    Coord const& prev_to_coord() const;
+   bool is_figure_was_beaten_in_last_move() const;
 
 private:
    struct Moves
@@ -44,6 +45,7 @@ private:
      bool _w_r_rook_m;
      bool _b_l_rook_m;
      bool _b_r_rook_m;
+     bool _figure_was_beaten_in_last_move;
    }m;
    std::vector<Moves>moves;
    Coord _f;

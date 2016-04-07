@@ -19,12 +19,12 @@ ApplicationWindow
 
   BoardInit{id: _board}
 
-  /*MenuLayout
+  MenuLayout
   {
     width: mENU_SIZE
     height: parent.height
     anchors.left: _board.right
-  }*/
+  }
 
   CellHighlight{id: _startCellHighlight}
   CellHighlight{id: _endCellHighlight}

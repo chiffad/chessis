@@ -41,7 +41,13 @@ Board::Board()
   moves[_move_num]._w_r_rook_m = false;
   moves[_move_num]._b_l_rook_m = false;
   moves[_move_num]._b_r_rook_m = false;
+  moves[_move_num]._figure_was_beaten_in_last_move = false;
   next_move();
+}
+
+bool Board::is_figure_was_beaten_in_last_move() const
+{
+  return moves[_move_num]._figure_was_beaten_in_last_move;
 }
 
 unsigned Board::get_current_move() const
@@ -72,7 +78,14 @@ Board::Coord const& Board::prev_to_coord() const
 bool Board::move(Coord const& fr, Coord const& t)
 {
   _f = fr; _t = t;
-  if(right_move_turn() && step_ver(fr, t)) field_change();
+  if(right_move_turn() && step_ver(fr, t))
+  {
+    if(_field[t.x][t.y] != FREE_FIELD)
+      moves[_move_num]._figure_was_beaten_in_last_move = true;
+    else moves[_move_num ]._figure_was_beaten_in_last_move = false;
+
+    field_change();
+  }
   else return false;
   if(!is_check(get_color(t)))
   {
@@ -85,6 +98,7 @@ bool Board::move(Coord const& fr, Coord const& t)
 
 bool Board::right_move_turn() const
 {
+  if(_move_num == 1 && get_color(_f) == W_FIG) return false;
   if(_move_num > 1 && get_color(_f) == moves[_move_num - 1]._color)
     return false;
   return true;
@@ -287,7 +301,7 @@ bool Board::is_mate(COLOR color)
   return m_is_mate;
 }
 
-void Board::back_move() 
+bool Board::back_move()
 {
   if(_move_num > 0)
   {
@@ -297,7 +311,9 @@ void Board::back_move()
     _field[moves[PREV_MOVE]._prev_to.x][moves[PREV_MOVE]._prev_to.y];
     _field[moves[PREV_MOVE]._prev_to.x][moves[PREV_MOVE]._prev_to.y] = moves[_move_num]._fig_on_field;
     _move_num = PREV_MOVE;
+    return true;
   }
+  return false;
 }
 
 void Board::next_move()

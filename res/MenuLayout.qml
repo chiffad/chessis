@@ -30,7 +30,7 @@ Rectangle
     }
   }
 
-  MoveTurn
+  /*MoveTurn // work!
   {
     id: _moveTurn
     anchors.left: parent.left
@@ -38,9 +38,9 @@ Rectangle
     anchors.topMargin: mARGIN
     width: parent.width
     height: parent.height/8
-  }
+  }*/
 
-  MoveOutput
+  /*MoveOutput
   {
     anchors.left: parent.left
     anchors.top: _moveTurn.bottom
@@ -48,5 +48,5 @@ Rectangle
 
     width: parent.width
     height: parent.height/4
-  }
+  }*/
 }
