@@ -46,7 +46,6 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
         //m_figures_model[SECOND_HILIGHT].set_coord(board->to);
         //switch_move_color(); // work!
         //add_to_history(board->from, board->to);//!!!
-
       }
       update_coordinates();
     }
@@ -56,11 +55,11 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
 
 void ChessIntegration::back_move()
 {
-  qDebug()<<"back move";
   if(board->back_move())
   {
    // m_figures_model[FIRST_HILIGHT].set_visible(false);
     //m_figures_model[SECOND_HILIGHT].set_visible(false);
+
     update_coordinates();
   }
 }
@@ -85,7 +84,6 @@ void ChessIntegration::update_coordinates()
 {
   int index = 0;
   Board::Coord a;
-
   for(; index < rowCount(); ++index)
   {
     a.x = m_figures_model[index].x();
@@ -105,12 +103,12 @@ void ChessIntegration::update_coordinates()
       {
         QString fig_name_color;
         if(board->get_color(coord) == W_FIG)
-          fig_name_color = "b_";
-        else fig_name_color = "w_";
+          fig_name_color = "w_";
+        else fig_name_color = "b_";
         fig_name_color += board->get_figure(coord);
 
-        m_figures_model[index].set_name(fig_name_color);
         m_figures_model[index].set_coord(coord);
+        m_figures_model[index].set_name(fig_name_color);
         m_figures_model[index].set_visible(true);
 
         emit_data_changed(index);

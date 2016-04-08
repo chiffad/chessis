@@ -16,6 +16,7 @@ public:
    {
      int x;
      int y;
+     bool operator ==(Coord const& rhv);
    }from, to;
 
    Board();
@@ -28,9 +29,8 @@ public:
    FIGURES get_figure(Coord const& c) const;
    COLOR get_prev_color() const;
 
-   Coord const& prev_from_coord() const;
-   Coord const& prev_to_coord() const;
-   bool is_figure_was_beaten_in_last_move() const;
+   Coord const& get_history_from_coord() const;
+   Coord const& get_history_to_coord() const;
 
 private:
    struct Moves
@@ -38,7 +38,7 @@ private:
      Coord _history_from;
      Coord _history_to;
      COLOR _color;
-     char _fig_on_field;
+     FIGURES _fig_on_captured_field;
      bool _w_king_m;
      bool _b_king_m;
      bool _w_l_rook_m;
@@ -51,7 +51,7 @@ private:
    Coord _f;
    Coord _t;
    int  _move_num;
-   char _field[X_SIZE][Y_SIZE];
+   FIGURES _field[X_SIZE][Y_SIZE];
 
    void next_move();
    void field_change();

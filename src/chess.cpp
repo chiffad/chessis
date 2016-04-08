@@ -45,9 +45,9 @@ Board::Board()
   next_move();
 }
 
-bool Board::is_figure_was_beaten_in_last_move() const
+bool Board::Coord::operator ==(Coord const& rhv)
 {
-  return moves[_move_num]._figure_was_beaten_in_last_move;
+  return(x == rhv.x && y == rhv.y);
 }
 
 unsigned Board::get_current_move() const
@@ -65,14 +65,14 @@ COLOR Board::get_prev_color() const
   return moves[_move_num - 1]._color;
 }
 
-Board::Coord const& Board::prev_from_coord() const
+Board::Coord const& Board::get_history_from_coord() const
 {
-  return moves[_move_num - 1]._history_from;
+  return moves[_move_num]._history_from;
 }
 
-Board::Coord const& Board::prev_to_coord() const
+Board::Coord const& Board::get_history_to_coord() const
 {
-  return moves[_move_num - 1]._history_to;
+  return moves[_move_num]._history_to;
 }
 
 bool Board::move(Coord const& fr, Coord const& t)
@@ -98,16 +98,16 @@ bool Board::move(Coord const& fr, Coord const& t)
 
 bool Board::right_move_turn() const
 {
-  if(_move_num == 1 && get_color(_f) == W_FIG) return false;
-  if(_move_num > 1 && get_color(_f) == moves[_move_num - 1]._color)
+  if(_move_num == 1 && get_color(_f) == B_FIG) return false;
+  if(_move_num > 1 && get_color(_f) == get_prev_color())
     return false;
   return true;
 }                                                                                                  
 
 void Board::field_change()
 {
-  moves[_move_num]._fig_on_field = _field[_t.x][_t.y];
-  int fig = _field[_f.x][_f.y];
+  moves[_move_num]._fig_on_captured_field = _field[_t.x][_t.y];
+  FIGURES fig = _field[_f.x][_f.y];
   _field[_f.x][_f.y] = FREE_FIELD;
   _field[_t.x][_t.y] = fig;
   
@@ -126,7 +126,7 @@ void Board::field_change()
 
 COLOR Board::get_color(Coord const& c) const
 {
-  if(_field[c.x][c.y] < W_FIG)
+  if(_field[c.x][c.y] > W_FIG)
     return W_FIG;
   return B_FIG;
 }
@@ -282,8 +282,8 @@ bool Board::is_mate(COLOR color)
           {
             if(step_ver(f, t)) 
             {
-              int fig_from = _field[f.x][f.y];
-              int fig_to   = _field[t.x][t.y];
+              FIGURES fig_from = _field[f.x][f.y];
+              FIGURES fig_to   = _field[t.x][t.y];
               _field[f.x][f.y] = FREE_FIELD;
               _field[t.x][t.y] = fig_from;
               if(!is_check(color)) 
@@ -309,7 +309,7 @@ bool Board::back_move()
     moves[_move_num]._color = get_color(moves[PREV_MOVE]._history_from);
     _field[moves[PREV_MOVE]._history_from.x][moves[PREV_MOVE]._history_from.y] =
     _field[moves[PREV_MOVE]._history_to.x][moves[PREV_MOVE]._history_to.y];
-    _field[moves[PREV_MOVE]._history_to.x][moves[PREV_MOVE]._history_to.y] = moves[_move_num]._fig_on_field;
+    _field[moves[PREV_MOVE]._history_to.x][moves[PREV_MOVE]._history_to.y] = moves[PREV_MOVE]._fig_on_captured_field;
     _move_num = PREV_MOVE;
     return true;
   }
