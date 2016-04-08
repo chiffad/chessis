@@ -48,7 +48,7 @@ ApplicationWindow
         anchors.fill: parent
         drag.minimumX: 0
         drag.minimumY: 0
-        enabled: figure_name != "hilight"
+        //enabled: figure_name != "hilight"
 
         onPressed:
         {    
@@ -65,7 +65,7 @@ ApplicationWindow
     }
   }
 
-  Image
+  /*Image
   {
     id: _checkMate
     source: "img/checkMate.png"
@@ -80,5 +80,5 @@ ApplicationWindow
       anchors.fill: parent
       onClicked: parent.visible = false
     }
-  }
+  }*/
 }

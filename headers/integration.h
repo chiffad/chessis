@@ -62,7 +62,7 @@ private:
   Board* board;
   QString m_move_color;
   QList<Figure> m_figures_model;
-  enum {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
+  //enum {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
 };
 
 class ChessIntegration::Figure
