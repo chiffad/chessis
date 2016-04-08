@@ -106,21 +106,22 @@ bool Board::right_move_turn() const
 
 void Board::field_change()
 {
-  moves[_move_num]._fig_on_captured_field = _field[_t.x][_t.y];
+  Moves* this_move = &moves[_move_num];
+  this_move->_fig_on_captured_field = _field[_t.x][_t.y];
   FIGURES fig = _field[_f.x][_f.y];
   _field[_f.x][_f.y] = FREE_FIELD;
   _field[_t.x][_t.y] = fig;
   
-  if(fig == B_KING) {moves[_move_num]._b_king_m = true;}
+  if(fig == B_KING) {this_move->_b_king_m = true;}
   else if(fig == W_ROOK) 
   {
-    if(_f.x == 0) moves[_move_num]._w_l_rook_m = true;
-    else if(_f.x == 7) moves[_move_num]._w_r_rook_m = true;
+    if(_f.x == 0) this_move->_w_l_rook_m = true;
+    else if(_f.x == 7) this_move->_w_r_rook_m = true;
   }
   else if(fig == B_ROOK) 
   {
-    if(_f.x == 0) moves[_move_num]._b_l_rook_m = true;
-    else if(_f.x == 7) moves[_move_num]._b_r_rook_m = true;
+    if(_f.x == 0) this_move->_b_l_rook_m = true;
+    else if(_f.x == 7) this_move->_b_r_rook_m = true;
   }
 }
 
@@ -218,21 +219,22 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
 
 bool Board::is_king_and_rook_not_moved(COLOR color, bool on_left_side) const
 {
-  if(color == W_FIG && !moves[_move_num]._w_king_m)
+  const Moves* this_move = &moves[_move_num];
+  if(color == W_FIG && !this_move->_w_king_m)
   {
-    if(on_left_side && !moves[_move_num]._w_l_rook_m)
+    if(on_left_side && !this_move->_w_l_rook_m)
       return true;
 
-    if(!on_left_side && !moves[_move_num]._w_r_rook_m)
+    if(!on_left_side && !this_move->_w_r_rook_m)
       return true;
   }
 
-  else if(color == B_FIG && !moves[_move_num]._b_king_m)
+  else if(color == B_FIG && !this_move->_b_king_m)
   {
-    if(on_left_side && !moves[_move_num]._b_l_rook_m)
+    if(on_left_side && !this_move->_b_l_rook_m)
       return true;
 
-    if(!on_left_side && !moves[_move_num]._b_r_rook_m)
+    if(!on_left_side && !this_move->_b_r_rook_m)
       return true;
   }
   return false;
