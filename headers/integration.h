@@ -35,11 +35,11 @@ public:
   //Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed) // work!
   //QString move_turn_color() const; // work!
 
-  //Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)
-  //QStringList moves_history() const;
+  //Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)//!!
+  //QStringList moves_history() const;//!!
 
-  Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
-  bool is_check_mate() const;
+  //Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)//!!
+  //bool is_check_mate() const;//!!
 
   Q_INVOKABLE void move(const unsigned x, const unsigned y);
   Q_INVOKABLE void back_move();
@@ -51,10 +51,10 @@ signals:
   void check_mate();
 
 private:
-  void set_new_figure_coord(const Board::Coord& old_coord, const Board::Coord& new_coord, bool back_move = false);
+  void update_coordinates();
   void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y);
   void emit_data_changed(const int INDEX);
-  //void switch_move_color();// work!S
+  //void switch_move_color();// work!
   //void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
   int get_index(const Board::Coord& coord, int index = 0) const;
 
@@ -62,6 +62,7 @@ private:
   Board* board;
   QString m_move_color;
   QList<Figure> m_figures_model;
+  enum {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
 };
 
 class ChessIntegration::Figure

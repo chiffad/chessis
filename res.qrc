@@ -14,12 +14,12 @@
         <file>res/img/w_r.png</file>
         <file>res/app.qml</file>
         <file>res/FigureDelegate.qml</file>
-        <file>res/CellHighlight.qml</file>
         <file>res/img/board.png</file>
         <file>res/MenuLayout.qml</file>
         <file>res/MoveTurn.qml</file>
         <file>res/MoveOutput.qml</file>
         <file>res/BoardInit.qml</file>
         <file>res/img/checkMate.png</file>
+        <file>res/img/hilight.png</file>
     </qresource>
 </RCC>

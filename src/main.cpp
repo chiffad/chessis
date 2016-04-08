@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
     model.addFigure(ChessIntegration::Figure("w_p", i, 6, true));
     model.addFigure(ChessIntegration::Figure("b_P", i, 1, true));
   }
+  model.addFigure(ChessIntegration::Figure("hilight", 0, 0, false));
+  model.addFigure(ChessIntegration::Figure("hilight", 0, 0, false));
 
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("FigureModel", &model);

@@ -55,7 +55,7 @@ unsigned Board::get_current_move() const
   return _move_num;
 }
 
-FIGURES Board::get_field(Coord const& c) const
+FIGURES Board::get_figure(Coord const& c) const
 {
   return FIGURES(_field[c.x][c.y]);
 }
@@ -67,12 +67,12 @@ COLOR Board::get_prev_color() const
 
 Board::Coord const& Board::prev_from_coord() const
 {
-  return moves[_move_num - 1]._prev_from;
+  return moves[_move_num - 1]._history_from;
 }
 
 Board::Coord const& Board::prev_to_coord() const
 {
-  return moves[_move_num - 1]._prev_to;
+  return moves[_move_num - 1]._history_to;
 }
 
 bool Board::move(Coord const& fr, Coord const& t)
@@ -131,7 +131,7 @@ COLOR Board::get_color(Coord const& c) const
   return B_FIG;
 }
 
-int Board::get_figure(Coord const& c) const
+int Board::get_field(Coord const& c) const
 {
   return (tolower(_field[c.x][c.y]) + toupper(_field[c.x][c.y]));
 }
@@ -141,10 +141,10 @@ bool Board::step_ver(Coord const& f, Coord const& t) const
   const int dx = t.x - f.x;
   const int dy = t.y - f.y;
   
-  if((get_figure(f) == ROOK || get_figure(f) == QUEEN) && (dx*dy == 0));
-  else if((get_figure(f) == ELEPHANT || get_figure(f) == QUEEN) && (abs(dx) == abs(dy)));
-  else if(get_figure(f) == HORSE && abs(dx*dy) == 2);
-  else if(get_figure(f) == KING && ((abs(dx) <= 1 && abs(dy) <= 1) || (dy == 0 && abs(dx) == 2)));
+  if((get_field(f) == ROOK || get_field(f) == QUEEN) && (dx*dy == 0));
+  else if((get_field(f) == ELEPHANT || get_field(f) == QUEEN) && (abs(dx) == abs(dy)));
+  else if(get_field(f) == HORSE && abs(dx*dy) == 2);
+  else if(get_field(f) == KING && ((abs(dx) <= 1 && abs(dy) <= 1) || (dy == 0 && abs(dx) == 2)));
   else if(_field[f.x][f.y] == B_PAWN && dy <= 2 && abs(dx) <= 1);
   else if(_field[f.x][f.y] == W_PAWN && dy >= -2 && abs(dx) <= 1);
   else return false;
@@ -156,7 +156,7 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
   const int dx = t.x - f.x;
   const int dy = t.y - f.y;
 
-  if(get_figure(f) == PAWN)
+  if(get_field(f) == PAWN)
   {
     int direction = dy/ abs(dy);
     if(_field[t.x][t.y] != FREE_FIELD && abs(dx) == 1 && 
@@ -167,7 +167,7 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
     else return false;
   }
 
-  if(get_figure(f) == KING && abs(dx) == 2 && dy == 0)
+  if(get_field(f) == KING && abs(dx) == 2 && dy == 0)
   {
     if(is_king_and_rook_not_moved(get_color(f), true))
     {
@@ -180,9 +180,9 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
     return false;
   }
 
-  if(get_figure(f) == HORSE && (_field[t.x][t.y] == FREE_FIELD ||
+  if(get_field(f) == HORSE && (_field[t.x][t.y] == FREE_FIELD ||
     get_color(f) != get_color(t))) return true; 
-  else if(get_figure(f) == HORSE) return false;
+  else if(get_field(f) == HORSE) return false;
   
   int x_s = f.x;
   int y_s = f.y;
@@ -248,7 +248,7 @@ bool Board::is_check(COLOR color) const
 
   for(t.x = 0; t.x < X_SIZE; ++t.x)
     for(t.y = 0; t.y < Y_SIZE; ++t.y)
-      if(get_figure(t) == KING && get_color(t) == color)
+      if(get_field(t) == KING && get_color(t) == color)
       {
         for(f.x = 0; f.x < X_SIZE; ++f.x)
           for(f.y = 0; f.y < Y_SIZE; ++f.y)
@@ -303,13 +303,13 @@ bool Board::is_mate(COLOR color)
 
 bool Board::back_move()
 {
-  if(_move_num > 0)
+  if(_move_num > 1)
   {
     const int PREV_MOVE = _move_num - 1;
-    moves[_move_num]._color = get_color(moves[PREV_MOVE]._prev_from);
-    _field[moves[PREV_MOVE]._prev_from.x][moves[PREV_MOVE]._prev_from.y] =
-    _field[moves[PREV_MOVE]._prev_to.x][moves[PREV_MOVE]._prev_to.y];
-    _field[moves[PREV_MOVE]._prev_to.x][moves[PREV_MOVE]._prev_to.y] = moves[_move_num]._fig_on_field;
+    moves[_move_num]._color = get_color(moves[PREV_MOVE]._history_from);
+    _field[moves[PREV_MOVE]._history_from.x][moves[PREV_MOVE]._history_from.y] =
+    _field[moves[PREV_MOVE]._history_to.x][moves[PREV_MOVE]._history_to.y];
+    _field[moves[PREV_MOVE]._history_to.x][moves[PREV_MOVE]._history_to.y] = moves[_move_num]._fig_on_field;
     _move_num = PREV_MOVE;
     return true;
   }
@@ -319,8 +319,8 @@ bool Board::back_move()
 void Board::next_move()
 {
   if(_move_num > 0) moves[_move_num]._color = get_color(_t);
-  moves[_move_num]._prev_from = _f;
-  moves[_move_num]._prev_to   = _t;
+  moves[_move_num]._history_from = _f;
+  moves[_move_num]._history_to   = _t;
   moves.push_back(moves[_move_num]);
   ++_move_num;
   moves[_move_num]._w_king_m = moves[_move_num - 1]._w_king_m;

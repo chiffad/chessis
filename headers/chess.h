@@ -22,10 +22,10 @@ public:
    bool move(Coord const& fr, Coord const& t);
    bool back_move();
    bool is_mate(COLOR color);
-   int  get_figure(Coord const& c) const;
+   int  get_field(Coord const& c) const;
    COLOR get_color(Coord const& c) const;
    unsigned get_current_move() const;
-   FIGURES get_field(Coord const& c) const;
+   FIGURES get_figure(Coord const& c) const;
    COLOR get_prev_color() const;
 
    Coord const& prev_from_coord() const;
@@ -35,8 +35,8 @@ public:
 private:
    struct Moves
    {
-     Coord _prev_from;
-     Coord _prev_to;
+     Coord _history_from;
+     Coord _history_to;
      COLOR _color;
      char _fig_on_field;
      bool _w_king_m;

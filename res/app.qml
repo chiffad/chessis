@@ -26,9 +26,6 @@ ApplicationWindow
     anchors.left: _board.right
   }
 
-  CellHighlight{id: _startCellHighlight}
-  CellHighlight{id: _endCellHighlight}
-
   Repeater
   {
     id: _repeater
@@ -51,24 +48,18 @@ ApplicationWindow
         anchors.fill: parent
         drag.minimumX: 0
         drag.minimumY: 0
+        enabled: figure_name != "hilight"
 
         onPressed:
         {    
           _figureDelegate.z = aCTIVE_FIGURE_Z
           FigureModel.move(parent.x, parent.y)
-          _startCellHighlight.x = parent.x
-          _startCellHighlight.y = parent.y
-          _startCellHighlight.visible = true
-          _endCellHighlight.visible = false
         }
 
         onReleased:
         {
           _figureDelegate.z = pASSIVE_FIGURE_Z
           FigureModel.move(parent.x, parent.y)
-          _endCellHighlight.x = parent.x
-          _endCellHighlight.y = parent.y
-          _endCellHighlight.visible = true
         }
       }
     }
