@@ -305,12 +305,12 @@ bool Board::back_move()
 {
   if(_move_num > 1)
   {
-    const int PREV_MOVE = _move_num - 1;
-    moves[_move_num]._color = get_color(moves[PREV_MOVE]._history_from);
-    _field[moves[PREV_MOVE]._history_from.x][moves[PREV_MOVE]._history_from.y] =
-    _field[moves[PREV_MOVE]._history_to.x][moves[PREV_MOVE]._history_to.y];
-    _field[moves[PREV_MOVE]._history_to.x][moves[PREV_MOVE]._history_to.y] = moves[PREV_MOVE]._fig_on_captured_field;
-    _move_num = PREV_MOVE;
+    Moves* prev_move = &moves[_move_num - 1];
+
+    moves[_move_num]._color = get_color(prev_move->_history_from);
+    _field[prev_move->_history_from.x][prev_move->_history_from.y] = _field[prev_move->_history_to.x][prev_move->_history_to.y];
+    _field[prev_move->_history_to.x][prev_move->_history_to.y] = prev_move->_fig_on_captured_field;
+    --_move_num;
     return true;
   }
   return false;
@@ -318,15 +318,18 @@ bool Board::back_move()
 
 void Board::next_move()
 {
-  if(_move_num > 0) moves[_move_num]._color = get_color(_t);
-  moves[_move_num]._history_from = _f;
-  moves[_move_num]._history_to   = _t;
+  Moves* prev_move = &moves[_move_num - 1];
+  Moves* this_move = &moves[_move_num];
+
+  if(_move_num > 0) this_move->_color = get_color(_t);
+  this_move->_history_from = _f;
+  this_move->_history_to   = _t;
   moves.push_back(moves[_move_num]);
   ++_move_num;
-  moves[_move_num]._w_king_m = moves[_move_num - 1]._w_king_m;
-  moves[_move_num]._b_king_m = moves[_move_num - 1]._b_king_m;
-  moves[_move_num]._w_l_rook_m = moves[_move_num - 1]._w_l_rook_m;
-  moves[_move_num]._w_r_rook_m = moves[_move_num - 1]._w_r_rook_m;
-  moves[_move_num]._b_l_rook_m = moves[_move_num - 1]._b_l_rook_m;
-  moves[_move_num]._b_r_rook_m = moves[_move_num - 1]._b_r_rook_m;
+  this_move->_w_king_m = prev_move->_w_king_m;
+  this_move->_b_king_m = prev_move->_b_king_m;
+  this_move->_w_l_rook_m = prev_move->_w_l_rook_m;
+  this_move->_w_r_rook_m = prev_move->_w_r_rook_m;
+  this_move->_b_l_rook_m = prev_move->_b_l_rook_m;
+  this_move->_b_r_rook_m = prev_move->_b_r_rook_m;
 }
