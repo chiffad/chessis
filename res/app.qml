@@ -48,7 +48,7 @@ ApplicationWindow
         anchors.fill: parent
         drag.minimumX: 0
         drag.minimumY: 0
-        //enabled: figure_name != "hilight"
+        enabled: figure_name != "hilight"
 
         onPressed:
         {    

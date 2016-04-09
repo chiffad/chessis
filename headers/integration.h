@@ -13,6 +13,7 @@ class ChessIntegration : public QAbstractListModel
   Q_OBJECT
 public:
   class Figure;
+  enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
 public:
   enum FigureRoles {
       NameRole = Qt::UserRole + 3,
@@ -54,15 +55,14 @@ private:
   void update_coordinates();
   void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y);
   void emit_data_changed(const int INDEX);
+  void update_hilight(const Board::Coord& coord, HILIGHT hilight_index, bool visible);
   //void switch_move_color();// work!
   //void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
-  int get_index(const Board::Coord& coord, int index = 0) const;
 
 private:
   Board* board;
   QString m_move_color;
   QList<Figure> m_figures_model;
-  //enum {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
 };
 
 class ChessIntegration::Figure

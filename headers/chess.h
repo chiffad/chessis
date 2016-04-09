@@ -45,7 +45,6 @@ private:
      bool _w_r_rook_m;
      bool _b_l_rook_m;
      bool _b_r_rook_m;
-     bool _figure_was_beaten_in_last_move;
    }m;
    std::vector<Moves>moves;
    Coord _f;

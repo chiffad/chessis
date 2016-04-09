@@ -28,9 +28,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
       correct_figure_coord(board->from,x,y);
       if(board->get_figure(board->from) != FREE_FIELD)
       {
-       // m_figures_model[FIRST_HILIGHT].set_visible(true);
-       // m_figures_model[FIRST_HILIGHT].set_coord(board->from);
-       // m_figures_model[SECOND_HILIGHT].set_visible(false);
+        update_hilight(board->from, FIRST_HILIGHT, true);
 
         is_from = false;
       }
@@ -40,10 +38,9 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
     {
       is_from = true;
       correct_figure_coord(board->to, x, y);
-      if(board->move(board->from, board->to))
+      if(!(board->from == board->to) && board->move(board->from, board->to))
       {
-        //m_figures_model[SECOND_HILIGHT].set_visible(true);
-        //m_figures_model[SECOND_HILIGHT].set_coord(board->to);
+        update_hilight(board->to, SECOND_HILIGHT, true);
         //switch_move_color(); // work!
         //add_to_history(board->from, board->to);//!!!
       }
@@ -57,19 +54,11 @@ void ChessIntegration::back_move()
 {
   if(board->back_move())
   {
-   // m_figures_model[FIRST_HILIGHT].set_visible(false);
-    //m_figures_model[SECOND_HILIGHT].set_visible(false);
+    update_hilight(board->get_history_from_coord(), FIRST_HILIGHT, true);
+    update_hilight(board->get_history_to_coord(), SECOND_HILIGHT, true);
 
     update_coordinates();
   }
-}
-
-int ChessIntegration::get_index(const Board::Coord& coord, int index) const
-{
-  for(; index < rowCount() ; ++index)
-    if(m_figures_model[index].x() == coord.x && m_figures_model[index].y() == coord.y)
-      break;
-  return index;
 }
 
 void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y)
@@ -84,7 +73,7 @@ void ChessIntegration::update_coordinates()
 {
   int index = 0;
   Board::Coord a;
-  for(; index < rowCount(); ++index)
+  for(; index < rowCount() - HILIGHT_CELLS; ++index)
   {
     a.x = m_figures_model[index].x();
     a.y = m_figures_model[index].y();
@@ -114,6 +103,19 @@ void ChessIntegration::update_coordinates()
         emit_data_changed(index);
         ++index;
       }
+}
+
+void ChessIntegration::update_hilight(const Board::Coord& coord, HILIGHT hilight_index, bool visible)
+{
+  m_figures_model[hilight_index].set_visible(visible);
+  m_figures_model[hilight_index].set_coord(coord);
+
+  if(hilight_index == FIRST_HILIGHT)
+  {
+    m_figures_model[SECOND_HILIGHT].set_visible(false);
+    emit_data_changed(SECOND_HILIGHT);
+  }
+  emit_data_changed(hilight_index);
 }
 
 /*void ChessIntegration::switch_move_color() // work!

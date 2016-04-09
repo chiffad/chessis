@@ -41,7 +41,6 @@ Board::Board()
   moves[_move_num]._w_r_rook_m = false;
   moves[_move_num]._b_l_rook_m = false;
   moves[_move_num]._b_r_rook_m = false;
-  moves[_move_num]._figure_was_beaten_in_last_move = false;
   next_move();
 }
 
@@ -78,21 +77,15 @@ Board::Coord const& Board::get_history_to_coord() const
 bool Board::move(Coord const& fr, Coord const& t)
 {
   _f = fr; _t = t;
-  if(right_move_turn() && step_ver(fr, t))
-  {
-    if(_field[t.x][t.y] != FREE_FIELD)
-      moves[_move_num]._figure_was_beaten_in_last_move = true;
-    else moves[_move_num ]._figure_was_beaten_in_last_move = false;
-
-    field_change();
-  }
+  if(right_move_turn() && step_ver(fr, t)) field_change();
   else return false;
   if(!is_check(get_color(t)))
   {
     next_move();
     return true;
   }
-  back_move();
+  _f = t; _t = fr;
+  field_change();
   return false;
 }
 
@@ -246,13 +239,14 @@ bool Board::is_check(COLOR color) const
 
   Coord f;
   Coord t;
-  bool m_is_check;
+  bool m_is_check = false;
 
   for(t.x = 0; t.x < X_SIZE; ++t.x)
     for(t.y = 0; t.y < Y_SIZE; ++t.y)
       if(get_field(t) == KING && get_color(t) == color)
       {
         for(f.x = 0; f.x < X_SIZE; ++f.x)
+        {
           for(f.y = 0; f.y < Y_SIZE; ++f.y)
             if(get_color(f) != color)
             {
@@ -262,7 +256,8 @@ bool Board::is_check(COLOR color) const
                 break;
               }
             }
-        m_is_check = false;
+          if(m_is_check == true) break;
+        }
         break;
       }
 
