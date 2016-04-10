@@ -266,35 +266,42 @@ bool Board::is_check(COLOR color) const
 
 bool Board::is_mate(COLOR color)
 {
+  if(_move_num < 2) return false;
+
   Coord f;
   Coord t;
-  bool m_is_mate = true;
+  bool m_is_mate = false;
 
   for(f.x = 0; f.x < X_SIZE; ++f.x)
+  {
     for(f.y = 0; f.y < Y_SIZE; ++f.y)
       if(_field[f.x][f.y] != FREE_FIELD && get_color(f) == color)
       {
         for(t.x = 0; t.x < X_SIZE; ++t.x)
+        {
           for(t.y = 0; t.y < Y_SIZE; ++t.y)
-          {
             if(step_ver(f, t)) 
             {
-              FIGURES fig_from = _field[f.x][f.y];
-              FIGURES fig_to   = _field[t.x][t.y];
+              FIGURES fig_from = get_figure(f);
+              FIGURES fig_to   = get_figure(t);
               _field[f.x][f.y] = FREE_FIELD;
               _field[t.x][t.y] = fig_from;
-              if(!is_check(color)) 
+              if(is_check(color))
               {
                 _field[f.x][f.y] = fig_from;
                 _field[t.x][t.y] = fig_to;
-                m_is_mate = false;
+                m_is_mate = true;
                 break;
               }
               _field[f.x][f.y] = fig_from;
               _field[t.x][t.y] = fig_to;
             }
-          }
+          if(m_is_mate) break;
+        }
+        if(m_is_mate) break;
       }
+    if(m_is_mate) break;
+  }
   return m_is_mate;
 }
 

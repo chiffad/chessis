@@ -16,13 +16,20 @@ ChessIntegration::ChessIntegration(QObject *parent)
 {
   board = new Board();
   m_move_color = "img/w_k.png";
+  for(int i = 0; i < FIGURES_NUMBER; ++i)
+  {
+    addFigure(Figure("b_P", 0, 0, true));
+  }
+  addFigure(ChessIntegration::Figure("hilight", 0, 0, false));
+  addFigure(ChessIntegration::Figure("hilight", 0, 0, false));
+  update_coordinates();
 }
 
 void ChessIntegration::move(const unsigned x, const unsigned y)
 {
   static bool is_from = true;
-  //if(!is_check_mate())
-  //{
+  if(!is_check_mate())
+  {
     if(is_from)
     {
       correct_figure_coord(board->from,x,y);
@@ -46,11 +53,11 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
       }
       update_coordinates();
     }
-  //}
-  //else emit check_mate();
+  }
+  else emit check_mate();
 }
 
-void ChessIntegration::back_move()
+/*void ChessIntegration::back_move() //work!
 {
   if(board->back_move())
   {
@@ -59,7 +66,7 @@ void ChessIntegration::back_move()
 
     update_coordinates();
   }
-}
+}*/
 
 void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y)
 {
@@ -139,10 +146,15 @@ void ChessIntegration::emit_data_changed(const int INDEX)
   emit dataChanged(topLeft, bottomRight);
 }
 
-/*bool ChessIntegration::is_check_mate() const//!!!!!!!!
+bool ChessIntegration::is_check_mate() const//!!!!!!!!
 {
-  if(board->get_current_move() < 2) return false;
-  return board->is_mate(board->get_color(board->prev_to_coord()));
+  return board->is_mate(board->get_prev_color());
+}
+
+/*void ChessIntegration::start_new_game() //work!
+{
+  while (board->get_current_move() != 1)
+    back_move();
 }*/
 
 /*QStringList ChessIntegration::moves_history() const //!!!!

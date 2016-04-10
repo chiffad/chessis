@@ -39,12 +39,13 @@ public:
   //Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)//!!
   //QStringList moves_history() const;//!!
 
-  //Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)//!!
-  //bool is_check_mate() const;//!!
+  Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)//!!
+  bool is_check_mate() const;//!!
 
   Q_INVOKABLE void move(const unsigned x, const unsigned y);
-  Q_INVOKABLE void back_move();
+  //Q_INVOKABLE void back_move(); //work!
   //Q_INVOKABLE QChar letter_return();
+  //Q_INVOKABLE void start_new_game();//work!
 
 signals:
   //void move_turn_color_changed(); // work!
@@ -58,6 +59,7 @@ private:
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index, bool visible);
   //void switch_move_color();// work!
   //void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
+
 
 private:
   Board* board;
