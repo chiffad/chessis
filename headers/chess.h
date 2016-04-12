@@ -27,10 +27,10 @@ public:
    COLOR get_color(Coord const& c) const;
    unsigned get_current_move() const;
    FIGURES get_figure(Coord const& c) const;
-   COLOR get_prev_color() const;
+   COLOR get_index_move_color_from_end(const unsigned index) const;
 
-   Coord const& get_history_from_coord() const;
-   Coord const& get_history_to_coord() const;
+   Coord const& get_history_from_coord(unsigned index = _move_num) const;
+   Coord const& get_history_to_coord(unsigned index = _move_num) const;
 
 private:
    struct Moves

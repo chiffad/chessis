@@ -3,6 +3,7 @@
 #include <QChar>
 #include <ctype.h>
 #include <QModelIndex>
+#include <vector>
 #include "headers/integration.h"
 #include "headers/chess.h"
 
@@ -28,8 +29,8 @@ ChessIntegration::ChessIntegration(QObject *parent)
 void ChessIntegration::move(const unsigned x, const unsigned y)
 {
   static bool is_from = true;
-  if(!is_check_mate())
-  {
+  //if(!is_check_mate())
+  //{
     if(is_from)
     {
       correct_figure_coord(board->from,x,y);
@@ -49,15 +50,42 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
       {
         update_hilight(board->to, SECOND_HILIGHT, true);
         //switch_move_color(); // work!
-        //add_to_history(board->from, board->to);//!!!
+        add_to_history(board->from, board->to);//fix need
       }
       update_coordinates();
     }
-  }
-  else emit check_mate();
+  //}
+  //else emit check_mate();
 }
 
-/*void ChessIntegration::back_move() //work!
+
+void ChessIntegration::move_to_history_index(const unsigned index)//!!
+{
+  if(index == board->get_current_move()) return;
+
+  if(index < board->get_current_move())
+  {
+    const unsigned D_INDEX = board->get_current_move() - index;
+
+    for(int i = 0; i < D_INDEX; ++i)
+      back_move();
+  }
+
+  if(index > board->get_current_move())
+  {}
+}
+
+void ChessIntegration::add_move_to_history_copy()//!!
+{
+  Copy_of_history_moves copy;
+
+  copy.from = board->get_history_from_coord();
+  copy.to = board->get_history_to_coord();
+
+  history_copy.push_back(copy);
+}
+
+/*void ChessIntegration::back_move(bool true_back) //work!
 {
   if(board->back_move())
   {
@@ -65,6 +93,9 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
     update_hilight(board->get_history_to_coord(), SECOND_HILIGHT, true);
 
     update_coordinates();
+
+    if(true_back)
+      history_copy.pop_back();
   }
 }*/
 
@@ -127,7 +158,7 @@ void ChessIntegration::update_hilight(const Board::Coord& coord, HILIGHT hilight
 
 /*void ChessIntegration::switch_move_color() // work!
 {
-  if(board->get_prev_color() == W_FIG)
+  if(board->get_index_move_color_from_end(1) == W_FIG)
     m_move_color = "img/w_k.png";
   else  m_move_color = "img/b_K.png";
 
@@ -146,10 +177,10 @@ void ChessIntegration::emit_data_changed(const int INDEX)
   emit dataChanged(topLeft, bottomRight);
 }
 
-bool ChessIntegration::is_check_mate() const//!!!!!!!!
+/*bool ChessIntegration::is_check_mate() const//need test
 {
-  return board->is_mate(board->get_prev_color());
-}
+  return board->is_mate(board->get_index_move_color_from_end(2));
+}*/
 
 /*void ChessIntegration::start_new_game() //work!
 {
@@ -157,21 +188,31 @@ bool ChessIntegration::is_check_mate() const//!!!!!!!!
     back_move();
 }*/
 
-/*QStringList ChessIntegration::moves_history() const //!!!!
+QStringList ChessIntegration::moves_history() const //fix need
 {
   return m_moves_history;
-}*/
+}
 
-/*void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to) //!!!!
+void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to) //fix need
 {
+  add_move_to_history_copy();
+
+  unsigned correct_move = board->get_current_move() / 2;
+  if(board->get_current_move() % 2 != 0) ++correct_move;
+
   const int a_LETTER = 'a';
   QString move;
-  if(m_move_color == "black") move.setNum(m_moves_history.count() / 2 + m_moves_history.count() % 2);
-  move += QChar(a_LETTER + coord_from.x) + coord_from.y + '-' + QChar(a_LETTER + coord_to.x) + coord_to.y;
+
+  move.setNum(correct_move);
+
+  if(board->get_color(coord_to) == B_FIG) move += 'b ';
+  else move += 'w ';
+
+  move += QChar(a_LETTER + coord_from.x) + coord_from.y + ' - ' + QChar(a_LETTER + coord_to.x) + coord_to.y;
 
   m_moves_history.append(move);
   emit moves_history_changed();
-}*/
+}
 
 void ChessIntegration::addFigure(const Figure &figure)
 {

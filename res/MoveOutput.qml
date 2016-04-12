@@ -20,9 +20,18 @@ Rectangle
       id: _moveNumber
       anchors.left: parent.left
       width: 10
+      color: (count % 2) != 0 ? 'lightyellow' : 'gold'
 
-      border.width: 2
+      border.width: 1
       border.color: Qt.darker(parent.color)
+
+      Text { text: modelData }
+
+      MouseArea
+      {
+        anchors.fill: parent
+        onClicked: FigureModel.move_to_history_index(currentIndex)
+      }
     }
   }
 }

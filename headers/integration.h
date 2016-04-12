@@ -6,6 +6,7 @@
 #include <QChar>
 #include <QAbstractListModel>
 #include <QStringList>
+#include <vector>
 #include "headers/chess.h"
 
 class ChessIntegration : public QAbstractListModel
@@ -36,21 +37,22 @@ public:
   //Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed) // work!
   //QString move_turn_color() const; // work!
 
-  //Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)//!!
-  //QStringList moves_history() const;//!!
+  Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)//fix need
+  QStringList moves_history() const;//fix need
 
-  Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)//!!
-  bool is_check_mate() const;//!!
+  //Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)//test need
+  //bool is_check_mate() const;//test need
 
   Q_INVOKABLE void move(const unsigned x, const unsigned y);
-  //Q_INVOKABLE void back_move(); //work!
+  //Q_INVOKABLE void back_move(bool true_back = false); //work!
   //Q_INVOKABLE QChar letter_return();
   //Q_INVOKABLE void start_new_game();//work!
+  Q_INVOKABLE void move_to_history_index(const unsigned index);
 
 signals:
   //void move_turn_color_changed(); // work!
-  //void moves_history_changed();
-  void check_mate();
+  void moves_history_changed();//fix need
+  //void check_mate(); // test need
 
 private:
   void update_coordinates();
@@ -58,13 +60,21 @@ private:
   void emit_data_changed(const int INDEX);
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index, bool visible);
   //void switch_move_color();// work!
-  //void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
-
+  void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);//fix need
+  void ChessIntegration::add_move_to_history_copy();
 
 private:
   Board* board;
   QString m_move_color;
+  QStringList m_moves_history;
   QList<Figure> m_figures_model;
+
+  struct Copy_of_history_moves
+  {
+    Board::Coord from;
+    Board::Coord to;
+  };
+  std::vector<Copy_of_history_moves> history_copy;
 };
 
 class ChessIntegration::Figure
@@ -88,4 +98,3 @@ public:
   bool m_visible;
 };
 #endif
-

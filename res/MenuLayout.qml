@@ -11,7 +11,7 @@ Rectangle
   border.width: bORDER_WIDTH
   border.color: "black"
 
-  Button
+  /*Button //work
   {
     id: _back_move_button
     anchors.left: parent.left
@@ -26,11 +26,11 @@ Rectangle
 
     onClicked:
     {
-      FigureModel.back_move();
+      FigureModel.back_move(true);
     }
-  }
+  }*/
 
-  Button
+  /*Button //work
   {
     id: _start_new_game
     anchors.right: parent.right
@@ -47,7 +47,7 @@ Rectangle
     {
       FigureModel.start_new_game();
     }
-  }
+  }*/
 
   /*MoveTurn // work!
   {
@@ -59,7 +59,7 @@ Rectangle
     height: parent.height/8
   }*/
 
-  /*MoveOutput
+  MoveOutput // fix need
   {
     anchors.left: parent.left
     anchors.top: _moveTurn.bottom
@@ -67,5 +67,5 @@ Rectangle
 
     width: parent.width
     height: parent.height/4
-  }*/
+  }
 }

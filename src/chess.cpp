@@ -59,19 +59,19 @@ FIGURES Board::get_figure(Coord const& c) const
   return FIGURES(_field[c.x][c.y]);
 }
 
-COLOR Board::get_prev_color() const
+COLOR Board::get_index_move_color_from_end(const unsigned index) const
 {
-  return moves[_move_num - 1]._color;
+  return moves[_move_num - index]._color;
 }
 
-Board::Coord const& Board::get_history_from_coord() const
+Board::Coord const& Board::get_history_from_coord(unsigned index) const
 {
-  return moves[_move_num]._history_from;
+  return moves[index]._history_from;
 }
 
-Board::Coord const& Board::get_history_to_coord() const
+Board::Coord const& Board::get_history_to_coord(unsigned index) const
 {
-  return moves[_move_num]._history_to;
+  return moves[index]._history_to;
 }
 
 bool Board::move(Coord const& fr, Coord const& t)
@@ -92,7 +92,7 @@ bool Board::move(Coord const& fr, Coord const& t)
 bool Board::right_move_turn() const
 {
   if(_move_num == 1 && get_color(_f) == B_FIG) return false;
-  if(_move_num > 1 && get_color(_f) == get_prev_color())
+  if(_move_num > 1 && get_color(_f) == get_index_color_from_end(1))
     return false;
   return true;
 }                                                                                                  
@@ -246,39 +246,35 @@ bool Board::is_check(COLOR color) const
       if(get_field(t) == KING && get_color(t) == color)
       {
         for(f.x = 0; f.x < X_SIZE; ++f.x)
-        {
           for(f.y = 0; f.y < Y_SIZE; ++f.y)
             if(get_color(f) != color)
             {
               if(step_ver(f, t))
               {
                 m_is_check = true;
-                break;
+                goto check;
               }
             }
-          if(m_is_check == true) break;
-        }
-        break;
+        goto check;
       }
 
+  check:
   return m_is_check;
 }
 
-bool Board::is_mate(COLOR color)
+bool Board::is_mate(COLOR color)//mate to who/color
 {
   if(_move_num < 2) return false;
 
   Coord f;
   Coord t;
-  bool m_is_mate = false;
+  bool m_is_mate = true;
 
   for(f.x = 0; f.x < X_SIZE; ++f.x)
-  {
     for(f.y = 0; f.y < Y_SIZE; ++f.y)
       if(_field[f.x][f.y] != FREE_FIELD && get_color(f) == color)
       {
         for(t.x = 0; t.x < X_SIZE; ++t.x)
-        {
           for(t.y = 0; t.y < Y_SIZE; ++t.y)
             if(step_ver(f, t)) 
             {
@@ -286,22 +282,24 @@ bool Board::is_mate(COLOR color)
               FIGURES fig_to   = get_figure(t);
               _field[f.x][f.y] = FREE_FIELD;
               _field[t.x][t.y] = fig_from;
-              if(is_check(color))
+              if(!is_check(color))
               {
                 _field[f.x][f.y] = fig_from;
                 _field[t.x][t.y] = fig_to;
-                m_is_mate = true;
-                break;
+                m_is_mate = false;
+                goto not_mate;
               }
-              _field[f.x][f.y] = fig_from;
-              _field[t.x][t.y] = fig_to;
+              else
+              {
+                _field[f.x][f.y] = fig_from;
+                _field[t.x][t.y] = fig_to;
+              }
             }
-          if(m_is_mate) break;
-        }
-        if(m_is_mate) break;
       }
-    if(m_is_mate) break;
-  }
+
+  return m_is_mate;
+
+  not_mate:
   return m_is_mate;
 }
 
