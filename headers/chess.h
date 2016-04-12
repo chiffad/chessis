@@ -29,8 +29,8 @@ public:
    FIGURES get_figure(Coord const& c) const;
    COLOR get_index_move_color_from_end(const unsigned index) const;
 
-   Coord const& get_history_from_coord(unsigned index = _move_num) const;
-   Coord const& get_history_to_coord(unsigned index = _move_num) const;
+   Coord const& get_history_from_coord() const;
+   Coord const& get_history_to_coord() const;
 
 private:
    struct Moves

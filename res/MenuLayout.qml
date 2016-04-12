@@ -62,7 +62,7 @@ Rectangle
   MoveOutput // fix need
   {
     anchors.left: parent.left
-    anchors.top: _moveTurn.bottom
+    //anchors.top: _moveTurn.bottom
     anchors.topMargin: mARGIN
 
     width: parent.width

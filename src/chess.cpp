@@ -64,14 +64,14 @@ COLOR Board::get_index_move_color_from_end(const unsigned index) const
   return moves[_move_num - index]._color;
 }
 
-Board::Coord const& Board::get_history_from_coord(unsigned index) const
+Board::Coord const& Board::get_history_from_coord() const
 {
-  return moves[index]._history_from;
+  return moves[_move_num]._history_from;
 }
 
-Board::Coord const& Board::get_history_to_coord(unsigned index) const
+Board::Coord const& Board::get_history_to_coord() const
 {
-  return moves[index]._history_to;
+  return moves[_move_num]._history_to;
 }
 
 bool Board::move(Coord const& fr, Coord const& t)
@@ -92,7 +92,7 @@ bool Board::move(Coord const& fr, Coord const& t)
 bool Board::right_move_turn() const
 {
   if(_move_num == 1 && get_color(_f) == B_FIG) return false;
-  if(_move_num > 1 && get_color(_f) == get_index_color_from_end(1))
+  if(_move_num > 1 && get_color(_f) == get_index_move_color_from_end(1))
     return false;
   return true;
 }                                                                                                  

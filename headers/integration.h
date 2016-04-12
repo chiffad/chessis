@@ -47,7 +47,7 @@ public:
   //Q_INVOKABLE void back_move(bool true_back = false); //work!
   //Q_INVOKABLE QChar letter_return();
   //Q_INVOKABLE void start_new_game();//work!
-  Q_INVOKABLE void move_to_history_index(const unsigned index);
+  //Q_INVOKABLE void move_to_history_index(const unsigned index);
 
 signals:
   //void move_turn_color_changed(); // work!
@@ -61,7 +61,7 @@ private:
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index, bool visible);
   //void switch_move_color();// work!
   void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);//fix need
-  void ChessIntegration::add_move_to_history_copy();
+  //void ChessIntegration::add_move_to_history_copy();
 
 private:
   Board* board;

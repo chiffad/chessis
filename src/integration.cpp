@@ -59,7 +59,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
 }
 
 
-void ChessIntegration::move_to_history_index(const unsigned index)//!!
+/*void ChessIntegration::move_to_history_index(const unsigned index)//!!
 {
   if(index == board->get_current_move()) return;
 
@@ -73,9 +73,9 @@ void ChessIntegration::move_to_history_index(const unsigned index)//!!
 
   if(index > board->get_current_move())
   {}
-}
+}*/
 
-void ChessIntegration::add_move_to_history_copy()//!!
+/*void ChessIntegration::add_move_to_history_copy()//!!
 {
   Copy_of_history_moves copy;
 
@@ -83,7 +83,7 @@ void ChessIntegration::add_move_to_history_copy()//!!
   copy.to = board->get_history_to_coord();
 
   history_copy.push_back(copy);
-}
+}*/
 
 /*void ChessIntegration::back_move(bool true_back) //work!
 {
@@ -195,7 +195,7 @@ QStringList ChessIntegration::moves_history() const //fix need
 
 void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to) //fix need
 {
-  add_move_to_history_copy();
+ // add_move_to_history_copy();
 
   unsigned correct_move = board->get_current_move() / 2;
   if(board->get_current_move() % 2 != 0) ++correct_move;
@@ -205,12 +205,16 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
 
   move.setNum(correct_move);
 
-  if(board->get_color(coord_to) == B_FIG) move += 'b ';
-  else move += 'w ';
+  if(board->get_color(coord_to) == B_FIG) move += "b ";
+  else move += "w ";
 
-  move += QChar(a_LETTER + coord_from.x) + coord_from.y + ' - ' + QChar(a_LETTER + coord_to.x) + coord_to.y;
+  QString toY;
+  QString fromY;
+
+  move += QChar(a_LETTER + coord_from.x) + fromY.setNum(coord_from.y) + " - " + QChar(a_LETTER + coord_to.x) + toY.setNum(coord_to.y);
 
   m_moves_history.append(move);
+
   emit moves_history_changed();
 }
 
