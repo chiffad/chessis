@@ -198,7 +198,6 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
  // add_move_to_history_copy();
 
   unsigned correct_move = board->get_current_move() / 2;
-  if(board->get_current_move() % 2 != 0) ++correct_move;
 
   const int a_LETTER = 'a';
   QString move;

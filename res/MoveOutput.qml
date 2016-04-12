@@ -21,12 +21,14 @@ Rectangle
     {
       id: _moveNumber
       anchors.left: parent.left
+      anchors.leftMargin: 1
+
       width: parent.width
       height: eLEMENT_HEIGHT
-      color: (model.currentIndex % 2) != 0 ? "lightyellow" : "gold"
+      color: (index % 2) == 1 ? "gold" : "lightyellow"
 
-      border.width: Qt.darker(color)
-      border.color: "black"//Qt.darker(color)
+      border.width: 1
+      border.color: Qt.darker(color)
 
       Text { text: modelData }
 
