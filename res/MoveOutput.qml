@@ -23,9 +23,9 @@ Rectangle
       anchors.left: parent.left
       width: parent.width
       height: eLEMENT_HEIGHT
-      color: "lightyellow"//(currentIndex % 2) != 0 ? "lightyellow" : "gold"
+      color: (model.currentIndex % 2) != 0 ? "lightyellow" : "gold"
 
-      border.width: 2
+      border.width: Qt.darker(color)
       border.color: "black"//Qt.darker(color)
 
       Text { text: modelData }
