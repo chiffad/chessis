@@ -37,31 +37,31 @@ public:
   //Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed) // work!
   //QString move_turn_color() const; // work!
 
-  Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)//fix need
-  QStringList moves_history() const;//fix need
+  Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)//work
+  QStringList moves_history() const;//work
 
   //Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)//test need
   //bool is_check_mate() const;//test need
 
-  Q_INVOKABLE void move(const unsigned x, const unsigned y);
-  //Q_INVOKABLE void back_move(bool true_back = false); //work!
+  Q_INVOKABLE void move(const unsigned x, const unsigned y, bool new_move = true);
+  //Q_INVOKABLE void back_move(); //work!
   //Q_INVOKABLE QChar letter_return();
   //Q_INVOKABLE void start_new_game();//work!
-  //Q_INVOKABLE void move_to_history_index(const unsigned index);
+  Q_INVOKABLE void go_to_history_index(const unsigned index);//!!
 
 signals:
   //void move_turn_color_changed(); // work!
-  void moves_history_changed();//fix need
+  void moves_history_changed();//work
   //void check_mate(); // test need
 
 private:
-  void update_coordinates();
-  void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y);
-  void emit_data_changed(const int INDEX);
-  void update_hilight(const Board::Coord& coord, HILIGHT hilight_index, bool visible);
+  void update_coordinates();//work
   //void switch_move_color();// work!
-  void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);//fix need
-  //void ChessIntegration::add_move_to_history_copy();
+  void emit_data_changed(const int INDEX); //work
+  void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y);//work
+  void update_hilight(const Board::Coord& coord, HILIGHT hilight_index, bool visible);//work
+  void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);//test need
+  void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to); //!!
 
 private:
   Board* board;

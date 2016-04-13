@@ -26,7 +26,7 @@ ChessIntegration::ChessIntegration(QObject *parent)
   update_coordinates();
 }
 
-void ChessIntegration::move(const unsigned x, const unsigned y)
+void ChessIntegration::move(const unsigned x, const unsigned y, bool new_move) //work
 {
   static bool is_from = true;
   //if(!is_check_mate())
@@ -49,8 +49,8 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
       if(!(board->from == board->to) && board->move(board->from, board->to))
       {
         update_hilight(board->to, SECOND_HILIGHT, true);
-        //switch_move_color(); // work!
-        add_to_history(board->from, board->to);//fix need
+        if(new_move)
+          add_to_history(board->from, board->to);//fix need
       }
       update_coordinates();
     }
@@ -59,33 +59,45 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
 }
 
 
-/*void ChessIntegration::move_to_history_index(const unsigned index)//!!
+void ChessIntegration::go_to_history_index(const unsigned index)//!!
 {
-  if(index == board->get_current_move()) return;
+  const int CURRENT_MOVE = board->get_current_move();
+  if(index == CURRENT_MOVE) return;
 
-  if(index < board->get_current_move())
+  if(index < CURRENT_MOVE)
   {
-    const unsigned D_INDEX = board->get_current_move() - index;
+    const unsigned D_INDEX = CURRENT_MOVE - index;
 
-    for(int i = 0; i < D_INDEX; ++i)
-      back_move();
+    //for(int i = 0; i < D_INDEX; ++i)
+      //back_move();
   }
 
-  if(index > board->get_current_move())
-  {}
-}*/
+  if(index > CURRENT_MOVE)
+  {
+    for(int i = CURRENT_MOVE; i < index; ++i)
+    {
+      move(history_copy[i].from.x, history_copy[i].from.y, false);
+      move(history_copy[i].to.x, history_copy[i].to.y, false);
+    }
+  }
+}
 
-/*void ChessIntegration::add_move_to_history_copy()//!!
+void ChessIntegration::add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to)//!!
 {
+  history_copy.shrink_to_fit();
+  const unsigned HISTRY_COPY_SIZE = history_copy.size();
+  for(int i = board->get_current_move(); i < HISTRY_COPY_SIZE; ++i)
+      history_copy.pop_back();
+
   Copy_of_history_moves copy;
 
-  copy.from = board->get_history_from_coord();
-  copy.to = board->get_history_to_coord();
+  copy.from = coord_from;
+  copy.to = coord_to;
 
   history_copy.push_back(copy);
-}*/
+}
 
-/*void ChessIntegration::back_move(bool true_back) //work!
+/*void ChessIntegration::back_move() //work!
 {
   if(board->back_move())
   {
@@ -93,13 +105,10 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
     update_hilight(board->get_history_to_coord(), SECOND_HILIGHT, true);
 
     update_coordinates();
-
-    if(true_back)
-      history_copy.pop_back();
   }
 }*/
 
-void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y)
+void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y)//work
 {
   const int CELL_SIZE = 560 / 8;
   const int IMG_MID = 40;
@@ -107,7 +116,7 @@ void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned 
   coord.y = (y + IMG_MID) / CELL_SIZE;
 }
 
-void ChessIntegration::update_coordinates()
+void ChessIntegration::update_coordinates()//work
 {
   int index = 0;
   Board::Coord a;
@@ -141,9 +150,10 @@ void ChessIntegration::update_coordinates()
         emit_data_changed(index);
         ++index;
       }
+  //switch_move_color(); // work!
 }
 
-void ChessIntegration::update_hilight(const Board::Coord& coord, HILIGHT hilight_index, bool visible)
+void ChessIntegration::update_hilight(const Board::Coord& coord, HILIGHT hilight_index, bool visible)//work
 {
   m_figures_model[hilight_index].set_visible(visible);
   m_figures_model[hilight_index].set_coord(coord);
@@ -170,7 +180,7 @@ QString ChessIntegration::move_turn_color() const // work!
   return m_move_color;
 }*/
 
-void ChessIntegration::emit_data_changed(const int INDEX)
+void ChessIntegration::emit_data_changed(const int INDEX)//work
 {
   QModelIndex topLeft = index(INDEX, 0);
   QModelIndex bottomRight = index(INDEX, 0);
@@ -188,32 +198,30 @@ void ChessIntegration::emit_data_changed(const int INDEX)
     back_move();
 }*/
 
-QStringList ChessIntegration::moves_history() const //fix need
+QStringList ChessIntegration::moves_history() const //work
 {
   return m_moves_history;
 }
 
-void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to) //fix need
+void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to) //test need
 {
- // add_move_to_history_copy();
+  add_move_to_history_copy(coord_from, coord_to);
+
+  const int LIST_SIZE = m_moves_history.size();
+  for(int i = board->get_current_move(); i < LIST_SIZE; ++i)
+    m_moves_history.pop_back();
 
   unsigned correct_move = board->get_current_move() / 2;
-
   const int a_LETTER = 'a';
-  QString move;
-
-  move.setNum(correct_move);
-
-  if(board->get_color(coord_to) == B_FIG) move += "b ";
-  else move += "w ";
-
+  QString move = "";
   QString toY;
   QString fromY;
 
+  if(board->get_current_move() % 2 == 0)
+    move.setNum(correct_move);
   move += QChar(a_LETTER + coord_from.x) + fromY.setNum(coord_from.y) + " - " + QChar(a_LETTER + coord_to.x) + toY.setNum(coord_to.y);
 
   m_moves_history.append(move);
-
   emit moves_history_changed();
 }
 
