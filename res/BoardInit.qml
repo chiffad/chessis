@@ -19,9 +19,7 @@ Item
 
   Repeater
   {
-    id: _horizontalCellNumeration
     model: 8
-
     Text
     {
       y: cELL_SIZE * index
@@ -32,16 +30,14 @@ Item
 
   Repeater
   {
-    id: _verticalCellNumeration
     model: 8
-
     Text
     {
       x: cELL_SIZE * (index+1) - cELL_NUMERATION_SIZE
       y: bOARD_SIZE - 2*cELL_NUMERATION_SIZE
 
       font.pointSize: cELL_NUMERATION_SIZE
-      text: 'a'+ index
+      text: FigureModel.letter_return(index)
     }
   }
 }

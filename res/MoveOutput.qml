@@ -16,6 +16,7 @@ Rectangle
 
     cellWidth: parent.width / 2
     cellHeight: eLEMENT_HEIGHT
+    clip: true
 
     model: FigureModel.moves_history
     delegate: Rectangle

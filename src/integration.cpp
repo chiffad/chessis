@@ -61,7 +61,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool new_move) /
 
 void ChessIntegration::go_to_history_index(const unsigned index)//!!
 {
-  const int CURRENT_MOVE = board->get_current_move();
+  const unsigned CURRENT_MOVE = board->get_current_move();
   if(index == CURRENT_MOVE) return;
 
   if(index < CURRENT_MOVE)
@@ -74,7 +74,7 @@ void ChessIntegration::go_to_history_index(const unsigned index)//!!
 
   if(index > CURRENT_MOVE)
   {
-    for(int i = CURRENT_MOVE; i < index; ++i)
+    for(unsigned i = CURRENT_MOVE; i < index; ++i)
     {
       move(history_copy[i].from.x, history_copy[i].from.y, false);
       move(history_copy[i].to.x, history_copy[i].to.y, false);
@@ -86,7 +86,7 @@ void ChessIntegration::add_move_to_history_copy(const Board::Coord& coord_from, 
 {
   history_copy.shrink_to_fit();
   const unsigned HISTRY_COPY_SIZE = history_copy.size();
-  for(int i = board->get_current_move(); i < HISTRY_COPY_SIZE; ++i)
+  for(unsigned i = board->get_current_move(); i < HISTRY_COPY_SIZE; ++i)
       history_copy.pop_back();
 
   Copy_of_history_moves copy;
@@ -185,6 +185,12 @@ void ChessIntegration::emit_data_changed(const int INDEX)//work
   QModelIndex topLeft = index(INDEX, 0);
   QModelIndex bottomRight = index(INDEX, 0);
   emit dataChanged(topLeft, bottomRight);
+}
+
+QChar ChessIntegration::letter_return(const int index) const
+{
+  const int a_LETTER = 'a';
+  return QChar(a_LETTER + index);
 }
 
 /*bool ChessIntegration::is_check_mate() const//need test
