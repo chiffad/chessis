@@ -11,20 +11,20 @@ Rectangle
 
   GridView
   {
-    width: parent.width
-    height: parent.height - eLEMENT_HEIGHT
-
-    cellWidth: parent.width / 2
-    cellHeight: eLEMENT_HEIGHT
+    anchors.fill: parent
+    anchors.margins: 2
     clip: true
 
     model: FigureModel.moves_history
-    delegate: Rectangle
+
+    cellWidth: parent.width / 2 - 2
+    cellHeight: eLEMENT_HEIGHT
+
+    delegate:  Rectangle
     {
       id: _moveNumber
-      anchors.left: parent.left
-      anchors.leftMargin: 1
-      anchors.rightMargin: 1
+      width: parent.width / 2
+      height: eLEMENT_HEIGHT
       radius: 5
 
       color: (index % 2) == 1 ? "navajowhite" : "lightyellow"
@@ -32,15 +32,13 @@ Rectangle
       border.width: 1
       border.color: Qt.darker(color)
 
-      Text { text: modelData }
+      Text { text: modelData;  anchors.horizontalCenter: parent.horizontalCenter }
 
-     /* MouseArea
+      MouseArea
       {
         anchors.fill: parent
         onClicked: FigureModel.go_to_history_index(index)
-      }*/
+      }
     }
-    highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
-    focus: true
   }
 }

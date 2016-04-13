@@ -44,10 +44,10 @@ public:
   //bool is_check_mate() const;//test need
 
   Q_INVOKABLE void move(const unsigned x, const unsigned y, bool new_move = true);
-  //Q_INVOKABLE void back_move(); //work!
+  Q_INVOKABLE void back_move(); //work!
   Q_INVOKABLE QChar letter_return(const int index) const;
   //Q_INVOKABLE void start_new_game();//work!
-  Q_INVOKABLE void go_to_history_index(const unsigned index);//!!
+  Q_INVOKABLE void go_to_history_index(unsigned index);//!!
 
 signals:
   //void move_turn_color_changed(); // work!

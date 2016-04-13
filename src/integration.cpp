@@ -46,8 +46,11 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool new_move) /
     {
       is_from = true;
       correct_figure_coord(board->to, x, y);
+      if(!new_move)
+     qDebug()<<"move1";
       if(!(board->from == board->to) && board->move(board->from, board->to))
       {
+
         update_hilight(board->to, SECOND_HILIGHT, true);
         if(new_move)
           add_to_history(board->from, board->to);//fix need
@@ -59,23 +62,29 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool new_move) /
 }
 
 
-void ChessIntegration::go_to_history_index(const unsigned index)//!!
+void ChessIntegration::go_to_history_index(unsigned index)//!!
 {
+  const int ZERO_AND_ACTUAL_MOVES = 2;
+  index += ZERO_AND_ACTUAL_MOVES;
   const unsigned CURRENT_MOVE = board->get_current_move();
   if(index == CURRENT_MOVE) return;
 
-  if(index < CURRENT_MOVE)
+  qDebug()<<CURRENT_MOVE;
+  qDebug()<<index;
+  if(index < CURRENT_MOVE)//work!
   {
     const unsigned D_INDEX = CURRENT_MOVE - index;
 
-    //for(int i = 0; i < D_INDEX; ++i)
-      //back_move();
+    for(int i = 0; i < D_INDEX; ++i)
+      back_move();
   }
 
   if(index > CURRENT_MOVE)
   {
     for(unsigned i = CURRENT_MOVE; i < index; ++i)
     {
+      qDebug()<<"here1"<<i;
+
       move(history_copy[i].from.x, history_copy[i].from.y, false);
       move(history_copy[i].to.x, history_copy[i].to.y, false);
     }
@@ -97,7 +106,7 @@ void ChessIntegration::add_move_to_history_copy(const Board::Coord& coord_from, 
   history_copy.push_back(copy);
 }
 
-/*void ChessIntegration::back_move() //work!
+void ChessIntegration::back_move() //work!
 {
   if(board->back_move())
   {
@@ -106,7 +115,7 @@ void ChessIntegration::add_move_to_history_copy(const Board::Coord& coord_from, 
 
     update_coordinates();
   }
-}*/
+}
 
 void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y)//work
 {
@@ -224,8 +233,11 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
   QString fromY;
 
   if(board->get_current_move() % 2 == 0)
+  {
     move.setNum(correct_move);
-  move += QChar(a_LETTER + coord_from.x) + fromY.setNum(coord_from.y) + " - " + QChar(a_LETTER + coord_to.x) + toY.setNum(coord_to.y);
+    move += " ";
+  }
+  move += QChar(a_LETTER + coord_from.x) + fromY.setNum(coord_from.y + 1) + " - " + QChar(a_LETTER + coord_to.x) + toY.setNum(coord_to.y + 1);
 
   m_moves_history.append(move);
   emit moves_history_changed();
