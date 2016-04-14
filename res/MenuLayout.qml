@@ -11,14 +11,34 @@ Rectangle
   border.width: bORDER_WIDTH
   border.color: "black"
 
-  /*Button //work
+  MoveOutput
   {
-    id: _back_move_button
+    id: _moveOutput
     anchors.left: parent.left
     anchors.top: parent.top
     anchors.topMargin: bORDER_WIDTH
+
+    width: parent.width
+    height: parent.height/4
+  }
+
+  MoveTurn
+  {
+    id: _moveTurn
+    anchors.left: parent.left
+    anchors.top: _moveOutput.bottom
+    anchors.topMargin: bORDER_WIDTH
+    width: parent.width
+    height: parent.height/8
+  }
+
+  Button
+  {
+    id: _back_move_button
+    anchors.left: parent.left
+    anchors.top: _moveTurn.bottom
+    anchors.topMargin: bORDER_WIDTH
     anchors.leftMargin: bORDER_WIDTH
-    radius: rADIUS
     width: parent.width/2
     height: parent.height/10
 
@@ -28,16 +48,16 @@ Rectangle
     {
       FigureModel.back_move(true);
     }
-  }*/
+  }
 
-  /*Button //work
+  Button
   {
     id: _start_new_game
+    anchors.left: _back_move_button.right
     anchors.right: parent.right
-    anchors.top: _back_move_button.bottom
+    anchors.top: _moveTurn.bottom
     anchors.topMargin: bORDER_WIDTH
     anchors.rightMargin: bORDER_WIDTH
-    radius: rADIUS
     width: parent.width/2
     height: parent.height/10
 
@@ -47,25 +67,5 @@ Rectangle
     {
       FigureModel.start_new_game();
     }
-  }*/
-
-  /*MoveTurn // work!
-  {
-    id: _moveTurn
-    anchors.left: parent.left
-    anchors.top: _start_new_game.bottom
-    anchors.topMargin: bORDER_WIDTH
-    width: parent.width
-    height: parent.height/8
-  }*/
-
-  MoveOutput // fix need
-  {
-    anchors.left: parent.left
-    //anchors.top: _moveTurn.bottom
-    anchors.topMargin: bORDER_WIDTH
-
-    width: parent.width
-    height: parent.height/4
   }
 }

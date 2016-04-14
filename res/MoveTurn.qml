@@ -11,13 +11,14 @@ Rectangle
     id: _text
     anchors.left: parent.left
     anchors.top: parent.top
-    anchors.leftMargin: mARGIN
-    anchors.topMargin: mARGIN
-    width: parent.width - cELL_SIZE
+    anchors.leftMargin: bORDER_WIDTH
+    anchors.verticalCenter: parent.verticalCenter
+    width: parent.width - cELL_SIZE - parent.width/10
 
     Text
     {
       anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
       font.family: "Helvetica"
       font.pointSize: 14
       color: "black"
@@ -31,8 +32,6 @@ Rectangle
     id: _image
     anchors.left: _text.right
     anchors.verticalCenter: parent.verticalCenter
-    anchors.topMargin: 3
-    anchors.rightMargin: 3
 
     width: cELL_SIZE
     height: width

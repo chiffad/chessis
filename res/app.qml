@@ -65,7 +65,7 @@ ApplicationWindow
     }
   }
 
-  /*Image
+  Image
   {
     id: _checkMate
     source: "img/checkMate.png"
@@ -80,5 +80,5 @@ ApplicationWindow
       anchors.fill: parent
       onClicked: parent.visible = false
     }
-  }*/
+  }
 }

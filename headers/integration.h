@@ -34,38 +34,38 @@ protected:
   QHash<int, QByteArray> roleNames() const;
 
 public:
-  //Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed) // work!
-  //QString move_turn_color() const; // work!
+  Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
+  QString move_turn_color() const;
 
-  Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)//work
-  QStringList moves_history() const;//work
+  Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)
+  QStringList moves_history() const;
 
-  //Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)//test need
-  //bool is_check_mate() const;//test need
+  Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
+  bool is_check_mate() const;
 
   Q_INVOKABLE void move(const unsigned x, const unsigned y);
-  Q_INVOKABLE void back_move(); //work!
+  Q_INVOKABLE void back_move();
   Q_INVOKABLE QChar letter_return(const int index) const;
-  //Q_INVOKABLE void start_new_game();//work!
-  Q_INVOKABLE void go_to_history_index(unsigned index);//work!
+  Q_INVOKABLE void start_new_game();
+  Q_INVOKABLE void go_to_history_index(unsigned index);
 
 signals:
-  //void move_turn_color_changed(); // work!
-  void moves_history_changed();//work
-  //void check_mate(); // test need
+  void move_turn_color_changed();
+  void moves_history_changed();
+  void check_mate();
 
 private:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
 
 private:
-  void update_coordinates();//work
-  //void switch_move_color();// work!
-  void emit_data_changed(const int INDEX); //work
-  void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y);//work
-  void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);//work
-  void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);//test need
-  void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to); //!!
+  void update_coordinates();
+  void switch_move_color();
+  void emit_data_changed(const int INDEX);
+  void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y);
+  void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
+  void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
+  void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to);
 
 private:
   Board* board;
