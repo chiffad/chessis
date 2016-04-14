@@ -57,53 +57,6 @@ void ChessIntegration::move(const unsigned x, const unsigned y) //work
   //else emit check_mate();
 }
 
-
-void ChessIntegration::go_to_history_index(unsigned index)//!!
-{
-  const int ZERO_AND_ACTUAL_MOVES = 2;
-  index += ZERO_AND_ACTUAL_MOVES;
-  const unsigned CURRENT_MOVE = board->get_current_move();
-  if(index == CURRENT_MOVE) return;
-
-  qDebug()<<CURRENT_MOVE;
-  qDebug()<<index;
-  if(index < CURRENT_MOVE)//work!
-  {
-    const unsigned D_INDEX = CURRENT_MOVE - index;
-
-    for(unsigned i = 0; i < D_INDEX; ++i)
-      back_move();
-  }
-
-  if(index > CURRENT_MOVE)
-  {
-    for(unsigned i = CURRENT_MOVE; i < index; ++i)
-    {
-      qDebug()<<"here1"<<i;
-
-      board->move(history_copy[i].from, history_copy[i].to);
-      update_hilight(history_copy[i].from, FIRST_HILIGHT);
-      update_hilight(history_copy[i].to, SECOND_HILIGHT);
-      update_coordinates();
-    }
-  }
-}
-
-void ChessIntegration::add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to)//!!
-{
-  history_copy.shrink_to_fit();
-  const unsigned HISTRY_COPY_SIZE = history_copy.size();
-  for(unsigned i = board->get_current_move(); i < HISTRY_COPY_SIZE; ++i)
-      history_copy.pop_back();
-
-  Copy_of_history_moves copy;
-
-  copy.from = coord_from;
-  copy.to = coord_to;
-
-  history_copy.push_back(copy);
-}
-
 void ChessIntegration::back_move() //work!
 {
   if(board->back_move())
@@ -116,8 +69,6 @@ void ChessIntegration::back_move() //work!
 
 void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y)//work
 {
-  const int CELL_SIZE = 560 / 8;
-  const int IMG_MID = 40;
   coord.x = (x + IMG_MID) / CELL_SIZE;
   coord.y = (y + IMG_MID) / CELL_SIZE;
 }
@@ -195,7 +146,6 @@ void ChessIntegration::emit_data_changed(const int INDEX)//work
 
 QChar ChessIntegration::letter_return(const int index) const
 {
-  const int a_LETTER = 'a';
   return QChar(a_LETTER + index);
 }
 
@@ -210,21 +160,60 @@ QChar ChessIntegration::letter_return(const int index) const
     back_move();
 }*/
 
+void ChessIntegration::go_to_history_index(unsigned index)//work!
+{
+  const unsigned CURRENT_MOVE = board->get_current_move();
+  if(index == CURRENT_MOVE - ZERO_AND_ACTUAL_MOVES) return;
+
+  if(index < CURRENT_MOVE - ZERO_AND_ACTUAL_MOVES)//work!
+  {
+    const unsigned D_INDEX = CURRENT_MOVE - index - ZERO_AND_ACTUAL_MOVES;
+
+    for(unsigned i = 0; i < D_INDEX; ++i)
+      back_move();
+  }
+
+  if(index > CURRENT_MOVE - ZERO_AND_ACTUAL_MOVES)
+  {
+    for(unsigned i = CURRENT_MOVE - ZERO_AND_ACTUAL_MOVES ; i <= index; ++i)
+    {
+      board->move(history_copy[i].from, history_copy[i].to);
+      update_hilight(history_copy[i].from, FIRST_HILIGHT);
+      update_hilight(history_copy[i].to, SECOND_HILIGHT);
+      update_coordinates();
+    }
+  }
+}
+
 QStringList ChessIntegration::moves_history() const //work
 {
   return m_moves_history;
+}
+
+void ChessIntegration::add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to)//more test
+{
+  history_copy.shrink_to_fit();
+  const unsigned HISTRY_COPY_SIZE = history_copy.size() + ZERO_AND_ACTUAL_MOVES;
+  for(unsigned i = board->get_current_move(); i < HISTRY_COPY_SIZE; ++i)
+      history_copy.pop_back();
+
+  Copy_of_history_moves copy;
+
+  copy.from = coord_from;
+  copy.to = coord_to;
+
+  history_copy.push_back(copy);
 }
 
 void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to) //test need
 {
   add_move_to_history_copy(coord_from, coord_to);
 
-  const int LIST_SIZE = m_moves_history.size();
+  const int LIST_SIZE = m_moves_history.size() + ZERO_AND_ACTUAL_MOVES;
   for(int i = board->get_current_move(); i < LIST_SIZE; ++i)
     m_moves_history.pop_back();
 
   unsigned correct_move = board->get_current_move() / 2;
-  const int a_LETTER = 'a';
   QString move = "";
   QString toY;
   QString fromY;

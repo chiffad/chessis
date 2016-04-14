@@ -12,9 +12,9 @@
 class ChessIntegration : public QAbstractListModel
 {
   Q_OBJECT
-public:
+private:
   class Figure;
-  enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
+
 public:
   enum FigureRoles {
       NameRole = Qt::UserRole + 3,
@@ -47,12 +47,16 @@ public:
   Q_INVOKABLE void back_move(); //work!
   Q_INVOKABLE QChar letter_return(const int index) const;
   //Q_INVOKABLE void start_new_game();//work!
-  Q_INVOKABLE void go_to_history_index(unsigned index);//!!
+  Q_INVOKABLE void go_to_history_index(unsigned index);//work!
 
 signals:
   //void move_turn_color_changed(); // work!
   void moves_history_changed();//work
   //void check_mate(); // test need
+
+private:
+  enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
+  enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
 
 private:
   void update_coordinates();//work
@@ -91,7 +95,7 @@ public:
   void set_coord(const Board::Coord& new_coord) {m_x = new_coord.x; m_y = new_coord.y;}
   void set_visible(const bool new_visible) {m_visible = new_visible;}
 
-public:
+private:
   QString m_name;
   int m_x;
   int m_y;
