@@ -26,7 +26,7 @@ ChessIntegration::ChessIntegration(QObject *parent)
   update_coordinates();
 }
 
-void ChessIntegration::move(const unsigned x, const unsigned y, bool new_move) //work
+void ChessIntegration::move(const unsigned x, const unsigned y) //work
 {
   static bool is_from = true;
   //if(!is_check_mate())
@@ -36,8 +36,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool new_move) /
       correct_figure_coord(board->from,x,y);
       if(board->get_figure(board->from) != FREE_FIELD)
       {
-        update_hilight(board->from, FIRST_HILIGHT, true);
-
+        update_hilight(board->from, FIRST_HILIGHT);
         is_from = false;
       }
     }
@@ -46,14 +45,11 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool new_move) /
     {
       is_from = true;
       correct_figure_coord(board->to, x, y);
-      if(!new_move)
-     qDebug()<<"move1";
+
       if(!(board->from == board->to) && board->move(board->from, board->to))
       {
-
-        update_hilight(board->to, SECOND_HILIGHT, true);
-        if(new_move)
-          add_to_history(board->from, board->to);//fix need
+        update_hilight(board->to, SECOND_HILIGHT);
+        add_to_history(board->from, board->to);//test need
       }
       update_coordinates();
     }
@@ -75,7 +71,7 @@ void ChessIntegration::go_to_history_index(unsigned index)//!!
   {
     const unsigned D_INDEX = CURRENT_MOVE - index;
 
-    for(int i = 0; i < D_INDEX; ++i)
+    for(unsigned i = 0; i < D_INDEX; ++i)
       back_move();
   }
 
@@ -85,8 +81,10 @@ void ChessIntegration::go_to_history_index(unsigned index)//!!
     {
       qDebug()<<"here1"<<i;
 
-      move(history_copy[i].from.x, history_copy[i].from.y, false);
-      move(history_copy[i].to.x, history_copy[i].to.y, false);
+      board->move(history_copy[i].from, history_copy[i].to);
+      update_hilight(history_copy[i].from, FIRST_HILIGHT);
+      update_hilight(history_copy[i].to, SECOND_HILIGHT);
+      update_coordinates();
     }
   }
 }
@@ -110,9 +108,8 @@ void ChessIntegration::back_move() //work!
 {
   if(board->back_move())
   {
-    update_hilight(board->get_history_from_coord(), FIRST_HILIGHT, true);
-    update_hilight(board->get_history_to_coord(), SECOND_HILIGHT, true);
-
+    update_hilight(board->get_history_from_coord(1), FIRST_HILIGHT);
+    update_hilight(board->get_history_to_coord(1), SECOND_HILIGHT);
     update_coordinates();
   }
 }
@@ -162,9 +159,9 @@ void ChessIntegration::update_coordinates()//work
   //switch_move_color(); // work!
 }
 
-void ChessIntegration::update_hilight(const Board::Coord& coord, HILIGHT hilight_index, bool visible)//work
+void ChessIntegration::update_hilight(const Board::Coord& coord, HILIGHT hilight_index)//work
 {
-  m_figures_model[hilight_index].set_visible(visible);
+  m_figures_model[hilight_index].set_visible(true);
   m_figures_model[hilight_index].set_coord(coord);
 
   if(hilight_index == FIRST_HILIGHT)

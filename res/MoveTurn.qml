@@ -4,7 +4,7 @@ Rectangle
 {
   border.width: bORDER_WIDTH
   border.color: "black"
-  radius: 10
+  radius: rADIUS
 
   Item
   {

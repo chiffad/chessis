@@ -7,12 +7,12 @@ Rectangle
 
   border.width: bORDER_WIDTH
   border.color: "black"
-  radius: 5
+  radius: rADIUS
 
   GridView
   {
     anchors.fill: parent
-    anchors.margins: 2
+    anchors.margins: bORDER_WIDTH
     clip: true
 
     model: FigureModel.moves_history
@@ -25,7 +25,7 @@ Rectangle
       id: _moveNumber
       width: parent.width / 2
       height: eLEMENT_HEIGHT
-      radius: 5
+      radius: rADIUS
 
       color: (index % 2) == 1 ? "navajowhite" : "lightyellow"
 
@@ -37,8 +37,13 @@ Rectangle
       MouseArea
       {
         anchors.fill: parent
-        onClicked: FigureModel.go_to_history_index(index)
-      }
+        onPressed:
+        {
+          parent.color = "	lightskyblue"
+          FigureModel.go_to_history_index(index)
+        }
+        onReleased: parent.color = (index % 2) == 1 ? "navajowhite" : "lightyellow"
+      }    
     }
   }
 }

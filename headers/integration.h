@@ -43,7 +43,7 @@ public:
   //Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)//test need
   //bool is_check_mate() const;//test need
 
-  Q_INVOKABLE void move(const unsigned x, const unsigned y, bool new_move = true);
+  Q_INVOKABLE void move(const unsigned x, const unsigned y);
   Q_INVOKABLE void back_move(); //work!
   Q_INVOKABLE QChar letter_return(const int index) const;
   //Q_INVOKABLE void start_new_game();//work!
@@ -59,7 +59,7 @@ private:
   //void switch_move_color();// work!
   void emit_data_changed(const int INDEX); //work
   void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y);//work
-  void update_hilight(const Board::Coord& coord, HILIGHT hilight_index, bool visible);//work
+  void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);//work
   void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);//test need
   void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to); //!!
 

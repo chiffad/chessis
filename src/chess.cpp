@@ -64,14 +64,14 @@ COLOR Board::get_index_move_color_from_end(const unsigned index) const
   return moves[_move_num - index]._color;
 }
 
-Board::Coord const& Board::get_history_from_coord() const
+Board::Coord const& Board::get_history_from_coord(const unsigned index) const
 {
-  return moves[_move_num]._history_from;
+  return moves[_move_num - index]._history_from;
 }
 
-Board::Coord const& Board::get_history_to_coord() const
+Board::Coord const& Board::get_history_to_coord(const unsigned index) const
 {
-  return moves[_move_num]._history_to;
+  return moves[_move_num - index]._history_to;
 }
 
 bool Board::move(Coord const& fr, Coord const& t)
