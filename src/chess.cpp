@@ -75,7 +75,7 @@ Board::Coord const& Board::get_history_to_coord(const unsigned index) const
 
 int Board::get_colorless_figure(Coord const& c) const
 {
-  return (tolower(get_figure(c)) + toupper(get_figure(c)));
+  return (tolower(_field[c.x][c.y]) + toupper(_field[c.x][c.y]));
 }
 
 void Board::set_field(Coord const& rhv, Coord const& lhv)
@@ -100,6 +100,7 @@ bool Board::move(Coord const& fr, Coord const& t)
   _f = fr; _t = t;
   if(right_move_turn() && step_ver(fr, t)) field_change();
   else return false;
+
   if(!is_check(get_color(t)))
   {
     next_move();
@@ -146,8 +147,9 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
 {
   const int dx = t.x - f.x;
   const int dy = t.y - f.y;
-  const int X_UNIT_VECTOR = dx/abs(dx);
-  const int Y_UNIT_VECTOR = dy/abs(dy);
+
+  const int X_UNIT_VECTOR = dx == 0 ? 0 : dx/abs(dx);
+  const int Y_UNIT_VECTOR = dy == 0 ? 0 : dy/abs(dy);
 
   if(get_colorless_figure(f) == PAWN)
   {
@@ -156,7 +158,7 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
     if(get_figure(t) == FREE_FIELD && abs(dx) == 0 && (abs(dy) == 1
     ||(abs(dy) == 2 && get_figure(t.x,f.y + Y_UNIT_VECTOR) == FREE_FIELD && (f.y == 6 || f.y == 1))))
       return true;
-    else return false;
+    return false;
   }
 
   if(get_colorless_figure(f) == KING && abs(dx) == 2 && dy == 0)
@@ -179,12 +181,14 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
   else if(get_colorless_figure(f) == HORSE) return false;
 
   Coord coord;
-  coord.x = f.x + X_UNIT_VECTOR;
-  coord.y = f.y + Y_UNIT_VECTOR;
+  coord.x = f.x;
+  coord.y = f.y;
 
-  for(; !(coord == t); coord.x += X_UNIT_VECTOR, coord.y += Y_UNIT_VECTOR)
+  while(!(coord == t))
   {
-    if(get_figure(coord) == FREE_FIELD || get_color(t) != get_color(coord))
+    coord.x += X_UNIT_VECTOR;
+    coord.y += Y_UNIT_VECTOR;
+    if(get_figure(coord) == FREE_FIELD || (get_color(t) != get_color(coord) && coord == t))
       continue;
      
     return false;
@@ -216,6 +220,7 @@ bool Board::is_can_castling(COLOR color, Coord const& t) const
 bool Board::is_check(COLOR color) const
 {
   if(_move_num < 2) return false;
+
   Coord f;
   Coord t;
 
@@ -224,16 +229,17 @@ bool Board::is_check(COLOR color) const
       if(get_colorless_figure(t) == KING && get_color(t) == color)
       {
         for(f.x = 0; f.x < X_SIZE; ++f.x)
-          for(f.y = 0; f.y < Y_SIZE; ++f.y)
+          for(f.y = 0; f.y < Y_SIZE; ++f.y) 
             if(get_color(f) != color)
             {
               if(step_ver(f, t))
                 goto check;
             }
-        goto check;
+        goto not_check;
       }
 
-  return false;
+  not_check:
+    return false;
 
   check:
     return true;
@@ -242,7 +248,6 @@ bool Board::is_check(COLOR color) const
 bool Board::is_mate(COLOR color)
 {
   if(_move_num < 2) return false;
-
   Coord f;
   Coord t;
 
@@ -302,6 +307,6 @@ void Board::next_move()
   if(_move_num > 0) this_move->_color = get_color(_t);
   this_move->_history_from = _f;
   this_move->_history_to   = _t;
-  moves.push_back(*this_move);
+  moves.push_back(moves[_move_num]);
   ++_move_num;
 }
