@@ -86,14 +86,14 @@ class ChessIntegration::Figure
 public:
   Figure(const QString& name, const int x, const int y, const bool visible);
 
-  QString name() const {return m_name;}
-  int x() const {return m_x;}
-  int y() const {return m_y;}
-  bool visible() const {return m_visible;}
+  inline QString name() const {return m_name;}
+  inline int x() const {return m_x;}
+  inline int y() const {return m_y;}
+  inline bool visible() const {return m_visible;}
 
-  void set_name(const QString& new_name) {m_name = new_name;}
-  void set_coord(const Board::Coord& new_coord) {m_x = new_coord.x; m_y = new_coord.y;}
-  void set_visible(const bool new_visible) {m_visible = new_visible;}
+  inline void set_name(const QString& new_name) {m_name = new_name;}
+  inline void set_coord(const Board::Coord& new_coord) {m_x = new_coord.x; m_y = new_coord.y;}
+  inline void set_visible(const bool new_visible) {m_visible = new_visible;}
 
 private:
   QString m_name;

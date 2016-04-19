@@ -23,10 +23,11 @@ public:
    bool move(Coord const& fr, Coord const& t);
    bool back_move();
    bool is_mate(COLOR color);
-   int  get_field(Coord const& c) const;
    COLOR get_color(Coord const& c) const;
    unsigned get_current_move() const;
    FIGURES get_figure(Coord const& c) const;
+   FIGURES get_figure(const int x, const int y) const;
+   int get_colorless_figure(Coord const& c) const;
    COLOR get_index_move_color_from_end(const unsigned index) const;
 
    Coord const& get_history_from_coord(const unsigned index = 0 ) const;
@@ -39,12 +40,6 @@ private:
      Coord _history_to;
      COLOR _color;
      FIGURES _fig_on_captured_field;
-     bool _w_king_m;
-     bool _b_king_m;
-     bool _w_l_rook_m;
-     bool _w_r_rook_m;
-     bool _b_l_rook_m;
-     bool _b_r_rook_m;
    }m;
    std::vector<Moves>moves;
    Coord _f;
@@ -58,6 +53,8 @@ private:
    bool is_check(COLOR color) const;
    bool step_ver(Coord const& f, Coord const& t) const;
    bool step_ver_2(Coord const& f, Coord const& t) const;
-   bool is_king_and_rook_not_moved(COLOR color, bool on_left_side) const;
+   bool is_can_castling(COLOR color, Coord const& t) const;
+   void set_field(Coord const& rhv, Coord const& lhv);
+   void set_field(Coord const& rhv, FIGURES fig);
 };
 #endif //_VILVIVYVKCKYVLVUYFDKYUFYTF
