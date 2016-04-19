@@ -48,7 +48,6 @@ unsigned Board::get_current_move() const
   return _move_num;
 }
 
-template<tipename>
 FIGURES Board::get_figure(Coord const& c) const
 {
   return FIGURES(_field[c.x][c.y]);
@@ -124,8 +123,8 @@ void Board::field_change()
   Moves* this_move = &moves[_move_num];
   this_move->_fig_on_captured_field = get_figure(_t);
   FIGURES fig = get_figure(_f);
-  set_field(f, FREE_FIELD);
-  set_field(t, fig);
+  set_field(_f, FREE_FIELD);
+  set_field(_t, fig);
 }
 
 bool Board::step_ver(Coord const& f, Coord const& t) const
@@ -166,10 +165,10 @@ bool Board::step_ver_2(Coord const& f, Coord const& t) const
     {
       if(dx == 2 && get_figure(f.x + X_UNIT_VECTOR, f.y) == FREE_FIELD && get_figure(f.x + 2 * X_UNIT_VECTOR,f.y) == FREE_FIELD)
       {
-        if(direction < 0 && get_figure(f.x - 3, f.y) == FREE_FIELD)
+        if(X_UNIT_VECTOR < 0 && get_figure(f.x - 3, f.y) == FREE_FIELD)
             return true;
 
-        else if(direction > 0) return true;
+        else if(X_UNIT_VECTOR > 0) return true;
       }
     }
     return false;
@@ -283,8 +282,8 @@ bool Board::back_move()
 {
   if(_move_num > 1)
   {
-    Moves* m_prev_from = &moves[_move_num - 1]._history_from;
-    Moves* m_prev_to = &moves[_move_num - 1]._history_to;
+    Coord& m_prev_from = moves[_move_num - 1]._history_from;
+    Coord& m_prev_to = moves[_move_num - 1]._history_to;
 
     moves[_move_num]._color = get_color(m_prev_from);
     set_field(m_prev_from, m_prev_to);
@@ -303,6 +302,6 @@ void Board::next_move()
   if(_move_num > 0) this_move->_color = get_color(_t);
   this_move->_history_from = _f;
   this_move->_history_to   = _t;
-  moves.push_back(this_move);
+  moves.push_back(*this_move);
   ++_move_num;
 }
