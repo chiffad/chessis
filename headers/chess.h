@@ -17,27 +17,27 @@ public:
      int x;
      int y;
      bool operator ==(Coord const& rhv);
-   }from, to;
+   };
 
    Board();
    bool move(Coord const& fr, Coord const& t);
    bool back_move();
    bool is_mate(COLOR color);
-   COLOR get_color(Coord const& c) const;
    unsigned get_current_move() const;
    FIGURES get_figure(Coord const& c) const;
    FIGURES get_figure(const int x, const int y) const;
    int get_colorless_figure(Coord const& c) const;
-   COLOR get_index_move_color_from_end(const unsigned index) const;
+   COLOR get_color(Coord const& c) const;
+   COLOR get_move_color_i_from_end(const unsigned i) const;
 
-   Coord const& get_history_from_coord(const unsigned index = 0 ) const;
-   Coord const& get_history_to_coord(const unsigned index = 0) const;
+   Coord const& get_i_from_coord_from_end(const unsigned i = 0 ) const;
+   Coord const& get_i_to_coord_from_end(const unsigned i = 0) const;
 
 private:
    struct Moves
    {
-     Coord _history_from;
-     Coord _history_to;
+     Coord _from;
+     Coord _to;
      COLOR _color;
      FIGURES _fig_on_captured_field;
    }m;
@@ -52,8 +52,7 @@ private:
    bool right_move_turn() const;
    bool is_check(COLOR color) const;
    bool step_ver(Coord const& f, Coord const& t) const;
-   bool step_ver_2(Coord const& f, Coord const& t) const;
-   bool is_can_castling(COLOR color, Coord const& t) const;
+   bool is_can_castling(COLOR color, const int x) const;
    void set_field(Coord const& rhv, Coord const& lhv);
    void set_field(Coord const& rhv, FIGURES fig);
 };

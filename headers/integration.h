@@ -72,6 +72,8 @@ private:
   QString m_move_color;
   QStringList m_moves_history;
   QList<Figure> m_figures_model;
+  Board::Coord from;
+  Board::Coord to;
 
   struct Copy_of_history_moves
   {

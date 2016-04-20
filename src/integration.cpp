@@ -33,10 +33,10 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
   {
     if(is_from)
     {
-      correct_figure_coord(board->from,x,y);
-      if(board->get_figure(board->from) != FREE_FIELD)
+      correct_figure_coord(from,x,y);
+      if(board->get_figure(from) != FREE_FIELD)
       {
-        update_hilight(board->from, FIRST_HILIGHT);
+        update_hilight(from, FIRST_HILIGHT);
         is_from = false;
       }
     }
@@ -44,12 +44,12 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
     else
     {
       is_from = true;
-      correct_figure_coord(board->to, x, y);
+      correct_figure_coord(to, x, y);
 
-      if(!(board->from == board->to) && board->move(board->from, board->to))
+      if(!(from == to) && board->move(from, to))
       {
-        update_hilight(board->to, SECOND_HILIGHT);
-        add_to_history(board->from, board->to);
+        update_hilight(to, SECOND_HILIGHT);
+        add_to_history(from, to);
 
         if(is_check_mate())
           emit check_mate();
@@ -63,8 +63,8 @@ void ChessIntegration::back_move()
 {
   if(board->back_move())
   {
-    update_hilight(board->get_history_from_coord(1), FIRST_HILIGHT);
-    update_hilight(board->get_history_to_coord(1), SECOND_HILIGHT);
+    update_hilight(board->get_i_from_coord_from_end(1), FIRST_HILIGHT);
+    update_hilight(board->get_i_to_coord_from_end(1), SECOND_HILIGHT);
     update_coordinates();
   }
 }
@@ -127,7 +127,7 @@ void ChessIntegration::update_hilight(const Board::Coord& coord, HILIGHT hilight
 
 void ChessIntegration::switch_move_color()
 {
-  if(board->get_index_move_color_from_end(1) == W_FIG)
+  if(board->get_move_color_i_from_end(1) == W_FIG)
     m_move_color = "img/b_K.png";
   else  m_move_color = "img/w_k.png";
 
@@ -154,7 +154,7 @@ QChar ChessIntegration::letter_return(const int index) const
 bool ChessIntegration::is_check_mate() const
 {
   if(board->get_current_move() <= 2) return false;
-  return board->is_mate(board->get_index_move_color_from_end(2));
+  return board->is_mate(board->get_move_color_i_from_end(2));
 }
 
 void ChessIntegration::start_new_game()
