@@ -8,6 +8,7 @@
 #include <QStringList>
 #include <vector>
 #include "headers/chess.h"
+#include "headers/udp_client.h"
 
 class ChessIntegration : public QAbstractListModel
 {
@@ -49,6 +50,9 @@ public:
   Q_INVOKABLE void start_new_game();
   Q_INVOKABLE void go_to_history_index(unsigned index);
 
+public slots:
+  void read_data_from_udp();
+
 signals:
   void move_turn_color_changed();
   void moves_history_changed();
@@ -57,11 +61,14 @@ signals:
 private:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
+  const QString BACK_MOVE = "back move!"; const QString NEW_GAME = "new game!";
 
 private:
   void update_coordinates();
   void switch_move_color();
   void emit_data_changed(const int INDEX);
+  void make_move_from_str(const QString& str);
+  void sent_data_on_server(const QString& message = "move");
   void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y);
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
   void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
@@ -69,11 +76,13 @@ private:
 
 private:
   Board* board;
+  UDP_client* udp_client;
   QString m_move_color;
   QStringList m_moves_history;
   QList<Figure> m_figures_model;
   Board::Coord from;
   Board::Coord to;
+  QString udp_data;
 
   struct Copy_of_history_moves
   {

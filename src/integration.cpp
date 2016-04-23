@@ -6,16 +6,13 @@
 #include <vector>
 #include "headers/integration.h"
 #include "headers/chess.h"
-
-ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
-    : m_name(name), m_x(x), m_y(y), m_visible(visible)
-{
-}
+#include "headers/udp_client.h"
 
 ChessIntegration::ChessIntegration(QObject *parent)
     : QAbstractListModel(parent)
 {
   board = new Board();
+  udp_client = new UDP_client();
   m_move_color = "img/w_k.png";
   for(int i = 0; i < FIGURES_NUMBER; ++i)
   {
@@ -24,6 +21,39 @@ ChessIntegration::ChessIntegration(QObject *parent)
   addFigure(ChessIntegration::Figure("hilight", 0, 0, false));
   addFigure(ChessIntegration::Figure("hilight", 0, 0, false));
   update_coordinates();
+
+  connect(udp_client, SIGNAL(some_data_came()), this, SLOT(read_data_from_udp()));
+}
+
+void ChessIntegration::read_data_from_udp()
+{
+  udp_client->export_readed_data_to_chess(udp_data);
+
+  qDebug()<<"===============";
+  qDebug()<<udp_data;
+  qDebug()<<"===============";
+
+  if(udp_data == BACK_MOVE)
+    back_move();
+  else if(udp_data == NEW_GAME)
+    start_new_game();
+  else make_move_from_str(udp_data);
+}
+
+void ChessIntegration::make_move_from_str(const QString& str)
+{
+  qDebug()<<"======make_move_from_str========";
+  qDebug()<<"in string: "<<str;
+  qDebug()<<"first: "<<str[0].unicode() - a_LETTER;
+  qDebug()<<"======make_move_from_str========";
+
+  move((str[0].unicode() - a_LETTER), str[1].digitValue());
+  move((str[3].unicode() - a_LETTER), str[4].digitValue());
+}
+
+ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
+    : m_name(name), m_x(x), m_y(y), m_visible(visible)
+{
 }
 
 void ChessIntegration::move(const unsigned x, const unsigned y)
@@ -53,10 +83,21 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
 
         if(is_check_mate())
           emit check_mate();
+
+        sent_data_on_server();
       }
       update_coordinates();
     }
   }
+}
+
+void ChessIntegration::sent_data_on_server(const QString& message)
+{
+  QByteArray m;
+  if(message == "move")
+    m.append(m_moves_history[m_moves_history.size() -1]);
+  else m.append(message);
+  udp_client->send_data(m);
 }
 
 void ChessIntegration::back_move()
@@ -66,6 +107,7 @@ void ChessIntegration::back_move()
     update_hilight(board->get_i_from_coord_from_end(1), FIRST_HILIGHT);
     update_hilight(board->get_i_to_coord_from_end(1), SECOND_HILIGHT);
     update_coordinates();
+    sent_data_on_server(BACK_MOVE);
   }
 }
 
@@ -162,13 +204,14 @@ void ChessIntegration::start_new_game()
   while (board->get_current_move() != 1)
   {
     back_move();
-     m_moves_history.pop_back();
+    m_moves_history.pop_back();
   }
   m_figures_model[FIRST_HILIGHT].set_visible(false);
   emit_data_changed(FIRST_HILIGHT);
   m_figures_model[SECOND_HILIGHT].set_visible(false);
   emit_data_changed(SECOND_HILIGHT);
   emit moves_history_changed();
+  sent_data_on_server(NEW_GAME);
 }
 
 void ChessIntegration::go_to_history_index(unsigned index)
