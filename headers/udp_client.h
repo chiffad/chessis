@@ -10,10 +10,10 @@ class UDP_client : public QObject
 public:
   explicit UDP_client(QObject *parent = 0);
   void export_readed_data_to_chess(QString& move);
-  void send_data(const QByteArray& message);
 
 public slots:
   void read_data();
+  void send_data(const QByteArray& message);
 
 signals:
   void some_data_came();

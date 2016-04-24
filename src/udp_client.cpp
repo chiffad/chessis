@@ -28,6 +28,7 @@ void UDP_client::send_data(const QByteArray& message)
 
 void UDP_client::read_data()
 {
+  qDebug()<<"======read========";
   _data.resize(_socket->pendingDatagramSize());
 
   QHostAddress sender;
@@ -35,7 +36,7 @@ void UDP_client::read_data()
 
   _socket->readDatagram(_data.data(), _data.size(), &sender, &senderPort);
 
-  qDebug()<<"======read========";
+
   qDebug()<<"Message from: "<<sender.toString();
   qDebug()<<"Message port: "<<senderPort;
   qDebug()<<"Message: "<<_data;

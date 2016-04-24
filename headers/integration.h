@@ -25,7 +25,7 @@ public:
   };
 
   explicit ChessIntegration(QObject *parent = 0);
-  ~ChessIntegration(){delete board;}
+  ~ChessIntegration(){delete board; delete udp_client;}
 
   void addFigure(const Figure &figure);
   int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -62,6 +62,7 @@ private:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
   const QString BACK_MOVE = "back move!"; const QString NEW_GAME = "new game!";
+  const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
 
 private:
   void update_coordinates();
