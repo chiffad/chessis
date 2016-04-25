@@ -8,22 +8,23 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent)
   _socket->bind(_SERVER_IP, _SERVER_PORT);
 
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
-  create_connection();
-}
-
-void UDP_client::create_connection()
-{
-  qDebug()<<"====Create connection====";
-
-  QByteArray create_connection;
-  create_connection.append("Hello, server!");
-  _socket->writeDatagram(create_connection, _SERVER_IP, _SERVER_PORT);
+  if(_socket->waitForConnected(1000))
+  {
+    qDebug()<<"Connected to server! ( is writable? : "<<_socket->isWritable()<<")";
+    QByteArray create_connection;
+    create_connection.append("Hello, server!");
+    send_data(create_connection);
+  }
+  else qDebug()<<"Can't connected to server! "<<_socket->error();
 }
 
 void UDP_client::send_data(const QByteArray& message)
 {
   qDebug()<<"====Sending data to server====";
-  _socket->writeDatagram(message, _SERVER_IP, _SERVER_PORT);
+  if(_socket->isValid())//_socket->isWritable()
+    _socket->writeDatagram(message, _SERVER_IP, _SERVER_PORT);
+  else qDebug()<<"error: "<<_socket->error();
+  qDebug()<<"====Sending data to server====";
 }
 
 void UDP_client::read_data()
@@ -34,8 +35,9 @@ void UDP_client::read_data()
   QHostAddress sender;
   quint16 senderPort;
 
-  _socket->readDatagram(_data.data(), _data.size(), &sender, &senderPort);
-
+  if(_socket->isReadable()) //_socket->isValid()
+    _socket->readDatagram(_data.data(), _data.size(), &sender, &senderPort);
+  qDebug()<<"is readable? : "<<_socket->isReadable();
 
   qDebug()<<"Message from: "<<sender.toString();
   qDebug()<<"Message port: "<<senderPort;
