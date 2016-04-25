@@ -13,6 +13,7 @@ ChessIntegration::ChessIntegration(QObject *parent)
 {
   board = new Board();
   udp_client = new UDP_client(); //udp!!!!
+  is_message_from_server = false;
 
   m_move_color = MOVE_COLOR_W;
   for(int i = 0; i < FIGURES_NUMBER; ++i)
@@ -25,42 +26,6 @@ ChessIntegration::ChessIntegration(QObject *parent)
   connect(udp_client, SIGNAL(some_data_came()), this, SLOT(read_data_from_udp()));//udp!!!!
 }
 
-void ChessIntegration::read_data_from_udp()//udp!!!!
-{
-  udp_client->export_readed_data_to_chess(udp_data);
-
-  if(udp_data.toInt() == BACK_MOVE)
-    back_move();
-  else if(udp_data.toInt() == NEW_GAME)
-    start_new_game();
-  else make_move_from_str(udp_data);
-}
-
-void ChessIntegration::make_move_from_str(const QString& str)//udp!!!!
-{
-  qDebug()<<"======make_move_from_str========";
-  enum {FIRST_NUM = 1, SECOND_LETTER = 5, SECOND_NUM = 6, NEED_SIMBOLS_TO_MOVE = 7};
-  int i = 0;
-  for(;str.size() < i + NEED_SIMBOLS_TO_MOVE; ++i)
-  {
-    if(str[i].isLetter() && str[i + FIRST_NUM].isNumber()
-      && str[i + SECOND_LETTER].isLetter() && str[i + SECOND_NUM].isNumber())
-    {
-      move((str[i].unicode() - a_LETTER) * CELL_SIZE, (Y_SIZE - str[i+1].digitValue()) * CELL_SIZE);
-      move((str[i+5].unicode() - a_LETTER) * CELL_SIZE, (Y_SIZE - str[i+6].digitValue()) * CELL_SIZE);
-      qDebug()<<"in string: "<<str;
-      qDebug()<<"from x: "<<str[i].unicode() - a_LETTER;
-      qDebug()<<"from y: "<<str[i+1].digitValue();
-      qDebug()<<"to x: "<<str[i+5].unicode() - a_LETTER;
-      qDebug()<<"to y: "<<str[i+6].digitValue();
-      break;
-    }
-    else qDebug()<<str<<" - is't correct string to move";
-  }
-  if(str.size() >= i + NEED_SIMBOLS_TO_MOVE) qDebug()<<"message to short!!!";
-  qDebug()<<"======make_move_from_str========";
-}
-
 ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
     : m_name(name), m_x(x), m_y(y), m_visible(visible)
 {
@@ -68,10 +33,6 @@ ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, 
 
 void ChessIntegration::move(const unsigned x, const unsigned y)
 {
-    /*qDebug()<<"====move====";
-    qDebug()<<"x: "<<x;
-    qDebug()<<"y: "<<y;
-    qDebug()<<"====move====";*/
   static bool is_from = true;
   if(!is_check_mate())
   {
@@ -98,20 +59,11 @@ void ChessIntegration::move(const unsigned x, const unsigned y)
         if(is_check_mate())
           emit check_mate();
 
-        send_data_on_server(MOVE);//udp!!!!
+        send_data_on_server(MOVE);//udp!!!
       }
       update_coordinates();
     }
   }
-}
-
-void ChessIntegration::send_data_on_server(SERVER_MESSGE_TYPE message)//udp!!!!
-{
-  QByteArray m;
-  if(message == MOVE)
-    m.append(m_moves_history[m_moves_history.size() -1]);
-  else m.append(message);
-  udp_client->send_data(m);
 }
 
 void ChessIntegration::back_move()
@@ -121,8 +73,8 @@ void ChessIntegration::back_move()
     update_hilight(board->get_i_from_coord_from_end(1), FIRST_HILIGHT);
     update_hilight(board->get_i_to_coord_from_end(1), SECOND_HILIGHT);
     update_coordinates();
-    send_data_on_server(BACK_MOVE);//udp!!!!
   }
+  send_data_on_server(BACK_MOVE);//udp!!!!
 }
 
 void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y)
@@ -296,6 +248,42 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
 
   m_moves_history.append(move);
   emit moves_history_changed();
+}
+
+void ChessIntegration::read_data_from_udp()//udp!!!!
+{
+  udp_client->export_readed_data_to_chess(m_udp_data);
+  is_message_from_server = true;
+
+  if(m_udp_data == BACK_MOVE)
+    back_move();
+  else if(m_udp_data == NEW_GAME)
+    start_new_game();
+  else make_move_from_str(m_udp_data);
+}
+
+void ChessIntegration::make_move_from_str(const QString& str)//udp!!!!
+{
+  enum {FIRST_NUM = 1, SECOND_LETTER = 5, SECOND_NUM = 6, NEED_SIMBOLS_TO_MOVE = 7};
+  for(int i = 0;i + NEED_SIMBOLS_TO_MOVE <= str.size(); ++i)
+    if(str[i].isLetter() && str[i + FIRST_NUM].isNumber()
+    && str[i + SECOND_LETTER].isLetter() && str[i + SECOND_NUM].isNumber())
+    {
+      move((str[i].unicode() - a_LETTER) * CELL_SIZE, (Y_SIZE - str[i + FIRST_NUM].digitValue()) * CELL_SIZE);
+      move((str[i+SECOND_LETTER].unicode() - a_LETTER) * CELL_SIZE, (Y_SIZE - str[i+SECOND_NUM].digitValue()) * CELL_SIZE);
+      break;
+    }
+}
+
+void ChessIntegration::send_data_on_server(const QString& message)//udp!!!!
+{
+  QByteArray m;
+  if(message == MOVE)
+    m.append(m_moves_history[m_moves_history.size() -1]);
+  else m.append(message);
+  if(!is_message_from_server)
+    udp_client->send_data(m);
+  is_message_from_server = false;
 }
 
 void ChessIntegration::addFigure(const Figure &figure)

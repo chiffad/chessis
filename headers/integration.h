@@ -61,7 +61,7 @@ signals:
 private:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
-  enum SERVER_MESSGE_TYPE{MOVE, BACK_MOVE, NEW_GAME};
+  const QString MOVE = "move";const QString BACK_MOVE = "back move"; const QString NEW_GAME = "new game";
   const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
 
 private:
@@ -69,7 +69,7 @@ private:
   void switch_move_color();
   void emit_data_changed(const int INDEX);
   void make_move_from_str(const QString& str);//udp!!!!
-  void send_data_on_server(SERVER_MESSGE_TYPE message);//udp!!!!
+  void send_data_on_server(const QString& message);//udp!!!!
   void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y);
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
   void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
@@ -83,7 +83,8 @@ private:
   QList<Figure> m_figures_model;
   Board::Coord from;
   Board::Coord to;
-  QString udp_data;//udp!!!!
+  QString m_udp_data;//udp!!!!
+  bool is_message_from_server;
 
   struct Copy_of_history_moves
   {

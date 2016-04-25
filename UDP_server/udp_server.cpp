@@ -17,9 +17,6 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent)
 
 void UDP_server::send_data(const quint16 port, const QHostAddress& addres, const QByteArray& message)
 {
-  qDebug()<<"======================";
-  qDebug()<<"Server send message: "<<message<<"; Port: "<<port<<"; IP addres: "<<addres;
-  qDebug()<<"======================";
   _socket->writeDatagram(message, addres, port);
 }
 
@@ -32,10 +29,6 @@ void UDP_server::read_data()
 
   buffer.resize(_socket->pendingDatagramSize());
   _socket->readDatagram(buffer.data(), buffer.size(), &sender_IP, &sender_port);
-
-  qDebug()<<"======================";
-  qDebug()<<"Server read message: "<<buffer<<" IP: "<<sender_IP<<"; Port: "<<sender_port;
-  qDebug()<<"======================";
 
   if(buffer == FIRST_CONECTION)
   {

@@ -10,7 +10,6 @@ class UDP_client : public QObject
 public:
   explicit UDP_client(QObject *parent = 0);
   void export_readed_data_to_chess(QString& move);
-  bool is_server_ready();
 
 public slots:
   void read_data();
@@ -21,10 +20,9 @@ signals:
 
 private:
   QUdpSocket* _socket;
-  quint16 _port;
   QByteArray _data;
 
-  const quint16 _SERVER_PORT = 1234;
-  const QHostAddress _SERVER_IP = QHostAddress::LocalHost;
+  const quint16 _SERVER_PORT;
+  const QHostAddress _SERVER_IP;
 };
 #endif // UDP_CLIENT_H
