@@ -22,7 +22,7 @@ private:
   QUdpSocket* _socket;
   QByteArray _data;
 
-  const quint16 _SERVER_PORT;
-  const QHostAddress _SERVER_IP;
+  const quint16 _SERVER_PORT= 1234;
+  const QHostAddress _SERVER_IP  = QHostAddress::LocalHost;
 };
 #endif // UDP_CLIENT_H

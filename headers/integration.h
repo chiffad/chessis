@@ -59,7 +59,7 @@ signals:
   void check_mate();
 
 private:
-  enum{FIRST_NUM = 1, ZERO_AND_ACTUAL_MOVES = 2, SECOND_LETTER = 5, SECOND_NUM = 6, NEED_SIMBOLS_TO_MOVE = 7, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a', h_LETTER = 'h'};
+  enum{FIRST_LETTER = 0,FIRST_NUM = 1, ZERO_AND_ACTUAL_MOVES = 2, SECOND_LETTER = 5, SECOND_NUM = 6, NEED_SIMBOLS_TO_MOVE = 7, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a', h_LETTER = 'h'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
   enum MESSAGE_TYPE{MOVE, BACK_MOVE, NEW_GAME, REPEAT_MESSAGE, MOVE_AGAIN, MOVE_RECIVED};
   const QString FREE_SPASE = " "; const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
@@ -87,6 +87,7 @@ private:
   //unsigned m_send_message_serial_number;
   bool m_is_message_from_server;
   bool m_is_move_was_made;
+  bool m_is_oponent_recived_move;
 
   struct Copy_of_history_moves
   {

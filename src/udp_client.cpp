@@ -4,8 +4,8 @@
 
 UDP_client::UDP_client(QObject *parent) : QObject(parent)
 {
-  _SERVER_PORT = 1234;
-  _SERVER_IP = QHostAddress::LocalHost;
+ // _SERVER_PORT = 1234;
+ // _SERVER_IP = QHostAddress::LocalHost;
   _socket = new QUdpSocket(this);
   _socket->bind(_SERVER_IP, _SERVER_PORT);
 
