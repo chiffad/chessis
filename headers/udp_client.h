@@ -27,10 +27,17 @@ signals:
 
 private:
   QUdpSocket* _socket;
+<<<<<<< HEAD
   bool _is_server_connected;
   bool _is_have_opponent;
   const quint16 _SERVER_PORT;
   const QHostAddress _SERVER_IP;
   QByteArray _data;
+=======
+  QByteArray _data;
+
+  const quint16 _SERVER_PORT;//= 1234;
+  const QHostAddress _SERVER_IP;//  = QHostAddress::LocalHost;
+>>>>>>> UDP_chess
 };
 #endif // UDP_CLIENT_H
