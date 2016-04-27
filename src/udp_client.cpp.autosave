@@ -16,6 +16,7 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _
 
 void UDP_client::send_data(const QByteArray& message)
 {
+  qDebug()<<"here";
   if(_socket->isValid())//_socket->isWritable()
     _socket->writeDatagram(message, _SERVER_IP, _SERVER_PORT);
   else
