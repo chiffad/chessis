@@ -266,11 +266,6 @@ void ChessIntegration::read_data_from_udp()//udp!!!!
 
   if(message.toInt() != MESSAGE_RECEIVED)
     send_data_on_server(MESSAGE_RECEIVED);
-  else
-  {
-    m_is_opponent_received_message = true;
-    return;
-  }
 
   qDebug()<<"====read_data_from_udp: "<<message;
   QString serial_num;
@@ -299,6 +294,10 @@ void ChessIntegration::read_data_from_udp()//udp!!!!
       break;
     case REPEAT_MESSAGE:
       send_data_on_server(REPEAT_MESSAGE);
+      break;
+    case MESSAGE_RECEIVED:
+      --m_last_received_message_num;
+      m_is_opponent_received_message = true;
       break;
     default:
       make_move_from_str(message);
