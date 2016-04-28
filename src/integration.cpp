@@ -8,15 +8,16 @@
 #include "headers/chess.h"
 #include "headers/udp_client.h"
 
-ChessIntegration::ChessIntegration(QObject *parent)
-    : QAbstractListModel(parent)
+ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
 {
   board = new Board();
   udp_client = new UDP_client(); //udp!!!!
   m_is_message_from_server = false;
-
   m_is_opponent_received_message = false;
+  m_last_received_message_num = 0;
+  m_send_message_num = 0;
   m_move_color = MOVE_COLOR_W;
+
   for(int i = 0; i < FIGURES_NUMBER; ++i)
     addFigure(Figure(MOVE_COLOR_W, 0, 0, true));
 
@@ -60,9 +61,10 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
         if(is_check_mate())
           emit check_mate();
 
+        m_is_moved = true;
         send_data_on_server(MOVE);//udp!!!
       }
-      else if(m_is_message_from_server) send_data_on_server(REPEAT_MESSAGE);
+      else m_is_moved = false;
       update_coordinates();
     }
   }
@@ -72,6 +74,7 @@ void ChessIntegration::back_move()
 {
   if(board->back_move())
   {
+    qDebug()<<"====back_move";
     update_hilight(board->get_i_from_coord_from_end(1), FIRST_HILIGHT);
     update_hilight(board->get_i_to_coord_from_end(1), SECOND_HILIGHT);
     update_coordinates();
@@ -169,6 +172,7 @@ bool ChessIntegration::is_check_mate() const
 
 void ChessIntegration::start_new_game()
 {
+  qDebug()<<"====start_new_game";
   while (board->get_current_move() != 1)
   {
     back_move();
@@ -256,15 +260,34 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
 
 void ChessIntegration::read_data_from_udp()//udp!!!!
 {
-  udp_client->export_readed_data_to_chess(m_udp_data);
+  QString message;
+  udp_client->export_readed_data_to_chess(message);
   m_is_message_from_server = true;
 
-  switch (m_udp_data.toInt())
+  qDebug()<<"====read_data_from_udp: "<<message;
+  QString serial_num;
+  int i;
+  for(i = 0; i < message.size() && QString(message[0]) != FREE_SPASE; ++i)
+  {
+    serial_num.append(message[0]);
+    message.remove(0,0);
+  }
+
+  if(i >= message.size() || serial_num.toInt() != m_last_received_message_num + 1)
+  {
+    qDebug()<<"wrong message";
+    send_data_on_server(REPEAT_MESSAGE);
+    return;
+  }
+
+  switch (message.toInt())
   {
     case BACK_MOVE:
+      ++m_last_received_message_num;
       back_move();
       break;
     case NEW_GAME:
+      ++m_last_received_message_num;
       start_new_game();
       break;
     case REPEAT_MESSAGE:
@@ -274,34 +297,34 @@ void ChessIntegration::read_data_from_udp()//udp!!!!
       m_is_opponent_received_message = true;
       break;
     default:
-      make_move_from_str(m_udp_data);
+      ++m_last_received_message_num;
+      make_move_from_str(message);
   }
-  /*if(m_udp_data.toInt() == BACK_MOVE)
-    back_move();
-  else if(m_udp_data.toInt() == NEW_GAME)
-    start_new_game();
-  else if(m_udp_data.toInt() == REPEAT_MESSAGE)
-    send_data_on_server(REPEAT_MESSAGE);
-  else make_move_from_str(m_udp_data);*/
 }
 
 void ChessIntegration::make_move_from_str(const QString& str)//udp!!!!
 {
-  /*for(int i = 0; i + NEED_SIMBOLS_TO_MOVE <= str.size(); ++i)
-    if(str[i].isLetter() && str[i + FIRST_NUM].isNumber()
-    && str[i + SECOND_LETTER].isLetter() && str[i + SECOND_NUM].isNumber())
-    {
-      move((str[FIRST_LETTER].unicode() - a_LETTER), (Y_SIZE - str[FIRST_NUM].digitValue()), true);
-      move((str[SECOND_LETTER].unicode() - a_LETTER), (Y_SIZE - str[SECOND_NUM].digitValue()), true);
-      break;
-    }*/
+  qDebug()<<"==== make_move_from_str: "<<str;
+  if(str.size() != NEED_SIMBOLS_TO_MOVE)
+    send_data_on_server(REPEAT_MESSAGE);
+
   move((str[FIRST_LETTER].unicode() - a_LETTER), (Y_SIZE - str[FIRST_NUM].digitValue()), true);
   move((str[SECOND_LETTER].unicode() - a_LETTER), (Y_SIZE - str[SECOND_NUM].digitValue()), true);
+
+  if(!m_is_moved)
+    send_data_on_server(REPEAT_MESSAGE);
 }
 
 void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
 {
   QByteArray message;
+
+  if(m_type != REPEAT_MESSAGE)
+  {
+    message.setNum(++m_send_message_num);
+    message.append(FREE_SPASE);
+  }
+
   if(m_type == MOVE || m_type == REPEAT_MESSAGE)
     message.append(m_moves_history[m_moves_history.size() -1]);
   else message.setNum(m_type);
@@ -314,11 +337,12 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
   timer.start();
   const int SECOND = 1000;
   while(udp_client->is_server_connected() && !m_is_opponent_received_message)
-    if(timer.elapsed() >= SECOND)
-     {
-       timer.restart();
-       udp_client->send_data(message);
-     }
+    if(timer.elapsed() > SECOND)
+    {
+      timer.restart();
+      udp_client->send_data(message);
+    }
+
   m_is_opponent_received_message = false;
 }
 

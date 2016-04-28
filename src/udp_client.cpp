@@ -51,17 +51,16 @@ void UDP_client::read_data()
       _is_have_opponent = true;
       break;
     case HAVENT_OPPONENT:
-      qDebug()<<"have_opponent";
+      qDebug()<<"havent_opponent";
       _is_have_opponent = false;
       break;
     default:
       emit some_data_came();
-      break;
   }
 }
 
-void UDP_client::export_readed_data_to_chess(QString& move)
+void UDP_client::export_readed_data_to_chess(QString& message)
 {
-  move.clear();
-  move.append(_data);
+  message.clear();
+  message.append(_data);
 }
