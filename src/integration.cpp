@@ -264,6 +264,14 @@ void ChessIntegration::read_data_from_udp()//udp!!!!
   udp_client->export_readed_data_to_chess(message);
   m_is_message_from_server = true;
 
+  if(message.toInt() != MESSAGE_RECEIVED)
+    send_data_on_server(MESSAGE_RECEIVED);
+  else
+  {
+    m_is_opponent_received_message = true;
+    return;
+  }
+
   qDebug()<<"====read_data_from_udp: "<<message;
   QString serial_num;
   int i;
@@ -276,28 +284,23 @@ void ChessIntegration::read_data_from_udp()//udp!!!!
   if(i >= message.size() || serial_num.toInt() != m_last_received_message_num + 1)
   {
     qDebug()<<"wrong message";
-    send_data_on_server(REPEAT_MESSAGE);
+    //send_data_on_server(REPEAT_MESSAGE);
     return;
   }
 
+  ++m_last_received_message_num;
   switch (message.toInt())
   {
     case BACK_MOVE:
-      ++m_last_received_message_num;
       back_move();
       break;
     case NEW_GAME:
-      ++m_last_received_message_num;
       start_new_game();
       break;
     case REPEAT_MESSAGE:
       send_data_on_server(REPEAT_MESSAGE);
       break;
-    case MESSAGE_RECEIVED:
-      m_is_opponent_received_message = true;
-      break;
     default:
-      ++m_last_received_message_num;
       make_move_from_str(message);
   }
 }
@@ -306,8 +309,10 @@ void ChessIntegration::make_move_from_str(const QString& str)//udp!!!!
 {
   qDebug()<<"==== make_move_from_str: "<<str;
   if(str.size() != NEED_SIMBOLS_TO_MOVE)
+  {
     send_data_on_server(REPEAT_MESSAGE);
-
+    return;
+  }
   move((str[FIRST_LETTER].unicode() - a_LETTER), (Y_SIZE - str[FIRST_NUM].digitValue()), true);
   move((str[SECOND_LETTER].unicode() - a_LETTER), (Y_SIZE - str[SECOND_NUM].digitValue()), true);
 
@@ -317,33 +322,33 @@ void ChessIntegration::make_move_from_str(const QString& str)//udp!!!!
 
 void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
 {
-  QByteArray message;
-
-  if(m_type != REPEAT_MESSAGE)
+  if(!m_is_message_from_server || m_type == REPEAT_MESSAGE || m_type == MESSAGE_RECEIVED)
   {
+    QByteArray message;
     message.setNum(++m_send_message_num);
     message.append(FREE_SPASE);
-  }
 
-  if(m_type == MOVE || m_type == REPEAT_MESSAGE)
-    message.append(m_moves_history[m_moves_history.size() -1]);
-  else message.setNum(m_type);
+    if(m_type == MOVE || m_type == REPEAT_MESSAGE)
+      message.append(m_moves_history[m_moves_history.size() -1]);
+    else message.setNum(m_type);
 
-  if(!m_is_message_from_server || m_type == REPEAT_MESSAGE)
     udp_client->send_data(message);
-  else m_is_message_from_server = false;
 
-  QTime timer;
-  timer.start();
-  const int SECOND = 1000;
-  while(udp_client->is_server_connected() && !m_is_opponent_received_message)
-    if(timer.elapsed() > SECOND)
+    if(m_type != MESSAGE_RECEIVED)
     {
-      timer.restart();
-      udp_client->send_data(message);
+      QTime timer;
+      timer.start();
+      const int SECOND = 1000;
+      while(udp_client->is_server_connected() && !m_is_opponent_received_message)
+        if(timer.elapsed() > SECOND)
+        {
+          timer.restart();
+          udp_client->send_data(message);
+        }
     }
-
-  m_is_opponent_received_message = false;
+    m_is_opponent_received_message = false;
+  }
+  else m_is_message_from_server = false;
 }
 
 //===========================================================================================================

@@ -12,7 +12,7 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent)
   _socket->bind(_server_IP, _server_port);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
-  qDebug()<<"server start!";
+  qDebug()<<"Server start!";
 }
 
 void UDP_server::send_data(const quint16 port, const QHostAddress& addres, const QByteArray& message)
