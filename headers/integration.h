@@ -59,29 +59,19 @@ signals:
   void check_mate();
 
 private:
-  enum{FIRST_LETTER = 0,FIRST_NUM = 1, ZERO_AND_ACTUAL_MOVES = 2, SECOND_LETTER = 5, SECOND_NUM = 6, NEED_SIMBOLS_TO_MOVE = 7, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a', h_LETTER = 'h'};
+  enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
-<<<<<<< HEAD
   enum SIMBOLS_IN_STR {FIRST_LETTER = 0, FIRST_NUM = 1, SECOND_LETTER = 5, SECOND_NUM = 6, NEED_SIMBOLS_TO_MOVE = 7};
   enum MESSAGE_TYPE{MOVE, BACK_MOVE, NEW_GAME, REPEAT_MESSAGE, MESSAGE_RECEIVED};
   const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
-=======
-  enum MESSAGE_TYPE{MOVE, BACK_MOVE, NEW_GAME, REPEAT_MESSAGE, MOVE_AGAIN, MOVE_RECIVED};
-  const QString FREE_SPASE = " "; const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
->>>>>>> UDP_chess
 
 private:
   void update_coordinates();
   void switch_move_color();
   void emit_data_changed(const int INDEX);
   void make_move_from_str(const QString& str);//udp!!!!
-<<<<<<< HEAD
   void send_data_on_server(MESSAGE_TYPE m_type);//udp!!!!
   void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y, bool is_correct);
-=======
-  void create_and_send_data_on_server(MESSAGE_TYPE type);//udp!!!!
-  void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y, bool is_correct = false);
->>>>>>> UDP_chess
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
   void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
   void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to);
@@ -94,18 +84,9 @@ private:
   QList<Figure> m_figures_model;
   Board::Coord from;
   Board::Coord to;
-<<<<<<< HEAD
   QString m_udp_data;//udp!!!!
   bool m_is_message_from_server;
   bool m_is_opponent_received_message;
-=======
-  //unsigned m_prev_received_message_serial_num;
-  //unsigned m_send_message_serial_number;
-  bool m_is_message_from_server;
-  bool m_is_move_was_made;
-  bool m_is_oponent_recived_move;
-
->>>>>>> UDP_chess
   struct Copy_of_history_moves
   {
     Board::Coord from;

@@ -24,7 +24,7 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes)
   _socket->writeDatagram(message, _SERVER_IP, _SERVER_PORT);
 }
 
-bool UDP_client::is_server_connected() const
+bool UDP_client::is_server_connected()
 {
   send_data(IS_HAVE_OPPONENT);
   send_data(IS_SERVER_WORKING);

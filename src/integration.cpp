@@ -3,10 +3,6 @@
 #include <QChar>
 #include <ctype.h>
 #include <QModelIndex>
-<<<<<<< HEAD
-=======
-#include <QByteArray>
->>>>>>> UDP_chess
 #include <QTime>
 #include "headers/integration.h"
 #include "headers/chess.h"
@@ -18,12 +14,9 @@ ChessIntegration::ChessIntegration(QObject *parent)
   board = new Board();
   udp_client = new UDP_client(); //udp!!!!
   m_is_message_from_server = false;
-<<<<<<< HEAD
-  m_is_opponent_received_message = false;
-=======
->>>>>>> UDP_chess
-  m_move_color = MOVE_COLOR_W;
 
+  m_is_opponent_received_message = false;
+  m_move_color = MOVE_COLOR_W;
   for(int i = 0; i < FIGURES_NUMBER; ++i)
     addFigure(Figure(MOVE_COLOR_W, 0, 0, true));
 
@@ -67,15 +60,9 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
         if(is_check_mate())
           emit check_mate();
 
-        create_and_send_data_on_server(MOVE);//udp!!!
-
-        m_is_move_was_made = true;
+        send_data_on_server(MOVE);//udp!!!
       }
-<<<<<<< HEAD
       else if(m_is_message_from_server) send_data_on_server(REPEAT_MESSAGE);
-=======
-      else m_is_move_was_made = false;
->>>>>>> UDP_chess
       update_coordinates();
     }
   }
@@ -89,7 +76,7 @@ void ChessIntegration::back_move()
     update_hilight(board->get_i_to_coord_from_end(1), SECOND_HILIGHT);
     update_coordinates();
   }
-  create_and_send_data_on_server(BACK_MOVE);//udp!!!!
+  send_data_on_server(BACK_MOVE);//udp!!!!
 }
 
 void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y, bool is_correct)
@@ -101,12 +88,12 @@ void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned 
 void ChessIntegration::update_coordinates()
 {
   int index = 0;
-  Board::Coord coord;
+  Board::Coord a;
   for(; index < rowCount() - HILIGHT_CELLS; ++index)
   {
-    coord.x = m_figures_model[index].x();
-    coord.y = m_figures_model[index].y();
-    if(board->get_figure(coord) == FREE_FIELD)
+    a.x = m_figures_model[index].x();
+    a.y = m_figures_model[index].y();
+    if(board->get_figure(a) == FREE_FIELD)
     {
       m_figures_model[index].set_visible(false);
       emit_data_changed(index);
@@ -114,6 +101,7 @@ void ChessIntegration::update_coordinates()
   }
 
   index = 0;
+  Board::Coord coord;
   for(coord.y = 0; coord.y < Y_SIZE; ++coord.y)
     for(coord.x = 0; coord.x < X_SIZE; ++coord.x)
       if(board->get_figure(coord) != FREE_FIELD)
@@ -191,7 +179,7 @@ void ChessIntegration::start_new_game()
   m_figures_model[SECOND_HILIGHT].set_visible(false);
   emit_data_changed(SECOND_HILIGHT);
   emit moves_history_changed();
-  create_and_send_data_on_server(NEW_GAME);//udp!!!!
+  send_data_on_server(NEW_GAME);//udp!!!!
 }
 
 void ChessIntegration::go_to_history_index(unsigned index)
@@ -264,7 +252,6 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
   emit moves_history_changed();
 }
 
-<<<<<<< HEAD
 //===================================================================================================
 
 void ChessIntegration::read_data_from_udp()//udp!!!!
@@ -288,7 +275,6 @@ void ChessIntegration::read_data_from_udp()//udp!!!!
       break;
     default:
       make_move_from_str(m_udp_data);
-      break;
   }
   /*if(m_udp_data.toInt() == BACK_MOVE)
     back_move();
@@ -297,41 +283,10 @@ void ChessIntegration::read_data_from_udp()//udp!!!!
   else if(m_udp_data.toInt() == REPEAT_MESSAGE)
     send_data_on_server(REPEAT_MESSAGE);
   else make_move_from_str(m_udp_data);*/
-=======
-//=================================================================================================
-
-void ChessIntegration::read_data_from_udp()//udp!!!!
-{
-  qDebug()<<"read_data_from_udp";
-  QString udp_data;
-  udp_client->export_readed_data_to_chess(udp_data);
-
-  if(NEED_SIMBOLS_TO_MOVE != udp_data.size() - 1)
-    create_and_send_data_on_server(REPEAT_MESSAGE);
-
-  else
-  {
-    m_is_oponent_recived_move = false;
-
-    m_is_message_from_server = true;
-
-    qDebug()<<"message.toInt(): "<<udp_data.toInt()<<" ;message: "<<udp_data<<" ;BACK_MOVE: "<<BACK_MOVE;
-    if(udp_data.toInt() == BACK_MOVE)
-      back_move();
-    else if(udp_data.toInt() == NEW_GAME)
-      start_new_game();
-    else if(udp_data.toInt() == MOVE_RECIVED)
-      m_is_oponent_recived_move = true;
-    else if(udp_data.toInt() == REPEAT_MESSAGE)
-      create_and_send_data_on_server(MOVE_AGAIN);
-    else make_move_from_str(udp_data);
-  }
->>>>>>> UDP_chess
 }
 
 void ChessIntegration::make_move_from_str(const QString& str)//udp!!!!
 {
-<<<<<<< HEAD
   /*for(int i = 0; i + NEED_SIMBOLS_TO_MOVE <= str.size(); ++i)
     if(str[i].isLetter() && str[i + FIRST_NUM].isNumber()
     && str[i + SECOND_LETTER].isLetter() && str[i + SECOND_NUM].isNumber())
@@ -345,7 +300,7 @@ void ChessIntegration::make_move_from_str(const QString& str)//udp!!!!
 }
 
 void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
-{   
+{
   QByteArray message;
   if(m_type == MOVE || m_type == REPEAT_MESSAGE)
     message.append(m_moves_history[m_moves_history.size() -1]);
@@ -359,55 +314,15 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
   timer.start();
   const int SECOND = 1000;
   while(udp_client->is_server_connected() && !m_is_opponent_received_message)
-    if(timer.elapsed() > SECOND)
-    {
-      udp_client->send_data(message);
-      timer.restart();
-    }
+    if(timer.elapsed() >= SECOND)
+     {
+       timer.restart();
+       udp_client->send_data(message);
+     }
   m_is_opponent_received_message = false;
 }
 
 //===========================================================================================================
-=======
-  qDebug()<<"make_move_from_str";
-  move((str[FIRST_LETTER].unicode() - a_LETTER), (Y_SIZE - str[FIRST_NUM].digitValue()), true);
-  move((str[SECOND_LETTER].unicode() - a_LETTER), (Y_SIZE - str[SECOND_NUM].digitValue()), true);
-
-  if(!m_is_move_was_made)
-    create_and_send_data_on_server(REPEAT_MESSAGE);
-  else create_and_send_data_on_server(MOVE_RECIVED);
-}
-
-void ChessIntegration::create_and_send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
-{  
-  if(!m_is_message_from_server || m_type == REPEAT_MESSAGE || m_type == MOVE_AGAIN || m_type == MOVE_RECIVED)
-  {
-    QString message;
-    if(m_type == MOVE || m_type == MOVE_AGAIN)
-      message = m_moves_history[m_moves_history.size() -1];
-    else message = m_type;
-
-    QByteArray m;
-    m.append(message);
-    qDebug()<<"sended message: "<<message;
-
-    udp_client->send_data(m);
-
-    QTime timer;
-    timer.start();
-    const int ONE_SECOND = 1000;
-    while(timer.elapsed() < ONE_SECOND);
-    if(!m_is_oponent_recived_move)
-    {
-      qDebug()<<"oponent didn't recive move";
-      create_and_send_data_on_server(REPEAT_MESSAGE);
-    }
-  }
-  m_is_message_from_server = false;
-}
-
-//==================================================================================================
->>>>>>> UDP_chess
 
 void ChessIntegration::addFigure(const Figure &figure)
 {

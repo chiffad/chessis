@@ -11,7 +11,7 @@ class UDP_client : public QObject
 public:
   explicit UDP_client(QObject *parent = 0);
   void export_readed_data_to_chess(QString& move);
-  bool is_server_connected() const;
+  bool is_server_connected();
 
 private:
   enum REQUEST_MESSAGES{HELLO_SERVER, HELLO_CLIENT,
@@ -27,17 +27,10 @@ signals:
 
 private:
   QUdpSocket* _socket;
-<<<<<<< HEAD
   bool _is_server_connected;
   bool _is_have_opponent;
   const quint16 _SERVER_PORT;
   const QHostAddress _SERVER_IP;
   QByteArray _data;
-=======
-  QByteArray _data;
-
-  const quint16 _SERVER_PORT;//= 1234;
-  const QHostAddress _SERVER_IP;//  = QHostAddress::LocalHost;
->>>>>>> UDP_chess
 };
 #endif // UDP_CLIENT_H
