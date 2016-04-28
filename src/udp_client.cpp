@@ -14,6 +14,7 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _
 void UDP_client::send_data(const QByteArray& message)
 {
   qDebug()<<"====Sending data to server====";
+  qDebug()<<message;
   _socket->writeDatagram(message, _SERVER_IP, _SERVER_PORT);
 }
 
@@ -38,6 +39,7 @@ void UDP_client::read_data()
   QHostAddress sender;
   quint16 senderPort;
 
+  qDebug()<<"socket read";
   _socket->readDatagram(_data.data(), _data.size(), &sender, &senderPort);
 
   switch(_data.toInt())

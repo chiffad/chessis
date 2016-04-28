@@ -269,14 +269,17 @@ void ChessIntegration::read_data_from_udp()//udp!!!!
 
   qDebug()<<"====read_data_from_udp: "<<message;
   QString serial_num;
-  int i;
-  for(i = 0; i < message.size() && QString(message[0]) != FREE_SPASE; ++i)
+  while(message.size() > 0 && QString(message[0]) != FREE_SPASE)
   {
     serial_num.append(message[0]);
-    message.remove(0,0);
+    message.remove(0,1);
   }
 
-  if(i >= message.size() || serial_num.toInt() != m_last_received_message_num + 1)
+  while(message.size() > NEED_SIMBOLS_TO_MOVE)
+    message.remove(0,1);
+
+  qDebug()<<"serial_num.toInt()"<<serial_num.toInt()<<" ;m_last_received_messag: "<<m_last_received_message_num;
+  if(message.size() <= 0 || serial_num.toInt() != m_last_received_message_num + 1)
   {
     qDebug()<<"wrong message";
     //send_data_on_server(REPEAT_MESSAGE);
@@ -321,6 +324,7 @@ void ChessIntegration::make_move_from_str(const QString& str)//udp!!!!
 
 void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
 {
+    qDebug()<<"here";
   if(!m_is_message_from_server || m_type == REPEAT_MESSAGE || m_type == MESSAGE_RECEIVED)
   {
     QByteArray message;
@@ -333,7 +337,7 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
 
     udp_client->send_data(message);
 
-    if(m_type != MESSAGE_RECEIVED)
+    /*if(m_type != MESSAGE_RECEIVED)
     {
       QTime timer;
       timer.start();
@@ -344,8 +348,8 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
           timer.restart();
           udp_client->send_data(message);
         }
-    }
-    m_is_opponent_received_message = false;
+    }*/
+    //m_is_opponent_received_message = false;
   }
   else m_is_message_from_server = false;
 }
