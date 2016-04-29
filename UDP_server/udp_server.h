@@ -15,7 +15,7 @@ public slots:
   void read_data();
 
 private:
-  enum REQUEST_MESSAGES{HELLO_SERVER, HELLO_CLIENT,
+  enum REQUEST_MESSAGES{HELLO_SERVER = 1, HELLO_CLIENT,
                         IS_HAVE_OPPONENT, HAVE_OPPONENT, HAVENT_OPPONENT,
                         IS_SERVER_WORKING};
 private:

@@ -27,9 +27,14 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes)
 
 bool UDP_client::is_server_connected()
 {
-  send_data(IS_HAVE_OPPONENT);
   send_data(IS_SERVER_WORKING);
-  return _is_server_connected && _is_have_opponent;
+  return _is_server_connected;
+}
+
+bool UDP_client::is_have_opponent()
+{
+  send_data(IS_HAVE_OPPONENT);
+  return _is_have_opponent;
 }
 
 void UDP_client::read_data()

@@ -12,9 +12,10 @@ public:
   explicit UDP_client(QObject *parent = 0);
   void export_readed_data_to_chess(QString& move);
   bool is_server_connected();
+  bool is_have_opponent();
 
 private:
-  enum REQUEST_MESSAGES{HELLO_SERVER, HELLO_CLIENT,
+  enum REQUEST_MESSAGES{HELLO_SERVER = 1, HELLO_CLIENT,
                         IS_HAVE_OPPONENT, HAVE_OPPONENT, HAVENT_OPPONENT,
                         IS_SERVER_WORKING};
 public slots:
@@ -24,6 +25,9 @@ public slots:
 
 signals:
   void some_data_came();
+
+private:
+
 
 private:
   QUdpSocket* _socket;

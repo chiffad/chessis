@@ -342,7 +342,7 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
       QTime timer;
       timer.start();
       const int SECOND = 1000;
-      while(udp_client->is_server_connected() && !m_is_opponent_received_message)
+      while(udp_client->is_server_connected() && udp_client->is_have_opponent() && !m_is_opponent_received_message)
         if(timer.elapsed() > SECOND)
         {
           timer.restart();
