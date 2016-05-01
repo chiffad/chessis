@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QUdpSocket>
 #include <QString>
+#include <QByteArray>
 
 class UDP_client : public QObject
 {
@@ -11,30 +12,27 @@ class UDP_client : public QObject
 public:
   explicit UDP_client(QObject *parent = 0);
   void export_readed_data_to_chess(QString& move);
-  bool is_server_connected();
-  bool is_have_opponent();
 
 private:
   enum REQUEST_MESSAGES{HELLO_SERVER = 1, HELLO_CLIENT,
                         IS_HAVE_OPPONENT, HAVE_OPPONENT, HAVENT_OPPONENT,
                         IS_SERVER_WORKING};
+  const QString FREE_SPASE = " ";
+  enum{NEED_SIMBOLS_TO_MOVE = 7};
+
 public slots:
   void read_data();
-  void send_data(const QByteArray& message);
+  void send_data(QByteArray message);
   void send_data(REQUEST_MESSAGES r_mes);
 
 signals:
   void some_data_came();
 
 private:
-
-
-private:
   QUdpSocket* _socket;
-  bool _is_server_connected;
-  bool _is_have_opponent;
-  const quint16 _SERVER_PORT;
-  const QHostAddress _SERVER_IP;
   QByteArray _data;
+
+  const quint16 SERVER_PORT;
+  const QHostAddress SERVER_IP;
 };
 #endif // UDP_CLIENT_H

@@ -62,8 +62,8 @@ private:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
   enum SIMBOLS_IN_STR {FIRST_LETTER = 0, FIRST_NUM = 1, SECOND_LETTER = 5, SECOND_NUM = 6, NEED_SIMBOLS_TO_MOVE = 7};
-  enum MESSAGE_TYPE{MOVE = 1, BACK_MOVE, NEW_GAME, REPEAT_MESSAGE, MESSAGE_RECEIVED};
-  const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight"; const QString FREE_SPASE = " ";
+  enum MESSAGE_TYPE{MOVE = 1, BACK_MOVE, NEW_GAME};
+  const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
 
 private:
   void update_coordinates();
@@ -84,11 +84,7 @@ private:
   QList<Figure> m_figures_model;
   Board::Coord from;
   Board::Coord to;
-  bool m_is_message_from_server;
-  bool m_is_opponent_received_message;
-  bool m_is_moved;
-  unsigned m_last_received_message_num;
-  unsigned m_send_message_num;
+  //bool m_is_moved;
 
   struct Copy_of_history_moves
   {

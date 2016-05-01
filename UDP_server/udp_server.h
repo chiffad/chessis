@@ -10,6 +10,7 @@ class UDP_server : public QObject
   Q_OBJECT
 public:
   explicit UDP_server(QObject *parent = 0);
+  ~UDP_server(){delete _socket;}
 
 public slots:
   void read_data();
@@ -23,8 +24,8 @@ private:
   void send_data(const quint16 port, const QHostAddress& addres, REQUEST_MESSAGES r_mes);
 
 private:
-  quint16 _server_port;
-  QHostAddress _server_IP;
+  const quint16 _SERVER_PORT;
+  const QHostAddress _SERVER_IP;
 
   QUdpSocket *_socket;
   QVector<quint16> _user_port;

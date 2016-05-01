@@ -3,13 +3,10 @@
 #include <QUdpSocket>
 #include "udp_server.h"
 
-UDP_server::UDP_server(QObject *parent) : QObject(parent)
+UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _SERVER_IP(QHostAddress::LocalHost)
 {
-  _server_port = 1234;
-  _server_IP = QHostAddress::LocalHost;
   _socket = new QUdpSocket(this);
-
-  _socket->bind(_server_IP, _server_port);
+  _socket->bind(_SERVER_IP, _SERVER_PORT);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   qDebug()<<"Server start!";

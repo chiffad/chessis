@@ -32,7 +32,11 @@ Rectangle
       border.width: 1
       border.color: Qt.darker(color)
 
-      Text { text: modelData;  anchors.horizontalCenter: parent.horizontalCenter }
+      Text
+      {
+        text: (index % 2 == 0 ? ((index / 2) + 1) + " " : "") + modelData;
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
 
       MouseArea
       {
