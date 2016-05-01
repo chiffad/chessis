@@ -18,17 +18,28 @@ public slots:
 private:
   enum REQUEST_MESSAGES{HELLO_SERVER = 1, HELLO_CLIENT,
                         IS_HAVE_OPPONENT, HAVE_OPPONENT, HAVENT_OPPONENT,
-                        IS_SERVER_WORKING};
+                        IS_SERVER_WORKING, SERVER_WORKING,
+                        MESSAGE_RECEIVED};
+  const QChar FREE_SPASE = ' ';
+
 private:
-  void send_data(const quint16 port, const QHostAddress& addres, const QByteArray& message);
-  void send_data(const quint16 port, const QHostAddress& addres, REQUEST_MESSAGES r_mes);
+  void send_data(QByteArray message, const int index);
+  void send_data(REQUEST_MESSAGES r_mes, const int index);
+  void add_serial_num_and_size(QByteArray& message, const int index);
+  QByteArray cut_data_to_free_spase(QByteArray& message);
 
 private:
   const quint16 _SERVER_PORT;
   const QHostAddress _SERVER_IP;
 
   QUdpSocket *_socket;
-  QVector<quint16> _user_port;
-  QVector<QHostAddress> _user_addres;
+  struct User
+  {
+    quint16 port;
+    QHostAddress ip;
+    int last_received_serial_num;
+    int send_serial_num;
+  };
+  QVector<User> _user;
 };
 #endif // UDP_SERVER_H

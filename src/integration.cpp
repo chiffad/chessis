@@ -12,10 +12,6 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
 {
   board = new Board();
   udp_client = new UDP_client(); //udp!!!!
-  //m_is_message_from_server = false;
-  //m_is_opponent_received_message = false;
-  //m_last_received_message_num = 0;
-  //m_send_message_num = 0;
   m_move_color = MOVE_COLOR_W;
 
   for(int i = 0; i < FIGURES_NUMBER; ++i)
@@ -62,7 +58,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
           emit check_mate();
 
         //m_is_moved = true;
-        //send_data_on_server(MOVE);//udp!!!
+        send_data_on_server(MOVE);//udp!!!
       }
       //else m_is_moved = false;
       update_coordinates();
@@ -278,7 +274,7 @@ void ChessIntegration::make_move_from_str(const QString& str)//udp!!!!
 
 void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
 {
-  qDebug()<<"here";
+  qDebug()<<"====send_data_on_server";
   QByteArray message;
   if(m_type == MOVE)
     message.append(m_moves_history[m_moves_history.size() -1]);

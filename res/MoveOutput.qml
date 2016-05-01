@@ -34,7 +34,7 @@ Rectangle
 
       Text
       {
-        text: (index % 2 == 0 ? ((index / 2) + 1) + " " : "") + modelData;
+        text: (index % 2 == 0 ? ((index / 2) + 1) + ". " : "") + modelData;
         anchors.horizontalCenter: parent.horizontalCenter
       }
 
