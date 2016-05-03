@@ -14,11 +14,12 @@ public:
   ~UDP_client(){delete _socket;}
 
   void export_readed_data_to_chess(QString& move);
+  void message_received();
 
 private:
   enum REQUEST_MESSAGES{HELLO_SERVER = 1, HELLO_CLIENT,
                         IS_HAVE_OPPONENT, HAVE_OPPONENT, HAVENT_OPPONENT,
-                        IS_SERVER_WORKING,SERVER_WORKING,
+                        IS_SERVER_WORKING, SERVER_WORKING,
                         MESSAGE_RECEIVED};
   enum{NEED_SIMBOLS_TO_MOVE = 7};
   const QChar FREE_SPASE = ' ';
@@ -32,6 +33,8 @@ signals:
   void some_data_came();
 
 private:
+  //void whait_for_an_ansver(const QByteArray& message) const;
+  void is_server_working();
   void add_serial_num_and_size(QByteArray& message);
   QByteArray cut_data_to_free_spase(QByteArray& message);
 
@@ -40,6 +43,8 @@ private:
   QByteArray _data;
   int _last_received_serial_num;
   int _serial_num;
+  //bool _is_message_received;
+  bool _is_server_work;
 
   const quint16 SERVER_PORT;
   const QHostAddress SERVER_IP;

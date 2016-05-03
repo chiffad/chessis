@@ -25,12 +25,14 @@ private:
 private:
   void send_data(QByteArray message, const int index);
   void send_data(REQUEST_MESSAGES r_mes, const int index);
+  //void whait_for_an_ansver(const QByteArray& message, const int index) const;
   void add_serial_num_and_size(QByteArray& message, const int index);
   QByteArray cut_data_to_free_spase(QByteArray& message);
 
 private:
   const quint16 _SERVER_PORT;
   const QHostAddress _SERVER_IP;
+  //bool _is_message_received;
 
   QUdpSocket *_socket;
   struct User

@@ -12,7 +12,8 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
 {
   board = new Board();
   udp_client = new UDP_client(); //udp!!!!
-  m_move_color = MOVE_COLOR_W;
+  _move_color = MOVE_COLOR_W;
+  _is_message_from_server = false;
 
   for(int i = 0; i < FIGURES_NUMBER; ++i)
     addFigure(Figure(MOVE_COLOR_W, 0, 0, true));
@@ -25,7 +26,7 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
 }
 
 ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
-    : m_name(name), m_x(x), m_y(y), m_visible(visible)
+    : _name(name), _x(x), _y(y), _visible(visible)
 {
 }
 
@@ -90,11 +91,11 @@ void ChessIntegration::update_coordinates()
   Board::Coord a;
   for(; index < rowCount() - HILIGHT_CELLS; ++index)
   {
-    a.x = m_figures_model[index].x();
-    a.y = m_figures_model[index].y();
+    a.x = _figures_model[index].x();
+    a.y = _figures_model[index].y();
     if(board->get_figure(a) == FREE_FIELD)
     {
-      m_figures_model[index].set_visible(false);
+      _figures_model[index].set_visible(false);
       emit_data_changed(index);
     }
   }
@@ -111,9 +112,9 @@ void ChessIntegration::update_coordinates()
         else fig_name_color = "b_";
         fig_name_color += board->get_figure(coord);
 
-        m_figures_model[index].set_coord(coord);
-        m_figures_model[index].set_name(fig_name_color);
-        m_figures_model[index].set_visible(true);
+        _figures_model[index].set_coord(coord);
+        _figures_model[index].set_name(fig_name_color);
+        _figures_model[index].set_visible(true);
 
         emit_data_changed(index);
         ++index;
@@ -123,12 +124,12 @@ void ChessIntegration::update_coordinates()
 
 void ChessIntegration::update_hilight(const Board::Coord& coord, HILIGHT hilight_index)
 {
-  m_figures_model[hilight_index].set_visible(true);
-  m_figures_model[hilight_index].set_coord(coord);
+  _figures_model[hilight_index].set_visible(true);
+  _figures_model[hilight_index].set_coord(coord);
 
   if(hilight_index == FIRST_HILIGHT)
   {
-    m_figures_model[SECOND_HILIGHT].set_visible(false);
+    _figures_model[SECOND_HILIGHT].set_visible(false);
     emit_data_changed(SECOND_HILIGHT);
   }
   emit_data_changed(hilight_index);
@@ -137,15 +138,15 @@ void ChessIntegration::update_hilight(const Board::Coord& coord, HILIGHT hilight
 void ChessIntegration::switch_move_color()
 {
   if(board->get_move_color_i_from_end(1) == W_FIG)
-    m_move_color = MOVE_COLOR_B;
-  else  m_move_color = MOVE_COLOR_W;
+    _move_color = MOVE_COLOR_B;
+  else  _move_color = MOVE_COLOR_W;
 
   emit move_turn_color_changed();
 }
 
 QString ChessIntegration::move_turn_color() const
 {
-  return m_move_color;
+  return _move_color;
 }
 
 void ChessIntegration::emit_data_changed(const int INDEX)
@@ -172,11 +173,11 @@ void ChessIntegration::start_new_game()
   while (board->get_current_move() != 1)
   {
     back_move();
-    m_moves_history.pop_back();
+    _moves_history.pop_back();
   }
-  m_figures_model[FIRST_HILIGHT].set_visible(false);
+  _figures_model[FIRST_HILIGHT].set_visible(false);
   emit_data_changed(FIRST_HILIGHT);
-  m_figures_model[SECOND_HILIGHT].set_visible(false);
+  _figures_model[SECOND_HILIGHT].set_visible(false);
   emit_data_changed(SECOND_HILIGHT);
   emit moves_history_changed();
   //send_data_on_server(NEW_GAME);//udp!!!!
@@ -210,7 +211,7 @@ void ChessIntegration::go_to_history_index(unsigned index)
 
 QStringList ChessIntegration::moves_history() const
 {
-  return m_moves_history;
+  return _moves_history;
 }
 
 void ChessIntegration::add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to)
@@ -232,9 +233,9 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
 {
   add_move_to_history_copy(coord_from, coord_to);
 
-  const int LIST_SIZE = m_moves_history.size() + ZERO_AND_ACTUAL_MOVES;
+  const int LIST_SIZE = _moves_history.size() + ZERO_AND_ACTUAL_MOVES;
   for(int i = board->get_current_move(); i < LIST_SIZE; ++i)
-    m_moves_history.pop_back();
+    _moves_history.pop_back();
 
   QString move;
   QString toY;
@@ -242,7 +243,7 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
 
   move = QChar(a_LETTER + coord_from.x) + fromY.setNum(Y_SIZE - coord_from.y) + " - " + QChar(a_LETTER + coord_to.x) + toY.setNum(Y_SIZE - coord_to.y);
 
-  m_moves_history.append(move);
+  _moves_history.append(move);
   emit moves_history_changed();
 }
 
@@ -250,8 +251,16 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
 
 void ChessIntegration::read_data_from_udp()//udp!!!!
 {
+  qDebug()<<"=====read_data_from_udp()";
+  _is_message_from_server = true;
   QString message;
   udp_client->export_readed_data_to_chess(message);
+
+  if(!(message.size() == NEED_SIMBOLS_TO_MOVE || message.toInt() >= MOVE))
+  {
+    qDebug()<<"wrong message in read_data_from_udp()";
+    return;
+  }
 
   switch (message.toInt())
   {
@@ -275,9 +284,16 @@ void ChessIntegration::make_move_from_str(const QString& str)//udp!!!!
 void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
 {
   qDebug()<<"====send_data_on_server";
+  if(_is_message_from_server)
+  {
+    _is_message_from_server = false;
+    qDebug()<<"message from server";
+    return;
+  }
+
   QByteArray message;
   if(m_type == MOVE)
-    message.append(m_moves_history[m_moves_history.size() -1]);
+    message.append(_moves_history[_moves_history.size() -1]);
   else message.setNum(m_type);
 
   udp_client->send_data(message);
@@ -288,22 +304,22 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
 void ChessIntegration::addFigure(const Figure &figure)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());
-  m_figures_model << figure;
+  _figures_model << figure;
   endInsertRows();
 }
 
 int ChessIntegration::rowCount(const QModelIndex & parent) const
 {
   Q_UNUSED(parent);
-  return m_figures_model.count();
+  return _figures_model.count();
 }
 
 QVariant ChessIntegration::data(const QModelIndex & index, int role) const
 {
-  if (index.row() < 0 || index.row() >= m_figures_model.count())
+  if (index.row() < 0 || index.row() >= _figures_model.count())
     return QVariant();
 
-  const Figure &figure = m_figures_model[index.row()];
+  const Figure &figure = _figures_model[index.row()];
   if (role == NameRole)
     return figure.name();
   else if (role == XRole)

@@ -62,7 +62,7 @@ private:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
   enum SIMBOLS_IN_STR {FIRST_LETTER = 0, FIRST_NUM = 1, SECOND_LETTER = 5, SECOND_NUM = 6, NEED_SIMBOLS_TO_MOVE = 7};
-  enum MESSAGE_TYPE{MOVE = 1, BACK_MOVE, NEW_GAME};
+  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, NEW_GAME};
   const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
 
 private:
@@ -79,11 +79,12 @@ private:
 private:
   Board* board;
   UDP_client* udp_client;//udp!!!!
-  QString m_move_color;
-  QStringList m_moves_history;
-  QList<Figure> m_figures_model;
+  QString _move_color;
+  QStringList _moves_history;
+  QList<Figure> _figures_model;
   Board::Coord from;
   Board::Coord to;
+  bool _is_message_from_server;
   //bool m_is_moved;
 
   struct Copy_of_history_moves
@@ -99,19 +100,19 @@ class ChessIntegration::Figure
 public:
   Figure(const QString& name, const int x, const int y, const bool visible);
 
-  inline QString name() const {return m_name;}
-  inline int x() const {return m_x;}
-  inline int y() const {return m_y;}
-  inline bool visible() const {return m_visible;}
+  inline QString name() const {return _name;}
+  inline int x() const {return _x;}
+  inline int y() const {return _y;}
+  inline bool visible() const {return _visible;}
 
-  inline void set_name(const QString& new_name) {m_name = new_name;}
-  inline void set_coord(const Board::Coord& new_coord) {m_x = new_coord.x; m_y = new_coord.y;}
-  inline void set_visible(const bool new_visible) {m_visible = new_visible;}
+  inline void set_name(const QString& new_name) {_name = new_name;}
+  inline void set_coord(const Board::Coord& new_coord) {_x = new_coord.x; _y = new_coord.y;}
+  inline void set_visible(const bool new_visible) {_visible = new_visible;}
 
 private:
-  QString m_name;
-  int m_x;
-  int m_y;
-  bool m_visible;
+  QString _name;
+  int _x;
+  int _y;
+  bool _visible;
 };
 #endif

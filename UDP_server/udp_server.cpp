@@ -1,6 +1,7 @@
 #include <QString>
 #include <QChar>
 #include <QUdpSocket>
+#include <QTime>
 #include "udp_server.h"
 
 UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _SERVER_IP(QHostAddress::LocalHost)
@@ -18,6 +19,8 @@ void UDP_server::send_data(QByteArray message, const int index)
 
   qDebug()<<"====sending"<<message;
   _socket->writeDatagram(message, _user[index].ip, _user[index].port);
+ // _is_message_received = false;
+ // whait_for_an_ansver(message, index);
 }
 
 void UDP_server::send_data(REQUEST_MESSAGES r_mes, const int index)
@@ -28,6 +31,9 @@ void UDP_server::send_data(REQUEST_MESSAGES r_mes, const int index)
 
   qDebug()<<"sending"<<message;
   _socket->writeDatagram(message, _user[index].ip, _user[index].port);
+  //_is_message_received = false;
+  //if(r_mes != MESSAGE_RECEIVED)
+   // whait_for_an_ansver(message, index);
 }
 
 void UDP_server::read_data()
@@ -52,6 +58,12 @@ void UDP_server::read_data()
   if(buffer.toInt() == HELLO_SERVER)
   {
     qDebug()<<"HELLO_SERVER";
+    for(int i = 0; i < _user.size(); ++i)
+      if(_user[i].ip == sender_IP && _user[i].port == sender_port)
+      {
+        qDebug()<<"this client already have";
+        return;
+      }
     User u;
     u.port = sender_port;
     u.ip = sender_IP;
@@ -63,12 +75,33 @@ void UDP_server::read_data()
   }
 
   int sender_index = 0;
-  for(; _user[sender_index].ip != sender_IP && _user[sender_index].port != sender_port; ++sender_index)
+  /*if(_user[0].port == sender_port)
+  {
+    qDebug()<<"herer  0";
+  }
+  if(_user[1].port == sender_port)
+  {
+    qDebug()<<"herer   1";
+  }
+*/
+
+  if(_user[0].port == sender_port)//fool crap
+    sender_index = 0;
+  else
+    sender_index = 1;
+
+
+  /*for(; !(_user[sender_index].port == sender_port); ++sender_index)
+  {
+    qDebug()<<"here";
     if(_user.size() <= sender_index)
     {
       qDebug()<<"some crap happened!";
       return;
     }
+  }*/
+
+  qDebug()<<"!!!!sender_index"<<sender_index;
 
   if(serial_num.toInt() != ++_user[sender_index].last_received_serial_num)
   {
@@ -77,16 +110,45 @@ void UDP_server::read_data()
     return;
   }
 
-  //send_data(MESSAGE_RECEIVED, sender_index);
+  if(buffer.toInt() == IS_SERVER_WORKING)
+  {
+    qDebug()<<"buffed is server working";
+    send_data(SERVER_WORKING, sender_index);
+    return;
+  }
 
-  qDebug()<<"received";
+
+  /*if(buffer.toInt() == MESSAGE_RECEIVED)
+  {
+    //_is_message_received = true;
+    return;
+  }
+
+  send_data(MESSAGE_RECEIVED, sender_index);*/
+
   int receiver_index = 0;
-  for(; receiver_index != sender_index; ++receiver_index); //fool crap, but for two players work
+  if(sender_index)  //fool crap, but for two players work
+    receiver_index = 0;
+  else
+    receiver_index = 1;
 
   qDebug()<<"here1";
   send_data(buffer, receiver_index);
-  return;
 }
+
+/*void UDP_server::whait_for_an_ansver(const QByteArray& message, const int index) const
+{
+  QTime timer;
+  timer.start();
+
+  qDebug()<<"===whait_for_an_ansver";
+  while(!_is_message_received)
+    if(timer.elapsed() >= 2000)
+    {
+      timer.restart();
+      _socket->writeDatagram(message, _user[index].ip, _user[index].port);
+    }
+}*/
 
 void UDP_server::add_serial_num_and_size(QByteArray& message, const int index)
 {
