@@ -256,12 +256,6 @@ void ChessIntegration::read_data_from_udp()//udp!!!!
   QString message;
   udp_client->export_readed_data_to_chess(message);
 
-  if(!(message.size() == NEED_SIMBOLS_TO_MOVE || message.toInt() >= MOVE))
-  {
-    qDebug()<<"wrong message in read_data_from_udp()";
-    return;
-  }
-
   switch (message.toInt())
   {
     case BACK_MOVE:

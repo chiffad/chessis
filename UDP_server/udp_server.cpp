@@ -1,39 +1,66 @@
 #include <QString>
 #include <QChar>
 #include <QUdpSocket>
-#include <QTime>
+#include <QTimer>
 #include "udp_server.h"
 
 UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _SERVER_IP(QHostAddress::LocalHost)
 {
+   _timer = new QTimer;
+
   _socket = new QUdpSocket(this);
   _socket->bind(_SERVER_IP, _SERVER_PORT);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   qDebug()<<"Server start!";
+  //begin_wait_confirm();
 }
 
-void UDP_server::send_data(QByteArray message, const int index)
+void UDP_server::begin_wait_confirm(const int i)
 {
-  add_serial_num_and_size(message, index);
+  _user[i].is_message_reach = false;
+  connect(_timer, SIGNAL(timeout()), this, SLOT(repeat_message()));
+  _timer->start(SECOND);
+}
+
+void UDP_server::repeat_message() // test wariant
+{
+  _timer->stop();
+  qDebug()<<"time out";
+  for(int index = 0; index < _user.size(); ++index)
+  {
+    if(!_user[index].is_message_reach)
+    {
+      qDebug()<<"timer stoped";
+      _timer->start();
+      _socket->writeDatagram(_user[index].last_sent_message, _user[index].ip, _user[index].port);
+    }
+    else _user[index].is_message_reach = false;
+  }
+}
+
+void UDP_server::send_data(QByteArray message, const int i)
+{
+  add_serial_num(message, i);
 
   qDebug()<<"====sending"<<message;
-  _socket->writeDatagram(message, _user[index].ip, _user[index].port);
- // _is_message_received = false;
- // whait_for_an_ansver(message, index);
+  _user[i].last_sent_message = message;
+  _socket->writeDatagram(message, _user[i].ip, _user[i].port);
+
+  begin_wait_confirm(i);
 }
 
-void UDP_server::send_data(REQUEST_MESSAGES r_mes, const int index)
+void UDP_server::send_data(REQUEST_MESSAGES r_mes, const int i)
 {
   QByteArray message;
   message.setNum(r_mes);
-  add_serial_num_and_size(message, index);
+  add_serial_num(message, i);
 
   qDebug()<<"sending"<<message;
-  _socket->writeDatagram(message, _user[index].ip, _user[index].port);
-  //_is_message_received = false;
-  //if(r_mes != MESSAGE_RECEIVED)
-   // whait_for_an_ansver(message, index);
+  _user[i].last_sent_message = message;
+  _socket->writeDatagram(message, _user[i].ip, _user[i].port);
+  if(r_mes != MESSAGE_RECEIVED)
+    begin_wait_confirm(i);
 }
 
 void UDP_server::read_data()
@@ -46,14 +73,7 @@ void UDP_server::read_data()
   _socket->readDatagram(buffer.data(), buffer.size(), &sender_IP, &sender_port);
   qDebug()<<"====reading"<<buffer;
 
-  QByteArray serial_num = cut_data_to_free_spase(buffer);
-  QByteArray message_size = cut_data_to_free_spase(buffer);
-
-  if(message_size.toInt() != buffer.size())
-  {
-    qDebug()<<"not fool size";
-    return;
-  }
+  QByteArray serial_num = cut_serial_num_from_data(buffer);
 
   if(buffer.toInt() == HELLO_SERVER)
   {
@@ -70,111 +90,58 @@ void UDP_server::read_data()
     u.last_received_serial_num = serial_num.toInt();
     u.send_serial_num = 0;
     _user.push_back(u);
-    send_data(HELLO_CLIENT, _user.size() - 1);
     return;
   }
 
-  int sender_index = 0;
-  /*if(_user[0].port == sender_port)
-  {
-    qDebug()<<"herer  0";
-  }
-  if(_user[1].port == sender_port)
-  {
-    qDebug()<<"herer   1";
-  }
-*/
-
+  int sender_index;
   if(_user[0].port == sender_port)//fool crap
-    sender_index = 0;
-  else
-    sender_index = 1;
+     sender_index = 0;
+  else sender_index = 1;
 
-
-  /*for(; !(_user[sender_index].port == sender_port); ++sender_index)
+  User *sender = &_user[sender_index];
+  if(serial_num.toInt() != ++sender->last_received_serial_num)
   {
-    qDebug()<<"here";
-    if(_user.size() <= sender_index)
-    {
-      qDebug()<<"some crap happened!";
-      return;
-    }
-  }*/
-
-  qDebug()<<"!!!!sender_index"<<sender_index;
-
-  if(serial_num.toInt() != ++_user[sender_index].last_received_serial_num)
-  {
-    --_user[sender_index].last_received_serial_num;
+    --sender->last_received_serial_num;
+    if(serial_num.toInt() == sender->last_received_serial_num && buffer.toInt() == MESSAGE_RECEIVED)
+      _socket->writeDatagram(sender->last_sent_message, sender->ip, sender->port);
     qDebug()<<"wrong serial num";
     return;
   }
-
-  if(buffer.toInt() == IS_SERVER_WORKING)
+  else
   {
-    qDebug()<<"buffed is server working";
-    send_data(SERVER_WORKING, sender_index);
-    return;
+    if(buffer.toInt() == MESSAGE_RECEIVED)
+      return;
+    else send_data(MESSAGE_RECEIVED, sender_index);
   }
 
-
-  /*if(buffer.toInt() == MESSAGE_RECEIVED)
-  {
-    //_is_message_received = true;
-    return;
-  }
-
-  send_data(MESSAGE_RECEIVED, sender_index);*/
-
-  int receiver_index = 0;
+  int receiver_index;
   if(sender_index)  //fool crap, but for two players work
     receiver_index = 0;
-  else
-    receiver_index = 1;
+  else receiver_index = 1;
 
-  qDebug()<<"here1";
   send_data(buffer, receiver_index);
 }
 
-/*void UDP_server::whait_for_an_ansver(const QByteArray& message, const int index) const
-{
-  QTime timer;
-  timer.start();
-
-  qDebug()<<"===whait_for_an_ansver";
-  while(!_is_message_received)
-    if(timer.elapsed() >= 2000)
-    {
-      timer.restart();
-      _socket->writeDatagram(message, _user[index].ip, _user[index].port);
-    }
-}*/
-
-void UDP_server::add_serial_num_and_size(QByteArray& message, const int index)
-{
-  QByteArray serial_num_and_size;
-  serial_num_and_size.setNum(++_user[index].send_serial_num);
-  serial_num_and_size.append(FREE_SPASE);
-
-  QByteArray message_size;
-  message_size.setNum(message.size());
-  message_size.append(FREE_SPASE);
-
-  serial_num_and_size.append(message_size);
-  message.prepend(serial_num_and_size);
-}
-
-QByteArray UDP_server::cut_data_to_free_spase(QByteArray& message)
+void UDP_server::add_serial_num(QByteArray& message, const int i)
 {
   QByteArray serial_num;
-  while(message.size() > 0 && QChar(message[0]) != FREE_SPASE)
+  serial_num.setNum(++_user[i].send_serial_num);
+  serial_num.append(FREE_SPASE);
+
+  message.prepend(serial_num);
+}
+
+QByteArray UDP_server::cut_serial_num_from_data(QByteArray& data)
+{
+  QByteArray serial_num;
+  while(data.size() > 0 && QChar(data[0]) != FREE_SPASE)
   {
-    serial_num.append(message[0]);
-    message.remove(0,1);
+    serial_num.append(data[0]);
+    data.remove(0,1);
   }
 
-  while(QChar(message[0]) == FREE_SPASE)
-    message.remove(0,1);
+  while(QChar(data[0]) == FREE_SPASE)
+    data.remove(0,1);
 
   return serial_num;
 }
