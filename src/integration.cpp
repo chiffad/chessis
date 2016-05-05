@@ -58,10 +58,8 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
         if(is_check_mate())
           emit check_mate();
 
-        //m_is_moved = true;
         send_data_on_server(MOVE);//udp!!!
       }
-      //else m_is_moved = false;
       update_coordinates();
     }
   }
@@ -76,7 +74,7 @@ void ChessIntegration::back_move()
     update_hilight(board->get_i_to_coord_from_end(1), SECOND_HILIGHT);
     update_coordinates();
   }
-  //send_data_on_server(BACK_MOVE);//udp!!!!
+  send_data_on_server(BACK_MOVE);//udp!!!!
 }
 
 void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y, bool is_correct)
@@ -180,25 +178,27 @@ void ChessIntegration::start_new_game()
   _figures_model[SECOND_HILIGHT].set_visible(false);
   emit_data_changed(SECOND_HILIGHT);
   emit moves_history_changed();
-  //send_data_on_server(NEW_GAME);//udp!!!!
+  send_data_on_server(NEW_GAME);//udp!!!!
 }
 
-void ChessIntegration::go_to_history_index(unsigned index)
+void ChessIntegration::go_to_history_index(const unsigned index)
 {
-  const unsigned CURRENT_MOVE = board->get_current_move();
-  if(index == CURRENT_MOVE - ZERO_AND_ACTUAL_MOVES) return;
+  const unsigned CURRENT_MOVE = board->get_current_move() - ZERO_AND_ACTUAL_MOVES;
 
-  if(index < CURRENT_MOVE - ZERO_AND_ACTUAL_MOVES)
+  if(index == CURRENT_MOVE)
+    return;
+
+  if(index < CURRENT_MOVE)
   {
-    const unsigned D_INDEX = CURRENT_MOVE - index - ZERO_AND_ACTUAL_MOVES;
+    const unsigned D_INDEX = CURRENT_MOVE - index;
 
     for(unsigned i = 0; i < D_INDEX; ++i)
       back_move();
   }
 
-  if(index > CURRENT_MOVE - ZERO_AND_ACTUAL_MOVES)
+  if(index > CURRENT_MOVE)
   {
-    for(unsigned i = CURRENT_MOVE - ZERO_AND_ACTUAL_MOVES ; i <= index; ++i)
+    for(unsigned i = CURRENT_MOVE; i <= index; ++i)
     {
       board->move(history_copy[i].from, history_copy[i].to);
       update_hilight(history_copy[i].from, FIRST_HILIGHT);

@@ -15,14 +15,14 @@ public:
   ~UDP_client(){delete _socket; delete _timer;}
 
 private:
-  enum REQUEST_MESSAGES{HELLO_SERVER = 1};
+  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED};
   enum CHESS_MESSAGE_TYPE{MOVE = 10, BACK_MOVE, NEW_GAME};
   enum{NEED_SIMBOLS_TO_MOVE = 7, SECOND = 1000};
   const QChar FREE_SPASE = ' ';
 
 public:
-  void send_data(QByteArray message);
-  void send_data(REQUEST_MESSAGES r_mes);
+  void send_data(QByteArray message, bool is_prev_serial_need = false);
+  void send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need = false);
   void export_readed_data_to_chess(QString& move);
   void message_received();
 
@@ -34,15 +34,19 @@ signals:
 
 private:
   void is_server_working();
-  void add_serial_num(QByteArray& data);
-  QByteArray cut_serial_num_from_data(QByteArray& data);
+  void add_serial_num(QByteArray& data, bool is_prev_serial_need = false);
+  QByteArray cut_serial_num(QByteArray& data);
+  void begin_wait_confirm(const QByteArray& message);
+  bool checked_message_received();
 
 private:
   QUdpSocket *_socket;
   QTimer *_timer;
   QByteArray _data;
+  QByteArray _last_send_message;
   int _last_received_serial_num;
   int _serial_num;
+  bool _is_message_received;
 
   const quint16 SERVER_PORT;
   const QHostAddress SERVER_IP;

@@ -48,7 +48,7 @@ public:
   Q_INVOKABLE void back_move();
   Q_INVOKABLE QChar letter_return(const int index) const;
   Q_INVOKABLE void start_new_game();
-  Q_INVOKABLE void go_to_history_index(unsigned index);
+  Q_INVOKABLE void go_to_history_index(const unsigned index);
 
 public slots:
   void read_data_from_udp();//udp!!!!
@@ -85,7 +85,6 @@ private:
   Board::Coord from;
   Board::Coord to;
   bool _is_message_from_server;
-  //bool m_is_moved;
 
   struct Copy_of_history_moves
   {

@@ -6,7 +6,8 @@
 
 UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _SERVER_IP(QHostAddress::LocalHost)
 {
-   _timer = new QTimer;
+  _timer = new QTimer;
+  connect(_timer, SIGNAL(timeout()), this, SLOT(repeat_message()));
 
   _socket = new QUdpSocket(this);
   _socket->bind(_SERVER_IP, _SERVER_PORT);
@@ -19,7 +20,6 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _
 void UDP_server::begin_wait_confirm(const int i)
 {
   _user[i].is_message_reach = false;
-  connect(_timer, SIGNAL(timeout()), this, SLOT(repeat_message()));
   _timer->start(SECOND);
 }
 
@@ -28,20 +28,17 @@ void UDP_server::repeat_message() // test wariant
   _timer->stop();
   qDebug()<<"time out";
   for(int index = 0; index < _user.size(); ++index)
-  {
     if(!_user[index].is_message_reach)
     {
       qDebug()<<"timer stoped";
       _timer->start();
       _socket->writeDatagram(_user[index].last_sent_message, _user[index].ip, _user[index].port);
     }
-    else _user[index].is_message_reach = false;
-  }
 }
 
-void UDP_server::send_data(QByteArray message, const int i)
+void UDP_server::send_data(QByteArray message, const int i, bool is_prev_serial_need)
 {
-  add_serial_num(message, i);
+  add_serial_num(message, i, is_prev_serial_need);
 
   qDebug()<<"====sending"<<message;
   _user[i].last_sent_message = message;
@@ -50,15 +47,16 @@ void UDP_server::send_data(QByteArray message, const int i)
   begin_wait_confirm(i);
 }
 
-void UDP_server::send_data(REQUEST_MESSAGES r_mes, const int i)
+void UDP_server::send_data(REQUEST_MESSAGES r_mes, const int i, bool is_prev_serial_need)
 {
   QByteArray message;
   message.setNum(r_mes);
-  add_serial_num(message, i);
+  add_serial_num(message, i, is_prev_serial_need);
 
   qDebug()<<"sending"<<message;
   _user[i].last_sent_message = message;
   _socket->writeDatagram(message, _user[i].ip, _user[i].port);
+
   if(r_mes != MESSAGE_RECEIVED)
     begin_wait_confirm(i);
 }
@@ -102,30 +100,36 @@ void UDP_server::read_data()
   if(serial_num.toInt() != ++sender->last_received_serial_num)
   {
     --sender->last_received_serial_num;
-    if(serial_num.toInt() == sender->last_received_serial_num && buffer.toInt() == MESSAGE_RECEIVED)
-      _socket->writeDatagram(sender->last_sent_message, sender->ip, sender->port);
     qDebug()<<"wrong serial num";
-    return;
+    if(serial_num.toInt() == sender->last_received_serial_num && buffer.toInt() != MESSAGE_RECEIVED)
+    {
+      send_data(MESSAGE_RECEIVED, sender_index, true);
+      qDebug()<<"prev serial num. Resent message";
+    }
   }
-  else
+  else if(buffer.toInt() != MESSAGE_RECEIVED)
   {
-    if(buffer.toInt() == MESSAGE_RECEIVED)
-      return;
-    else send_data(MESSAGE_RECEIVED, sender_index);
+    send_data(MESSAGE_RECEIVED, sender_index);
+    qDebug()<<"sending MESSAGE_RECEIVED";
+
+    int receiver_index;
+    if(sender_index)  //fool crap, but for two players work
+      receiver_index = 0;
+    else receiver_index = 1;
+
+    send_data(buffer, receiver_index);
+    qDebug()<<"sending buffer";
   }
-
-  int receiver_index;
-  if(sender_index)  //fool crap, but for two players work
-    receiver_index = 0;
-  else receiver_index = 1;
-
-  send_data(buffer, receiver_index);
+  else qDebug()<<"buffer.toInt == MESSAGE_RECEIVED";
 }
 
-void UDP_server::add_serial_num(QByteArray& message, const int i)
+void UDP_server::add_serial_num(QByteArray& message, const int i, bool is_prev_serial_need)
 {
+  if(!is_prev_serial_need)
+    ++_user[i].send_serial_num;
+
   QByteArray serial_num;
-  serial_num.setNum(++_user[i].send_serial_num);
+  serial_num.setNum(_user[i].send_serial_num);
   serial_num.append(FREE_SPASE);
 
   message.prepend(serial_num);

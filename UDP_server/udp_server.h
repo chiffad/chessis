@@ -23,9 +23,9 @@ private:
   const QChar FREE_SPASE = ' ';
 
 private:
-  void send_data(QByteArray message, const int i);
-  void send_data(REQUEST_MESSAGES r_mes, const int i);
-  void add_serial_num(QByteArray& message, const int i);
+  void send_data(QByteArray message, const int i, bool is_prev_serial_need = false);
+  void send_data(REQUEST_MESSAGES r_mes, const int i, bool is_prev_serial_need = false);
+  void add_serial_num(QByteArray& message, const int i, bool is_prev_serial_need = false);
   QByteArray cut_serial_num_from_data(QByteArray& message);
   void begin_wait_confirm(const int i);
 
