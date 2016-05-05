@@ -15,7 +15,7 @@ public:
 
 public slots:
   void read_data();
-  void repeat_message();
+  void checked_is_message_received();
 
 private:
   enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED};

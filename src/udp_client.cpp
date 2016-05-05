@@ -20,7 +20,7 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), SERVER_PORT(1234), SE
 
 void UDP_client::send_data(QByteArray message, bool is_prev_serial_need)
 {
-  if(!checked_message_received())
+  if(!checked_is_message_received())
   {
     qDebug()<<"cant send, prev message not reach";
     return;
@@ -35,20 +35,41 @@ void UDP_client::send_data(QByteArray message, bool is_prev_serial_need)
 
 void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
 {
-  if(!checked_message_received())
+  QByteArray message;
+  message.setNum(r_mes);
+
+  if(!checked_is_message_received())
   {
     qDebug()<<"cant send, last message not reach";
     return;
   }
-
-  QByteArray message;
-  message.setNum(r_mes);
   add_serial_num(message, is_prev_serial_need);
 
   qDebug()<<"====Sending data to server"<<message;
   _socket->writeDatagram(message, SERVER_IP, SERVER_PORT);
   if(r_mes != MESSAGE_RECEIVED)
     begin_wait_receive(message);
+}
+
+void UDP_client::begin_wait_receive(const QByteArray& message)
+{
+  _is_message_received = false;
+  _last_send_message = message;
+  _timer->start(SECOND);
+}
+
+bool UDP_client::checked_is_message_received() // test wariant
+{
+  qDebug()<<"===checked_message_received";
+  if(_is_message_received)
+    _timer->stop();
+  else
+  {
+    qDebug()<<"timer restart";
+    _timer->start();
+    _socket->writeDatagram(_last_send_message, SERVER_IP, SERVER_PORT);
+  }
+  return _is_message_received;
 }
 
 void UDP_client::read_data()
@@ -76,27 +97,6 @@ void UDP_client::read_data()
   if(_data.size() == NEED_SIMBOLS_TO_MOVE || (_data.toInt() >= MOVE && _data.toInt() <= NEW_GAME))
     emit some_data_came();
   else qDebug()<<"wrong message in read_data_from_udp()";
-}
-
-void UDP_client::begin_wait_receive(const QByteArray& message)
-{
-  _is_message_received = false;
-  _last_send_message = message;
-  _timer->start(SECOND);
-}
-
-bool UDP_client::checked_message_received() // test wariant
-{
-  qDebug()<<"===checked_message_received";
-  if(_is_message_received)
-    _timer->stop();
-  else
-  {
-    qDebug()<<"timer restart";
-    _timer->start();
-    _socket->writeDatagram(_last_send_message, SERVER_IP, SERVER_PORT);
-  }
-  return _is_message_received;
 }
 
 void UDP_client::export_readed_data_to_chess(QString& data)

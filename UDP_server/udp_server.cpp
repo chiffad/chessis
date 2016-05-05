@@ -7,7 +7,7 @@
 UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _SERVER_IP(QHostAddress::LocalHost)
 {
   _timer = new QTimer;
-  connect(_timer, SIGNAL(timeout()), this, SLOT(repeat_message()));
+  connect(_timer, SIGNAL(timeout()), this, SLOT(checked_is_message_received()));
 
   _socket = new QUdpSocket(this);
   _socket->bind(_SERVER_IP, _SERVER_PORT);
@@ -23,7 +23,7 @@ void UDP_server::begin_wait_receive(const int index)
   _timer->start(SECOND);
 }
 
-void UDP_server::repeat_message() // test wariant
+void UDP_server::checked_is_message_received() // test wariant
 {
   _timer->stop();
   qDebug()<<"time out";
@@ -88,6 +88,9 @@ void UDP_server::read_data()
     u.last_received_serial_num = serial_num.toInt();
     u.send_serial_num = 0;
     _user.push_back(u);
+
+    send_data(MESSAGE_RECEIVED, _user.size() - 1);
+
     return;
   }
 
@@ -123,13 +126,13 @@ void UDP_server::read_data()
   else qDebug()<<"buffer.toInt == MESSAGE_RECEIVED";
 }
 
-void UDP_server::add_serial_num(QByteArray& message, const int index, bool is_prev_serial_need)
+void UDP_server::add_serial_num(QByteArray& message, const int i, bool is_prev_serial_need)
 {
   if(!is_prev_serial_need)
-    ++_user[index].send_serial_num;
+    ++_user[i].send_serial_num;
 
   QByteArray serial_num;
-  serial_num.setNum(_user[index].send_serial_num);
+  serial_num.setNum(_user[i].send_serial_num);
   serial_num.append(FREE_SPASE);
 
   message.prepend(serial_num);

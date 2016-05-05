@@ -37,7 +37,7 @@ private:
   void add_serial_num(QByteArray& data, bool is_prev_serial_need = false);
   QByteArray cut_serial_num(QByteArray& data);
   void begin_wait_receive(const QByteArray& message);
-  bool checked_message_received();
+  bool checked_is_message_received();
 
 private:
   QUdpSocket *_socket;
@@ -47,6 +47,7 @@ private:
   int _last_received_serial_num;
   int _serial_num;
   bool _is_message_received;
+  QVector<QByteArray> _moves_stack;
 
   const quint16 SERVER_PORT;
   const QHostAddress SERVER_IP;
