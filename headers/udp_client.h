@@ -36,7 +36,7 @@ private:
   void is_server_working();
   void add_serial_num(QByteArray& data, bool is_prev_serial_need = false);
   QByteArray cut_serial_num(QByteArray& data);
-  void begin_wait_confirm(const QByteArray& message);
+  void begin_wait_receive(const QByteArray& message);
   bool checked_message_received();
 
 private:

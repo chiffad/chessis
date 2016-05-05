@@ -30,7 +30,7 @@ void UDP_client::send_data(QByteArray message, bool is_prev_serial_need)
 
   qDebug()<<"====Sending data to server"<<message;
   _socket->writeDatagram(message, SERVER_IP, SERVER_PORT);
-  begin_wait_confirm(message);
+  begin_wait_receive(message);
 }
 
 void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
@@ -48,7 +48,7 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
   qDebug()<<"====Sending data to server"<<message;
   _socket->writeDatagram(message, SERVER_IP, SERVER_PORT);
   if(r_mes != MESSAGE_RECEIVED)
-    begin_wait_confirm(message);
+    begin_wait_receive(message);
 }
 
 void UDP_client::read_data()
@@ -76,10 +76,9 @@ void UDP_client::read_data()
   if(_data.size() == NEED_SIMBOLS_TO_MOVE || (_data.toInt() >= MOVE && _data.toInt() <= NEW_GAME))
     emit some_data_came();
   else qDebug()<<"wrong message in read_data_from_udp()";
-
 }
 
-void UDP_client::begin_wait_confirm(const QByteArray& message)
+void UDP_client::begin_wait_receive(const QByteArray& message)
 {
   _is_message_received = false;
   _last_send_message = message;
