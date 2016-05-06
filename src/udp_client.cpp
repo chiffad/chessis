@@ -21,11 +21,12 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), SERVER_PORT(1234), SE
 
 void UDP_client::send_data(QByteArray message, bool is_prev_serial_need)
 {
- /* if(!checked_is_message_received())
+  if(!checked_is_message_received())
   {
     qDebug()<<"cant send, prev message not reach";
+    _message_stack.push_back(message);
     return;
-  }*/
+  }
 
   add_serial_num(message, is_prev_serial_need);
 
@@ -39,11 +40,12 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
   QByteArray message;
   message.setNum(r_mes);
 
- /* if(!checked_is_message_received())
+  if(!checked_is_message_received())
   {
     qDebug()<<"cant send, last message not reach";
+    _message_stack.push_back(message);
     return;
-  }*/
+  }
   add_serial_num(message, is_prev_serial_need);
 
   qDebug()<<"====Sending data to server"<<message;
@@ -68,7 +70,7 @@ bool UDP_client::checked_is_message_received() // test wariant
   else
   {
     qDebug()<<"timer restart";
-    _timer->start();
+    _timer->start(SECOND);
     _socket->writeDatagram(_last_send_message, SERVER_IP, SERVER_PORT);
   }
   return _is_message_received;
@@ -101,6 +103,11 @@ void UDP_client::read_data()
     case MESSAGE_RECEIVED:
       qDebug()<<"Message received";
       _is_message_received = true;
+      if(_message_stack.size())
+      {
+        send_data(_message_stack[0]);
+        _message_stack.remove(0);
+      }
       break;
 
     default:
