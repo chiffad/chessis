@@ -19,6 +19,7 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _
 
 void UDP_server::begin_wait_receive(const int index)
 {
+  qDebug()<<"begin_wait_receive";
   _user[index].is_message_reach = false;
   _timer->start(SECOND);
 }
@@ -30,7 +31,7 @@ void UDP_server::checked_is_message_received() // test wariant
   for(int index = 0; index < _user.size(); ++index)
     if(!_user[index].is_message_reach)
     {
-      qDebug()<<"timer stoped";
+      qDebug()<<"timer restart";
       _timer->start();
       _socket->writeDatagram(_user[index].last_sent_message, _user[index].ip, _user[index].port);
     }
@@ -110,20 +111,23 @@ void UDP_server::read_data()
       qDebug()<<"prev serial num. Resent message";
     }
   }
-  else if(buffer.toInt() != MESSAGE_RECEIVED)
+  else if(buffer.toInt() == MESSAGE_RECEIVED)
+  {
+    sender->is_message_reach = true;
+    qDebug()<<"buffer.toInt() == MESSAGE_RECEIVED";
+  }
+  else
   {
     send_data(MESSAGE_RECEIVED, sender_index);
-    qDebug()<<"sending MESSAGE_RECEIVED";
 
-    int receiver_index;
-    if(sender_index)  //fool crap, but for two players work
+    int receiver_index = !sender_index;
+    /*if(sender_index)  //fool crap, but for two players work
       receiver_index = 0;
-    else receiver_index = 1;
+    else receiver_index = 1;*/
 
-    send_data(buffer, receiver_index);
-    qDebug()<<"sending buffer";
+    if(_user.size() > 1)
+      send_data(buffer, receiver_index);
   }
-  else qDebug()<<"buffer.toInt == MESSAGE_RECEIVED";
 }
 
 void UDP_server::add_serial_num(QByteArray& message, const int i, bool is_prev_serial_need)

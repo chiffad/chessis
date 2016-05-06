@@ -10,6 +10,7 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), SERVER_PORT(1234), SE
   _serial_num = 0;
 
   _timer = new QTimer(this);
+  connect(_timer, SIGNAL(timeout()), this, SLOT(checked_is_message_received()));
 
   _socket = new QUdpSocket(this);
   _socket->bind(SERVER_IP, SERVER_PORT);
@@ -20,11 +21,11 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), SERVER_PORT(1234), SE
 
 void UDP_client::send_data(QByteArray message, bool is_prev_serial_need)
 {
-  if(!checked_is_message_received())
+ /* if(!checked_is_message_received())
   {
     qDebug()<<"cant send, prev message not reach";
     return;
-  }
+  }*/
 
   add_serial_num(message, is_prev_serial_need);
 
@@ -38,11 +39,11 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
   QByteArray message;
   message.setNum(r_mes);
 
-  if(!checked_is_message_received())
+ /* if(!checked_is_message_received())
   {
     qDebug()<<"cant send, last message not reach";
     return;
-  }
+  }*/
   add_serial_num(message, is_prev_serial_need);
 
   qDebug()<<"====Sending data to server"<<message;
@@ -53,6 +54,7 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
 
 void UDP_client::begin_wait_receive(const QByteArray& message)
 {
+  qDebug()<<"begin waight";
   _is_message_received = false;
   _last_send_message = message;
   _timer->start(SECOND);
@@ -94,9 +96,21 @@ void UDP_client::read_data()
 
   qDebug()<<"received: "<<_data;
 
-  if(_data.size() == NEED_SIMBOLS_TO_MOVE || (_data.toInt() >= MOVE && _data.toInt() <= NEW_GAME))
-    emit some_data_came();
-  else qDebug()<<"wrong message in read_data_from_udp()";
+  switch (_data.toInt())
+  {
+    case MESSAGE_RECEIVED:
+      qDebug()<<"Message received";
+      _is_message_received = true;
+      break;
+
+    default:
+      if(_data.size() == NEED_SIMBOLS_TO_MOVE || (_data.toInt() >= MOVE && _data.toInt() <= NEW_GAME))
+      {
+        send_data(MESSAGE_RECEIVED);
+        emit some_data_came();
+      }
+      else qDebug()<<"wrong message in read_data_from_udp()";
+  }
 }
 
 void UDP_client::export_readed_data_to_chess(QString& data)
