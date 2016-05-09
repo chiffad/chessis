@@ -29,9 +29,9 @@ void UDP_server::checked_is_message_received() // test wariant
 
   _timer->stop();
   for(int index = 0; index < _user.size(); ++index)
-    if(_user[index].is_message_reach)
+    if(!_user[index].is_message_reach)
     {
-      qDebug()<<"timer restart";
+      qDebug()<<"timer restart"<<index;
       _timer->start(SECOND);
       _socket->writeDatagram(_user[index].last_sent_message, _user[index].ip, _user[index].port);
     }
@@ -88,6 +88,7 @@ void UDP_server::read_data()
     u.ip = sender_IP;
     u.last_received_serial_num = serial_num.toInt();
     u.send_serial_num = 0;
+    u.is_message_reach = true;
     _user.push_back(u);
 
     send_data(MESSAGE_RECEIVED, _user.size() - 1);
@@ -95,7 +96,10 @@ void UDP_server::read_data()
     return;
   }
 
-  int sender_index = !(_user[0].port == sender_port);//fool crap
+  int sender_index;
+  if(_user[0].port == sender_port)//fool crap
+    sender_index = 0;
+  else sender_index = 1;
 
   User *sender = &_user[sender_index];
   if(serial_num.toInt() != ++sender->last_received_serial_num)
@@ -111,7 +115,7 @@ void UDP_server::read_data()
   else if(buffer.toInt() == MESSAGE_RECEIVED)
   {
     sender->is_message_reach = true;
-    qDebug()<<"buffer.toInt() == MESSAGE_RECEIVED";
+    qDebug()<<"buffer.toInt() == MESSAGE_RECEIVED"<<sender_index;
   }
   else
   {

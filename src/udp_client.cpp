@@ -16,6 +16,7 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), SERVER_PORT(1234), SE
   _socket->bind(SERVER_IP, SERVER_PORT);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
+  _is_message_received = true;
   send_data(HELLO_SERVER);
 }
 
@@ -105,6 +106,7 @@ void UDP_client::read_data()
       _is_message_received = true;
       if(_message_stack.size())
       {
+        qDebug()<<"message stack not empty";
         send_data(_message_stack[0]);
         _message_stack.remove(0);
       }
