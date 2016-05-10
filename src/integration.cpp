@@ -251,7 +251,7 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
 
 void ChessIntegration::read_data_from_udp()//udp!!!!
 {
-  qDebug()<<"=====read_data_from_udp()";
+  qDebug()<<"=====integrator read_data_from_udp()";
   _is_message_from_server = true;
   QString message;
   udp_client->export_readed_data_to_chess(message);
@@ -277,7 +277,7 @@ void ChessIntegration::make_move_from_str(const QString& str)//udp!!!!
 
 void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)//udp!!!!
 {
-  qDebug()<<"====send_data_on_server";
+  qDebug()<<"send_data_on_server";
   if(_is_message_from_server)
   {
     _is_message_from_server = false;

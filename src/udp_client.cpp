@@ -4,11 +4,9 @@
 #include <QTimer>
 #include "headers/udp_client.h"
 
-UDP_client::UDP_client(QObject *parent) : QObject(parent), SERVER_PORT(1234), SERVER_IP(QHostAddress::LocalHost)
+UDP_client::UDP_client(QObject *parent) : QObject(parent), _last_received_serial_num(0), _serial_num(0), 
+                                          _is_message_received(true), SERVER_PORT(1234), SERVER_IP(QHostAddress::LocalHost)
 {
-  _last_received_serial_num = 0;
-  _serial_num = 0;
-
   _timer = new QTimer(this);
   connect(_timer, SIGNAL(timeout()), this, SLOT(checked_is_message_received()));
 
@@ -16,15 +14,14 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), SERVER_PORT(1234), SE
   _socket->bind(SERVER_IP, SERVER_PORT);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
-  _is_message_received = true;
   send_data(HELLO_SERVER);
 }
 
-void UDP_client::send_data(QByteArray message, bool is_prev_serial_need)
+void UDP_client::send_data(QByteArray& message, bool is_prev_serial_need)
 {
   if(!checked_is_message_received())
   {
-    qDebug()<<"cant send, prev message not reach";
+    qDebug()<<"can't send, prev message not reach";
     _message_stack.push_back(message);
     return;
   }
@@ -43,7 +40,7 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
 
   if(!checked_is_message_received())
   {
-    qDebug()<<"cant send, last message not reach";
+    qDebug()<<"can't send, last message not reach";
     _message_stack.push_back(message);
     return;
   }
@@ -57,13 +54,13 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
 
 void UDP_client::begin_wait_receive(const QByteArray& message)
 {
-  qDebug()<<"begin waight";
+  qDebug()<<"====begin waight";
   _is_message_received = false;
   _last_send_message = message;
   _timer->start(SECOND);
 }
 
-bool UDP_client::checked_is_message_received() // test wariant
+bool UDP_client::checked_is_message_received()
 {
   qDebug()<<"===checked_message_received";
   if(_is_message_received)
@@ -79,8 +76,17 @@ bool UDP_client::checked_is_message_received() // test wariant
 
 void UDP_client::read_data()
 {
+  QHostAddress sender_IP;
+  quint16 sender_port;
+
   _data.resize(_socket->pendingDatagramSize());
-  _socket->readDatagram(_data.data(), _data.size());
+  _socket->readDatagram(_data.data(), _data.size(), &sender_IP, &sender_port);
+
+  if(sender_IP != SERVER_IP || sender_port != SERVER_PORT)
+  {
+    qDebug()<<"wrong sender!";
+    return;
+  }
 
   qDebug()<<"=====socket read"<<_data;
   QByteArray serial_num = cut_serial_num(_data);
@@ -88,12 +94,12 @@ void UDP_client::read_data()
   if(serial_num.toInt() != ++_last_received_serial_num)
   {
     --_last_received_serial_num;
-    qDebug()<<"serial_num is wrong";
     if(serial_num.toInt() == _last_received_serial_num && _data.toInt() != MESSAGE_RECEIVED)
     {
       send_data(MESSAGE_RECEIVED, true);
       qDebug()<<"prev serial num. Resent message";
     }
+    else qDebug()<<"serial_num is wrong";
     return;
   }
 
@@ -106,7 +112,7 @@ void UDP_client::read_data()
       _is_message_received = true;
       if(_message_stack.size())
       {
-        qDebug()<<"message stack not empty";
+        qDebug()<<"message stack not empty: "<<_message_stack[0];
         send_data(_message_stack[0]);
         _message_stack.remove(0);
       }
@@ -143,10 +149,12 @@ void UDP_client::add_serial_num(QByteArray& data, bool is_prev_serial_need)
 QByteArray UDP_client::cut_serial_num(QByteArray& data)
 {
   QByteArray serial_num;
-  while(data.size() > 0 && QChar(data[0]) != FREE_SPASE)
+  QChar first_data_simbol = QChar(data[0]);
+  while(data.size() > 0 && first_data_simbol.isNumber())
   {
     serial_num.append(data[0]);
     data.remove(0,1);
+    first_data_simbol = QChar(data[0]);
   }
 
   while(QChar(data[0]) == FREE_SPASE)

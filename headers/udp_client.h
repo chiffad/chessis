@@ -21,10 +21,9 @@ private:
   const QChar FREE_SPASE = ' ';
 
 public:
-  void send_data(QByteArray message, bool is_prev_serial_need = false);
+  void send_data(QByteArray& message, bool is_prev_serial_need = false);
   void send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need = false);
   void export_readed_data_to_chess(QString& move);
-  void message_received();
 
 public slots:
   void read_data();
@@ -34,7 +33,6 @@ signals:
   void some_data_came();
 
 private:
-  void is_server_working();
   void add_serial_num(QByteArray& data, bool is_prev_serial_need = false);
   QByteArray cut_serial_num(QByteArray& data);
   void begin_wait_receive(const QByteArray& message);
@@ -42,12 +40,13 @@ private:
 private:
   QUdpSocket *_socket;
   QTimer *_timer;
+  
   QByteArray _data;
   QByteArray _last_send_message;
+  QVector<QByteArray> _message_stack;
   int _last_received_serial_num;
   int _serial_num;
   bool _is_message_received;
-  QVector<QByteArray> _message_stack;
 
   const quint16 SERVER_PORT;
   const QHostAddress SERVER_IP;

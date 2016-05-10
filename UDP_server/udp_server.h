@@ -19,15 +19,26 @@ public slots:
 
 private:
   enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED};
-  enum {SECOND = 1000};
+  enum {NO_OPPONENT = -1, SECOND = 1000};
   const QChar FREE_SPASE = ' ';
+  struct User
+  {
+    quint16 port;
+    QHostAddress ip;
+    QByteArray last_sent_message;
+    int last_received_serial_num;
+    int send_serial_num;
+    int opponent_index;
+    bool is_message_reach;
+  };
 
 private:
-  void send_data(QByteArray message, const int index, bool is_prev_serial_need = false);
+  void send_data(QByteArray& message, const int index, bool is_prev_serial_need = false);
   void send_data(REQUEST_MESSAGES r_mes, const int index, bool is_prev_serial_need = false);
   void add_serial_num(QByteArray& message, const int index, bool is_prev_serial_need = false);
   QByteArray cut_serial_num_from_data(QByteArray& message);
   void begin_wait_receive(const int index);
+  void set_opponent(User& u);
 
 private:
   const quint16 _SERVER_PORT;
@@ -36,15 +47,6 @@ private:
   QUdpSocket *_socket;
   QTimer *_timer;
 
-  struct User
-  {
-    quint16 port;
-    QHostAddress ip;
-    QByteArray last_sent_message;
-    int last_received_serial_num;
-    int send_serial_num;
-    bool is_message_reach;
-  };
   QVector<User> _user;
 };
 #endif // UDP_SERVER_H
