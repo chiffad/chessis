@@ -143,7 +143,7 @@ void UDP_server::set_opponent(User& u)
     if(_user[i].opponent_index == NO_OPPONENT)
     {  
       u.opponent_index = i;
-      _user[i].opponent_index = _user.size() - 1;
+      _user[i].opponent_index = _user.size();
       qDebug()<<"_user[i].opponent_index: "<<_user[i].opponent_index;
       break;
     }
