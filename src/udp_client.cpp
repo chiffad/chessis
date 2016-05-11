@@ -4,7 +4,7 @@
 #include <QTimer>
 #include "headers/udp_client.h"
 
-UDP_client::UDP_client(QObject *parent) : QObject(parent), _last_received_serial_num(0), _serial_num(0), 
+UDP_client::UDP_client(QObject *parent) : QObject(parent), _last_received_serial_num(0), _serial_num(0),
                                           _is_message_received(true), SERVER_PORT(1234), SERVER_IP(QHostAddress::LocalHost)
 {
   _timer = new QTimer(this);
@@ -17,7 +17,7 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), _last_received_serial
   send_data(HELLO_SERVER);
 }
 
-void UDP_client::send_data(QByteArray& message, bool is_prev_serial_need)
+void UDP_client::send_data(QByteArray& message)
 {
   if(!checked_is_message_received())
   {
@@ -26,7 +26,7 @@ void UDP_client::send_data(QByteArray& message, bool is_prev_serial_need)
     return;
   }
 
-  add_serial_num(message, is_prev_serial_need);
+  add_serial_num(message);
 
   qDebug()<<"====Sending data to server"<<message;
   _socket->writeDatagram(message, SERVER_IP, SERVER_PORT);
@@ -62,14 +62,24 @@ void UDP_client::begin_wait_receive(const QByteArray& message)
 
 bool UDP_client::checked_is_message_received()
 {
+  static unsigned repeat_message_counter = 0;
   qDebug()<<"===checked_message_received";
   if(_is_message_received)
+  {
     _timer->stop();
+    repeat_message_counter = 0;
+  }
   else
   {
+    if(repeat_message_counter > 5)
+    {
+      qDebug()<<"_repeat_message_counter > 5, connection lost?";
+    }
+
     qDebug()<<"timer restart";
     _timer->start(SECOND);
     _socket->writeDatagram(_last_send_message, SERVER_IP, SERVER_PORT);
+    ++repeat_message_counter;
   }
   return _is_message_received;
 }

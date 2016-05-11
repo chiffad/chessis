@@ -17,11 +17,11 @@ public:
 private:
   enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED};
   enum CHESS_MESSAGE_TYPE{MOVE = 10, BACK_MOVE, NEW_GAME};
-  enum{NEED_SIMBOLS_TO_MOVE = 7, SECOND = 1000};
+  enum{NEED_SIMBOLS_TO_MOVE = 7, SECOND = 1000, FIVE_SEC = 5000};
   const QChar FREE_SPASE = ' ';
 
 public:
-  void send_data(QByteArray& message, bool is_prev_serial_need = false);
+  void send_data(QByteArray& message);
   void send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need = false);
   void export_readed_data_to_chess(QString& move);
 
