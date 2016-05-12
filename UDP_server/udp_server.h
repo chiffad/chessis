@@ -30,14 +30,15 @@ private:
     int send_serial_num;
     int opponent_index;
     bool is_message_reach;
+    QVector<QByteArray> message_stack;
   };
 
 private:
-  void send_data(QByteArray& message, const int index, bool is_prev_serial_need = false);
-  void send_data(REQUEST_MESSAGES r_mes, const int index, bool is_prev_serial_need = false);
-  void add_serial_num(QByteArray& message, const int index, bool is_prev_serial_need = false);
+  void send_data(QByteArray& message, User& u, bool is_prev_serial_need = false);
+  void send_data(REQUEST_MESSAGES r_mes, User& u, bool is_prev_serial_need = false);
+  void add_serial_num(QByteArray& message, User& u, bool is_prev_serial_need = false);
   QByteArray cut_serial_num_from_data(QByteArray& message);
-  void begin_wait_receive(const int index);
+  void begin_wait_receive(User& u);
   void set_opponent(User& u);
 
 private:

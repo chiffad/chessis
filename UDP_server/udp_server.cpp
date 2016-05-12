@@ -16,35 +16,50 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _
   qDebug()<<"Server start!";
 }
 
-void UDP_server::send_data(QByteArray& message, const int index, bool is_prev_serial_need)
+void UDP_server::send_data(QByteArray& message, User& u, bool is_prev_serial_need)
 {
-  add_serial_num(message, index, is_prev_serial_need);
+  if(!u.is_message_reach)
+  {
+    qDebug()<<"can't send, prev message not reach";
+    u.message_stack.push_back(message);
+    return;
+  }
+
+  add_serial_num(message, u, is_prev_serial_need);
 
   qDebug()<<"====sending"<<message;
-  _user[index].last_sent_message = message;
-  _socket->writeDatagram(message, _user[index].ip, _user[index].port);
+  u.last_sent_message = message;
+  _socket->writeDatagram(message, u.ip, u.port);
 
-  begin_wait_receive(index);
+  begin_wait_receive(u);
 }
 
-void UDP_server::send_data(REQUEST_MESSAGES r_mes, const int index, bool is_prev_serial_need)
+void UDP_server::send_data(REQUEST_MESSAGES r_mes, User& u, bool is_prev_serial_need)
 {
   QByteArray message;
   message.setNum(r_mes);
-  add_serial_num(message, index, is_prev_serial_need);
+
+  if(!u.is_message_reach)
+  {
+    qDebug()<<"can't send, prev message not reach";
+    u.message_stack.push_back(message);
+    return;
+  }
+
+  add_serial_num(message, u, is_prev_serial_need);
 
   qDebug()<<"sending"<<message;
-  _user[index].last_sent_message = message;
-  _socket->writeDatagram(message, _user[index].ip, _user[index].port);
+  u.last_sent_message = message;
+  _socket->writeDatagram(message, u.ip, u.port);
 
   if(r_mes != MESSAGE_RECEIVED)
-    begin_wait_receive(index);
+    begin_wait_receive(u);
 }
 
-void UDP_server::begin_wait_receive(const int index)
+void UDP_server::begin_wait_receive(User& u)
 {
   qDebug()<<"====begin_wait_receive";
-  _user[index].is_message_reach = false;
+  u.is_message_reach = false;
   _timer->start(SECOND);
 }
 
@@ -93,7 +108,7 @@ void UDP_server::read_data()
     
     _user.push_back(u);
 
-    send_data(MESSAGE_RECEIVED, _user.size() - 1);
+    send_data(MESSAGE_RECEIVED, _user[_user.size() - 1]);
     return;
   }
 
@@ -106,10 +121,6 @@ void UDP_server::read_data()
       break;
     }
 
-  /*if(_user[0].port == sender_port)//fool crap
-    sender_index = 0;
-  else sender_index = 1;*/
-
   User *sender = &_user[sender_index];
   if(serial_num.toInt() != ++sender->last_received_serial_num)
   {
@@ -117,21 +128,27 @@ void UDP_server::read_data()
     qDebug()<<"wrong serial num";
     if(serial_num.toInt() == sender->last_received_serial_num && buffer.toInt() != MESSAGE_RECEIVED)
     {
-      send_data(MESSAGE_RECEIVED, sender_index, true);
+      send_data(MESSAGE_RECEIVED, *sender, true);
       qDebug()<<"prev serial num. Resent message";
     }
   }
   else if(buffer.toInt() == MESSAGE_RECEIVED)
   {
     sender->is_message_reach = true;
+    if(sender->message_stack.size())
+    {
+      qDebug()<<"message stack not empty: "<<sender->message_stack[0];
+      send_data(sender->message_stack[0], *sender);
+      sender->message_stack.remove(0);
+    }
     qDebug()<<"buffer.toInt() == MESSAGE_RECEIVED"<<sender_index;
   }
   else
   {
-    send_data(MESSAGE_RECEIVED, sender_index);
+    send_data(MESSAGE_RECEIVED, *sender);
 
     if(sender->opponent_index != NO_OPPONENT)
-      send_data(buffer, sender->opponent_index);
+      send_data(buffer, _user[sender->opponent_index]);
   }
 }
 
@@ -143,20 +160,20 @@ void UDP_server::set_opponent(User& u)
     if(_user[i].opponent_index == NO_OPPONENT)
     {  
       u.opponent_index = i;
-      _user[i].opponent_index = _user.size() - 1;
+      _user[i].opponent_index = _user.size();
       qDebug()<<"_user[i].opponent_index: "<<_user[i].opponent_index;
       break;
     }
   qDebug()<<"u.opponent_index: "<<u.opponent_index;
 }
 
-void UDP_server::add_serial_num(QByteArray& message, const int i, bool is_prev_serial_need)
+void UDP_server::add_serial_num(QByteArray& message, User& u, bool is_prev_serial_need)
 {
   if(!is_prev_serial_need)
-    ++_user[i].send_serial_num;
+    ++u.send_serial_num;
 
   QByteArray serial_num;
-  serial_num.setNum(_user[i].send_serial_num);
+  serial_num.setNum(u.send_serial_num);
   serial_num.append(FREE_SPASE);
 
   message.prepend(serial_num);
