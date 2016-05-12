@@ -127,6 +127,10 @@ void UDP_client::read_data()
       else _timer_from_last_received_message->start(FIVE_SEC);
       break;
 
+    case CLIENT_LOST:
+      send_data(MESSAGE_RECEIVED);
+      break;
+
     default:
       if(_data.size() == NEED_SIMBOLS_TO_MOVE || (_data.toInt() >= MOVE && _data.toInt() <= NEW_GAME))
       {

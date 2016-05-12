@@ -16,13 +16,19 @@ public:
 public slots:
   void read_data();
   void timer_timeout();
+  void timer_last_received_message_timeout();
 
 private:
   enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, SERVER_LOST, CLIENT_LOST};
-  enum {NO_OPPONENT = -1, SECOND = 1000};
+  enum {NO_OPPONENT = -1, SECOND = 1000, FIVE_SEC = 5000};
   const QChar FREE_SPASE = ' ';
+
   struct User
   {
+    ~User(){delete timer; delete timer_last_received_message;}
+    QTimer *timer;
+    QTimer *timer_last_received_message;
+
     quint16 port;
     QHostAddress ip;
     int last_received_serial_num;
@@ -31,10 +37,6 @@ private:
     bool is_message_reach;
     QByteArray last_sent_message;
     QVector<QByteArray> message_stack;
-
-    QTimer *timer;
-    //QTimer *timer_from_last_received_message;
-    ~User(){delete timer;}// delete timer_from_last_received_message;}
   };
 
 private:

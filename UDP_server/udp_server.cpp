@@ -62,35 +62,34 @@ void UDP_server::read_data()
         qDebug()<<"this client already have";
         return;
       }
-    User u;
-    u.port = sender_port;
-    u.ip = sender_IP;
-    u.last_received_serial_num = serial_num.toInt();
-    u.last_send_serial_num = 0;
-    u.is_message_reach = true;
-    u.timer = nullptr;
-    //u.timer_from_last_received_message = nullptr;
-    set_opponent(u);
 
-    _user.push_back(u);
-    _user[_user.size() - 1].timer = new QTimer;
-    //_user[_user.size() - 1].timer_from_last_received_message = new QTimer;
-    connect(_user[_user.size() - 1].timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-    //connect(_user[_user.size() - 1].timer_from_last_received_message, SIGNAL(timeout()), this, SLOT(timer_timeout()));
+    _user.resize(_user.size() + 1);
+    User *new_user = &_user[_user.size() - 1];
+    new_user->port = sender_port;
+    new_user->ip = sender_IP;
+    new_user->last_received_serial_num = serial_num.toInt();
+    new_user->last_send_serial_num = 0;
+    new_user->is_message_reach = true;
+    new_user->timer = new QTimer;
+    new_user->timer_last_received_message = new QTimer;;
+    set_opponent(*new_user);
 
-    send_data(MESSAGE_RECEIVED, _user[_user.size() - 1]);
+    connect(new_user->timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
+    connect(new_user->timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
+
+    send_data(MESSAGE_RECEIVED, *new_user);
     return;
   }
 
-  int sender_ind;
-  for(sender_ind = 0; sender_ind < _user.size(); ++sender_ind)
-    if(_user[sender_ind].port == sender_port && _user[sender_ind].ip == sender_IP)
+  int sender_i;
+  for(sender_i = 0; sender_i < _user.size(); ++sender_i)
+    if(_user[sender_i].port == sender_port && _user[sender_i].ip == sender_IP)
     {
-      qDebug()<<"index: "<<sender_ind;
+      qDebug()<<"index: "<<sender_i;
       break;
     }
 
-  User *sender = &_user[sender_ind];
+  User *sender = &_user[sender_i];
   if(serial_num.toInt() != ++sender->last_received_serial_num)
   {
     --sender->last_received_serial_num;
@@ -106,6 +105,7 @@ void UDP_server::read_data()
   switch (buffer.toInt())
   {
     case MESSAGE_RECEIVED:
+      qDebug()<<"buffer.toInt() == MESSAGE_RECEIVED"<<sender_i;
       sender->is_message_reach = true;
       if(sender->message_stack.size())
       {
@@ -113,7 +113,7 @@ void UDP_server::read_data()
         send_data(sender->message_stack[0], *sender);
         sender->message_stack.remove(0);
       }
-      qDebug()<<"buffer.toInt() == MESSAGE_RECEIVED"<<sender_ind;
+      else sender->timer_last_received_message->start(FIVE_SEC);
       break;
 
     case SERVER_LOST:
@@ -131,11 +131,11 @@ void UDP_server::set_opponent(User& u)
 {
   u.opponent_index = NO_OPPONENT;  
   
-  for(int i = 0; i < _user.size(); ++i)
+  for(int i = 0; i < _user.size() - 1; ++i)
     if(_user[i].opponent_index == NO_OPPONENT)
     {  
       u.opponent_index = i;
-      _user[i].opponent_index = _user.size();
+      _user[i].opponent_index = _user.size() - 1;
       qDebug()<<"_user[i].opponent_index: "<<_user[i].opponent_index;
       break;
     }
@@ -158,15 +158,39 @@ void UDP_server::timer_timeout() // test wariant
     {
       if(!_user[i].is_message_reach)
       {
+        if(_user[i].last_sent_message.toInt() == CLIENT_LOST)
+        {
+          qDebug()<<"last message was client lost";
+          /*_user[i].timer->stop();
+          _user[_user[i].opponent_index].opponent_index = NO_OPPONENT;
+          _user.remove(i);*/
+          return;
+        }
         qDebug()<<"timer restart"<<i;
         _user[i].timer->start(SECOND);
-        _socket->writeDatagram(_user[i].last_sent_message, _user[i].ip, _user[i].port);
+
+        QByteArray m = _user[i].last_sent_message;
+        add_serial_num(m,_user[i], true);
+        _socket->writeDatagram(m, _user[i].ip, _user[i].port);
       }
       else
       {
         _user[i].timer->stop();
         qDebug()<<"timer stop";
       }
+    }
+}
+
+void UDP_server::timer_last_received_message_timeout()
+{
+  qDebug()<<"===timer_from_last_received_message_timeout";
+
+  for(int i = 0; i < _user.size(); ++i)
+    if(_user[i].timer_last_received_message->remainingTime())
+    {
+      qDebug()<<"user: "<<i;
+      _user[i].timer_last_received_message->stop();
+      send_data(CLIENT_LOST,_user[i]);
     }
 }
 
