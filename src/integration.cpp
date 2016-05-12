@@ -60,6 +60,12 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
 
         send_data_on_server(MOVE);//udp!!!
       }
+      else
+      {
+        qDebug()<<"====move problem";
+        qDebug()<<"from: x = "<<from.x<<" y = "<<from.y;
+        qDebug()<<"to: x = "<<to.x<<" y = "<<to.y;
+      }
       update_coordinates();
     }
   }

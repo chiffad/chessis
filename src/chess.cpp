@@ -105,7 +105,8 @@ bool Board::step_ver(Coord const& f, Coord const& t) const
     if(get_figure(t) != FREE_FIELD && abs(dx) == 1 && get_color(f) != get_color(t))
       return true;
     if(get_figure(t) == FREE_FIELD && abs(dx) == 0 && (abs(dy) == 1
-    ||(abs(dy) == 2 && get_figure(t.x,f.y + Y_UNIT_VECTOR) == FREE_FIELD && (f.y == 6 || f.y == 1))))
+    ||(abs(dy) == 2 && get_figure(t.x,f.y + Y_UNIT_VECTOR) == FREE_FIELD
+    &&((f.y == 6 && get_color(f) == W_FIG) || (f.y == 1 && get_color(f) == B_FIG)))))
       return true;
     return false;
   }
