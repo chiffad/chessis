@@ -12,12 +12,12 @@ class UDP_client : public QObject
   Q_OBJECT
 public:
   explicit UDP_client(QObject *parent = 0);
-  ~UDP_client(){delete _socket; delete _timer;}
+  ~UDP_client(){delete _socket; delete _timer; delete _timer_from_last_received_message;}
 
 private:
-  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED};
+  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, SERVER_LOST, CLIENT_LOST};
   enum CHESS_MESSAGE_TYPE{MOVE = 10, BACK_MOVE, NEW_GAME};
-  enum{NEED_SIMBOLS_TO_MOVE = 7, SECOND = 1000};
+  enum{NEED_SIMBOLS_TO_MOVE = 7, SECOND = 1000, FIVE_SEC = 5000};
   const QChar FREE_SPASE = ' ';
 
 public:
@@ -28,6 +28,7 @@ public:
 public slots:
   void read_data();
   bool checked_is_message_received();
+  void timer_from_last_received_message_timeout();
 
 signals:
   void some_data_came();
@@ -40,6 +41,7 @@ private:
 private:
   QUdpSocket *_socket;
   QTimer *_timer;
+  QTimer *_timer_from_last_received_message;
   
   QByteArray _data;
   QByteArray _last_send_message;

@@ -68,12 +68,15 @@ void UDP_server::read_data()
     u.last_received_serial_num = serial_num.toInt();
     u.last_send_serial_num = 0;
     u.is_message_reach = true;
-    set_opponent(u);
     u.timer = nullptr;
-    
+    //u.timer_from_last_received_message = nullptr;
+    set_opponent(u);
+
     _user.push_back(u);
     _user[_user.size() - 1].timer = new QTimer;
+    //_user[_user.size() - 1].timer_from_last_received_message = new QTimer;
     connect(_user[_user.size() - 1].timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
+    //connect(_user[_user.size() - 1].timer_from_last_received_message, SIGNAL(timeout()), this, SLOT(timer_timeout()));
 
     send_data(MESSAGE_RECEIVED, _user[_user.size() - 1]);
     return;
@@ -97,24 +100,30 @@ void UDP_server::read_data()
       send_data(MESSAGE_RECEIVED, *sender, true);
       qDebug()<<"prev serial num. Resent message";
     }
+    return;
   }
-  else if(buffer.toInt() == MESSAGE_RECEIVED)
-  {
-    sender->is_message_reach = true;
-    if(sender->message_stack.size())
-    {
-      qDebug()<<"message stack not empty: "<<sender->message_stack[0];
-      send_data(sender->message_stack[0], *sender);
-      sender->message_stack.remove(0);
-    }
-    qDebug()<<"buffer.toInt() == MESSAGE_RECEIVED"<<sender_ind;
-  }
-  else
-  {
-    send_data(MESSAGE_RECEIVED, *sender);
 
-    if(sender->opponent_index != NO_OPPONENT)
-      send_data(buffer, _user[sender->opponent_index]);
+  switch (buffer.toInt())
+  {
+    case MESSAGE_RECEIVED:
+      sender->is_message_reach = true;
+      if(sender->message_stack.size())
+      {
+        qDebug()<<"message stack not empty: "<<sender->message_stack[0];
+        send_data(sender->message_stack[0], *sender);
+        sender->message_stack.remove(0);
+      }
+      qDebug()<<"buffer.toInt() == MESSAGE_RECEIVED"<<sender_ind;
+      break;
+
+    case SERVER_LOST:
+      send_data(MESSAGE_RECEIVED, *sender);
+      break;
+
+    default:
+      send_data(MESSAGE_RECEIVED, *sender);
+      if(sender->opponent_index != NO_OPPONENT)
+        send_data(buffer, _user[sender->opponent_index]);
   }
 }
 

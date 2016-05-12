@@ -8,13 +8,21 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), _last_received_serial
                                           _is_message_received(true), SERVER_PORT(1234), SERVER_IP(QHostAddress::LocalHost)
 {
   _timer = new QTimer(this);
+  _timer_from_last_received_message = new QTimer(this);
   connect(_timer, SIGNAL(timeout()), this, SLOT(checked_is_message_received()));
+  connect(_timer_from_last_received_message, SIGNAL(timeout()), this, SLOT(timer_from_last_received_message_timeout));
 
   _socket = new QUdpSocket(this);
   _socket->bind(SERVER_IP, SERVER_PORT);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   send_data(HELLO_SERVER);
+}
+
+void UDP_client::timer_from_last_received_message_timeout()
+{
+  qDebug()<<"is server lost?";
+  send_data(SERVER_LOST);
 }
 
 void UDP_client::send_data(QByteArray& message, bool is_prev_serial_need)
@@ -116,6 +124,7 @@ void UDP_client::read_data()
         send_data(_message_stack[0]);
         _message_stack.remove(0);
       }
+      else _timer_from_last_received_message->start(FIVE_SEC);
       break;
 
     default:

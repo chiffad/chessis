@@ -18,7 +18,7 @@ public slots:
   void timer_timeout();
 
 private:
-  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED};
+  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, SERVER_LOST, CLIENT_LOST};
   enum {NO_OPPONENT = -1, SECOND = 1000};
   const QChar FREE_SPASE = ' ';
   struct User
@@ -31,9 +31,10 @@ private:
     bool is_message_reach;
     QByteArray last_sent_message;
     QVector<QByteArray> message_stack;
-    QTimer *timer;
 
-    ~User(){delete timer;}
+    QTimer *timer;
+    //QTimer *timer_from_last_received_message;
+    ~User(){delete timer;}// delete timer_from_last_received_message;}
   };
 
 private:
