@@ -11,7 +11,7 @@ class UDP_server : public QObject
   Q_OBJECT
 public:
   explicit UDP_server(QObject *parent = 0);
-  ~UDP_server(){delete _socket;}
+  ~UDP_server(){delete _socket; delete _timer;}
 
 public slots:
   void read_data();
@@ -21,7 +21,6 @@ private:
   enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED};
   enum {NO_OPPONENT = -1, SECOND = 1000};
   const QChar FREE_SPASE = ' ';
-
   struct User
   {
     quint16 port;
@@ -31,25 +30,22 @@ private:
     int send_serial_num;
     int opponent_index;
     bool is_message_reach;
-    QVector<QByteArray> message_stack;
-    QTimer *timer;
-
-    ~User(){delete timer;}
   };
 
 private:
-  void send_data(QByteArray& message, User& u, bool is_prev_serial_need = false);
-  void send_data(REQUEST_MESSAGES r_mes, User& u, bool is_prev_serial_need = false);
+  void send_data(QByteArray& message, const int index, bool is_prev_serial_need = false);
+  void send_data(REQUEST_MESSAGES r_mes, const int index, bool is_prev_serial_need = false);
+  void add_serial_num(QByteArray& message, const int index, bool is_prev_serial_need = false);
   QByteArray cut_serial_num_from_data(QByteArray& message);
-  void begin_wait_receive(User& u);
+  void begin_wait_receive(const int index);
   void set_opponent(User& u);
-  bool check_status_and_add_serial(QByteArray& message, User& u, bool is_prev_serial_need);
 
 private:
   const quint16 _SERVER_PORT;
   const QHostAddress _SERVER_IP;
 
   QUdpSocket *_socket;
+  QTimer *_timer;
 
   QVector<User> _user;
 };
