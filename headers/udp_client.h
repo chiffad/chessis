@@ -17,7 +17,7 @@ public:
 private:
   enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, SERVER_LOST, CLIENT_LOST};
   enum CHESS_MESSAGE_TYPE{MOVE = 10, BACK_MOVE, NEW_GAME};
-  enum{NEED_SIMBOLS_TO_MOVE = 7, SECOND = 1000, FIVE_SEC = 5000};
+  enum{NEED_SIMBOLS_TO_MOVE = 7, SECOND = 1000, TEN_SEC = 10000};
   const QChar FREE_SPASE = ' ';
 
 public:
@@ -46,8 +46,8 @@ private:
   QByteArray _data;
   QByteArray _last_send_message;
   QVector<QByteArray> _message_stack;
-  int _last_received_serial_num;
-  int _serial_num;
+  int _received_serial_num;
+  int _send_serial_num;
   bool _is_message_received;
 
   const quint16 SERVER_PORT;

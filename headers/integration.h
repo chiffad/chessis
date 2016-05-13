@@ -52,6 +52,7 @@ public:
 
 public slots:
   void read_data_from_udp();//udp!!!!
+  void timer_timeout();
 
 signals:
   void move_turn_color_changed();
@@ -66,6 +67,7 @@ private:
   const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
 
 private:
+  QTimer *timer;
   void update_coordinates();
   void switch_move_color();
   void emit_data_changed(const int INDEX);

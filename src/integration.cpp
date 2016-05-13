@@ -3,7 +3,7 @@
 #include <QChar>
 #include <ctype.h>
 #include <QModelIndex>
-#include <QTime>
+#include <QTimer>
 #include "headers/integration.h"
 #include "headers/chess.h"
 #include "headers/udp_client.h"
@@ -23,7 +23,18 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
   update_coordinates();
 
   connect(udp_client, SIGNAL(some_data_came()), this, SLOT(read_data_from_udp()));//udp!!!!
+
+  timer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
+  timer->start(6000);
 }
+
+void ChessIntegration::timer_timeout()
+{
+  timer->stop();
+  move(6,6,true);
+  move(6,5,true);
+ }
 
 ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
     : _name(name), _x(x), _y(y), _visible(visible)
