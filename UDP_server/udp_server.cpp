@@ -14,11 +14,9 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _
 }
 
 UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16& port, const QHostAddress& ip, const int received_serial_num)
-    : QObject(parent), _parent_class(parent_class),_port(port), _ip(ip), _received_serial_num(received_serial_num)
+                     : QObject(parent), _parent_class(parent_class),_port(port), _ip(ip),  _send_serial_num(0),
+                       _received_serial_num(received_serial_num), _is_message_reach(true)
 {
-  _send_serial_num = 0;
-  _is_message_reach = true;
-
   _timer = new QTimer;
   connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
   _timer_last_received_message = new QTimer;

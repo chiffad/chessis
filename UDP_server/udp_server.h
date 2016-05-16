@@ -55,9 +55,9 @@ public:
   QTimer *_timer;
   QTimer *_timer_last_received_message;
 
-  UDP_server* const _parent_class;
-  quint16 _port;
-  QHostAddress _ip;
+  UDP_server *const _parent_class;
+  const quint16 _port;
+  const QHostAddress _ip;
   int _received_serial_num;
   int _send_serial_num;
   int _opponent_index;
@@ -65,4 +65,5 @@ public:
   QByteArray _last_sent_message;
   QVector<QByteArray> _message_stack;
 };
+
 #endif // UDP_SERVER_H
