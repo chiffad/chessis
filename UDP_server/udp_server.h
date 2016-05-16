@@ -44,7 +44,7 @@ private:
   void send_data(REQUEST_MESSAGES r_mes, User& u, bool is_prev_serial_need = false);
   bool is_message_reach(QByteArray& message, User& u);
   void add_serial_num(QByteArray& message, User& u, bool is_prev_serial_need = false);
-  QByteArray cut_serial_num_from_data(QByteArray& message);
+  QByteArray cut_serial_num_from_data(QByteArray& message) const;
   void begin_wait_receive(User& u);
   void set_opponent(User& u);
 

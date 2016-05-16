@@ -8,8 +8,9 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), _received_serial_num(
                                           _is_message_received(true), SERVER_PORT(1234), SERVER_IP(QHostAddress::LocalHost)
 {
   _timer = new QTimer(this);
-  _timer_from_last_received_message = new QTimer(this);
   connect(_timer, SIGNAL(timeout()), this, SLOT(checked_is_message_received()));
+
+  _timer_from_last_received_message = new QTimer(this);
   connect(_timer_from_last_received_message, SIGNAL(timeout()), this, SLOT(timer_from_last_received_message_timeout()));
 
   _socket = new QUdpSocket(this);
@@ -143,10 +144,10 @@ void UDP_client::read_data()
   }
 }
 
-void UDP_client::export_readed_data_to_chess(QString& data)
+void UDP_client::export_readed_data_to_chess(QString& move) const
 {
-  data.clear();
-  data.append(_data);
+  move.clear();
+  move.append(_data);
 }
 
 void UDP_client::add_serial_num(QByteArray& data, bool is_prev_serial_need)
@@ -161,7 +162,7 @@ void UDP_client::add_serial_num(QByteArray& data, bool is_prev_serial_need)
   data.prepend(serial_num);
 }
 
-QByteArray UDP_client::cut_serial_num(QByteArray& data)
+QByteArray UDP_client::cut_serial_num(QByteArray& data) const
 {
   QByteArray serial_num;
   QChar first_data_simbol = QChar(data[0]);

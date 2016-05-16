@@ -23,7 +23,7 @@ private:
 public:
   void send_data(QByteArray& message, bool is_prev_serial_need = false);
   void send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need = false);
-  void export_readed_data_to_chess(QString& move);
+  void export_readed_data_to_chess(QString& move) const;
 
 public slots:
   void read_data();
@@ -35,7 +35,7 @@ signals:
 
 private:
   void add_serial_num(QByteArray& data, bool is_prev_serial_need = false);
-  QByteArray cut_serial_num(QByteArray& data);
+  QByteArray cut_serial_num(QByteArray& data) const;
   void begin_wait_receive(const QByteArray& message);
 
 private:

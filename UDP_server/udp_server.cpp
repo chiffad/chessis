@@ -220,7 +220,7 @@ void UDP_server::add_serial_num(QByteArray& message, User& u, bool is_prev_seria
   message.prepend(serial_num);
 }
 
-QByteArray UDP_server::cut_serial_num_from_data(QByteArray& data)
+QByteArray UDP_server::cut_serial_num_from_data(QByteArray& data) const
 {
   QByteArray serial_num;
   QChar first_data_simbol = QChar(data[0]);
