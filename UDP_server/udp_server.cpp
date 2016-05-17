@@ -13,12 +13,22 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _
   qDebug()<<"Server start!";
 }
 
-UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16& port, const QHostAddress& ip, const int received_serial_num)
-                     : QObject(parent), _parent_class(parent_class),_port(port), _ip(ip),  _send_serial_num(0),
-                       _received_serial_num(received_serial_num), _is_message_reach(true)
+UDP_server::~UDP_server()
+{
+  delete _socket;
+
+  foreach(auto i, _user)
+    delete i;
+}
+
+UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16& port, const QHostAddress& ip,
+                       const int received_serial_num, const int index)
+                     : QObject(parent), _parent_class(parent_class),_port(port), _ip(ip), _my_index(index),
+                       _send_serial_num(0), _received_serial_num(received_serial_num), _is_message_reach(true)
 {
   _timer = new QTimer;
   connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
+
   _timer_last_received_message = new QTimer;
   connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
 }
@@ -71,14 +81,17 @@ void UDP_server::read_data()
       if(_user[i]->_ip == sender_IP && _user[i]->_port == sender_port)
       {
         qDebug()<<"this client already have";
-        return;
+        goto something_wrong;
       }
 
-    _user.append(new User(this, this, sender_port, sender_IP, serial_num.toInt()));
+    _user.append(new User(this, this, sender_port, sender_IP, serial_num.toInt(), _user.size()));
     set_opponent(*_user[_user.size() - 1]);
 
     send_data(MESSAGE_RECEIVED, *_user[_user.size() - 1]);
     return;
+
+    something_wrong:
+      return;
   }
 
   int sender_i;
@@ -150,54 +163,6 @@ void UDP_server::begin_wait_receive(User& u)
   u._timer->start(SECOND);
 }
 
-void UDP_server::User::timer_timeout() // test wariant
-{
-  qDebug()<<"===time out";
-
-  if(!_is_message_reach)
-  {
-    if(_last_sent_message.toInt() == CLIENT_LOST)
-    {
-      qDebug()<<"last message was client lost";
-      /*_timer->stop();
-      _user[_opponent_index]._opponent_index = NO_OPPONENT;
-      _user.remove(i);*/
-      return;
-    }
-    _timer->start(SECOND);
-
-    _parent_class->add_serial_num(_last_sent_message, *_parent_class->_user[_parent_class->_user[_opponent_index]->_opponent_index], true);
-    qDebug()<<"some sheeete!! "<<_parent_class->_user[_parent_class->_user[_opponent_index]->_opponent_index];
-    _parent_class->_socket->writeDatagram(_last_sent_message, _ip, _port);
-  }
-  else
-  {
-    qDebug()<<"timer stop";
-    _timer->stop();
-  }
-}
-
-void UDP_server::User::timer_last_received_message_timeout()
-{
-  qDebug()<<"===timer_from_last_received_message_timeout";
-
-  _timer_last_received_message->stop();
-  _parent_class->send_data(CLIENT_LOST, *_parent_class->_user[_parent_class->_user[_opponent_index]->_opponent_index]);
-}
-
-bool UDP_server::is_message_reach(QByteArray& message, User& u)
-{
-  if(!u._is_message_reach)
-  {
-    qDebug()<<"can't send, prev message not reach";
-    u._message_stack.push_back(message);
-    return false;
-  }
-
-  u._last_sent_message = message;
-  return true;
-}
-
 void UDP_server::add_serial_num(QByteArray& message, User& u, bool is_prev_serial_need)
 {
   if(!is_prev_serial_need)
@@ -226,4 +191,51 @@ QByteArray UDP_server::cut_serial_num_from_data(QByteArray& data) const
     data.remove(0,1);
 
   return serial_num;
+}
+
+void UDP_server::User::timer_timeout() // test wariant
+{
+  qDebug()<<"===time out";
+
+  if(!_is_message_reach)
+  {
+    if(_last_sent_message.toInt() == CLIENT_LOST)
+    {
+      qDebug()<<"last message was client lost";
+      /*_timer->stop();
+      _user[_opponent_index]._opponent_index = NO_OPPONENT;
+      _user.remove(i);*/
+      return;
+    }
+    _timer->start(SECOND);
+
+    _parent_class->add_serial_num(_last_sent_message, *_parent_class->_user[_my_index], true);
+    _parent_class->_socket->writeDatagram(_last_sent_message, _ip, _port);
+  }
+  else
+  {
+    qDebug()<<"timer stop";
+    _timer->stop();
+  }
+}
+
+void UDP_server::User::timer_last_received_message_timeout()
+{
+  qDebug()<<"===timer_from_last_received_message_timeout "<<_my_index;
+
+  _timer_last_received_message->stop();
+  _parent_class->send_data(CLIENT_LOST, *_parent_class->_user[_my_index]);
+}
+
+bool UDP_server::is_message_reach(QByteArray& message, User& u)
+{
+  if(!u._is_message_reach)
+  {
+    qDebug()<<"can't send, prev message not reach";
+    u._message_stack.push_back(message);
+    return false;
+  }
+
+  u._last_sent_message = message;
+  return true;
 }

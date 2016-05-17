@@ -11,20 +11,24 @@ class UDP_server : public QObject
   Q_OBJECT
 public:
   explicit UDP_server(QObject *parent = nullptr);
-  ~UDP_server(){delete _socket;}
+  ~UDP_server();
 
 public slots:
   void read_data();
 
 private:
+  class User;
+
+public:
   enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, SERVER_LOST, CLIENT_LOST};
   enum {NO_OPPONENT = -1, SECOND = 1000, TEN_SEC = 10000};
   const QChar FREE_SPASE = ' ';
-  class User;
 
-private:
+public:
   void send_data(QByteArray& message, User& u);
   void send_data(REQUEST_MESSAGES r_mes, User& u, bool is_prev_serial_need = false);
+
+private:
   bool is_message_reach(QByteArray& message, User& u);
   void add_serial_num(QByteArray& message, User& u, bool is_prev_serial_need = false);
   QByteArray cut_serial_num_from_data(QByteArray& message) const;
@@ -44,7 +48,7 @@ class UDP_server::User : public QObject
   Q_OBJECT
 public:
   explicit User(QObject *parent = nullptr, UDP_server *parent_class = nullptr, const quint16& port = 0,
-                const QHostAddress& ip = QHostAddress::LocalHost, const int received_serial_num = 0);
+                const QHostAddress& ip = QHostAddress::LocalHost, const int received_serial_num = 0, const int index = 0);
   ~User() {delete _timer; delete _timer_last_received_message;}
 
 public slots:
@@ -58,6 +62,7 @@ public:
   UDP_server *const _parent_class;
   const quint16 _port;
   const QHostAddress _ip;
+  const int _my_index;
   int _received_serial_num;
   int _send_serial_num;
   int _opponent_index;
@@ -65,5 +70,4 @@ public:
   QByteArray _last_sent_message;
   QVector<QByteArray> _message_stack;
 };
-
 #endif // UDP_SERVER_H

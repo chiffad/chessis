@@ -14,7 +14,7 @@ public:
   explicit UDP_client(QObject *parent = 0);
   ~UDP_client(){delete _socket; delete _timer; delete _timer_from_last_received_message;}
 
-private:
+public:
   enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, SERVER_LOST, CLIENT_LOST};
   enum CHESS_MESSAGE_TYPE{MOVE = 10, BACK_MOVE, NEW_GAME};
   enum{NEED_SIMBOLS_TO_MOVE = 7, SECOND = 1000, TEN_SEC = 10000};

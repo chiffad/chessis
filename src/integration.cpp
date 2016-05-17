@@ -31,9 +31,26 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
 
 void ChessIntegration::timer_timeout()
 {
-  timer->stop();
-  move(6,6,true);
-  move(6,5,true);
+
+  static int i = 0;
+  ++i;
+
+  if( i == 1)
+  {
+    move(4,6,true);
+    move(4,5,true);
+  }
+  if( i == 2)
+  {
+    move(4,1,true);
+    move(4,2,true);
+  }
+  if( i == 2)
+  {
+    move(1,7,true);
+    move(0,5,true);
+    timer->stop();
+  }
  }
 
 ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
