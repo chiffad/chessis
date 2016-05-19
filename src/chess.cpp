@@ -103,9 +103,9 @@ bool Board::step_ver(const Coord& f, const Coord& t) const
     else return false;
   }
 
-  else if(get_colorless_figure(f) == KING && ((dx <= 1 && dy <= 1) || (dy == 0 && dx == 2)))
+  else if(get_colorless_figure(f) == KING)
   {
-    if(is_can_castling(get_color(f), t.x) && dx == 2)
+    if(is_can_castling(get_color(f), t.x) && dy == 0 && dx == 2)
     {
       if(get_figure(f.x + X_UNIT_VECTOR, f.y) == FREE_FIELD && get_figure(f.x + 2 * X_UNIT_VECTOR,f.y) == FREE_FIELD)
       {
@@ -115,16 +115,20 @@ bool Board::step_ver(const Coord& f, const Coord& t) const
       }
       return false;
     }
-    else if(dx == 2) return false;
+    else if(!(dx <= 1 && dy <= 1) && dx != 2) return false;
   }
 
-  else if(get_colorless_figure(f) == PAWN && dy <= 2 && dx <= 1)
+  else if(get_colorless_figure(f) == PAWN)
   {
-    if(get_figure(t) != FREE_FIELD && dx == 1 && get_color(f) != get_color(t))
-      return true;
-    if(get_figure(t) == FREE_FIELD && dx == 0 && (dy == 1
-    ||(dy == 2 && get_figure(t.x,f.y + Y_UNIT_VECTOR) == FREE_FIELD
-    &&((f.y == 6 && get_color(f) == W_FIG) || (f.y == 1 && get_color(f) == B_FIG)))))
+    if((Y_UNIT_VECTOR > 0 && get_color(f) == W_FIG) || (Y_UNIT_VECTOR < 0 && get_color(f) == B_FIG))
+      return false;
+
+    if(get_figure(t) != FREE_FIELD)
+      if(dy * dx == 1 && get_color(f) != get_color(t))
+        return true;
+
+    else if(dx == 0 && (dy == 1 || (dy == 2 && get_figure(t.x,f.y + Y_UNIT_VECTOR) == FREE_FIELD
+            &&(f.y == 6 || f.y == 1))))
       return true;
     return false;
   }
