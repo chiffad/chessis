@@ -16,22 +16,22 @@ public:
    {
      int x;
      int y;
-     bool operator ==(Coord const& rhv);
+     bool operator ==(const Coord& rhs);
    };
 
    Board();
-   bool move(Coord const& fr, Coord const& t);
+   bool move(const Coord& fr, const Coord& t);
    bool back_move();
    bool is_mate(COLOR color);
    unsigned get_current_move() const;
-   FIGURES get_figure(Coord const& c) const;
+   FIGURES get_figure(const Coord& c) const;
    FIGURES get_figure(const int x, const int y) const;
-   int get_colorless_figure(Coord const& c) const;
-   COLOR get_color(Coord const& c) const;
+   int get_colorless_figure(const Coord& c) const;
+   COLOR get_color(const Coord& c) const;
    COLOR get_move_color_i_from_end(const unsigned i) const;
 
-   Coord const& get_i_from_coord_from_end(const unsigned i = 0 ) const;
-   Coord const& get_i_to_coord_from_end(const unsigned i = 0) const;
+   const Coord& get_i_from_coord_from_end(const unsigned i = 0 ) const;
+   const Coord& get_i_to_coord_from_end(const unsigned i = 0) const;
 
 private:
    struct Moves
@@ -42,18 +42,17 @@ private:
      FIGURES _fig_on_captured_field;
    }m;
    std::vector<Moves>moves;
-   Coord _f;
-   Coord _t;
    int  _move_num;
    FIGURES _field[X_SIZE][Y_SIZE];
 
-   void next_move();
-   void field_change();
-   bool right_move_turn() const;
+   void next_move(const Coord& fr = Coord(), const Coord& t = Coord());
+   void field_change(const Coord& fr, const Coord& t);
+   void if_castling(const Coord& fr, const Coord& t);
+   bool right_move_turn(const Coord& coord) const;
    bool is_check(COLOR color) const;
-   bool step_ver(Coord const& f, Coord const& t) const;
+   bool step_ver(const Coord& f, const Coord& t) const;
    bool is_can_castling(COLOR color, const int x) const;
-   void set_field(Coord const& rhv, Coord const& lhv);
-   void set_field(Coord const& rhv, FIGURES fig);
+   void set_field(const Coord& rhv, const Coord& lhv);
+   void set_field(const Coord& rhv, FIGURES fig);
 };
 #endif //_VILVIVYVKCKYVLVUYFDKYUFYTF

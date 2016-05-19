@@ -46,12 +46,12 @@ public:
 
   Q_INVOKABLE void move(const unsigned x, const unsigned y, bool is_correct_coord = false);
   Q_INVOKABLE void back_move();
-  Q_INVOKABLE QChar letter_return(const int index) const;
+  Q_INVOKABLE QChar letter_return(const unsigned INDEX) const;
   Q_INVOKABLE void start_new_game();
-  Q_INVOKABLE void go_to_history_index(const unsigned index);
+  Q_INVOKABLE void go_to_history_index(const unsigned INDEX);
 
 public slots:
-  void read_data_from_udp();//udp!!!!
+  void read_data_from_udp();
   void timer_timeout();
 
 signals:
@@ -59,24 +59,26 @@ signals:
   void moves_history_changed();
   void check_mate();
 
-private:
+public:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
   enum SIMBOLS_IN_STR {FIRST_LETTER = 0, FIRST_NUM = 1, SECOND_LETTER = 5, SECOND_NUM = 6, NEED_SIMBOLS_TO_MOVE = 7};
-  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, NEW_GAME};
+  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, NEW_GAME, GO_TO_HISTORY_INDEX};
   const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
+  const char FREE_SPACE = ' ';
 
 private:
   QTimer *timer;
   void update_coordinates();
   void switch_move_color();
-  void emit_data_changed(const int INDEX);
-  void make_move_from_str(const QString& str);//udp!!!!
-  void send_data_on_server(MESSAGE_TYPE m_type);//udp!!!!
+  void emit_data_changed(const unsigned INDEX);
+  void make_move_from_str(const QString& str);
+  void send_data_on_server(MESSAGE_TYPE m_type, const unsigned INDEX = 0);
   void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y, bool is_correct);
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
   void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
   void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to);
+  void go_to_history_index_from_server(QString& str);
 
 private:
   Board* board;

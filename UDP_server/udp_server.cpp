@@ -17,7 +17,7 @@ UDP_server::~UDP_server()
 {
   delete _socket;
 
-  foreach(auto i, _user)
+  for(auto i : _user)
     delete i;
 }
 
@@ -94,8 +94,8 @@ void UDP_server::read_data()
       return;
   }
 
-  int sender_i;
-  for(sender_i = 0; sender_i < _user.size(); ++sender_i)
+  int sender_i = 0;
+  for(; sender_i < _user.size(); ++sender_i)
     if(_user[sender_i]->_port == sender_port && _user[sender_i]->_ip == sender_IP)
     {
       qDebug()<<"index: "<<sender_i;

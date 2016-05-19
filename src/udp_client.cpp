@@ -20,12 +20,6 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), _received_serial_num(
   send_data(HELLO_SERVER);
 }
 
-void UDP_client::timer_from_last_received_message_timeout()
-{
-  qDebug()<<"is server lost?";
-  send_data(SERVER_LOST);
-}
-
 void UDP_client::send_data(QByteArray& message, bool is_prev_serial_need)
 {
   if(!checked_is_message_received())
@@ -54,6 +48,7 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
       _message_stack.push_back(message);
       return;
     }
+
   add_serial_num(message, is_prev_serial_need);
 
   qDebug()<<"====Sending data to server"<<message;
@@ -62,30 +57,9 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
     begin_wait_receive(message);
 }
 
-void UDP_client::begin_wait_receive(const QByteArray& message)
-{
-  qDebug()<<"====begin waight";
-  _is_message_received = false;
-  _last_send_message = message;
-  _timer->start(SECOND);
-}
-
-bool UDP_client::checked_is_message_received()
-{
-  qDebug()<<"===checked_message_received";
-  if(_is_message_received)
-    _timer->stop();
-  else
-  {
-    qDebug()<<"timer restart";
-    _timer->start(SECOND);
-    _socket->writeDatagram(_last_send_message, SERVER_IP, SERVER_PORT);
-  }
-  return _is_message_received;
-}
-
 void UDP_client::read_data()
 {
+  qDebug()<<"=====socket read"<<_data;
   QHostAddress sender_IP;
   quint16 sender_port;
 
@@ -98,7 +72,6 @@ void UDP_client::read_data()
     return;
   }
 
-  qDebug()<<"=====socket read"<<_data;
   QByteArray serial_num = cut_serial_num(_data);
 
   if(serial_num.toInt() != ++_received_serial_num)
@@ -142,6 +115,40 @@ void UDP_client::read_data()
       }
       else qDebug()<<"wrong message in read_data_from_udp()";
   }
+}
+
+void UDP_client::begin_wait_receive(const QByteArray& message)
+{
+  qDebug()<<"====begin waight";
+  _is_message_received = false;
+  _last_send_message = message;
+  _timer->start(SECOND);
+}
+
+void UDP_client::timer_from_last_received_message_timeout()
+{
+  qDebug()<<"is server lost?";
+  send_data(SERVER_LOST);
+}
+
+bool UDP_client::checked_is_message_received()
+{
+  static int num_of_restarts = 0;
+  qDebug()<<"===checked_message_received";
+  if(_is_message_received)
+  {
+    _timer->stop();
+    num_of_restarts = 0;
+  }
+  else
+  {
+    qDebug()<<"timer restart";
+    _timer->start(SECOND);
+    _socket->writeDatagram(_last_send_message, SERVER_IP, SERVER_PORT);
+    ++num_of_restarts;
+  }
+  if(num_of_restarts > 5) qDebug()<<"server can be lost";
+  return _is_message_received;
 }
 
 void UDP_client::export_readed_data_to_chess(QString& move) const
