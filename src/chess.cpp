@@ -97,13 +97,8 @@ bool Board::step_ver(const Coord& f, const Coord& t) const
   const int X_UNIT_VECTOR = dx == 0 ? 0 : (t.x - f.x)/dx;
   const int Y_UNIT_VECTOR = dy == 0 ? 0 : (t.y - f.y)/dy;
 
-  if(get_colorless_figure(f) == HORSE && dx*dy == 2)
-  {
-    if(get_figure(t) == FREE_FIELD || get_color(f) != get_color(t))
-      return true;
-    else return false;
-  }
-
+  if(get_colorless_figure(f) == HORSE && dx*dy == 2 && get_color(f) != get_color(t))
+    return true;
   else if(get_colorless_figure(f) == PAWN)
   {
     if((Y_UNIT_VECTOR > 0 && get_color(f) == W_FIG) || (Y_UNIT_VECTOR < 0 && get_color(f) == B_FIG))
@@ -318,6 +313,9 @@ void Board::set_field(const Coord& rhs, FIGURES fig)
 
 COLOR Board::get_color(const Coord& c) const
 {
+  if(_field[c.x][c.y] == FREE_FIELD)
+     return NONE;
+
   if(_field[c.x][c.y] > W_FIG)
     return W_FIG;
   return B_FIG;
