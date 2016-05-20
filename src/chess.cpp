@@ -40,7 +40,8 @@ Board::Board()
 
 bool Board::move(const Coord& fr, const Coord& t)
 {
-  if(right_move_turn(fr) && step_ver(fr, t)) field_change(fr, t);
+  if(right_move_turn(fr) && (step_ver(fr, t) || is_can_castling(fr, t)))
+    field_change(fr, t);
   else return false;
 
   if(!is_check(get_color(t)))
@@ -95,27 +96,12 @@ bool Board::step_ver(const Coord& f, const Coord& t) const
 
   const int X_UNIT_VECTOR = dx == 0 ? 0 : (t.x - f.x)/dx;
   const int Y_UNIT_VECTOR = dy == 0 ? 0 : (t.y - f.y)/dy;
-  
+
   if(get_colorless_figure(f) == HORSE && dx*dy == 2)
   {
     if(get_figure(t) == FREE_FIELD || get_color(f) != get_color(t))
       return true;
     else return false;
-  }
-
-  else if(get_colorless_figure(f) == KING)
-  {
-    if(is_can_castling(get_color(f), t.x) && dy == 0 && dx == 2)
-    {
-      if(get_figure(f.x + X_UNIT_VECTOR, f.y) == FREE_FIELD && get_figure(f.x + 2 * X_UNIT_VECTOR,f.y) == FREE_FIELD)
-      {
-        if(X_UNIT_VECTOR > 0 || (X_UNIT_VECTOR < 0 && get_figure(f.x - 3, f.y) == FREE_FIELD))
-          return true;
-        else return false;
-      }
-      return false;
-    }
-    else if(!(dx <= 1 && dy <= 1) && dx != 2) return false;
   }
 
   else if(get_colorless_figure(f) == PAWN)
@@ -124,14 +110,16 @@ bool Board::step_ver(const Coord& f, const Coord& t) const
       return false;
 
     if(get_figure(t) != FREE_FIELD)
+    {
       if(dy * dx == 1 && get_color(f) != get_color(t))
         return true;
-
+    }
     else if(dx == 0 && (dy == 1 || (dy == 2 && get_figure(t.x,f.y + Y_UNIT_VECTOR) == FREE_FIELD
             &&(f.y == 6 || f.y == 1))))
       return true;
     return false;
   }
+  else if(get_colorless_figure(f) == KING && dx <= 1 && dy <= 1);
   else if((get_colorless_figure(f) == ROOK || get_colorless_figure(f) == QUEEN) && (dx*dy == 0));
   else if((get_colorless_figure(f) == ELEPHANT || get_colorless_figure(f) == QUEEN) && (dx == dy));
   else return false;
@@ -152,20 +140,34 @@ bool Board::step_ver(const Coord& f, const Coord& t) const
   return true;
 }
 
-bool Board::is_can_castling(COLOR color, const int x) const
+bool Board::is_can_castling(const Coord& f, const Coord& t) const
 {
-  const bool IS_TWO_ZEROS = x > 4;
-  Coord coord;
-  coord.x = IS_TWO_ZEROS ? 7 : 0;
-  coord.y = (color == W_FIG) ? 7 : 0;
+  const int dx = abs(t.x - f.x);
+  const int dy = abs(t.y - f.y);
 
-  for(unsigned i = 0; i < get_current_move(); ++i)
-    if(is_check(color) && ((get_colorless_figure(moves[i]._from) == KING && get_color(moves[i]._from) == color)
-      || coord == moves[i]._from || coord == moves[i]._to))
-      goto cant_castling;
+  const int X_UNIT_VECTOR = dx == 0 ? 0 : (t.x - f.x)/dx;
 
-  return true;
+  if(get_colorless_figure(f) != KING || dy != 0 || dx != 2)
+    goto cant_castling;
 
+  if(get_figure(f.x + X_UNIT_VECTOR, f.y) == FREE_FIELD && get_figure(f.x + 2 * X_UNIT_VECTOR,f.y) == FREE_FIELD)
+  {
+    if(X_UNIT_VECTOR > 0 || (X_UNIT_VECTOR < 0 && get_figure(f.x - 3, f.y) == FREE_FIELD))
+    {
+      const bool IS_TWO_ZEROS = t.x > 4;
+      Coord coord;
+      coord.x = IS_TWO_ZEROS ? 7 : 0;
+      coord.y = get_color(f) == W_FIG ? 7 : 0;
+
+      for(unsigned i = 0; i < get_current_move(); ++i)
+        if(!is_check(get_color(f)) && ((get_colorless_figure(moves[i]._from) == KING
+           && get_color(moves[i]._from) == get_color(f)) || coord == moves[i]._from || coord == moves[i]._to))
+          goto cant_castling;
+
+      return true;
+    }
+    else return false;
+  }
   cant_castling:
     return false;
 }
@@ -264,7 +266,7 @@ void Board::next_move(const Coord& fr, const Coord& t)
   ++_move_num;
 }
 
-inline bool Board::Coord::operator ==(const Coord& rhs)
+bool Board::Coord::operator ==(const Coord& rhs)
 {
   return(x == rhs.x && y == rhs.y);
 }

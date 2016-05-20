@@ -51,7 +51,7 @@ private:
    bool right_move_turn(const Coord& coord) const;
    bool is_check(COLOR color) const;
    bool step_ver(const Coord& f, const Coord& t) const;
-   bool is_can_castling(COLOR color, const int x) const;
+   bool is_can_castling(const Coord& from, const Coord& to) const;
    void set_field(const Coord& rhv, const Coord& lhv);
    void set_field(const Coord& rhv, FIGURES fig);
 };

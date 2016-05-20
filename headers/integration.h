@@ -68,7 +68,7 @@ public:
   const char FREE_SPACE = ' ';
 
 private:
-  QTimer *timer;
+  QTimer *__timer;
   void update_coordinates();
   void switch_move_color();
   void emit_data_changed(const unsigned INDEX);

@@ -24,13 +24,15 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
 
   connect(udp_client, SIGNAL(some_data_came()), this, SLOT(read_data_from_udp()));
 
-  timer = new QTimer(this);
-  connect(timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  timer->start(6000);
+  __timer = new QTimer(this);
+  connect(__timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
+  __timer->start(6000);
 }
 
 void ChessIntegration::timer_timeout()
 {
+  __timer->stop();
+
   static int i = 0;
   ++i;
 
@@ -44,12 +46,13 @@ void ChessIntegration::timer_timeout()
     move(4,1,true);
     move(4,2,true);
   }
-  if( i == 2)
+  if( i == 3)
   {
     move(1,7,true);
     move(0,5,true);
-   // timer->stop();
+   //
   }
+  __timer->start(6000);
  }
 
 ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
@@ -75,7 +78,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
     else
     {
       is_from = true;
-      correct_figure_coord(to, x, y,is_correct_coord);
+      correct_figure_coord(to, x, y, is_correct_coord);
 
       if(!(from == to) && board->move(from, to))
       {
