@@ -243,7 +243,7 @@ void ChessIntegration::go_to_history_index(const unsigned INDEX)
     }
   }
   switch_move_color();
-  send_data_on_server(GO_TO_HISTORY_INDEX, INDEX);
+  send_data_on_server(GO_TO_HISTORY_INDEX, INDEX);//problem here! here calling back_move
 }
 
 QStringList ChessIntegration::moves_history() const
