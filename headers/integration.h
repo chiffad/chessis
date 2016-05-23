@@ -63,7 +63,7 @@ public:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
   enum SIMBOLS_IN_STR {FIRST_LETTER = 0, FIRST_NUM = 1, SECOND_LETTER = 5, SECOND_NUM = 6, NEED_SIMBOLS_TO_MOVE = 7};
-  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, NEW_GAME, GO_TO_HISTORY_INDEX};
+  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, NEW_GAME};
   const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
   const char FREE_SPACE = ' ';
 
@@ -78,7 +78,6 @@ private:
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
   void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
   void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to);
-  void go_to_history_index_from_server(QString& str);
 
 private:
   Board* board;
