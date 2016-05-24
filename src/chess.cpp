@@ -56,15 +56,16 @@ bool Board::move(const Coord& fr, const Coord& t)
 
 void Board::if_castling(const Coord& fr, const Coord& t)
 {
-  const int dx = abs(fr.x - t.x);
+  const int dx = abs(t.x - fr.x);
   const int X_UNIT_VEC = dx == 0 ? 0 : (t.x - fr.x)/dx;
+
   if(get_colorless_figure(t) == KING && dx > 1)
   {
     Coord rook_fr;
     Coord rook_to;
 
-    rook_fr.x = X_UNIT_VEC > 0 ? t.x - X_UNIT_VEC : t.x + 2 * X_UNIT_VEC;
-    rook_to.x = t.x + X_UNIT_VEC;
+    rook_fr.x = X_UNIT_VEC > 0 ? t.x + X_UNIT_VEC : t.x + 2 * X_UNIT_VEC;
+    rook_to.x = t.x - X_UNIT_VEC;
     rook_fr.y = rook_to.y = t.y;
 
     FIGURES fig = get_figure(rook_fr);
@@ -127,7 +128,7 @@ bool Board::step_ver(const Coord& f, const Coord& t) const
   {
     coord.x += X_UNIT_VECTOR;
     coord.y += Y_UNIT_VECTOR;
-    if(get_figure(coord) == FREE_FIELD || (get_color(t) != get_color(coord) && coord == t))
+    if(get_figure(coord) == FREE_FIELD || (get_color(t) != get_color(f) && coord == t))
       continue;
 
     return false;
@@ -155,9 +156,9 @@ bool Board::is_can_castling(const Coord& f, const Coord& t) const
       coord.y = get_color(f) == W_FIG ? 7 : 0;
 
       for(unsigned i = 0; i < get_current_move(); ++i)
-        if(!is_check(get_color(f)) && ((get_colorless_figure(moves[i]._from) == KING
+        if(is_check(get_color(f)) && ((get_colorless_figure(moves[i]._from) == KING
            && get_color(moves[i]._from) == get_color(f)) || coord == moves[i]._from || coord == moves[i]._to))
-          goto cant_castling;
+           goto cant_castling;
 
       return true;
     }
