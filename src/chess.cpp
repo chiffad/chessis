@@ -54,26 +54,6 @@ bool Board::move(const Coord& fr, const Coord& t)
   return false;
 }
 
-void Board::if_castling(const Coord& fr, const Coord& t)
-{
-  const int dx = abs(t.x - fr.x);
-  const int X_UNIT_VEC = dx == 0 ? 0 : (t.x - fr.x)/dx;
-
-  if(get_colorless_figure(t) == KING && dx > 1)
-  {
-    Coord rook_fr;
-    Coord rook_to;
-
-    rook_fr.x = X_UNIT_VEC > 0 ? t.x + X_UNIT_VEC : t.x + 2 * X_UNIT_VEC;
-    rook_to.x = t.x - X_UNIT_VEC;
-    rook_fr.y = rook_to.y = t.y;
-
-    FIGURES fig = get_figure(rook_fr);
-    set_field(rook_fr, FREE_FIELD);
-    set_field(rook_to, fig);
-  }
-}
-
 bool Board::right_move_turn(const Coord& coord) const
 {
   if(_move_num == 1 && get_color(coord) == B_FIG) return false;
@@ -136,15 +116,40 @@ bool Board::step_ver(const Coord& f, const Coord& t) const
   return true;
 }
 
+void Board::if_castling(const Coord& fr, const Coord& t)
+{
+  const int dx = abs(t.x - fr.x);
+  const int X_UNIT_VEC = dx == 0 ? 0 : (t.x - fr.x)/dx;
+
+  if(get_colorless_figure(t) == KING && dx > 1)
+  {
+    Coord rook_fr;
+    Coord rook_to;
+
+    rook_fr.y = rook_to.y = t.y;
+    if(fr.x == 6 || fr.x == 2)
+    {
+      rook_fr.x = fr.x + X_UNIT_VEC;
+      rook_to.x = fr.x - X_UNIT_VEC * (X_UNIT_VEC > 0 ? 2 : 1);
+    }
+    else
+    {
+      rook_fr.x = t.x + X_UNIT_VEC * (X_UNIT_VEC > 0 ? 1 : 2);
+      rook_to.x = t.x - X_UNIT_VEC;
+    }
+    FIGURES fig = get_figure(rook_fr);
+    set_field(rook_fr, FREE_FIELD);
+    set_field(rook_to, fig);
+  }
+}
+
 bool Board::is_can_castling(const Coord& f, const Coord& t) const
 {
   const int dx = abs(t.x - f.x);
-  const int dy = abs(t.y - f.y);
-
   const int X_UNIT_VECTOR = dx == 0 ? 0 : (t.x - f.x)/dx;
 
-  if(get_colorless_figure(f) != KING || dy != 0 || dx != 2)
-    goto cant_castling;
+  if(get_colorless_figure(f) != KING || abs(t.y - f.y) != 0 || dx != 2)
+    return false;
 
   if(get_figure(f.x + X_UNIT_VECTOR, f.y) == FREE_FIELD && get_figure(f.x + 2 * X_UNIT_VECTOR,f.y) == FREE_FIELD)
   {
@@ -162,8 +167,8 @@ bool Board::is_can_castling(const Coord& f, const Coord& t) const
 
       return true;
     }
-    else return false;
   }
+  return false;
   cant_castling:
     return false;
 }
@@ -245,7 +250,7 @@ bool Board::back_move()
     set_field(prev_from, prev_to);
     set_field(prev_to, moves[_move_num - 1]._fig_on_captured_field);
     --_move_num;
-    if_castling(prev_from, prev_to);
+    if_castling(prev_to, prev_from);
     return true;
   }
   return false;

@@ -26,7 +26,7 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
 
   __timer = new QTimer(this);
   connect(__timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  __timer->start(6000);
+//  __timer->start(6000);
 }
 
 void ChessIntegration::timer_timeout()
@@ -100,7 +100,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
         if(is_check_mate())
           emit check_mate();
 
-        send_data_on_server(MOVE);//udp!!!
+        send_data_on_server(MOVE);
       }
       else
       {
@@ -121,8 +121,8 @@ void ChessIntegration::back_move()
     update_hilight(board->get_i_from_coord_from_end(1), FIRST_HILIGHT);
     update_hilight(board->get_i_to_coord_from_end(1), SECOND_HILIGHT);
     update_coordinates();
+    send_data_on_server(BACK_MOVE);
   }
-  send_data_on_server(BACK_MOVE);
 }
 
 void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y, bool is_correct)
@@ -324,7 +324,7 @@ void ChessIntegration::make_move_from_str(const QString& str)
   move((str[SECOND_LETTER].unicode() - a_LETTER), (Y_SIZE - str[SECOND_NUM].digitValue()), true);
 }
 
-void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type, const unsigned INDEX)
+void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)
 {
   qDebug()<<"send_data_on_server";
   if(_is_message_from_server)

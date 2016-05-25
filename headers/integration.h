@@ -73,7 +73,7 @@ private:
   void switch_move_color();
   void emit_data_changed(const unsigned INDEX);
   void make_move_from_str(const QString& str);
-  void send_data_on_server(MESSAGE_TYPE m_type, const unsigned INDEX = 0);
+  void send_data_on_server(MESSAGE_TYPE m_type);
   void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y, bool is_correct);
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
   void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
