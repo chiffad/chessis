@@ -26,7 +26,7 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
 
   __timer = new QTimer(this);
   connect(__timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-//  __timer->start(6000);
+  __timer->start(6000);
 }
 
 void ChessIntegration::timer_timeout()
@@ -202,9 +202,9 @@ void ChessIntegration::emit_data_changed(const unsigned INDEX)
   emit dataChanged(topLeft, bottomRight);
 }
 
-QChar ChessIntegration::letter_return(const unsigned INDEX) const
+QChar ChessIntegration::letter_return(const unsigned index) const
 {
-  return QChar(a_LETTER + INDEX);
+  return QChar(a_LETTER + index);
 }
 
 bool ChessIntegration::is_check_mate() const
@@ -229,31 +229,32 @@ void ChessIntegration::start_new_game()
   send_data_on_server(NEW_GAME);
 }
 
-void ChessIntegration::go_to_history_index(const unsigned INDEX)
+void ChessIntegration::go_to_history_index(const unsigned index)
 {
   qDebug()<<"go to history index";
   const unsigned CURRENT_MOVE = board->get_current_move() - ZERO_AND_ACTUAL_MOVES;
 
-  if(INDEX == CURRENT_MOVE)
+  if(index == CURRENT_MOVE)
     return;
 
-  if(INDEX < CURRENT_MOVE)
+  if(index < CURRENT_MOVE)
   {
-    const unsigned D_INDEX = CURRENT_MOVE - INDEX;
+    const unsigned D_INDEX = CURRENT_MOVE - index;
 
     for(unsigned i = 0; i < D_INDEX; ++i)
       back_move();
   }
 
-  if(INDEX > CURRENT_MOVE && INDEX < history_copy.size())
+  if(index > CURRENT_MOVE && index < history_copy.size())
   {
-    for(unsigned i = CURRENT_MOVE; i <= INDEX; ++i)
+    for(unsigned i = CURRENT_MOVE; i <= index; ++i)
     {
       board->move(history_copy[i].from, history_copy[i].to);
       update_hilight(history_copy[i].from, FIRST_HILIGHT);
       update_hilight(history_copy[i].to, SECOND_HILIGHT);
       update_coordinates();
     }
+    send_data_on_server(GO_TO_HISTORY, -1 * index);
   }
   switch_move_color();
 }
@@ -314,7 +315,7 @@ void ChessIntegration::read_data_from_udp()
       start_new_game();
       break;
     default:
-      make_move_from_str(message);
+      message.toInt() < 0 ? go_to_history_index(abs(message.toInt())) : make_move_from_str(message);
   }
 }
 
@@ -324,7 +325,7 @@ void ChessIntegration::make_move_from_str(const QString& str)
   move((str[SECOND_LETTER].unicode() - a_LETTER), (Y_SIZE - str[SECOND_NUM].digitValue()), true);
 }
 
-void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)
+void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type, const int index)
 {
   qDebug()<<"send_data_on_server";
   if(_is_message_from_server)
@@ -337,6 +338,8 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type)
   QByteArray message;
   if(m_type == MOVE)
     message.append(_moves_history[_moves_history.size() -1]);
+  else if(m_type == GO_TO_HISTORY)
+    message.setNum(index);
   else message.setNum(m_type);
 
   udp_client->send_data(message);

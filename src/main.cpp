@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
   ChessIntegration model;
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("FigureModel", &model);
-  engine.load(QUrl(QStringLiteral("chessis/res/app.qml")));
+  //engine.load(QUrl(QStringLiteral("chessis/res/app.qml")));
 
   return app.exec();
 }

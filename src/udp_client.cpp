@@ -107,7 +107,7 @@ void UDP_client::read_data()
       break;
 
     default:
-      if(_data.size() == NEED_SIMBOLS_TO_MOVE ||(_data.toInt() >= MOVE && _data.toInt() <= NEW_GAME))
+      if(_data.size() == NEED_SIMBOLS_TO_MOVE || _data.toInt() < 0 ||(_data.toInt() >= MOVE && _data.toInt() <= NEW_GAME))
       {
         qDebug()<<"emit_data_came";
         send_data(MESSAGE_RECEIVED);
