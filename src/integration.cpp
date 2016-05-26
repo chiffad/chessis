@@ -4,14 +4,15 @@
 #include <ctype.h>
 #include <QModelIndex>
 #include <QTimer>
+#include <fstream>
 #include "headers/integration.h"
 #include "headers/chess.h"
 #include "headers/udp_client.h"
 
 ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
 {
-  board = new Board();
-  udp_client = new UDP_client();
+  _board = new Board();
+  _udp_client = new UDP_client();
   _move_color = MOVE_COLOR_W;
   _is_message_from_server = false;
 
@@ -22,7 +23,7 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
   addFigure(ChessIntegration::Figure(HILIGHT_IM, 0, 0, false));
   update_coordinates();
 
-  connect(udp_client, SIGNAL(some_data_came()), this, SLOT(read_data_from_udp()));
+  connect(_udp_client, SIGNAL(some_data_came()), this, SLOT(read_data_from_udp()));
 
   __timer = new QTimer(this);
   connect(__timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
@@ -80,7 +81,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
     if(is_from)
     {
       correct_figure_coord(from,x,y,is_correct_coord);
-      if(board->get_figure(from) != FREE_FIELD)
+      if(_board->get_figure(from) != FREE_FIELD)
       {
         update_hilight(from, FIRST_HILIGHT);
         is_from = false;
@@ -92,7 +93,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
       is_from = true;
       correct_figure_coord(to, x, y, is_correct_coord);
 
-      if(!(from == to) && board->move(from, to))
+      if(!(from == to) && _board->move(from, to))
       {
         update_hilight(to, SECOND_HILIGHT);
         add_to_history(from, to);
@@ -115,11 +116,11 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
 
 void ChessIntegration::back_move()
 {
-  if(board->back_move())
+  if(_board->back_move())
   {
     qDebug()<<"====back_move";
-    update_hilight(board->get_i_from_coord_from_end(1), FIRST_HILIGHT);
-    update_hilight(board->get_i_to_coord_from_end(1), SECOND_HILIGHT);
+    update_hilight(_board->get_i_from_coord_from_end(1), FIRST_HILIGHT);
+    update_hilight(_board->get_i_to_coord_from_end(1), SECOND_HILIGHT);
     update_coordinates();
     send_data_on_server(BACK_MOVE);
   }
@@ -139,7 +140,7 @@ void ChessIntegration::update_coordinates()
   {
     a.x = _figures_model[index].x();
     a.y = _figures_model[index].y();
-    if(board->get_figure(a) == FREE_FIELD)
+    if(_board->get_figure(a) == FREE_FIELD)
     {
       _figures_model[index].set_visible(false);
       emit_data_changed(index);
@@ -150,13 +151,13 @@ void ChessIntegration::update_coordinates()
   Board::Coord coord;
   for(coord.y = 0; coord.y < Y_SIZE; ++coord.y)
     for(coord.x = 0; coord.x < X_SIZE; ++coord.x)
-      if(board->get_figure(coord) != FREE_FIELD)
+      if(_board->get_figure(coord) != FREE_FIELD)
       {
         QString fig_name_color;
-        if(board->get_color(coord) == W_FIG)
+        if(_board->get_color(coord) == W_FIG)
           fig_name_color = "w_";
         else fig_name_color = "b_";
-        fig_name_color += board->get_figure(coord);
+        fig_name_color += _board->get_figure(coord);
 
         _figures_model[index].set_coord(coord);
         _figures_model[index].set_name(fig_name_color);
@@ -183,7 +184,7 @@ void ChessIntegration::update_hilight(const Board::Coord& coord, HILIGHT hilight
 
 void ChessIntegration::switch_move_color()
 {
-  if(board->get_move_color_i_from_end(1) == W_FIG)
+  if(_board->get_move_color_i_from_end(1) == W_FIG)
     _move_color = MOVE_COLOR_B;
   else  _move_color = MOVE_COLOR_W;
 
@@ -209,14 +210,14 @@ QChar ChessIntegration::letter_return(const unsigned index) const
 
 bool ChessIntegration::is_check_mate() const
 {
-  if(board->get_current_move() <= 2) return false;
-  return board->is_mate(board->get_move_color_i_from_end(2));
+  if(_board->get_current_move() <= 2) return false;
+  return _board->is_mate(_board->get_move_color_i_from_end(2));
 }
 
 void ChessIntegration::start_new_game()
 {
   qDebug()<<"====start_new_game";
-  while (board->get_current_move() != 1)
+  while (_board->get_current_move() != 1)
   {
     back_move();
     _moves_history.pop_back();
@@ -232,7 +233,7 @@ void ChessIntegration::start_new_game()
 void ChessIntegration::go_to_history_index(const unsigned index)
 {
   qDebug()<<"go to history index";
-  const unsigned CURRENT_MOVE = board->get_current_move() - ZERO_AND_ACTUAL_MOVES;
+  const unsigned CURRENT_MOVE = _board->get_current_move() - ZERO_AND_ACTUAL_MOVES;
 
   if(index == CURRENT_MOVE)
     return;
@@ -249,7 +250,7 @@ void ChessIntegration::go_to_history_index(const unsigned index)
   {
     for(unsigned i = CURRENT_MOVE; i <= index; ++i)
     {
-      board->move(history_copy[i].from, history_copy[i].to);
+      _board->move(history_copy[i].from, history_copy[i].to);
       update_hilight(history_copy[i].from, FIRST_HILIGHT);
       update_hilight(history_copy[i].to, SECOND_HILIGHT);
       update_coordinates();
@@ -268,7 +269,7 @@ void ChessIntegration::add_move_to_history_copy(const Board::Coord& coord_from, 
 {
   history_copy.shrink_to_fit();
   const int HISTRY_COPY_SIZE = history_copy.size() + ZERO_AND_ACTUAL_MOVES;
-  for(int i = board->get_current_move(); i < HISTRY_COPY_SIZE; ++i)
+  for(int i = _board->get_current_move(); i < HISTRY_COPY_SIZE; ++i)
       history_copy.pop_back();
 
   Copy_of_history_moves copy;
@@ -284,7 +285,7 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
   add_move_to_history_copy(coord_from, coord_to);
 
   const int LIST_SIZE = _moves_history.size() + ZERO_AND_ACTUAL_MOVES;
-  for(int i = board->get_current_move(); i < LIST_SIZE; ++i)
+  for(int i = _board->get_current_move(); i < LIST_SIZE; ++i)
     _moves_history.pop_back();
 
   QString move;
@@ -297,6 +298,27 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
   emit moves_history_changed();
 }
 
+void ChessIntegration::get_path(const QString& path, bool is_moves_out)
+{
+  is_moves_out ? moves_to_file(path) : moves_from_file(path);
+}
+
+void ChessIntegration::moves_to_file(const QString& path)
+{
+  qDebug()<<"moves_to_file path: "<<path;
+  _in_file.open(path.toUtf8().constData());
+  for(int i = 0; i < _moves_history.size(); ++i)
+    _in_file<<_moves_history[i].toUtf8().constData() + FREE_SPACE;
+
+  _in_file.close();
+}
+
+void ChessIntegration::moves_from_file(const QString& path)
+{
+  qDebug()<<"moves_from_file";
+
+}
+
 //===================================================================================================
 
 void ChessIntegration::read_data_from_udp()
@@ -304,7 +326,7 @@ void ChessIntegration::read_data_from_udp()
   qDebug()<<"=====integrator read_data_from_udp()";
   _is_message_from_server = true;
   QString message;
-  udp_client->export_readed_data_to_chess(message);
+  _udp_client->export_readed_data_to_chess(message);
 
   switch (message.toInt())
   {
@@ -342,7 +364,7 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type, const int index)
     message.setNum(index);
   else message.setNum(m_type);
 
-  udp_client->send_data(message);
+  _udp_client->send_data(message);
 }
 
 //===========================================================================================================

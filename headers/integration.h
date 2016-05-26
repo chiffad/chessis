@@ -7,6 +7,7 @@
 #include <QAbstractListModel>
 #include <QStringList>
 #include <vector>
+#include <fstream>
 #include "headers/chess.h"
 #include "headers/udp_client.h"
 
@@ -25,7 +26,7 @@ public:
   };
 
   explicit ChessIntegration(QObject *parent = 0);
-  ~ChessIntegration(){delete board; delete udp_client;}
+  ~ChessIntegration(){delete _board; delete _udp_client;}
 
   void addFigure(const Figure &figure);
   int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -49,6 +50,7 @@ public:
   Q_INVOKABLE QChar letter_return(const unsigned index) const;
   Q_INVOKABLE void start_new_game();
   Q_INVOKABLE void go_to_history_index(const unsigned index);
+  Q_INVOKABLE void get_path(const QString& path, bool is_moves_out);
 
 public slots:
   void read_data_from_udp();
@@ -78,10 +80,14 @@ private:
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
   void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
   void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to);
+  void moves_from_file(const QString& path);
+  void moves_to_file(const QString& path);
 
 private:
-  Board* board;
-  UDP_client* udp_client;//udp!!!!
+  Board* _board;
+  UDP_client* _udp_client;
+  std::ofstream _in_file;
+  QString _path_for_out_moves;
   QString _move_color;
   QStringList _moves_history;
   QList<Figure> _figures_model;
