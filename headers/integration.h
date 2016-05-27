@@ -50,7 +50,7 @@ public:
   Q_INVOKABLE QChar letter_return(const unsigned index) const;
   Q_INVOKABLE void start_new_game();
   Q_INVOKABLE void go_to_history_index(const unsigned index);
-  Q_INVOKABLE void get_path(const QString& path, bool is_moves_out);
+  Q_INVOKABLE void path_to_file(const QString& path, bool is_moves_to_file);
 
 public slots:
   void read_data_from_udp();
@@ -64,10 +64,10 @@ signals:
 public:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
-  enum SIMBOLS_IN_STR {FIRST_LETTER = 0, FIRST_NUM = 1, SECOND_LETTER = 5, SECOND_NUM = 6, NEED_SIMBOLS_TO_MOVE = 7};
-  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME};
   const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
   const char FREE_SPACE = ' ';
+
+  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME};
 
 private:
   QTimer *__timer;
@@ -80,14 +80,12 @@ private:
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
   void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
   void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to);
-  void moves_from_file(const QString& path);
-  void moves_to_file(const QString& path);
+  void read_moves_from_file(const QString& path);
+  void write_moves_to_file(const QString& path);
 
 private:
   Board* _board;
   UDP_client* _udp_client;
-  std::ofstream _in_file;
-  QString _path_for_out_moves;
   QString _move_color;
   QStringList _moves_history;
   QList<Figure> _figures_model;

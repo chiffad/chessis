@@ -79,12 +79,31 @@ Rectangle
     width: parent.width/2
     height: parent.height/10
 
-    text: "Moves to file"
+    text: "Create file"
 
     onClicked:
     {
       _path_to_file.visible = true;
-      _path_to_file._is_moves_out = true;
+      _path_to_file._is_moves_from_file = false;
+    }
+  }
+
+  Button
+  {
+    id: _moves_from_file
+    anchors.right: parent.right
+    anchors.top: _start_new_game.top
+    anchors.topMargin: bORDER_WIDTH
+    anchors.rightMargin: bORDER_WIDTH
+    width: parent.width/2
+    height: parent.height/10
+
+    text: "Load file"
+
+    onClicked:
+    {
+      _path_to_file.visible = true;
+      _path_to_file._is_moves_from_file = true;
     }
   }
 
@@ -98,7 +117,7 @@ Rectangle
     border.width: bORDER_WIDTH
     border.color: "black"
 
-    property bool _is_moves_out: false
+    property bool _is_moves_from_file: false
 
     TextInput
     {
@@ -109,7 +128,7 @@ Rectangle
       onAccepted:
       {
         parent.visible = false;
-        FigureModel.get_path(text, is_moves_out);
+        FigureModel.path_to_file(text, _path_to_file._is_moves_from_file);
       }
     }
   }

@@ -75,6 +75,8 @@ ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, 
 
 void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_coord)
 {
+  qDebug()<<"===move";
+  qDebug()<<"x: "<<x<<" y: "<<y;
   static bool is_from = true;
   if(!is_check_mate())
   {
@@ -112,6 +114,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
       update_coordinates();
     }
   }
+  qDebug()<<"move end";
 }
 
 void ChessIntegration::back_move()
@@ -288,35 +291,70 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
   for(int i = _board->get_current_move(); i < LIST_SIZE; ++i)
     _moves_history.pop_back();
 
-  QString move;
-  QString toY;
-  QString fromY;
-
-  move = QChar(a_LETTER + coord_from.x) + fromY.setNum(Y_SIZE - coord_from.y) + " - " + QChar(a_LETTER + coord_to.x) + toY.setNum(Y_SIZE - coord_to.y);
+  QString move = QChar(a_LETTER + coord_from.x) + QString::number(Y_SIZE - coord_from.y) + " - "
+                 + QChar(a_LETTER + coord_to.x) + QString::number(Y_SIZE - coord_to.y);
 
   _moves_history.append(move);
   emit moves_history_changed();
 }
 
-void ChessIntegration::get_path(const QString& path, bool is_moves_out)
+void ChessIntegration::path_to_file(const QString& path, bool is_moves_to_file)
 {
-  is_moves_out ? moves_to_file(path) : moves_from_file(path);
+  qDebug()<<"is moves out?"<<is_moves_to_file;
+  is_moves_to_file ? write_moves_to_file(path) : read_moves_from_file(path);
 }
 
-void ChessIntegration::moves_to_file(const QString& path)
+void ChessIntegration::write_moves_to_file(const QString& path)
 {
-  qDebug()<<"moves_to_file path: "<<path;
-  _in_file.open(path.toUtf8().constData());
+  qDebug()<<"====moves_to_file path: "<<path;
+
+  std::ofstream in_file(path.toUtf8().constData());
   for(int i = 0; i < _moves_history.size(); ++i)
-    _in_file<<_moves_history[i].toUtf8().constData() + FREE_SPACE;
+    in_file<<_moves_history[i].toUtf8().constData() + FREE_SPACE;
 
-  _in_file.close();
+  in_file.close();
 }
 
-void ChessIntegration::moves_from_file(const QString& path)
+void ChessIntegration::read_moves_from_file(const QString& path)
 {
-  qDebug()<<"moves_from_file";
+  qDebug()<<"====moves_from_file, path: "<<path;
 
+  std::string data_from_file;
+  std::ifstream from_file(path.toUtf8().constData());
+
+  while(!from_file.eof())
+    from_file>>data_from_file;
+
+  from_file.close();
+  make_move_from_str(QString::fromStdString(data_from_file));
+}
+
+void ChessIntegration::make_move_from_str(const QString& str)
+{
+  qDebug()<<"===make_move_from_str "<<str;
+
+  QVector<int> coord_str;
+  enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4};
+
+  for(int i = 0; i < str.size(); ++i)
+  {
+    int coord = X_SIZE;
+    if(str[i].isLetterOrNumber())
+      coord = str[i].isNumber() ? Y_SIZE - str[i].digitValue() : str[i].unicode() - a_LETTER;
+
+    if(coord < X_SIZE)
+    {
+      qDebug()<<"str[i]: "<<str[i]<<" coord: "<<coord;
+      coord_str.push_back(coord);
+      if(coord_str.size() == COORD_NEED_TO_MOVE)
+      {
+        qDebug()<<"str to move:"<<coord_str;
+        move(coord_str[FROM_X], coord_str[FROM_Y], true);
+        move(coord_str[TO_X], coord_str[TO_Y], true);
+        coord_str.clear();
+      }
+    }
+  }
 }
 
 //===================================================================================================
@@ -339,12 +377,6 @@ void ChessIntegration::read_data_from_udp()
     default:
       message.toInt() < 0 ? go_to_history_index(abs(message.toInt())) : make_move_from_str(message);
   }
-}
-
-void ChessIntegration::make_move_from_str(const QString& str)
-{
-  move((str[FIRST_LETTER].unicode() - a_LETTER), (Y_SIZE - str[FIRST_NUM].digitValue()), true);
-  move((str[SECOND_LETTER].unicode() - a_LETTER), (Y_SIZE - str[SECOND_NUM].digitValue()), true);
 }
 
 void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type, const int index)
