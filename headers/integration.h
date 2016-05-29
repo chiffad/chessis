@@ -50,7 +50,7 @@ public:
   Q_INVOKABLE QChar letter_return(const unsigned index) const;
   Q_INVOKABLE void start_new_game();
   Q_INVOKABLE void go_to_history_index(const unsigned index);
-  Q_INVOKABLE void path_to_file(const QString& path, bool is_moves_to_file);
+  Q_INVOKABLE void path_to_file(const QString& path, bool is_moves_from_file);
 
 public slots:
   void read_data_from_udp();

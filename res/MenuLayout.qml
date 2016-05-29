@@ -71,9 +71,29 @@ Rectangle
 
   Button
   {
+    id: _moves_from_file
+    anchors.left: parent.left
+    anchors.top: _start_new_game.bottom
+    anchors.topMargin: bORDER_WIDTH
+    anchors.leftMargin: bORDER_WIDTH
+    width: parent.width/2
+    height: parent.height/10
+
+    text: "Load file"
+
+    onClicked:
+    {
+      _path_to_file.visible = true;
+      _path_to_file._is_moves_from_file = true;
+    }
+  }
+
+  Button
+  {
     id: _moves_to_file
+    anchors.left:  _moves_from_file.right
     anchors.right: parent.right
-    anchors.top: _start_new_game.top
+    anchors.top: _start_new_game.bottom
     anchors.topMargin: bORDER_WIDTH
     anchors.rightMargin: bORDER_WIDTH
     width: parent.width/2
@@ -88,30 +108,14 @@ Rectangle
     }
   }
 
-  Button
-  {
-    id: _moves_from_file
-    anchors.right: parent.right
-    anchors.top: _start_new_game.top
-    anchors.topMargin: bORDER_WIDTH
-    anchors.rightMargin: bORDER_WIDTH
-    width: parent.width/2
-    height: parent.height/10
-
-    text: "Load file"
-
-    onClicked:
-    {
-      _path_to_file.visible = true;
-      _path_to_file._is_moves_from_file = true;
-    }
-  }
-
   Rectangle
   {
     id: _path_to_file
-    anchors.horizontalCenter: paretn
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.bottom: parent.bottom
+    anchors.leftMargin: bORDER_WIDTH
+    anchors.rightMargin: anchors.leftMargin
     height: 30
     visible: false
     border.width: bORDER_WIDTH
@@ -119,11 +123,13 @@ Rectangle
 
     property bool _is_moves_from_file: false
 
-    TextInput
+    TextField
     {
       anchors.fill: parent
-      visible: parent
-      text: "Enter full path & file name"
+      visible: parent.visible
+      clip: true
+      focus: true
+      placeholderText: "Enter path & name"
 
       onAccepted:
       {
