@@ -113,7 +113,7 @@ Rectangle
     id: _path_to_file
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.bottom: parent.bottom
+    anchors.top:  _moves_to_file.bottom
     anchors.leftMargin: bORDER_WIDTH
     anchors.rightMargin: anchors.leftMargin
     height: 30
@@ -136,6 +136,22 @@ Rectangle
         parent.visible = false;
         FigureModel.path_to_file(text, _path_to_file._is_moves_from_file);
       }
+    }
+  }
+
+  Rectangle
+  {
+    id: _connection_status
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    height: 30
+    color: parent.color
+
+    Text
+    {
+      anchors.fill: parent
+      text: FigureModel.udp_connection_status
     }
   }
 }

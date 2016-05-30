@@ -3,19 +3,17 @@
 #include <QChar>
 #include <ctype.h>
 #include <QModelIndex>
-#include <QTimer>
 #include <fstream>
 #include <sstream>
 #include "headers/integration.h"
 #include "headers/chess.h"
 #include "headers/udp_client.h"
 
-ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
+ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
+                                                     _udp_connection_status("Connection ok"), _is_message_from_server(false)
 {
   _board = new Board();
   _udp_client = new UDP_client();
-  _move_color = MOVE_COLOR_W;
-  _is_message_from_server = false;
 
   for(int i = 0; i < FIGURES_NUMBER; ++i)
     addFigure(Figure(MOVE_COLOR_W, 0, 0, true));
@@ -25,49 +23,7 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
   update_coordinates();
 
   connect(_udp_client, SIGNAL(some_data_came()), this, SLOT(read_data_from_udp()));
-
-  __timer = new QTimer(this);
-  connect(__timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  //__timer->start(6000);
 }
-
-void ChessIntegration::timer_timeout()
-{
-  __timer->stop();
-
-  static int i = 0;
-  ++i;
-
-  if( i == 1)
-  {
-    move(4,6,true);
-    move(4,5,true);
-  }
-  if( i == 2)
-  {
-    move(4,1,true);
-    move(4,2,true);
-  }
-
-
-  if( i == 3)
-  {
-    move(1,7,true);
-    move(0,5,true);
-  }
-
-  if( i == 4)
-  {
-     go_to_history_index(0);
-  }
-
-  if( i == 5)
-  {
-     go_to_history_index(2);
-  }
-
-  __timer->start(6000);
- }
 
 ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
     : _name(name), _x(x), _y(y), _visible(visible)
@@ -76,42 +32,39 @@ ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, 
 
 void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_coord)
 {
-  static bool is_from = true;
-  if(!is_check_mate())
-  {
-    if(is_from)
-    {
-      correct_figure_coord(from,x,y,is_correct_coord);
-      if(_board->get_figure(from) != FREE_FIELD)
-      {
-        update_hilight(from, FIRST_HILIGHT);
-        is_from = false;
-      }
-    }
+  static bool is_from = true; 
 
+  if(is_from)
+  {
+    correct_figure_coord(from,x,y,is_correct_coord);
+    if(_board->get_figure(from) != FREE_FIELD)
+    {
+      update_hilight(from, FIRST_HILIGHT);
+      is_from = false;
+    }
+  }
+
+  else
+  {
+    is_from = true;
+    correct_figure_coord(to, x, y, is_correct_coord);
+
+    if(!(from == to) && _board->move(from, to))
+    {
+      update_hilight(to, SECOND_HILIGHT);
+      add_to_history(from, to);
+
+      is_check_mate();
+
+      send_data_on_server(MOVE);
+    }
     else
     {
-      is_from = true;
-      correct_figure_coord(to, x, y, is_correct_coord);
-
-      if(!(from == to) && _board->move(from, to))
-      {
-        update_hilight(to, SECOND_HILIGHT);
-        add_to_history(from, to);
-
-        if(is_check_mate())
-          emit check_mate();
-
-        send_data_on_server(MOVE);
-      }
-      else
-      {
-        qDebug()<<"====move problem";
-        qDebug()<<"from: x = "<<from.x<<" y = "<<from.y;
-        qDebug()<<"to: x = "<<to.x<<" y = "<<to.y;
-      }
-      update_coordinates();
+      qDebug()<<"====move problem";
+      qDebug()<<"from: x = "<<from.x<<" y = "<<from.y;
+      qDebug()<<"to: x = "<<to.x<<" y = "<<to.y;
     }
+    update_coordinates();
   }
 }
 
@@ -154,10 +107,7 @@ void ChessIntegration::update_coordinates()
     for(coord.x = 0; coord.x < X_SIZE; ++coord.x)
       if(_board->get_figure(coord) != FREE_FIELD)
       {
-        QString fig_name_color;
-        if(_board->get_color(coord) == W_FIG)
-          fig_name_color = "w_";
-        else fig_name_color = "b_";
+        QString fig_name_color = _board->get_color(coord) == W_FIG ? "w_" : "b_";
         fig_name_color += _board->get_figure(coord);
 
         _figures_model[index].set_coord(coord);
@@ -197,6 +147,11 @@ QString ChessIntegration::move_turn_color() const
   return _move_color;
 }
 
+QString ChessIntegration::udp_connection_status() const
+{
+  return _udp_connection_status;
+}
+
 void ChessIntegration::emit_data_changed(const unsigned INDEX)
 {
   QModelIndex topLeft = index(INDEX, 0);
@@ -211,8 +166,13 @@ QChar ChessIntegration::letter_return(const unsigned index) const
 
 bool ChessIntegration::is_check_mate() const
 {
-  if(_board->get_current_move() <= 2) return false;
-  return _board->is_mate(_board->get_move_color_i_from_end(2));
+  if(_board->get_current_move() <= 2);
+  else if (_board->is_mate(_board->get_move_color_i_from_end(2)))
+  {
+    emit check_mate();
+    return true;
+  }
+  return false;
 }
 
 void ChessIntegration::start_new_game()
@@ -240,12 +200,8 @@ void ChessIntegration::go_to_history_index(const unsigned index)
     return;
 
   if(index < CURRENT_MOVE)
-  {
-    const unsigned D_INDEX = CURRENT_MOVE - index;
-
-    for(unsigned i = 0; i < D_INDEX; ++i)
+    for(unsigned i = 0; i < CURRENT_MOVE - index; ++i)
       back_move();
-  }
 
   if(index > CURRENT_MOVE && index < history_copy.size())
   {
@@ -332,9 +288,10 @@ void ChessIntegration::make_move_from_str(const QString& str)
 
   for(int i = 0; i < str.size(); ++i)
   {
-    int coord = X_SIZE;
-    if(str[i].isLetterOrNumber())
-      coord = str[i].isNumber() ? Y_SIZE - str[i].digitValue() : str[i].unicode() - a_LETTER;
+    if(!str[i].isLetterOrNumber())
+      continue;
+
+    int coord = str[i].isNumber() ? Y_SIZE - str[i].digitValue() : str[i].unicode() - a_LETTER;
 
     if(coord < X_SIZE)
       coord_str.push_back(coord);
@@ -364,6 +321,18 @@ void ChessIntegration::read_data_from_udp()
       break;
     case NEW_GAME:
       start_new_game();
+      break;
+    case SERVER_LOST:
+      _udp_connection_status = "Server lost";
+      emit udp_connection_status_changed();
+      break;
+    case OPPONENT_LOST:
+      _udp_connection_status = "Opponent lost";
+      emit udp_connection_status_changed();
+      break;
+    case CONNECTION_OK:
+      _udp_connection_status = "Connection ok";
+      emit udp_connection_status_changed();
       break;
     default:
       message.toInt() < 0 ? go_to_history_index(abs(message.toInt())) : make_move_from_str(message);

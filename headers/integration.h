@@ -45,6 +45,10 @@ public:
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
   bool is_check_mate() const;
 
+  Q_PROPERTY(QString udp_connection_status READ udp_connection_status NOTIFY udp_connection_status_changed)
+  QString udp_connection_status() const;
+
+
   Q_INVOKABLE void move(const unsigned x, const unsigned y, bool is_correct_coord = false);
   Q_INVOKABLE void back_move();
   Q_INVOKABLE QChar letter_return(const unsigned index) const;
@@ -54,12 +58,12 @@ public:
 
 public slots:
   void read_data_from_udp();
-  void timer_timeout();
 
 signals:
   void move_turn_color_changed();
   void moves_history_changed();
-  void check_mate();
+  void check_mate() const;
+  void udp_connection_status_changed();
 
 public:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
@@ -67,10 +71,9 @@ public:
   const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
   const char FREE_SPACE = ' ';
 
-  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME};
+  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, SERVER_LOST, OPPONENT_LOST, CONNECTION_OK};
 
 private:
-  QTimer *__timer;
   void update_coordinates();
   void switch_move_color();
   void emit_data_changed(const unsigned index);
@@ -87,6 +90,7 @@ private:
   Board* _board;
   UDP_client* _udp_client;
   QString _move_color;
+  QString _udp_connection_status;
   QStringList _moves_history;
   QList<Figure> _figures_model;
   Board::Coord from;

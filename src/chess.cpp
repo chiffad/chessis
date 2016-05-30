@@ -40,7 +40,7 @@ Board::Board()
 
 bool Board::move(const Coord& fr, const Coord& t)
 {
-  if(right_move_turn(fr) && (step_ver(fr, t) || is_can_castling(fr, t)))
+  if(right_move_turn(fr) && (step_ver(fr, t) || is_castling(fr, t)))
     field_change(fr, t);
   else return false;
 
@@ -80,20 +80,12 @@ bool Board::step_ver(const Coord& f, const Coord& t) const
 
   if(get_colorless_figure(f) == HORSE && dx*dy == 2 && get_color(f) != get_color(t))
     return true;
-  else if(get_colorless_figure(f) == PAWN)
+  else if(get_colorless_figure(f) == PAWN && ((Y_UNIT_VECTOR > 0 && get_color(f) == W_FIG)
+                                              || (Y_UNIT_VECTOR < 0 && get_color(f) == B_FIG)))
   {
-    if((Y_UNIT_VECTOR > 0 && get_color(f) == W_FIG) || (Y_UNIT_VECTOR < 0 && get_color(f) == B_FIG))
-      return false;
-
-    if(get_figure(t) != FREE_FIELD)
-    {
-      if(dy * dx == 1 && get_color(f) != get_color(t))
-        return true;
-    }
-    else if(dx == 0 && (dy == 1 || (dy == 2 && get_figure(t.x,f.y + Y_UNIT_VECTOR) == FREE_FIELD
-            &&(f.y == 6 || f.y == 1))))
-      return true;
-    return false;
+      return ((get_figure(t) != FREE_FIELD && dy * dx == 1 && get_color(f) != get_color(t))
+              || (dx == 0 && ((dy == 1 && get_figure(t) == FREE_FIELD)
+                  || (dy == 2 && get_figure(t.x,f.y + Y_UNIT_VECTOR) == FREE_FIELD && (f.y == 6 || f.y == 1)))));
   }
   else if(get_colorless_figure(f) == KING && dx <= 1 && dy <= 1);
   else if((get_colorless_figure(f) == ROOK || get_colorless_figure(f) == QUEEN) && (dx*dy == 0));
@@ -108,12 +100,12 @@ bool Board::step_ver(const Coord& f, const Coord& t) const
   {
     coord.x += X_UNIT_VECTOR;
     coord.y += Y_UNIT_VECTOR;
-    if(get_figure(coord) == FREE_FIELD || (get_color(t) != get_color(f) && coord == t))
-      continue;
-
-    return false;
+    if(get_figure(coord) != FREE_FIELD && get_color(t) != get_color(f) && !(coord == t))
+      goto failed;
   }
   return true;
+  failed:
+    return false;
 }
 
 void Board::if_castling(const Coord& fr, const Coord& t)
@@ -143,30 +135,27 @@ void Board::if_castling(const Coord& fr, const Coord& t)
   }
 }
 
-bool Board::is_can_castling(const Coord& f, const Coord& t) const
+bool Board::is_castling(const Coord& f, const Coord& t) const
 {
   const int dx = abs(t.x - f.x);
   const int X_UNIT_VECTOR = dx == 0 ? 0 : (t.x - f.x)/dx;
 
-  if(get_colorless_figure(f) != KING || abs(t.y - f.y) != 0 || dx != 2)
-    return false;
+  if(get_colorless_figure(f) != KING || abs(t.y - f.y) != 0 || dx != 2);
 
-  if(get_figure(f.x + X_UNIT_VECTOR, f.y) == FREE_FIELD && get_figure(f.x + 2 * X_UNIT_VECTOR,f.y) == FREE_FIELD)
+  else if((get_figure(f.x + X_UNIT_VECTOR, f.y) == FREE_FIELD && get_figure(f.x + 2 * X_UNIT_VECTOR,f.y) == FREE_FIELD)
+     && (X_UNIT_VECTOR > 0 || get_figure(f.x + 3 * X_UNIT_VECTOR, f.y) == FREE_FIELD))
   {
-    if(X_UNIT_VECTOR > 0 || (X_UNIT_VECTOR < 0 && get_figure(f.x - 3, f.y) == FREE_FIELD))
-    {
-      const bool IS_TWO_ZEROS = t.x > 4;
-      Coord coord;
-      coord.x = IS_TWO_ZEROS ? 7 : 0;
-      coord.y = get_color(f) == W_FIG ? 7 : 0;
+    const bool IS_TWO_ZEROS = t.x > 4;
+    Coord coord;
+    coord.x = IS_TWO_ZEROS ? 7 : 0;
+    coord.y = get_color(f) == W_FIG ? 7 : 0;
 
-      for(unsigned i = 0; i < get_current_move(); ++i)
-        if(is_check(get_color(f)) && ((get_colorless_figure(moves[i]._from) == KING
-           && get_color(moves[i]._from) == get_color(f)) || coord == moves[i]._from || coord == moves[i]._to))
-           goto cant_castling;
+    for(unsigned i = 0; i < get_current_move(); ++i)
+      if(is_check(get_color(f)) || ((get_colorless_figure(moves[i]._from) == KING
+         && get_color(moves[i]._from) == get_color(f)) || coord == moves[i]._from || coord == moves[i]._to))
+         goto cant_castling;
 
-      return true;
-    }
+    return true;
   }
   return false;
   cant_castling:
@@ -312,9 +301,9 @@ void Board::set_field(const Coord& lhs, const Coord& rhs)
   _field[lhs.x][lhs.y] = _field[rhs.x][rhs.y];
 }
 
-void Board::set_field(const Coord& rhs, FIGURES fig)
+void Board::set_field(const Coord& coord, FIGURES fig)
 {
-  _field[rhs.x][rhs.y] = fig;
+  _field[coord.x][coord.y] = fig;
 }
 
 COLOR Board::get_color(const Coord& c) const
