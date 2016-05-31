@@ -71,7 +71,7 @@ public:
   const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
   const char FREE_SPACE = ' ';
 
-  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, SERVER_LOST, OPPONENT_LOST, CONNECTION_OK};
+  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, SERVER_LOST, OPPONENT_LOST};
 
 private:
   void update_coordinates();

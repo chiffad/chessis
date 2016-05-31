@@ -106,6 +106,10 @@ void UDP_client::read_data()
       send_data(MESSAGE_RECEIVED);
       break;
 
+    case OPPONENT_LOST_FROM_SERVER:
+      set_data_and_emit_to_chess(OPPONENT_LOST);
+      break;
+
     default:
       if(_data.size() == NEED_SIMBOLS_TO_MOVE || _data.toInt() < 0 ||(_data.toInt() >= MOVE && _data.toInt() <= NEW_GAME))
       {
@@ -115,6 +119,13 @@ void UDP_client::read_data()
       }
       else qDebug()<<"wrong message in read_data_from_udp()";
   }
+}
+
+void UDP_client::set_data_and_emit_to_chess(CHESS_MESSAGE_TYPE message)
+{
+  _data.clear();
+  _data.setNum(message);
+  emit some_data_came();
 }
 
 void UDP_client::begin_wait_receive(const QByteArray& message)
@@ -128,7 +139,7 @@ void UDP_client::begin_wait_receive(const QByteArray& message)
 void UDP_client::timer_from_last_received_message_timeout()
 {
   qDebug()<<"is server lost?";
-  send_data(SERVER_LOST);
+  send_data(IS_SERVER_LOST);
 }
 
 bool UDP_client::checked_is_message_received()
@@ -145,9 +156,11 @@ bool UDP_client::checked_is_message_received()
     qDebug()<<"timer restart";
     _timer->start(SECOND);
     _socket->writeDatagram(_last_send_message, SERVER_IP, SERVER_PORT);
+    if(_last_send_message.toInt() == IS_SERVER_LOST || num_of_restarts > 5)
+      set_data_and_emit_to_chess(SERVER_LOST);
+
     ++num_of_restarts;
   }
-  if(num_of_restarts > 5) qDebug()<<"server can be lost";
   return _is_message_received;
 }
 

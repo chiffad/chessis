@@ -130,7 +130,7 @@ void UDP_server::read_data()
       }
       break;
 
-    case SERVER_LOST:
+    case IS_SERVER_LOST:
       send_data(MESSAGE_RECEIVED, *sender);
       break;
 
@@ -202,10 +202,7 @@ void UDP_server::User::timer_timeout() // test wariant
     if(_last_sent_message.toInt() == CLIENT_LOST)
     {
       qDebug()<<"last message was client lost";
-      /*_timer->stop();
-      _user[_opponent_index]._opponent_index = NO_OPPONENT;
-      _user.remove(i);*/
-      return;
+      _parent_class->send_data(OPPONENT_LOST, *_parent_class->_user[_opponent_index]);
     }
     _timer->start(SECOND);
 

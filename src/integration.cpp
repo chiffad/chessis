@@ -314,7 +314,7 @@ void ChessIntegration::read_data_from_udp()
   QString message;
   _udp_client->export_readed_data_to_chess(message);
 
-  switch (message.toInt())
+  switch(message.toInt())
   {
     case BACK_MOVE:
       back_move();
@@ -330,12 +330,13 @@ void ChessIntegration::read_data_from_udp()
       _udp_connection_status = "Opponent lost";
       emit udp_connection_status_changed();
       break;
-    case CONNECTION_OK:
-      _udp_connection_status = "Connection ok";
-      emit udp_connection_status_changed();
-      break;
     default:
-      message.toInt() < 0 ? go_to_history_index(abs(message.toInt())) : make_move_from_str(message);
+      if(_udp_connection_status != "Connection ok")
+      {
+        _udp_connection_status = "Connection ok";
+        emit udp_connection_status_changed();
+      }
+      else message.toInt() < 0 ? go_to_history_index(abs(message.toInt())) : make_move_from_str(message);
   }
 }
 

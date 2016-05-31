@@ -15,8 +15,8 @@ public:
   ~UDP_client(){delete _socket; delete _timer; delete _timer_from_last_received_message;}
 
 public:
-  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, SERVER_LOST, CLIENT_LOST};
-  enum CHESS_MESSAGE_TYPE{MOVE = 10, BACK_MOVE, NEW_GAME};
+  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, IS_SERVER_LOST, CLIENT_LOST, OPPONENT_LOST_FROM_SERVER};
+  enum CHESS_MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, SERVER_LOST, OPPONENT_LOST};
   enum{NEED_SIMBOLS_TO_MOVE = 7, SECOND = 1000, TEN_SEC = 10000};
   const QChar FREE_SPASE = ' ';
 
@@ -37,6 +37,7 @@ private:
   void add_serial_num(QByteArray& data, bool is_prev_serial_need = false);
   QByteArray cut_serial_num(QByteArray& data) const;
   void begin_wait_receive(const QByteArray& message);
+  void set_data_and_emit_to_chess(CHESS_MESSAGE_TYPE message);
 
 private:
   QUdpSocket *_socket;
