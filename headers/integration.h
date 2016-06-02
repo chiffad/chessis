@@ -42,12 +42,14 @@ public:
   Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)
   QStringList moves_history() const;
 
+  Q_PROPERTY(QStringList commands_list READ commands_list NOTIFY commands_list_changed)
+  QStringList commands_list() const;
+
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
   bool is_check_mate() const;
 
   Q_PROPERTY(QString udp_connection_status READ udp_connection_status NOTIFY udp_connection_status_changed)
   QString udp_connection_status() const;
-
 
   Q_INVOKABLE void move(const unsigned x, const unsigned y, bool is_correct_coord = false);
   Q_INVOKABLE void back_move();
@@ -55,6 +57,7 @@ public:
   Q_INVOKABLE void start_new_game();
   Q_INVOKABLE void go_to_history_index(const unsigned index);
   Q_INVOKABLE void path_to_file(const QString& path, bool is_moves_from_file);
+  Q_INVOKABLE void run_command(QString& command);
 
 public slots:
   void read_data_from_udp();
@@ -64,6 +67,7 @@ signals:
   void moves_history_changed();
   void check_mate() const;
   void udp_connection_status_changed();
+  void commands_list_changed();
 
 public:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
@@ -71,7 +75,7 @@ public:
   const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
   const char FREE_SPACE = ' ';
 
-  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, SERVER_LOST, OPPONENT_LOST};
+  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, SERVER_LOST, OPPONENT_LOST, SHOW_OPPONENT_INF};
 
 private:
   void update_coordinates();
@@ -92,6 +96,7 @@ private:
   QString _move_color;
   QString _udp_connection_status;
   QStringList _moves_history;
+  QStringList _commands_history;
   QList<Figure> _figures_model;
   Board::Coord from;
   Board::Coord to;

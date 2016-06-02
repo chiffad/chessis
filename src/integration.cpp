@@ -217,6 +217,50 @@ void ChessIntegration::go_to_history_index(const unsigned index)
   switch_move_color();
 }
 
+QStringList ChessIntegration::commands_list() const
+{
+  return _commands_history;
+}
+
+void ChessIntegration::run_command(const QString& command)
+{
+  _commands_history.append(command);
+
+  bool is_working_command = true;
+  const QString HELP_WORD = "help";
+  const QString MOVE_WORD = "move";
+  switch(command)
+  {
+    case HELP_WORD:
+      _commands_history.append("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + "d2-d4).");
+      break;
+    case "Show opponent information":
+      send_data_on_server(SHOW_OPPONENT_INF);
+      break;
+    default:
+      QString command_copy = command;
+      QString first_word;
+      while(command_copy.size())
+      {
+        if(command_copy[0].isLetter())
+          first_word.append(command_copy[0]);
+
+        command_copy.remove(0);
+        if(first_word.size() == 4)
+          break;
+      }
+      if(first_word == MOVE_WORD)
+         make_move_from_str(command_copy);
+      else
+        is_working_command = false;
+  }
+
+  if(!is_working_command)
+    _commands_history.append("Invalid command ('" + HELP_WORD + "' for help).");
+
+  emit commands_list_changed();
+}
+
 QStringList ChessIntegration::moves_history() const
 {
   return _moves_history;
@@ -314,7 +358,26 @@ void ChessIntegration::read_data_from_udp()
   QString message;
   _udp_client->export_readed_data_to_chess(message);
 
-  switch(message.toInt())
+  if(_udp_connection_status != "Connection ok")
+  {
+    _udp_connection_status = "Connection ok";
+    emit udp_connection_status_changed();
+  }
+
+  QString message_type;
+  while(message.size())
+  {
+    while(message[0].isLetterOrNumber())
+    {
+      message_type.append(message[0]);
+      message.remove(0);
+    }
+    message.remove(0);
+    if(message_type.size())
+      break;
+  }
+
+  switch(message_type.toInt())
   {
     case BACK_MOVE:
       back_move();
@@ -330,13 +393,17 @@ void ChessIntegration::read_data_from_udp()
       _udp_connection_status = "Opponent lost";
       emit udp_connection_status_changed();
       break;
+    /*case SHOW_OPPONENT_INF:
+      while(message.size())
+        if(message[0].t == )
+      run_command(message);
+      break;*/
+    case GO_TO_HISTORY:
+      go_to_history_index(abs(message.toInt()));
+      break;
+
     default:
-      if(_udp_connection_status != "Connection ok")
-      {
-        _udp_connection_status = "Connection ok";
-        emit udp_connection_status_changed();
-      }
-      else message.toInt() < 0 ? go_to_history_index(abs(message.toInt())) : make_move_from_str(message);
+      make_move_from_str(message);
   }
 }
 

@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.5
 import QtQuick.Controls 1.4
 
 Rectangle
@@ -154,4 +154,19 @@ Rectangle
       text: FigureModel.udp_connection_status
     }
   }
+
+  CommandField
+  {
+    id: _command_field
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: _path_to_file.bottom
+    anchors.bottom: _connection_status.top
+    anchors.topMargin: bORDER_WIDTH
+    anchors.bottomMargin: bORDER_WIDTH
+    anchors.rightMargin: bORDER_WIDTH
+    anchors.leftMargin: bORDER_WIDTH
+
+  }
+
 }

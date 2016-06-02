@@ -21,5 +21,6 @@
         <file>res/BoardInit.qml</file>
         <file>res/img/checkMate.png</file>
         <file>res/img/hilight.png</file>
+        <file>res/CommandField.qml</file>
     </qresource>
 </RCC>

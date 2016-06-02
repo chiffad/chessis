@@ -21,7 +21,7 @@ UDP_client::UDP_client(QObject *parent) : QObject(parent), _received_serial_num(
 
 void UDP_client::send_data(QByteArray& message, bool is_prev_serial_need)
 {
-  if(!checked_is_message_received())
+  /*if(!checked_is_message_received())
   {
     qDebug()<<"can't send, prev message not reach";
     _message_stack.push_back(message);
@@ -32,12 +32,12 @@ void UDP_client::send_data(QByteArray& message, bool is_prev_serial_need)
 
   qDebug()<<"====Sending data to server"<<message;
   _socket->writeDatagram(message, SERVER_IP, SERVER_PORT);
-  begin_wait_receive(message);
+  begin_wait_receive(message);*/
 }
 
 void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
 {
-  QByteArray message;
+  /*QByteArray message;
   message.setNum(r_mes);
 
   if(r_mes != MESSAGE_RECEIVED)
@@ -53,7 +53,7 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
   qDebug()<<"====Sending data to server"<<message;
   _socket->writeDatagram(message, SERVER_IP, SERVER_PORT);
   if(r_mes != MESSAGE_RECEIVED)
-    begin_wait_receive(message);
+    begin_wait_receive(message);*/
 }
 
 void UDP_client::read_data()
