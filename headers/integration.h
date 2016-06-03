@@ -57,7 +57,7 @@ public:
   Q_INVOKABLE void start_new_game();
   Q_INVOKABLE void go_to_history_index(const unsigned index);
   Q_INVOKABLE void path_to_file(const QString& path, bool is_moves_from_file);
-  Q_INVOKABLE void run_command(QString& command);
+  Q_INVOKABLE void run_command(const QString& command);
 
 public slots:
   void read_data_from_udp();

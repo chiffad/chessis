@@ -20,7 +20,7 @@ private:
   class User;
 
 public:
-  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, IS_SERVER_LOST, CLIENT_LOST, OPPONENT_LOST};
+  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, IS_SERVER_LOST, CLIENT_LOST, OPPONENT_LOST_FROM_SERVER};
   enum {NO_OPPONENT = -1, SECOND = 1000, TEN_SEC = 10000};
   const QChar FREE_SPASE = ' ';
 
@@ -69,5 +69,8 @@ public:
   bool _is_message_reach;
   QByteArray _last_sent_message;
   QVector<QByteArray> _message_stack;
+
+  QString _login;
+  int _rating_ELO;
 };
 #endif // UDP_SERVER_H

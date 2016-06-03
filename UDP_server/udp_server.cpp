@@ -26,6 +26,8 @@ UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16&
                      : QObject(parent), _parent_class(parent_class),_port(port), _ip(ip), _my_index(index),
                        _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true)
 {
+  _login = "login";
+  _rating_ELO = 1200;
   _timer = new QTimer;
   connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
 
@@ -202,7 +204,7 @@ void UDP_server::User::timer_timeout() // test wariant
     if(_last_sent_message.toInt() == CLIENT_LOST)
     {
       qDebug()<<"last message was client lost";
-      _parent_class->send_data(OPPONENT_LOST, *_parent_class->_user[_opponent_index]);
+      _parent_class->send_data(OPPONENT_LOST_FROM_SERVER, *_parent_class->_user[_opponent_index]);
     }
     _timer->start(SECOND);
 

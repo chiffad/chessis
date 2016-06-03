@@ -212,7 +212,7 @@ void ChessIntegration::go_to_history_index(const unsigned index)
       update_hilight(history_copy[i].to, SECOND_HILIGHT);
       update_coordinates();
     }
-    send_data_on_server(GO_TO_HISTORY, -1 * index);
+    send_data_on_server(GO_TO_HISTORY, index);
   }
   switch_move_color();
 }
@@ -224,19 +224,23 @@ QStringList ChessIntegration::commands_list() const
 
 void ChessIntegration::run_command(const QString& command)
 {
+  qDebug()<<"===run_command: "<<command;
   _commands_history.append(command);
 
-  bool is_working_command = true;
   const QString HELP_WORD = "help";
   const QString MOVE_WORD = "move";
+  //const QString SHOW_OPPONENT = "show opponent";
+
   switch(command)
   {
     case HELP_WORD:
+      qDebug()<<"help_word";
       _commands_history.append("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + "d2-d4).");
+     // _commands_history.append("To see opponent information type '" + SHOW_OPPONENT + " .");
       break;
-    case "Show opponent information":
-      send_data_on_server(SHOW_OPPONENT_INF);
-      break;
+    //case SHOW_OPPONENT:
+     // send_data_on_server(SHOW_OPPONENT_INF);
+     //break;
     default:
       QString command_copy = command;
       QString first_word;
@@ -245,19 +249,17 @@ void ChessIntegration::run_command(const QString& command)
         if(command_copy[0].isLetter())
           first_word.append(command_copy[0]);
 
-        command_copy.remove(0);
+        command_copy.remove(0,1);
         if(first_word.size() == 4)
           break;
       }
       if(first_word == MOVE_WORD)
-         make_move_from_str(command_copy);
-      else
-        is_working_command = false;
+      {
+        make_move_from_str(command_copy);
+        qDebug()<<"move word";
+      }
+      else _commands_history.append("Unknown command ('" + HELP_WORD + "' for help).");
   }
-
-  if(!is_working_command)
-    _commands_history.append("Invalid command ('" + HELP_WORD + "' for help).");
-
   emit commands_list_changed();
 }
 
@@ -298,6 +300,7 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
 
 void ChessIntegration::path_to_file(const QString& path, bool is_moves_from_file)
 {
+  qDebug()<<"===path_to_file: "<<path;
   is_moves_from_file ? read_moves_from_file(path) : write_moves_to_file(path);
 }
 
@@ -327,6 +330,7 @@ void ChessIntegration::read_moves_from_file(const QString& path)
 
 void ChessIntegration::make_move_from_str(const QString& str)
 {
+  qDebug()<<"==make_move_from_str CHESS: "<<str;
   QVector<int> coord_str;
   enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4};
 
@@ -358,7 +362,7 @@ void ChessIntegration::read_data_from_udp()
   QString message;
   _udp_client->export_readed_data_to_chess(message);
 
-  if(_udp_connection_status != "Connection ok")
+  if(_udp_connection_status == "Server lost")
   {
     _udp_connection_status = "Connection ok";
     emit udp_connection_status_changed();
@@ -370,9 +374,9 @@ void ChessIntegration::read_data_from_udp()
     while(message[0].isLetterOrNumber())
     {
       message_type.append(message[0]);
-      message.remove(0);
+      message.remove(0,1);
     }
-    message.remove(0);
+    message.remove(0,1);
     if(message_type.size())
       break;
   }
@@ -399,9 +403,8 @@ void ChessIntegration::read_data_from_udp()
       run_command(message);
       break;*/
     case GO_TO_HISTORY:
-      go_to_history_index(abs(message.toInt()));
+      go_to_history_index(message.toInt());
       break;
-
     default:
       make_move_from_str(message);
   }
@@ -409,7 +412,7 @@ void ChessIntegration::read_data_from_udp()
 
 void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type, const int index)
 {
-  qDebug()<<"send_data_on_server";
+  qDebug()<<"====send_data_on_server_chess";
   if(_is_message_from_server)
   {
     _is_message_from_server = false;
@@ -420,9 +423,8 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type, const int index)
   QByteArray message;
   if(m_type == MOVE)
     message.append(_moves_history[_moves_history.size() -1]);
-  else if(m_type == GO_TO_HISTORY)
-    message.setNum(index);
   else message.setNum(m_type);
+  if(index) message.setNum(index);
 
   _udp_client->send_data(message);
 }

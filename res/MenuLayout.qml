@@ -1,5 +1,6 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
+import QtQuick.Dialogs 1.2
 
 Rectangle
 {
@@ -83,8 +84,9 @@ Rectangle
 
     onClicked:
     {
-      _path_to_file.visible = true;
-      _path_to_file._is_moves_from_file = true;
+      _file_dialog.selectExisting = true
+      _file_dialog.visible = true;
+      _file_dialog._is_moves_from_file = true;
     }
   }
 
@@ -103,39 +105,26 @@ Rectangle
 
     onClicked:
     {
-      _path_to_file.visible = true;
-      _path_to_file._is_moves_from_file = false;
+      _file_dialog.visible = true;
+      _file_dialog._is_moves_from_file = false;
+      _file_dialog.selectExisting = false
     }
   }
 
-  Rectangle
+  FileDialog
   {
-    id: _path_to_file
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top:  _moves_to_file.bottom
-    anchors.leftMargin: bORDER_WIDTH
-    anchors.rightMargin: anchors.leftMargin
-    height: 30
-    visible: false
-    border.width: bORDER_WIDTH
-    border.color: "black"
+    id: _file_dialog
 
     property bool _is_moves_from_file: false
 
-    TextField
-    {
-      anchors.fill: parent
-      visible: parent.visible
-      clip: true
-      focus: true
-      placeholderText: "Enter path & name"
+    visible: false
+    title: "Please choose a file"
+    folder: shortcuts.home
 
-      onAccepted:
-      {
-        parent.visible = false;
-        FigureModel.path_to_file(text, _path_to_file._is_moves_from_file);
-      }
+    onAccepted:
+    {
+      parent.visible = false;
+      FigureModel.path_to_file(_file_dialog.fileUrls, _file_dialog._is_moves_from_file);
     }
   }
 
@@ -160,13 +149,11 @@ Rectangle
     id: _command_field
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.top: _path_to_file.bottom
+    anchors.top: _moves_from_file.bottom
     anchors.bottom: _connection_status.top
     anchors.topMargin: bORDER_WIDTH
     anchors.bottomMargin: bORDER_WIDTH
     anchors.rightMargin: bORDER_WIDTH
     anchors.leftMargin: bORDER_WIDTH
-
   }
-
 }

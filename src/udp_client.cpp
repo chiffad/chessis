@@ -85,40 +85,50 @@ void UDP_client::read_data()
     else qDebug()<<"serial_num is wrong";
     return;
   }
-  else _timer_from_last_received_message->start(TEN_SEC);
 
   qDebug()<<"received: "<<_data;
 
-  switch (_data.toInt())
+  QByteArray message_type;
+  for(int i = 0; QChar(_data[i]) != FREE_SPASE && _data.size() < i; ++i)
+    message_type.append(_data[i]);
+
+  qDebug()<<"message_type: "<<message_type.toInt();
+
+  switch(message_type.toInt())
   {
-    case MESSAGE_RECEIVED:
-      qDebug()<<"Message received";
-      _is_message_received = true;
-      if(_message_stack.size())
-      {
-        qDebug()<<"message stack not empty: "<<_message_stack[0];
-        send_data(_message_stack[0]);
-        _message_stack.remove(0);
-      }
-      break;
-
     case CLIENT_LOST:
-      send_data(MESSAGE_RECEIVED);
       break;
-
     case OPPONENT_LOST_FROM_SERVER:
       set_data_and_emit_to_chess(OPPONENT_LOST);
       break;
-
+    case GO_TO_HISTORY:
+      emit some_data_came();
+      break;
     default:
-      if(_data.size() == NEED_SIMBOLS_TO_MOVE || _data.toInt() < 0 ||(_data.toInt() >= MOVE && _data.toInt() <= NEW_GAME))
+      if(_data.size() == NEED_SIMBOLS_TO_MOVE || (_data.toInt() >= MOVE && _data.toInt() <= NEW_GAME))
       {
         qDebug()<<"emit_data_came";
-        send_data(MESSAGE_RECEIVED);
         emit some_data_came();
       }
-      else qDebug()<<"wrong message in read_data_from_udp()";
+      else
+      {
+        if(message_type.toInt() == MESSAGE_RECEIVED)
+        {
+          qDebug()<<"Message received";
+          _is_message_received = true;
+          if(_message_stack.size())
+          {
+            qDebug()<<"message stack not empty: "<<_message_stack[0];
+            send_data(_message_stack[0]);
+            _message_stack.remove(0);
+          }
+        }
+        else qDebug()<<"wrong message in read_data_from_udp()";
+        return;
+      }
   }
+  send_data(MESSAGE_RECEIVED);
+  _timer_from_last_received_message->start(TEN_SEC);
 }
 
 void UDP_client::set_data_and_emit_to_chess(CHESS_MESSAGE_TYPE message)
