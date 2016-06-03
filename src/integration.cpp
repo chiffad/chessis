@@ -231,34 +231,34 @@ void ChessIntegration::run_command(const QString& command)
   const QString MOVE_WORD = "move";
   //const QString SHOW_OPPONENT = "show opponent";
 
-  switch(command)
+  if(command == HELP_WORD)
   {
-    case HELP_WORD:
-      qDebug()<<"help_word";
-      _commands_history.append("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + "d2-d4).");
-     // _commands_history.append("To see opponent information type '" + SHOW_OPPONENT + " .");
-      break;
-    //case SHOW_OPPONENT:
-     // send_data_on_server(SHOW_OPPONENT_INF);
-     //break;
-    default:
-      QString command_copy = command;
-      QString first_word;
-      while(command_copy.size())
-      {
-        if(command_copy[0].isLetter())
-          first_word.append(command_copy[0]);
+    qDebug()<<"help_word";
+     _commands_history.append("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + "d2-d4).");
+    // _commands_history.append("To see opponent information type '" + SHOW_OPPONENT + " .");
+  }
+  //else if(command == SHOW_OPPONENT)
+    // send_data_on_server(SHOW_OPPONENT_INF);
+    //break;
+  else
+  {
+    QString command_copy = command;
+    QString first_word;
+    while(command_copy.size())
+    {
+      if(command_copy[0].isLetter())
+        first_word.append(command_copy[0]);
 
-        command_copy.remove(0,1);
-        if(first_word.size() == 4)
-          break;
-      }
-      if(first_word == MOVE_WORD)
-      {
-        make_move_from_str(command_copy);
-        qDebug()<<"move word";
-      }
-      else _commands_history.append("Unknown command ('" + HELP_WORD + "' for help).");
+      command_copy.remove(0,1);
+      if(first_word.size() == 4)
+        break;
+    }
+    if(first_word == MOVE_WORD)
+    {
+      make_move_from_str(command_copy);
+      qDebug()<<"move word";
+    }
+    else _commands_history.append("Unknown command ('" + HELP_WORD + "' for help).");
   }
   emit commands_list_changed();
 }
