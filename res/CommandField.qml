@@ -34,8 +34,6 @@ Rectangle
     focus: true
     wrapMode: TextInput.Wrap
 
-    displayText: "command: "
-
 
     onAccepted:
       FigureModel.run_command(text);

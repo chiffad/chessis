@@ -80,8 +80,8 @@ bool Board::step_ver(const Coord& f, const Coord& t) const
 
   if(get_colorless_figure(f) == HORSE && dx*dy == 2 && get_color(f) != get_color(t))
     return true;
-  else if(get_colorless_figure(f) == PAWN && ((Y_UNIT_VECTOR > 0 && get_color(f) == W_FIG)
-                                              || (Y_UNIT_VECTOR < 0 && get_color(f) == B_FIG)))
+  else if(get_colorless_figure(f) == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(f) == W_FIG)
+                                              || (Y_UNIT_VECTOR > 0 && get_color(f) == B_FIG)))
   {
       return ((get_figure(t) != FREE_FIELD && dy * dx == 1 && get_color(f) != get_color(t))
               || (dx == 0 && ((dy == 1 && get_figure(t) == FREE_FIELD)

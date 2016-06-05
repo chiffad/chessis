@@ -10,7 +10,7 @@
 #include "headers/udp_client.h"
 
 ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
-                                                     _udp_connection_status("Connection ok"), _is_message_from_server(false)
+                                                     _udp_connection_status(DISCONNECT), _is_message_from_server(false)
 {
   _board = new Board();
   _udp_client = new UDP_client();
@@ -317,6 +317,7 @@ void ChessIntegration::write_moves_to_file(const QString& path)
 
 void ChessIntegration::read_moves_from_file(const QString& path)
 {
+  qDebug()<<"===read_move_from_file: "<<path;
   std::ifstream from_file(path.toUtf8().constData());
   std::ostringstream out;
   out<<from_file.rdbuf();
@@ -325,6 +326,10 @@ void ChessIntegration::read_moves_from_file(const QString& path)
   out.str().swap(data_from_file);
 
   from_file.close();
+
+  //start_new_game();
+  std::cout<<"data_from_file std: "<<data_from_file<<std::endl;
+  qDebug()<<QString::fromStdString(data_from_file);
   make_move_from_str(QString::fromStdString(data_from_file));
 }
 
@@ -362,11 +367,8 @@ void ChessIntegration::read_data_from_udp()
   QString message;
   _udp_client->export_readed_data_to_chess(message);
 
-  if(_udp_connection_status == "Server lost")
-  {
-    _udp_connection_status = "Connection ok";
-    emit udp_connection_status_changed();
-  }
+  if(_udp_connection_status == DISCONNECT)
+    set_new_connetc_status(CONNECT);
 
   QString message_type;
   while(message.size())
@@ -390,12 +392,10 @@ void ChessIntegration::read_data_from_udp()
       start_new_game();
       break;
     case SERVER_LOST:
-      _udp_connection_status = "Server lost";
-      emit udp_connection_status_changed();
+      set_new_connetc_status(DISCONNECT);
       break;
     case OPPONENT_LOST:
-      _udp_connection_status = "Opponent lost";
-      emit udp_connection_status_changed();
+      set_new_connetc_status(OPPONENT_DISCONNECT);
       break;
     /*case SHOW_OPPONENT_INF:
       while(message.size())
@@ -408,6 +408,11 @@ void ChessIntegration::read_data_from_udp()
     default:
       make_move_from_str(message);
   }
+}
+void ChessIntegration::set_new_connetc_status(const QString& status)
+{
+  _udp_connection_status = status;
+  emit udp_connection_status_changed();
 }
 
 void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type, const int index)

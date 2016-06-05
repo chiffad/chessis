@@ -73,6 +73,7 @@ public:
   enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
   const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
+  const QString DISCONNECT = "Disconnect"; const QString OPPONENT_DISCONNECT = "Opponent disconnect"; const QString CONNECT = "Connect";
   const char FREE_SPACE = ' ';
 
   enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, SERVER_LOST, OPPONENT_LOST, SHOW_OPPONENT_INF};
@@ -89,6 +90,7 @@ private:
   void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to);
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
+  void set_new_connetc_status(const QString& status);
 
 private:
   Board* _board;

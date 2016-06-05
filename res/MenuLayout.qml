@@ -84,7 +84,6 @@ Rectangle
 
     onClicked:
     {
-      _file_dialog.selectExisting = true
       _file_dialog.visible = true;
       _file_dialog._is_moves_from_file = true;
     }
@@ -107,7 +106,6 @@ Rectangle
     {
       _file_dialog.visible = true;
       _file_dialog._is_moves_from_file = false;
-      _file_dialog.selectExisting = false
     }
   }
 
@@ -118,8 +116,9 @@ Rectangle
     property bool _is_moves_from_file: false
 
     visible: false
-    title: "Please choose a file"
     folder: shortcuts.home
+    selectMultiple: false
+    selectExisting: !_is_moves_from_file
 
     onAccepted:
     {
@@ -134,7 +133,10 @@ Rectangle
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    height: 30
+    anchors.leftMargin: bORDER_WIDTH
+    anchors.rightMargin: bORDER_WIDTH
+    anchors.bottomMargin: bORDER_WIDTH
+    height: 20
     color: parent.color
 
     Text
