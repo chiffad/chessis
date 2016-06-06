@@ -9,6 +9,7 @@
 #include "headers/chess.h"
 #include "headers/udp_client.h"
 
+
 ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
                                                      _udp_connection_status(DISCONNECT), _is_message_from_server(false)
 {
@@ -23,7 +24,50 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
   update_coordinates();
 
   connect(_udp_client, SIGNAL(some_data_came()), this, SLOT(read_data_from_udp()));
+
+  timer_kill = new QTimer(this);
+  connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
+  timer_kill->start(6000);
 }
+
+void ChessIntegration::timer_timeout()
+{
+  timer_kill->stop();
+
+  static int i = 0;
+  ++i;
+
+  if( i == 1)
+  {
+    move(4,6,true);
+    move(4,5,true);
+  }
+  if( i == 2)
+  {
+    move(4,1,true);
+    move(4,2,true);
+  }
+
+
+  if( i == 3)
+  {
+    move(1,7,true);
+    move(0,5,true);
+  }
+
+  if( i == 4)
+  {
+     go_to_history_index(0);
+  }
+
+  if( i == 5)
+  {
+     go_to_history_index(2);
+  }
+
+  timer_kill->start(6000);
+ }
+
 
 ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
     : _name(name), _x(x), _y(y), _visible(visible)
@@ -32,7 +76,7 @@ ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, 
 
 void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_coord)
 {
-  static bool is_from = true; 
+  static bool is_from = true;
 
   if(is_from)
   {
@@ -193,7 +237,7 @@ void ChessIntegration::start_new_game()
 
 void ChessIntegration::go_to_history_index(const unsigned index)
 {
-  qDebug()<<"go to history index";
+  qDebug()<<"====go to history index";
   const unsigned CURRENT_MOVE = _board->get_current_move() - ZERO_AND_ACTUAL_MOVES;
 
   if(index == CURRENT_MOVE)
@@ -298,8 +342,9 @@ void ChessIntegration::add_to_history(const Board::Coord& coord_from, const Boar
   emit moves_history_changed();
 }
 
-void ChessIntegration::path_to_file(const QString& path, bool is_moves_from_file)
+void ChessIntegration::path_to_file(QString& path, bool is_moves_from_file)
 {
+  path.remove(0,7);
   qDebug()<<"===path_to_file: "<<path;
   is_moves_from_file ? read_moves_from_file(path) : write_moves_to_file(path);
 }
@@ -415,7 +460,7 @@ void ChessIntegration::set_new_connetc_status(const QString& status)
   emit udp_connection_status_changed();
 }
 
-void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type, const int index)
+void ChessIntegration::send_data_on_server(MESSAGE_TYPE type, const int index)
 {
   qDebug()<<"====send_data_on_server_chess";
   if(_is_message_from_server)
@@ -426,10 +471,18 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE m_type, const int index)
   }
 
   QByteArray message;
-  if(m_type == MOVE)
-    message.append(_moves_history[_moves_history.size() -1]);
-  else message.setNum(m_type);
-  if(index) message.setNum(index);
+  message.setNum(type);
+
+  if(type == MOVE && !_moves_history.isEmpty())
+  {
+    message += FREE_SPACE;
+    message += _moves_history.last();
+  }
+  else if(type == GO_TO_HISTORY)
+  {
+    message += FREE_SPACE;
+    message += QByteArray::number(index);
+  }
 
   _udp_client->send_data(message);
 }

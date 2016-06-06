@@ -43,7 +43,7 @@ private:
   QUdpSocket *_socket;
   QTimer *_timer;
   QTimer *_timer_from_last_received_message;
-  
+
   QByteArray _data;
   QByteArray _last_send_message;
   QVector<QByteArray> _message_stack;

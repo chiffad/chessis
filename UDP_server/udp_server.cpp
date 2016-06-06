@@ -36,7 +36,7 @@ UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16&
 }
 
 void UDP_server::send_data(QByteArray& message, User& u)
-{ 
+{
   if(!is_message_reach(message, u))
     return;
 
@@ -122,7 +122,7 @@ void UDP_server::read_data()
   switch (buffer.toInt())
   {
     case MESSAGE_RECEIVED:
-      qDebug()<<"buffer.toInt() == MESSAGE_RECEIVED"<<sender_i;
+      qDebug()<<"buffer.toInt() == MESSAGE_RECEIVED";
       sender->_is_message_reach = true;
       if(sender->_message_stack.size())
       {
@@ -146,10 +146,10 @@ void UDP_server::read_data()
 void UDP_server::set_opponent(User& u)
 {
   u._opponent_index = NO_OPPONENT;
-  
+
   for(int i = 0; i < _user.size() - 1; ++i)
     if(_user[i]->_opponent_index == NO_OPPONENT)
-    {  
+    {
       u._opponent_index = i;
       _user[i]->_opponent_index = _user.size() - 1;
       qDebug()<<"_user[i].opponent_index: "<<_user[i]->_opponent_index;

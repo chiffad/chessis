@@ -58,12 +58,13 @@ void UDP_client::send_data(REQUEST_MESSAGES r_mes, bool is_prev_serial_need)
 
 void UDP_client::read_data()
 {
-  qDebug()<<"====socket read"<<_data;
   QHostAddress sender_IP;
   quint16 sender_port;
 
   _data.resize(_socket->pendingDatagramSize());
   _socket->readDatagram(_data.data(), _data.size(), &sender_IP, &sender_port);
+
+  qDebug()<<"====socket read"<<_data;
 
   if(sender_IP != SERVER_IP || sender_port != SERVER_PORT || _last_send_message == _data)
   {
@@ -89,7 +90,7 @@ void UDP_client::read_data()
   qDebug()<<"received: "<<_data;
 
   QByteArray message_type;
-  for(int i = 0; QChar(_data[i]) != FREE_SPASE && _data.size() < i; ++i)
+  for(int i = 0; QChar(_data[i]) != FREE_SPASE && i < _data.size(); ++i)
     message_type.append(_data[i]);
 
   qDebug()<<"message_type: "<<message_type.toInt();
@@ -101,11 +102,8 @@ void UDP_client::read_data()
     case OPPONENT_LOST_FROM_SERVER:
       set_data_and_emit_to_chess(OPPONENT_LOST);
       break;
-    case GO_TO_HISTORY:
-      emit some_data_came();
-      break;
     default:
-      if(_data.size() == NEED_SIMBOLS_TO_MOVE || (_data.toInt() >= MOVE && _data.toInt() <= NEW_GAME))
+      if(message_type.toInt() >= MOVE && message_type.toInt() <= NEW_GAME)
       {
         qDebug()<<"emit_data_came";
         emit some_data_came();

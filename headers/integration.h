@@ -11,6 +11,8 @@
 #include "headers/chess.h"
 #include "headers/udp_client.h"
 
+#include <QTimer>
+
 class ChessIntegration : public QAbstractListModel
 {
   Q_OBJECT
@@ -56,11 +58,12 @@ public:
   Q_INVOKABLE QChar letter_return(const unsigned index) const;
   Q_INVOKABLE void start_new_game();
   Q_INVOKABLE void go_to_history_index(const unsigned index);
-  Q_INVOKABLE void path_to_file(const QString& path, bool is_moves_from_file);
+  Q_INVOKABLE void path_to_file(QString& path, bool is_moves_from_file);
   Q_INVOKABLE void run_command(const QString& command);
 
 public slots:
   void read_data_from_udp();
+  void timer_timeout();
 
 signals:
   void move_turn_color_changed();
@@ -83,7 +86,7 @@ private:
   void switch_move_color();
   void emit_data_changed(const unsigned index);
   void make_move_from_str(const QString& str);
-  void send_data_on_server(MESSAGE_TYPE m_type, const int index = 0);
+  void send_data_on_server(MESSAGE_TYPE m_type, const int index = -1);
   void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y, bool is_correct);
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
   void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
@@ -93,6 +96,7 @@ private:
   void set_new_connetc_status(const QString& status);
 
 private:
+  QTimer* timer_kill;
   Board* _board;
   UDP_client* _udp_client;
   QString _move_color;
