@@ -273,17 +273,16 @@ void ChessIntegration::run_command(const QString& command)
 
   const QString HELP_WORD = "help";
   const QString MOVE_WORD = "move";
-  //const QString SHOW_OPPONENT = "show opponent";
+  const QString SHOW_OPPONENT = "show opponent";
 
   if(command == HELP_WORD)
   {
     qDebug()<<"help_word";
-     _commands_history.append("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + "d2-d4).");
-    // _commands_history.append("To see opponent information type '" + SHOW_OPPONENT + " .");
+     add_to_comman_history("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + "d2-d4).");
+     add_to_comman_history("To see opponent information type '" + SHOW_OPPONENT + " .");
   }
-  //else if(command == SHOW_OPPONENT)
-    // send_data_on_server(SHOW_OPPONENT_INF);
-    //break;
+  else if(command == SHOW_OPPONENT)
+    send_data_on_server(SHOW_OPPONENT_INF);
   else
   {
     QString command_copy = command;
@@ -302,8 +301,13 @@ void ChessIntegration::run_command(const QString& command)
       make_move_from_str(command_copy);
       qDebug()<<"move word";
     }
-    else _commands_history.append("Unknown command ('" + HELP_WORD + "' for help).");
+    else add_to_comman_history("Unknown command ('" + HELP_WORD + "' for help).");
   }
+}
+
+void ChessIntegration::add_to_comman_history(const QString& str)
+{
+  _commands_history.append(str);
   emit commands_list_changed();
 }
 
@@ -450,13 +454,17 @@ void ChessIntegration::read_data_from_udp()
     case NEW_GAME:
       start_new_game();
       break;
+    case SHOW_OPPONENT_INF:
+      add_to_comman_history(message);
+      if(_udp_connection_status == DISCONNECT)
+        set_connect_status(CONNECT);
+      break;
     case GO_TO_HISTORY:
       go_to_history_index(message.toInt());
       break;
     default:
       make_move_from_str(message);
   }
-
   if(message_type.toInt() >= MOVE && message_type.toInt() <= NEW_GAME)
     set_connect_status(CONNECT);
 }

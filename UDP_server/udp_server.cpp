@@ -147,7 +147,11 @@ void UDP_server::read_data()
 void UDP_server::show_information(User& u)
 {
   QByteArray inf;
-  inf.append("Login: " + u._login + "; Rating ELO: " + QByteArray::number(u._rating_ELO));
+  if(u._opponent_index == NO_OPPONENT)
+    inf.append("No opponent!");
+  else inf.append(QByteArray::number(OPPONENT_INF_REQUEST) + " Login: " + u._login + "; Rating ELO: "
+             + QByteArray::number(u._rating_ELO));
+
   send_data(inf, *_user[u._opponent_index]);
 }
 

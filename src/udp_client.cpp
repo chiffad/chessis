@@ -103,6 +103,12 @@ void UDP_client::read_data()
     case OPPONENT_LOST_FROM_SERVER:
       set_data_and_emit_to_chess(OPPONENT_LOST);
       break;
+    case OPPONENT_INF_REQUEST:
+      for(int i = 0; QChar(_data[i]) != FREE_SPASE && i < _data.size(); ++i)
+        _data.remove(0,1);
+      _data.prepend(QByteArray::number(SHOW_OPPONENT_INF));
+      emit some_data_came();
+      break;
     default:
       if(message_type.toInt() >= MOVE && message_type.toInt() <= NEW_GAME)
       {
@@ -123,7 +129,6 @@ void UDP_client::read_data()
           }
         }
         else qDebug()<<"wrong message in read_data_from_udp()";
-        return;
       }
   }
   send_data(MESSAGE_RECEIVED);

@@ -94,6 +94,7 @@ private:
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
   void set_connect_status(const QString& status);
+  void add_to_comman_history(const QString& str);
 
 private:
   QTimer* timer_kill;
