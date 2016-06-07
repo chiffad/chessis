@@ -89,7 +89,7 @@ void UDP_server::read_data()
     _user.append(new User(this, this, sender_port, sender_IP, serial_num.toInt(), _user.size()));
     set_opponent(*_user[_user.size() - 1]);
 
-    send_data(MESSAGE_RECEIVED, *_user[_user.size() - 1]);
+    send_data(MESSAGE_RECEIVED, *_user.last());
     return;
 
     something_wrong:
@@ -131,16 +131,24 @@ void UDP_server::read_data()
         sender->_message_stack.remove(0);
       }
       break;
-
     case IS_SERVER_LOST:
-      send_data(MESSAGE_RECEIVED, *sender);
       break;
-
+    case OPPONENT_INF_REQUEST:
+      show_information(*_user[sender->_opponent_index]);
+      break;
     default:
-      send_data(MESSAGE_RECEIVED, *sender);
       if(sender->_opponent_index != NO_OPPONENT)
         send_data(buffer, *_user[sender->_opponent_index]);
   }
+  if(buffer.toInt() != MESSAGE_RECEIVED)
+    send_data(MESSAGE_RECEIVED, *sender);
+}
+
+void UDP_server::show_information(User& u)
+{
+  QByteArray inf;
+  inf.append("Login: " + u._login + "; Rating ELO: " + QByteArray::number(u._rating_ELO));
+  send_data(inf, *_user[u._opponent_index]);
 }
 
 void UDP_server::set_opponent(User& u)
@@ -195,13 +203,15 @@ QByteArray UDP_server::cut_serial_num_from_data(QByteArray& data) const
   return serial_num;
 }
 
-void UDP_server::User::timer_timeout() // test wariant
+void UDP_server::User::timer_timeout()
 {
   qDebug()<<"===time out";
 
+  static int count = 0;
   if(!_is_message_reach)
   {
-    if(_last_sent_message.toInt() == CLIENT_LOST)
+    ++count;
+    if(_last_sent_message.toInt() == CLIENT_LOST || count > 5)
     {
       qDebug()<<"last message was client lost";
       _parent_class->send_data(OPPONENT_LOST_FROM_SERVER, *_parent_class->_user[_opponent_index]);
@@ -215,6 +225,7 @@ void UDP_server::User::timer_timeout() // test wariant
   {
     qDebug()<<"timer stop";
     _timer->stop();
+    count = 0;
   }
 }
 
