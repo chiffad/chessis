@@ -403,6 +403,14 @@ void ChessIntegration::make_move_from_str(const QString& str)
   }
 }
 
+void ChessIntegration::set_connect_status(const QString& status)
+{
+  if(_udp_connection_status == status)
+    return;
+  _udp_connection_status = status;
+  emit udp_connection_status_changed();
+}
+
 //===================================================================================================
 
 void ChessIntegration::read_data_from_udp()
@@ -411,9 +419,6 @@ void ChessIntegration::read_data_from_udp()
   _is_message_from_server = true;
   QString message;
   _udp_client->export_readed_data_to_chess(message);
-
-  if(_udp_connection_status == DISCONNECT)
-    set_new_connetc_status(CONNECT);
 
   QString message_type;
   while(message.size())
@@ -430,34 +435,30 @@ void ChessIntegration::read_data_from_udp()
 
   switch(message_type.toInt())
   {
+    case SERVER_LOST:
+      set_connect_status(DISCONNECT);
+      break;
+    case OPPONENT_LOST:
+      set_connect_status(OPPONENT_DISCONNECT);
+      break;
+    case SERVER_HERE:
+      set_connect_status(CONNECT);
+      break;
     case BACK_MOVE:
       back_move();
       break;
     case NEW_GAME:
       start_new_game();
       break;
-    case SERVER_LOST:
-      set_new_connetc_status(DISCONNECT);
-      break;
-    case OPPONENT_LOST:
-      set_new_connetc_status(OPPONENT_DISCONNECT);
-      break;
-    /*case SHOW_OPPONENT_INF:
-      while(message.size())
-        if(message[0].t == )
-      run_command(message);
-      break;*/
     case GO_TO_HISTORY:
       go_to_history_index(message.toInt());
       break;
     default:
       make_move_from_str(message);
   }
-}
-void ChessIntegration::set_new_connetc_status(const QString& status)
-{
-  _udp_connection_status = status;
-  emit udp_connection_status_changed();
+
+  if(message_type.toInt() >= MOVE && message_type.toInt() <= NEW_GAME)
+    set_connect_status(CONNECT);
 }
 
 void ChessIntegration::send_data_on_server(MESSAGE_TYPE type, const int index)
@@ -473,17 +474,11 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE type, const int index)
   QByteArray message;
   message.setNum(type);
 
-  if(type == MOVE && !_moves_history.isEmpty())
+  if((type == MOVE && !_moves_history.isEmpty()) || type == GO_TO_HISTORY)
   {
     message += FREE_SPACE;
-    message += _moves_history.last();
+    message += (type == MOVE) ? _moves_history.last() : QByteArray::number(index);
   }
-  else if(type == GO_TO_HISTORY)
-  {
-    message += FREE_SPACE;
-    message += QByteArray::number(index);
-  }
-
   _udp_client->send_data(message);
 }
 

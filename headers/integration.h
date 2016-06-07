@@ -79,7 +79,7 @@ public:
   const QString DISCONNECT = "Disconnect"; const QString OPPONENT_DISCONNECT = "Opponent disconnect"; const QString CONNECT = "Connect";
   const char FREE_SPACE = ' ';
 
-  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, SERVER_LOST, OPPONENT_LOST, SHOW_OPPONENT_INF};
+  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, SHOW_OPPONENT_INF, SERVER_HERE, SERVER_LOST, OPPONENT_LOST};
 
 private:
   void update_coordinates();
@@ -93,7 +93,7 @@ private:
   void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to);
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
-  void set_new_connetc_status(const QString& status);
+  void set_connect_status(const QString& status);
 
 private:
   QTimer* timer_kill;

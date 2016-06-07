@@ -98,6 +98,7 @@ void UDP_client::read_data()
   switch(message_type.toInt())
   {
     case CLIENT_LOST:
+      set_data_and_emit_to_chess(SERVER_HERE);
       break;
     case OPPONENT_LOST_FROM_SERVER:
       set_data_and_emit_to_chess(OPPONENT_LOST);
