@@ -31,8 +31,10 @@ Rectangle
   TextInput
   {
     anchors.top: _history_view.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.leftMargin: _root.border.width
-    width: parent.width
+    anchors.rightMargin: _root.border.width
     visible: parent.visible
     clip: true
     focus: true

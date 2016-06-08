@@ -282,7 +282,7 @@ void ChessIntegration::run_command(const QString& command)
      add_to_comman_history("To see opponent information type '" + SHOW_OPPONENT + " .");
   }
   else if(command == SHOW_OPPONENT)
-    send_data_on_server(SHOW_OPPONENT_INF);
+    send_data_on_server(OPPONENT_INF_REQUEST);
   else
   {
     QString command_copy = command;
@@ -419,10 +419,11 @@ void ChessIntegration::set_connect_status(const QString& status)
 
 void ChessIntegration::read_data_from_udp()
 {
-  qDebug()<<"=====integrator read_data_from_udp()";
   _is_message_from_server = true;
   QString message;
   _udp_client->export_readed_data_to_chess(message);
+
+  qDebug()<<"=====integrator read_data_from_udp(): "<<message;
 
   QString message_type;
   while(message.size())
@@ -454,7 +455,7 @@ void ChessIntegration::read_data_from_udp()
     case NEW_GAME:
       start_new_game();
       break;
-    case SHOW_OPPONENT_INF:
+    case OPPONENT_INF_REQUEST:
       add_to_comman_history(message);
       if(_udp_connection_status == DISCONNECT)
         set_connect_status(CONNECT);
