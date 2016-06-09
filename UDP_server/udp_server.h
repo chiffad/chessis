@@ -20,7 +20,7 @@ private:
   class User;
 
 public:
-  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, IS_SERVER_LOST, CLIENT_LOST, OPPONENT_LOST_FROM_SERVER, OPPONENT_INF_REQUEST};
+  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, IS_SERVER_LOST, CLIENT_LOST, OPPONENT_LOST_FROM_SERVER, OPPONENT_INF, MY_INF};
   enum {NO_OPPONENT = -1, SECOND = 1000, TEN_SEC = 10000};
   const QChar FREE_SPASE = ' ';
 
@@ -34,7 +34,7 @@ private:
   QByteArray cut_serial_num_from_data(QByteArray& message) const;
   void begin_wait_receive(User& u);
   void set_opponent(User& u);
-  void show_information(User& u);
+  void show_information(const User& u, bool is_to_opponent = true);
 
 private:
   const quint16 _SERVER_PORT;

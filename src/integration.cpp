@@ -274,15 +274,19 @@ void ChessIntegration::run_command(const QString& command)
   const QString HELP_WORD = "help";
   const QString MOVE_WORD = "move";
   const QString SHOW_OPPONENT = "show opponent";
+  const QString SHOW_ME = "show me";
 
   if(command == HELP_WORD)
   {
     qDebug()<<"help_word";
-     add_to_comman_history("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + "d2-d4).");
-     add_to_comman_history("To see opponent information type '" + SHOW_OPPONENT + " .");
+    add_to_comman_history("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + "d2-d4).");
+    add_to_comman_history("To see opponent information, print '" + SHOW_OPPONENT + " .");
+    add_to_comman_history("To view your information, print '" + SHOW_ME + " .");
   }
   else if(command == SHOW_OPPONENT)
     send_data_on_server(OPPONENT_INF_REQUEST);
+  else if(command == SHOW_ME)
+    send_data_on_server(MY_INF_REQUEST);
   else
   {
     QString command_copy = command;

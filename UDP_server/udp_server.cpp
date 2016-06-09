@@ -133,8 +133,11 @@ void UDP_server::read_data()
       break;
     case IS_SERVER_LOST:
       break;
-    case OPPONENT_INF_REQUEST:
-      show_information(*_user[sender->_opponent_index]);
+    case OPPONENT_INF:
+      show_information(*sender);
+      break;
+    case MY_INF:
+      show_information(*sender, false);
       break;
     default:
       if(sender->_opponent_index != NO_OPPONENT)
@@ -144,15 +147,20 @@ void UDP_server::read_data()
     send_data(MESSAGE_RECEIVED, *sender);
 }
 
-void UDP_server::show_information(User& u)
+void UDP_server::show_information(const User& u, bool is_to_opponent)
 {
   QByteArray inf;
-  if(u._opponent_index == NO_OPPONENT)
-    inf.append("No opponent!");
-  else inf.append(QByteArray::number(OPPONENT_INF_REQUEST) + " Login: " + u._login + "; Rating ELO: "
-             + QByteArray::number(u._rating_ELO));
-
-  send_data(inf, *_user[u._opponent_index]);
+  int receiver = u._my_index;
+  if(is_to_opponent && u._opponent_index == NO_OPPONENT)
+     inf.append("No opponent!");
+  else
+  {
+    if(is_to_opponent)
+      receiver = u._opponent_index;
+    inf.append(" Login: " + _user[receiver]->_login + "; Rating ELO: "
+           + QByteArray::number(_user[receiver]->_rating_ELO));
+  }
+  send_data(inf, *_user[receiver]);
 }
 
 void UDP_server::set_opponent(User& u)

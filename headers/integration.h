@@ -79,7 +79,7 @@ public:
   const QString DISCONNECT = "Disconnect"; const QString OPPONENT_DISCONNECT = "Opponent disconnect"; const QString CONNECT = "Connect";
   const char FREE_SPACE = ' ';
 
-  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, OPPONENT_INF_REQUEST, SERVER_HERE, SERVER_LOST, OPPONENT_LOST};
+  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, OPPONENT_INF_REQUEST, MY_INF_REQUEST, SERVER_HERE, SERVER_LOST, OPPONENT_LOST};
 
 private:
   void update_coordinates();
