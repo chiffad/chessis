@@ -92,7 +92,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
     is_from = true;
     correct_figure_coord(to, x, y, is_correct_coord);
 
-    if(!(from == to) && _board->move(from, to))
+    if(_board->move(from, to))
     {
       update_hilight(to, SECOND_HILIGHT);
       add_move_to_str_history(from, to);
@@ -322,7 +322,7 @@ void ChessIntegration::read_moves_from_file(const QString& path)
 
   from_file.close();
 
-  //start_new_game();
+  start_new_game();
   std::cout<<"data_from_file std: "<<data_from_file<<std::endl;
   qDebug()<<QString::fromStdString(data_from_file);
   make_move_from_str(QString::fromStdString(data_from_file));

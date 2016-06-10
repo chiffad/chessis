@@ -164,7 +164,7 @@ bool Board::is_castling(const Coord& f, const Coord& t) const
 
 bool Board::is_check(COLOR color) const
 {
-  if(_move_num < 2) return false;
+  if(_move_num < 2 || color == NONE) return false;
 
   Coord f;
   Coord t;
@@ -192,7 +192,7 @@ bool Board::is_check(COLOR color) const
 
 bool Board::is_mate(COLOR color)
 {
-  if(_move_num < 2) return false;
+  if(_move_num < 2 || color == NONE) return false;
   Coord f;
   Coord t;
 
