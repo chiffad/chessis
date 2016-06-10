@@ -116,8 +116,8 @@ void ChessIntegration::back_move()
   if(_board->back_move())
   {
     qDebug()<<"====back_move";
-    update_hilight(_board->get_i_from_coord_from_end(1), FIRST_HILIGHT);
-    update_hilight(_board->get_i_to_coord_from_end(1), SECOND_HILIGHT);
+    update_hilight(_board->get_prev_from_coord(), FIRST_HILIGHT);
+    update_hilight(_board->get_prev_to_coord(), SECOND_HILIGHT);
     update_coordinates();
     send_data_on_server(BACK_MOVE);
   }

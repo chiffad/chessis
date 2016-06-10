@@ -310,17 +310,17 @@ Board::FIGURES Board::get_figure(const int x, const int y) const
 
 Board::COLOR Board::get_move_color_i_from_end(const unsigned i) const
 {
-  return moves[_move_num - i]._color;
+  return (_move_num < i) ? NONE : moves[_move_num - i]._color;
 }
 
-const Board::Coord& Board::get_i_from_coord_from_end(const unsigned i) const
+const Board::Coord& Board::get_prev_from_coord() const
 {
-  return moves[_move_num - i]._from;
+  return moves[_move_num - 1]._from;
 }
 
-const Board::Coord& Board::get_i_to_coord_from_end(const unsigned i) const
+const Board::Coord& Board::get_prev_to_coord() const
 {
-  return moves[_move_num - i]._to;
+  return moves[_move_num - 1]._to;
 }
 
 Board::COLORLESS_FIG Board::get_colorless_figure(const Coord& c) const

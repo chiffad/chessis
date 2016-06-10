@@ -33,8 +33,8 @@ public:
    COLOR get_color(const Coord& c) const;
    COLOR get_move_color_i_from_end(const unsigned i) const;
 
-   const Coord& get_i_from_coord_from_end(const unsigned i = 0 ) const;
-   const Coord& get_i_to_coord_from_end(const unsigned i = 0) const;
+   const Coord& get_prev_from_coord() const;
+   const Coord& get_prev_to_coord() const;
 private:
    struct Moves
    {
