@@ -89,8 +89,7 @@ private:
   void send_data_on_server(MESSAGE_TYPE m_type, const int index = -1);
   void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y, bool is_correct);
   void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
-  void add_to_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
-  void add_move_to_history_copy(const Board::Coord& coord_from, const Board::Coord& coord_to);
+  void add_move_to_str_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
   void set_connect_status(const QString& status);
@@ -102,19 +101,12 @@ private:
   UDP_client* _udp_client;
   QString _move_color;
   QString _udp_connection_status;
-  QStringList _moves_history;
+  QStringList _str_moves_history;
   QStringList _commands_history;
   QList<Figure> _figures_model;
   Board::Coord from;
   Board::Coord to;
   bool _is_message_from_server;
-
-  struct Copy_of_history_moves
-  {
-    Board::Coord from;
-    Board::Coord to;
-  };
-  std::vector<Copy_of_history_moves> history_copy;
 };
 
 class ChessIntegration::Figure
