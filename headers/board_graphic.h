@@ -12,7 +12,7 @@
 
 #include <QTimer>
 
-class ChessIntegration : public QAbstractListModel
+class Board_graphic : public QAbstractListModel
 {
   Q_OBJECT
 private:  
@@ -31,8 +31,8 @@ public:
       VisibleRole = Qt::UserRole
   };
 
-  explicit ChessIntegration(QObject *parent = 0);
-  ~ChessIntegration(){delete _udp_client;}
+  explicit Board_graphic(QObject *parent = 0);
+  ~Board_graphic(){delete _udp_client;}
 
   void addFigure(const Figure &figure);
   int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -110,7 +110,7 @@ private:
   bool _is_message_from_server;
 };
 
-class ChessIntegration::Figure
+class Board_graphic::Figure
 {
 public:
   Figure(const QString& name, const int x, const int y, const bool visible);

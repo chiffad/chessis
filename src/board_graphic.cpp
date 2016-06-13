@@ -5,11 +5,11 @@
 #include <QModelIndex>
 #include <fstream>
 #include <sstream>
-#include "headers/integration.h"
+#include "headers/board_graphic.h"
 #include "headers/udp_client.h"
 
 
-ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
+Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
                                                      _udp_connection_status(DISCONNECT), _is_message_from_server(false)
 {
   _udp_client = new UDP_client();
@@ -17,8 +17,8 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
   for(int i = 0; i < Board::FIGURES_NUMBER; ++i)
     addFigure(Figure(MOVE_COLOR_W, 0, 0, true));
 
-  addFigure(ChessIntegration::Figure(HILIGHT_IM, 0, 0, false));
-  addFigure(ChessIntegration::Figure(HILIGHT_IM, 0, 0, false));
+  addFigure(Board_graphic::Figure(HILIGHT_IM, 0, 0, false));
+  addFigure(Board_graphic::Figure(HILIGHT_IM, 0, 0, false));
   update_coordinates();
 
   connect(_udp_client, SIGNAL(some_data_came()), this, SLOT(read_data_from_udp()));
@@ -28,7 +28,7 @@ ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent)
   timer_kill->start(1000);
 }
 
-void ChessIntegration::timer_timeout()
+void Board_graphic::timer_timeout()
 {
   timer_kill->stop();
 
@@ -66,12 +66,12 @@ void ChessIntegration::timer_timeout()
 }
 
 
-ChessIntegration::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
+Board_graphic::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
     : _name(name), _x(x), _y(y), _visible(visible)
 {
 }
 
-void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_coord)
+void Board_graphic::move(const unsigned x, const unsigned y, bool is_correct_coord)
 {
   static bool is_from = true;
 
@@ -109,7 +109,7 @@ void ChessIntegration::move(const unsigned x, const unsigned y, bool is_correct_
   }
 }
 
-void ChessIntegration::back_move()
+void Board_graphic::back_move()
 {
   if(_board->back_move())
   {
@@ -121,13 +121,13 @@ void ChessIntegration::back_move()
   }
 }
 
-void ChessIntegration::correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct)
+void Board_graphic::correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct)
 {
   coord.x = is_correct ? x : (x + IMG_MID) / CELL_SIZE;
   coord.y = is_correct ? y : (y + IMG_MID) / CELL_SIZE;
 }
 
-void ChessIntegration::update_coordinates()
+void Board_graphic::update_coordinates()
 {
   int index = 0;
   Coord a;
@@ -161,7 +161,7 @@ void ChessIntegration::update_coordinates()
   switch_move_color();
 }
 
-void ChessIntegration::update_hilight(const Coord& coord, HILIGHT hilight_index)
+void Board_graphic::update_hilight(const Coord& coord, HILIGHT hilight_index)
 {
   _figures_model[hilight_index].set_visible(true);
   _figures_model[hilight_index].set_coord(coord);
@@ -174,7 +174,7 @@ void ChessIntegration::update_hilight(const Coord& coord, HILIGHT hilight_index)
   emit_data_changed(hilight_index);
 }
 
-void ChessIntegration::switch_move_color()
+void Board_graphic::switch_move_color()
 {
   if(_board->get_move_color_i_from_end(1) == Board::W_FIG)
     _move_color = MOVE_COLOR_B;
@@ -182,14 +182,14 @@ void ChessIntegration::switch_move_color()
 
   emit move_turn_color_changed();
 }
-void ChessIntegration::emit_data_changed(const unsigned INDEX)
+void Board_graphic::emit_data_changed(const unsigned INDEX)
 {
   QModelIndex topLeft = index(INDEX, 0);
   QModelIndex bottomRight = index(INDEX, 0);
   emit dataChanged(topLeft, bottomRight);
 }
 
-bool ChessIntegration::is_check_mate() const
+bool Board_graphic::is_check_mate() const
 {
   if(!_board->is_mate(_board->get_move_color_i_from_end(2)))
     return false;
@@ -198,7 +198,7 @@ bool ChessIntegration::is_check_mate() const
   return true;
 }
 
-void ChessIntegration::start_new_game()
+void Board_graphic::start_new_game()
 {
   qDebug()<<"====start_new_game";
   while(_board->get_current_move() != 1)
@@ -214,7 +214,7 @@ void ChessIntegration::start_new_game()
   send_data_on_server(NEW_GAME);
 }
 
-void ChessIntegration::go_to_history_index(const unsigned index)
+void Board_graphic::go_to_history_index(const unsigned index)
 {
   qDebug()<<"====go to history index: " <<index;
 
@@ -228,7 +228,7 @@ void ChessIntegration::go_to_history_index(const unsigned index)
   }
 }
 
-void ChessIntegration::add_move_to_str_history(const Board::Coord& coord_from, const Board::Coord& coord_to)
+void Board_graphic::add_move_to_str_history(const Board::Coord& coord_from, const Board::Coord& coord_to)
 {
   const int LIST_SIZE = _str_moves_history.size() + ZERO_AND_ACTUAL_MOVES;
   for(int i = _board->get_current_move(); i < LIST_SIZE; ++i)
@@ -241,7 +241,7 @@ void ChessIntegration::add_move_to_str_history(const Board::Coord& coord_from, c
   emit moves_history_changed();
 }
 
-void ChessIntegration::run_command(const QString& command)
+void Board_graphic::run_command(const QString& command)
 {
   qDebug()<<"===run_command: "<<command;
   _commands_history.append(command);
@@ -284,20 +284,20 @@ void ChessIntegration::run_command(const QString& command)
   }
 }
 
-void ChessIntegration::add_to_comman_history(const QString& str)
+void Board_graphic::add_to_comman_history(const QString& str)
 {
   _commands_history.append(str);
   emit commands_list_changed();
 }
 
-void ChessIntegration::path_to_file(QString& path, bool is_moves_from_file)
+void Board_graphic::path_to_file(QString& path, bool is_moves_from_file)
 {
   path.remove(0,7);
   qDebug()<<"===path_to_file: "<<path;
   is_moves_from_file ? read_moves_from_file(path) : write_moves_to_file(path);
 }
 
-void ChessIntegration::write_moves_to_file(const QString& path)
+void Board_graphic::write_moves_to_file(const QString& path)
 {
   std::ofstream in_file(path.toUtf8().constData());
   for(int i = 0; i < _str_moves_history.size(); ++i)
@@ -308,7 +308,7 @@ void ChessIntegration::write_moves_to_file(const QString& path)
   in_file.close();
 }
 
-void ChessIntegration::read_moves_from_file(const QString& path)
+void Board_graphic::read_moves_from_file(const QString& path)
 {
   qDebug()<<"===read_move_from_file: "<<path;
   std::ifstream from_file(path.toUtf8().constData());
@@ -326,7 +326,7 @@ void ChessIntegration::read_moves_from_file(const QString& path)
   make_move_from_str(QString::fromStdString(data_from_file));
 }
 
-void ChessIntegration::make_move_from_str(const QString& str)
+void Board_graphic::make_move_from_str(const QString& str)
 {
   qDebug()<<"==make_move_from_str CHESS: "<<str;
   QVector<int> coord_str;
@@ -351,7 +351,7 @@ void ChessIntegration::make_move_from_str(const QString& str)
   }
 }
 
-void ChessIntegration::set_connect_status(const QString& status)
+void Board_graphic::set_connect_status(const QString& status)
 {
   if(_udp_connection_status == status)
     return;
@@ -361,7 +361,7 @@ void ChessIntegration::set_connect_status(const QString& status)
 
 //===================================================================================================
 
-void ChessIntegration::read_data_from_udp()
+void Board_graphic::read_data_from_udp()
 {
   _is_message_from_server = true;
   QString message;
@@ -414,7 +414,7 @@ void ChessIntegration::read_data_from_udp()
     set_connect_status(CONNECT);
 }
 
-void ChessIntegration::send_data_on_server(MESSAGE_TYPE type, const int index)
+void Board_graphic::send_data_on_server(MESSAGE_TYPE type, const int index)
 {
   qDebug()<<"====send_data_on_server_chess";
   if(_is_message_from_server)
@@ -437,45 +437,45 @@ void ChessIntegration::send_data_on_server(MESSAGE_TYPE type, const int index)
 
 //===========================================================================================================
 
-QStringList ChessIntegration::moves_history() const
+QStringList Board_graphic::moves_history() const
 {
   return _str_moves_history;
 }
 
-QStringList ChessIntegration::commands_list() const
+QStringList Board_graphic::commands_list() const
 {
   return _commands_history;
 }
 
-QString ChessIntegration::move_turn_color() const
+QString Board_graphic::move_turn_color() const
 {
   return _move_color;
 }
 
-QString ChessIntegration::udp_connection_status() const
+QString Board_graphic::udp_connection_status() const
 {
   return _udp_connection_status;
 }
 
-QChar ChessIntegration::letter_return(const unsigned index) const
+QChar Board_graphic::letter_return(const unsigned index) const
 {
   return QChar(a_LETTER + index);
 }
 
-void ChessIntegration::addFigure(const Figure &figure)
+void Board_graphic::addFigure(const Figure &figure)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());
   _figures_model << figure;
   endInsertRows();
 }
 
-int ChessIntegration::rowCount(const QModelIndex & parent) const
+int Board_graphic::rowCount(const QModelIndex & parent) const
 {
   Q_UNUSED(parent);
   return _figures_model.count();
 }
 
-QVariant ChessIntegration::data(const QModelIndex & index, int role) const
+QVariant Board_graphic::data(const QModelIndex & index, int role) const
 {
   if (index.row() < 0 || index.row() >= _figures_model.count())
     return QVariant();
@@ -492,7 +492,7 @@ QVariant ChessIntegration::data(const QModelIndex & index, int role) const
   return QVariant();
 }
 
-QHash<int, QByteArray> ChessIntegration::roleNames() const
+QHash<int, QByteArray> Board_graphic::roleNames() const
 {
   QHash<int, QByteArray> roles;
   roles[NameRole] = "figure_name";

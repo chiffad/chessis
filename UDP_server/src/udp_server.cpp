@@ -7,7 +7,6 @@
 
 UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _SERVER_IP(QHostAddress::LocalHost)
 {
-  _board = new Board;
   _socket = new QUdpSocket(this);
   _socket->bind(_SERVER_IP, _SERVER_PORT);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
@@ -18,23 +17,11 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _
 UDP_server::~UDP_server()
 {
   delete _socket;
-  delete _board;
   for(auto i : _user)
     delete i;
-}
 
-UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16& port, const QHostAddress& ip,
-                       const int received_serial_num, const int index)
-                     : QObject(parent), _parent_class(parent_class),_port(port), _ip(ip), _my_index(index),
-                       _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true)
-{
-  _login = "login";
-  _rating_ELO = 1200;
-  _timer = new QTimer;
-  connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-
-  _timer_last_received_message = new QTimer;
-  connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
+  for(auto i : _board)
+    delete i;
 }
 
 void UDP_server::send_data(QByteArray& message, User& u)
@@ -262,4 +249,32 @@ bool UDP_server::is_message_reach(QByteArray& message, User& u)
 
   u._last_sent_message = message;
   return true;
+}
+
+UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16& port, const QHostAddress& ip,
+                       const int received_serial_num, const int index)
+                     : QObject(parent), _parent_class(parent_class),_port(port), _ip(ip), _my_index(index),
+                       _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true)
+{
+  _login = "login";
+  _rating_ELO = 1200;
+  _timer = new QTimer;
+  connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
+
+  _timer_last_received_message = new QTimer;
+  connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
+}
+
+int UDP_server::User::get_desk_ind()
+{
+  if(_opponent_index == NO_OPPONENT)
+    return NO_OPPONENT;
+
+  int i = 0;
+  for(; i < _parent_class->_board.size(); ++i)
+    if(_parent_class->_board[i]->_first_player_ind == _my_index
+       && _parent_class->_board[i]->_second_player_ind == _opponent_index)
+      break;
+
+  return i;
 }

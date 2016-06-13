@@ -5,12 +5,14 @@ QT += qml quick \
 
 CONFIG+=c++14
 
-HEADERS += headers/integration.h\
-           headers/udp_client.h
+HEADERS +=\
+           headers/udp_client.h \
+    headers/board_graphic.h
 
-SOURCES += src/integration.cpp \
+SOURCES += \
            src/main.cpp\
-           src/udp_client.cpp
+           src/udp_client.cpp \
+    src/board_graphic.cpp
 
 RESOURCES += \
     res.qrc

@@ -16,4 +16,5 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 HEADERS += headers/udp_server.h \
-           headers/chess.h
+           headers/chess.h \
+    headers/desk.h

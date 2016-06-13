@@ -6,6 +6,7 @@
 #include <QString>
 #include <QTimer>
 #include "headers/chess.h"
+#include "headers/desk.h"
 
 class UDP_server : public QObject
 {
@@ -42,8 +43,8 @@ private:
   const QHostAddress _SERVER_IP;
 
   QUdpSocket *_socket;
-  Board *_board;
   QVector<User*> _user;
+  QVector<Desk*> _board;
 };
 
 class UDP_server::User : public QObject
@@ -53,6 +54,7 @@ public:
   explicit User(QObject *parent = nullptr, UDP_server *parent_class = nullptr, const quint16& port = 0,
                 const QHostAddress& ip = QHostAddress::LocalHost, const int received_serial_num = 0, const int index = 0);
   ~User() {delete _timer; delete _timer_last_received_message;}
+  int get_desk_ind();
 
 public slots:
   void timer_timeout();

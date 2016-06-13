@@ -3,13 +3,13 @@
 #include <QApplication>
 #include <QQmlComponent>
 #include <QQmlProperty>
-#include "headers/integration.h"
+#include "headers/board_graphic.h"
 
 int main(int argc, char *argv[])
 {
   QGuiApplication app(argc, argv);
 
-  ChessIntegration model;
+  Board_graphic model;
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("FigureModel", &model);
   //engine.load(QUrl(QStringLiteral("chessis/res/app.qml")));
