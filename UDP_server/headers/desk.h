@@ -6,7 +6,7 @@
 class Desk : public Board
 {
 public:
-  Desk(const unsigned first_p, const unsigned second_p)
+  explicit Desk(const unsigned first_p, const unsigned second_p)
                         : Board(), _first_player_ind(first_p), _second_player_ind(second_p)
   {}
   ~Desk(){}
