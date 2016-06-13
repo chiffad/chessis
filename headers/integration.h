@@ -8,7 +8,6 @@
 #include <QStringList>
 #include <vector>
 #include <fstream>
-#include "headers/chess.h"
 #include "headers/udp_client.h"
 
 #include <QTimer>
@@ -16,7 +15,12 @@
 class ChessIntegration : public QAbstractListModel
 {
   Q_OBJECT
-private:
+private:  
+  struct Coord
+  {
+    int x;
+    int y;
+  }from, to;
   class Figure;
 
 public:
@@ -28,7 +32,7 @@ public:
   };
 
   explicit ChessIntegration(QObject *parent = 0);
-  ~ChessIntegration(){delete _board; delete _udp_client;}
+  ~ChessIntegration(){delete _udp_client;}
 
   void addFigure(const Figure &figure);
   int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -87,9 +91,9 @@ private:
   void emit_data_changed(const unsigned index);
   void make_move_from_str(const QString& str);
   void send_data_on_server(MESSAGE_TYPE m_type, const int index = -1);
-  void correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y, bool is_correct);
-  void update_hilight(const Board::Coord& coord, HILIGHT hilight_index);
-  void add_move_to_str_history(const Board::Coord& coord_from, const Board::Coord& coord_to);
+  void correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct);
+  void update_hilight(const Coord& coord, HILIGHT hilight_index);
+  void add_move_to_str_history(const Coord& coord_from, const Coord& coord_to);
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
   void set_connect_status(const QString& status);
@@ -97,15 +101,12 @@ private:
 
 private:
   QTimer* timer_kill;
-  Board* _board;
   UDP_client* _udp_client;
   QString _move_color;
   QString _udp_connection_status;
   QStringList _str_moves_history;
   QStringList _commands_history;
   QList<Figure> _figures_model;
-  Board::Coord from;
-  Board::Coord to;
   bool _is_message_from_server;
 };
 
@@ -120,7 +121,7 @@ public:
   inline bool visible() const {return _visible;}
 
   inline void set_name(const QString& new_name) {_name = new_name;}
-  inline void set_coord(const Board::Coord& new_coord) {_x = new_coord.x; _y = new_coord.y;}
+  inline void set_coord(const Coord& new_coord) {_x = new_coord.x; _y = new_coord.y;}
   inline void set_visible(const bool new_visible) {_visible = new_visible;}
 
 private:

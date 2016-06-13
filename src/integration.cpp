@@ -6,14 +6,12 @@
 #include <fstream>
 #include <sstream>
 #include "headers/integration.h"
-#include "headers/chess.h"
 #include "headers/udp_client.h"
 
 
 ChessIntegration::ChessIntegration(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
                                                      _udp_connection_status(DISCONNECT), _is_message_from_server(false)
 {
-  _board = new Board();
   _udp_client = new UDP_client();
 
   for(int i = 0; i < Board::FIGURES_NUMBER; ++i)
@@ -123,7 +121,7 @@ void ChessIntegration::back_move()
   }
 }
 
-void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned x, const unsigned y, bool is_correct)
+void ChessIntegration::correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct)
 {
   coord.x = is_correct ? x : (x + IMG_MID) / CELL_SIZE;
   coord.y = is_correct ? y : (y + IMG_MID) / CELL_SIZE;
@@ -132,7 +130,7 @@ void ChessIntegration::correct_figure_coord(Board::Coord& coord, const unsigned 
 void ChessIntegration::update_coordinates()
 {
   int index = 0;
-  Board::Coord a;
+  Coord a;
   for(; index < rowCount() - HILIGHT_CELLS; ++index)
   {
     a.x = _figures_model[index].x();
@@ -145,7 +143,7 @@ void ChessIntegration::update_coordinates()
   }
 
   index = 0;
-  Board::Coord coord;
+  Coord coord;
   for(coord.y = 0; coord.y < Board::Y_SIZE; ++coord.y)
     for(coord.x = 0; coord.x < Board::X_SIZE; ++coord.x)
       if(_board->get_figure(coord) != Board::FREE_FIELD)
@@ -163,7 +161,7 @@ void ChessIntegration::update_coordinates()
   switch_move_color();
 }
 
-void ChessIntegration::update_hilight(const Board::Coord& coord, HILIGHT hilight_index)
+void ChessIntegration::update_hilight(const Coord& coord, HILIGHT hilight_index)
 {
   _figures_model[hilight_index].set_visible(true);
   _figures_model[hilight_index].set_coord(coord);
