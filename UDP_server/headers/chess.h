@@ -35,6 +35,20 @@ public:
 
    const Coord& get_prev_from_coord() const;
    const Coord& get_prev_to_coord() const;
+
+private:
+   void next_move(const Coord& fr = Coord(), const Coord& t = Coord());
+   void add_move_to_history_copy(const Coord& coord_from, const Coord& coord_to);
+   void field_change(const Coord& fr, const Coord& t);
+   void if_castling(const Coord& fr, const Coord& t);
+   bool right_move_turn(const Coord& coord) const;
+   bool is_check(COLOR color) const;
+   bool step_ver(const Coord& f, const Coord& t) const;
+   bool is_castling(const Coord& from, const Coord& to) const;
+   void set_field(const Coord& lhs, const Coord& rhs);
+   void set_field(const Coord& coord, FIGURES fig);
+   void make_moves_from_str(const std::string& str);
+
 private:
    struct Moves
    {
@@ -48,22 +62,11 @@ private:
    FIGURES _field[X_SIZE][Y_SIZE];
    bool _is_go_to_history_in_progress;
 
-   struct Copy_of_history_moves
+   struct Fool_move_coord
    {
      Coord _from;
      Coord _to;
    };
-   std::vector<Copy_of_history_moves> history_copy;
-
-   void next_move(const Coord& fr = Coord(), const Coord& t = Coord());
-   void add_move_to_history_copy(const Coord& coord_from, const Coord& coord_to);
-   void field_change(const Coord& fr, const Coord& t);
-   void if_castling(const Coord& fr, const Coord& t);
-   bool right_move_turn(const Coord& coord) const;
-   bool is_check(COLOR color) const;
-   bool step_ver(const Coord& f, const Coord& t) const;
-   bool is_castling(const Coord& from, const Coord& to) const;
-   void set_field(const Coord& lhs, const Coord& rhs);
-   void set_field(const Coord& coord, FIGURES fig);
+   std::vector<Fool_move_coord> history_copy;
 };
 #endif //_VILVIVYVKCKYVLVUYFDKYUFYTF

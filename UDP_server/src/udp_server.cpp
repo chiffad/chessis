@@ -65,10 +65,18 @@ void UDP_server::read_data()
 
   QByteArray serial_num = cut_serial_num_from_data(message);
 
+  int sender_i = 0;
+  for(; sender_i < _user.size(); ++sender_i)
+    if(_user[sender_i]->_port == sender_port && _user[sender_i]->_ip == sender_IP)
+    {
+      qDebug()<<"index: "<<sender_i;
+      break;
+    }
+
   if(message.toInt() == HELLO_SERVER)
   {
     qDebug()<<"HELLO_SERVER";
-    if(!(sender_i < _user.size()))
+    if(sender_i < _user.size())
     {
       qDebug()<<"this client already have";
       return;
@@ -80,14 +88,6 @@ void UDP_server::read_data()
     send_data(MESSAGE_RECEIVED, *_user.last());
     return;
   }
-
-  int sender_i = 0;
-  for(; sender_i < _user.size(); ++sender_i)
-    if(_user[sender_i]->_port == sender_port && _user[sender_i]->_ip == sender_IP)
-    {
-      qDebug()<<"index: "<<sender_i;
-      break;
-    }
 
   if(serial_num.toInt() != ++_user[sender_i]->_received_serial_num)
   {
@@ -112,10 +112,10 @@ void UDP_server::run_message(const QByteArray& message, User& u)
 {
   QByteArray message_type;
   QByteArray message_content = message;
-  while(message.size() && message_content[0] != FREE_SPASE)
+  while(message_content.size() && QChar(message_content[0]) != FREE_SPASE)
   {
     message_type.append(message_content[0]);
-    message.message_content(0,1);
+    message_content.remove(0,1);
   }
 
   bool is_to_board = false;
@@ -143,25 +143,25 @@ void UDP_server::run_message(const QByteArray& message, User& u)
       is_to_board = true;
       break;
     case BACK_MOVE:
-      back_move();
+    //  back_move();
       is_to_board = true;
       break;
     case NEW_GAME:
-      start_new_game();
+    //  start_new_game();
       is_to_board = true;
       break;
     case GO_TO_HISTORY:
-      go_to_history_index(message.toInt());
+     // go_to_history_index(message.toInt());
       is_to_board = true;
       break;
     default:
       qDebug()<<"sheet message!";
   }
 
-  if(u._opponent_index != NO_OPPONENT && is_to_board)
-    send_data(message, *_user[u._opponent_index]);
+  /*if(u._opponent_index != NO_OPPONENT && is_to_board)
+    send_data(message, *_user[u._opponent_index]);*/
 
-  if(message_type != MESSAGE_RECEIVED)
+  if(message_type.toInt() != MESSAGE_RECEIVED)
     send_data(MESSAGE_RECEIVED, u);
 }
 
@@ -191,7 +191,7 @@ void UDP_server::set_opponent(User& u)
       u._opponent_index = i;
       _user[i]->_opponent_index = _user.size() - 1;
       qDebug()<<"_user[i].opponent_index: "<<_user[i]->_opponent_index;
-      _board.append(Desk(u._my_index, u._opponent_index));
+      _board.append(new Desk(u._my_index, u._opponent_index));
       break;
     }
   qDebug()<<"u.opponent_index: "<<u._opponent_index;

@@ -265,7 +265,7 @@ void Board::add_move_to_history_copy(const Coord& coord_from, const Coord& coord
   history_copy.shrink_to_fit();
   for(unsigned i = get_current_move(); i < history_copy.size(); ++i)
     history_copy.pop_back();
-  Copy_of_history_moves copy;
+  Fool_move_coord copy;
   copy._from = coord_from;
   copy._to = coord_to;
   history_copy.push_back(copy);
@@ -286,6 +286,37 @@ bool Board::go_to_history_index(const unsigned index)
 
   _is_go_to_history_in_progress = false;
   return ((index > CURRENT_MOVE && index < history_copy.size()) || index < get_current_move());
+}
+
+void Board::make_moves_from_str(const std::string& str)
+{
+  std::cout<<"==make_move_from_str CHESS: "<<str<<std::endl;
+  enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4};
+  const char a_LETTER = 'a';
+  const char h_LETTER = 'h';
+  const char ONE_ch = '1';
+  const char EIGHT_ch = '8';
+
+  std::vector<int> coord_str;
+  for(int i = 0; i < str.size(); ++i)
+  {
+    if(!(str[i] >= a_LETTER && str[i] <= h_LETTER) || (str[i] >= ONE_ch && str[i] <= EIGHT_ch))
+      continue;
+
+    coord_str.push_back((str[i] >= a_LETTER) ? str[i] - a_LETTER : str[i] - ONE_ch);
+
+    if(coord_str.size() == COORD_NEED_TO_MOVE)
+    {
+      Fool_move_coord coord;
+      coord._from.x = coord_str[FROM_X];
+      coord._from.y = coord_str[FROM_Y];
+      coord._to.x = coord_str[TO_X];
+      coord._to.y = coord_str[TO_Y];
+
+      move(coord._from, coord._to);
+      coord_str.clear();
+    }
+  }
 }
 
 bool Board::Coord::operator ==(const Coord& rhs)
