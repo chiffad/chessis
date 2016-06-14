@@ -23,31 +23,31 @@ public:
 
    Board();
    bool move(const Coord& fr, const Coord& t);
-   bool back_move();
    bool is_mate(COLOR color);
-   bool go_to_history_index(const unsigned index);
-   unsigned get_current_move() const;
+   void back_move();
+   void go_to_history_index(const unsigned index);
+   void make_moves_from_str(const std::string& str);
+   void start_new_game();
    FIGURES get_figure(const Coord& c) const;
    FIGURES get_figure(const int x, const int y) const;
    COLORLESS_FIG get_colorless_figure(const Coord& c) const;
    COLOR get_color(const Coord& c) const;
-   COLOR get_move_color_i_from_end(const unsigned i) const;
-
+   COLOR get_move_color() const;
    const Coord& get_prev_from_coord() const;
    const Coord& get_prev_to_coord() const;
+   unsigned get_current_move() const;
 
 private:
    void next_move(const Coord& fr = Coord(), const Coord& t = Coord());
    void add_move_to_history_copy(const Coord& coord_from, const Coord& coord_to);
    void field_change(const Coord& fr, const Coord& t);
-   void if_castling(const Coord& fr, const Coord& t);
-   bool right_move_turn(const Coord& coord) const;
-   bool is_check(COLOR color) const;
-   bool step_ver(const Coord& f, const Coord& t) const;
-   bool is_castling(const Coord& from, const Coord& to) const;
    void set_field(const Coord& lhs, const Coord& rhs);
    void set_field(const Coord& coord, FIGURES fig);
-   void make_moves_from_str(const std::string& str);
+   void if_castling(const Coord& fr, const Coord& t);
+   bool is_castling(const Coord& from, const Coord& to) const;
+   bool is_right_move_turn(const Coord& coord) const;
+   bool is_check(COLOR color) const;
+   bool is_can_move(const Coord& f, const Coord& t) const;
 
 private:
    struct Moves
@@ -58,7 +58,7 @@ private:
      FIGURES _fig_on_captured_field;
    }m;
    std::vector<Moves> moves;
-   int  _move_num;
+   unsigned  _move_num;
    FIGURES _field[X_SIZE][Y_SIZE];
    bool _is_go_to_history_in_progress;
 

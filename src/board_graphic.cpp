@@ -176,9 +176,9 @@ void Board_graphic::update_hilight(const Coord& coord, HILIGHT hilight_index)
 
 void Board_graphic::switch_move_color()
 {
-  if(_board->get_move_color_i_from_end(1) == Board::W_FIG)
-    _move_color = MOVE_COLOR_B;
-  else  _move_color = MOVE_COLOR_W;
+  if(_board->get_move_color() == Board::W_FIG)
+    _move_color = MOVE_COLOR_W;
+  else  _move_color = MOVE_COLOR_B;
 
   emit move_turn_color_changed();
 }
@@ -191,7 +191,7 @@ void Board_graphic::emit_data_changed(const unsigned INDEX)
 
 bool Board_graphic::is_check_mate() const
 {
-  if(!_board->is_mate(_board->get_move_color_i_from_end(2)))
+  if(!_board->is_mate(_board->get_move_color()))
     return false;
 
   emit check_mate();

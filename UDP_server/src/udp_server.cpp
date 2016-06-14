@@ -63,15 +63,12 @@ void UDP_server::read_data()
   _socket->readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
   qDebug()<<"====reading"<<message;
 
-  QByteArray serial_num = cut_serial_num_from_data(message);
-
   int sender_i = 0;
   for(; sender_i < _user.size(); ++sender_i)
     if(_user[sender_i]->_port == sender_port && _user[sender_i]->_ip == sender_IP)
-    {
-      qDebug()<<"index: "<<sender_i;
       break;
-    }
+
+  QByteArray serial_num = cut_serial_num_from_data(message);
 
   if(message.toInt() == HELLO_SERVER)
   {
@@ -86,10 +83,8 @@ void UDP_server::read_data()
     set_opponent(*_user[sender_i]);
 
     send_data(MESSAGE_RECEIVED, *_user.last());
-    return;
   }
-
-  if(serial_num.toInt() != ++_user[sender_i]->_received_serial_num)
+  else if(serial_num.toInt() != ++_user[sender_i]->_received_serial_num)
   {
     --_user[sender_i]->_received_serial_num;
     qDebug()<<"wrong serial num";
@@ -101,25 +96,12 @@ void UDP_server::read_data()
     }
     return;
   }
-  else
-  {
-    _user[sender_i]->_timer_last_received_message->start(TEN_SEC);
-    run_message(message, *_user[sender_i]);
-  }
+  else run_message(message, *_user[sender_i]);
 }
 
-void UDP_server::run_message(const QByteArray& message, User& u)
+void UDP_server::run_message(QByteArray message, User& u)
 {
-  QByteArray message_type;
-  QByteArray message_content = message;
-  while(message_content.size() && QChar(message_content[0]) != FREE_SPASE)
-  {
-    message_type.append(message_content[0]);
-    message_content.remove(0,1);
-  }
-
-  bool is_to_board = false;
-  switch(message_type.toInt())
+  switch(message.toInt())
   {
     case MESSAGE_RECEIVED:
       qDebug()<<"message_type == MESSAGE_RECEIVED";
@@ -139,30 +121,50 @@ void UDP_server::run_message(const QByteArray& message, User& u)
     case MY_INF:
       show_information(u, false);
       break;
+    default:
+      push_message_to_logic(message, u);
+  }
+  u._timer_last_received_message->start(TEN_SEC);
+  if(message.toInt() != MESSAGE_RECEIVED)
+    send_data(MESSAGE_RECEIVED, u);
+}
+
+void UDP_server::push_message_to_logic(QByteArray message, User& u)
+{
+  if(u.get_board_ind() == NO_OPPONENT)
+    return;
+
+  QByteArray message_type;
+  QByteArray message_content = message;
+  while(message_content.size() && QChar(message_content[0]) != FREE_SPASE)
+  {
+    message_type.append(message_content[0]);
+    message_content.remove(0,1);
+  }
+
+  Desk *const board = _board[u.get_board_ind()];
+  switch(message_type.toInt())
+  {
     case MOVE:
-      is_to_board = true;
+    {
+      std::string str(message_content.constData(), message_content.length());
+      board->make_moves_from_str(str);
       break;
+    }
     case BACK_MOVE:
-    //  back_move();
-      is_to_board = true;
+      board->back_move();
       break;
     case NEW_GAME:
-    //  start_new_game();
-      is_to_board = true;
+      board->start_new_game();
       break;
     case GO_TO_HISTORY:
-     // go_to_history_index(message.toInt());
-      is_to_board = true;
+      board->go_to_history_index(message_content.toInt());
       break;
     default:
       qDebug()<<"sheet message!";
+      return;
   }
-
-  /*if(u._opponent_index != NO_OPPONENT && is_to_board)
-    send_data(message, *_user[u._opponent_index]);*/
-
-  if(message_type.toInt() != MESSAGE_RECEIVED)
-    send_data(MESSAGE_RECEIVED, u);
+  send_data(message, *_user[u._opponent_index]);
 }
 
 void UDP_server::show_information(const User& u, bool is_to_opponent)
@@ -295,7 +297,7 @@ UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16&
   connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
 }
 
-int UDP_server::User::get_desk_ind()
+int UDP_server::User::get_board_ind()
 {
   if(_opponent_index == NO_OPPONENT)
     return NO_OPPONENT;
@@ -305,6 +307,9 @@ int UDP_server::User::get_desk_ind()
     if(_parent_class->_board[i]->_first_player_ind == _my_index
        && _parent_class->_board[i]->_second_player_ind == _opponent_index)
       break;
+
+  if(i >= _parent_class->_board.size())
+    qDebug()<<"crash here";
 
   return i;
 }

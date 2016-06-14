@@ -40,7 +40,7 @@ Board::Board()
 
 bool Board::move(const Coord& fr, const Coord& t)
 {
-  if(right_move_turn(fr) && (step_ver(fr, t) || is_castling(fr, t)))
+  if(is_right_move_turn(fr) && (is_can_move(fr, t) || is_castling(fr, t)))
     field_change(fr, t);
   else return false;
 
@@ -54,10 +54,10 @@ bool Board::move(const Coord& fr, const Coord& t)
   return false;
 }
 
-bool Board::right_move_turn(const Coord& coord) const
+bool Board::is_right_move_turn(const Coord& coord) const
 {
   if(_move_num == 1 && get_color(coord) == B_FIG) return false;
-  if(_move_num > 1 && get_color(coord) == get_move_color_i_from_end(1))
+  if(_move_num > 1 && get_color(coord) != get_move_color())
     return false;
   return true;
 }
@@ -70,7 +70,7 @@ void Board::field_change(const Coord& fr, const Coord& t)
   set_field(t, fig);
 }
 
-bool Board::step_ver(const Coord& f, const Coord& t) const
+bool Board::is_can_move(const Coord& f, const Coord& t) const
 {
   const int dx = abs(t.x - f.x);
   const int dy = abs(t.y - f.y);
@@ -177,7 +177,7 @@ bool Board::is_check(COLOR color) const
           for(f.y = 0; f.y < Y_SIZE; ++f.y) 
             if(get_color(f) != color)
             {
-              if(step_ver(f, t))
+              if(is_can_move(f, t))
                 goto check;
             }
         goto not_check;
@@ -202,7 +202,7 @@ bool Board::is_mate(COLOR color)
       {
         for(t.x = 0; t.x < X_SIZE; ++t.x)
           for(t.y = 0; t.y < Y_SIZE; ++t.y)
-            if(step_ver(f, t)) 
+            if(is_can_move(f, t))
             {
               FIGURES fig_from = get_figure(f);
               FIGURES fig_to   = get_figure(t);
@@ -228,38 +228,6 @@ bool Board::is_mate(COLOR color)
     return false;
 }
 
-bool Board::back_move()
-{
-  if(_move_num > 1)
-  {
-    const int I = _move_num - 1;
-    moves[_move_num]._color = get_color(moves[I]._from);
-    set_field(moves[I]._from, moves[I]._to);
-    set_field(moves[I]._to, moves[_move_num - 1]._fig_on_captured_field);
-    if_castling(moves[I]._to, moves[I]._from);
-    --_move_num;
-    return true;
-  }
-  return false;
-}
-
-void Board::next_move(const Coord& fr, const Coord& t)
-{
-  Moves* this_move = &moves[_move_num];
-
-  if(_move_num > 0)
-  {
-    this_move->_color = get_color(t);
-
-    if(!_is_go_to_history_in_progress)
-      add_move_to_history_copy(fr, t);
-  }
-  this_move->_from = fr;
-  this_move->_to   = t;
-  moves.push_back(moves[_move_num]);
-  ++_move_num;
-}
-
 void Board::add_move_to_history_copy(const Coord& coord_from, const Coord& coord_to)
 {
   history_copy.shrink_to_fit();
@@ -271,7 +239,7 @@ void Board::add_move_to_history_copy(const Coord& coord_from, const Coord& coord
   history_copy.push_back(copy);
 }
 
-bool Board::go_to_history_index(const unsigned index)
+void Board::go_to_history_index(const unsigned index)
 {
   _is_go_to_history_in_progress = true;
   const unsigned CURRENT_MOVE = get_current_move() - 1;
@@ -285,7 +253,6 @@ bool Board::go_to_history_index(const unsigned index)
       move(history_copy[i]._from, history_copy[i]._to);
 
   _is_go_to_history_in_progress = false;
-  return ((index > CURRENT_MOVE && index < history_copy.size()) || index < get_current_move());
 }
 
 void Board::make_moves_from_str(const std::string& str)
@@ -298,7 +265,7 @@ void Board::make_moves_from_str(const std::string& str)
   const char EIGHT_ch = '8';
 
   std::vector<int> coord_str;
-  for(int i = 0; i < str.size(); ++i)
+  for(unsigned i = 0; i < str.size(); ++i)
   {
     if(!(str[i] >= a_LETTER && str[i] <= h_LETTER) || (str[i] >= ONE_ch && str[i] <= EIGHT_ch))
       continue;
@@ -317,6 +284,43 @@ void Board::make_moves_from_str(const std::string& str)
       coord_str.clear();
     }
   }
+}
+
+void Board::start_new_game()
+{
+  std::cout<<"====start_new_game chess"<<std::endl;
+  while(get_current_move() != 1)
+    back_move();
+}
+
+void Board::back_move()
+{
+  if(_move_num > 1)
+    return;
+
+  const int I = _move_num - 1;
+  moves[_move_num]._color = get_color(moves[I]._from);
+  set_field(moves[I]._from, moves[I]._to);
+  set_field(moves[I]._to, moves[_move_num - 1]._fig_on_captured_field);
+  if_castling(moves[I]._to, moves[I]._from);
+  --_move_num;
+}
+
+void Board::next_move(const Coord& fr, const Coord& t)
+{
+  Moves* this_move = &moves[_move_num];
+
+  if(_move_num > 0)
+  {
+    this_move->_color = get_color(t);
+
+    if(!_is_go_to_history_in_progress)
+      add_move_to_history_copy(fr, t);
+  }
+  this_move->_from = fr;
+  this_move->_to   = t;
+  moves.push_back(moves[_move_num]);
+  ++_move_num;
 }
 
 bool Board::Coord::operator ==(const Coord& rhs)
@@ -339,9 +343,9 @@ Board::FIGURES Board::get_figure(const int x, const int y) const
   return FIGURES(_field[x][y]);
 }
 
-Board::COLOR Board::get_move_color_i_from_end(const unsigned i) const
+Board::COLOR Board::get_move_color() const
 {
-  return (_move_num < i) ? NONE : moves[_move_num - i]._color;
+  return (moves[_move_num - 1]._color == W_FIG) ? B_FIG : W_FIG;
 }
 
 const Board::Coord& Board::get_prev_from_coord() const
