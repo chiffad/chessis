@@ -10,8 +10,8 @@ Board::Board()
   _move_num = 0;
   moves[_move_num]._color = NONE;
   
-  for(int i = 0; i < X_SIZE; ++i)
-    for(int j = 0; j < Y_SIZE; ++j)
+  for(int i = 0; i < BOARD_SIZE; ++i)
+    for(int j = 0; j < BOARD_SIZE; ++j)
     {
       _field[i][j] = FREE_FIELD;
       if(j == 1) _field[i][j] = B_PAWN;
@@ -169,12 +169,12 @@ bool Board::is_check(COLOR color) const
   Coord f;
   Coord t;
 
-  for(t.x = 0; t.x < X_SIZE; ++t.x)
-    for(t.y = 0; t.y < Y_SIZE; ++t.y)
+  for(t.x = 0; t.x < BOARD_SIZE; ++t.x)
+    for(t.y = 0; t.y < BOARD_SIZE; ++t.y)
       if(get_colorless_figure(t) == KING && get_color(t) == color)
       {
-        for(f.x = 0; f.x < X_SIZE; ++f.x)
-          for(f.y = 0; f.y < Y_SIZE; ++f.y) 
+        for(f.x = 0; f.x < BOARD_SIZE; ++f.x)
+          for(f.y = 0; f.y < BOARD_SIZE; ++f.y) 
             if(get_color(f) != color)
             {
               if(is_can_move(f, t))
@@ -196,12 +196,12 @@ bool Board::is_mate(COLOR color)
   Coord f;
   Coord t;
 
-  for(f.x = 0; f.x < X_SIZE; ++f.x)
-    for(f.y = 0; f.y < Y_SIZE; ++f.y)
+  for(f.x = 0; f.x < BOARD_SIZE; ++f.x)
+    for(f.y = 0; f.y < BOARD_SIZE; ++f.y)
       if(get_figure(f) != FREE_FIELD && get_color(f) == color)
       {
-        for(t.x = 0; t.x < X_SIZE; ++t.x)
-          for(t.y = 0; t.y < Y_SIZE; ++t.y)
+        for(t.x = 0; t.x < BOARD_SIZE; ++t.x)
+          for(t.y = 0; t.y < BOARD_SIZE; ++t.y)
             if(is_can_move(f, t))
             {
               FIGURES fig_from = get_figure(f);
@@ -259,10 +259,6 @@ void Board::make_moves_from_str(const std::string& str)
 {
   std::cout<<"==make_move_from_str CHESS: "<<str<<std::endl;
   enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4};
-  const char a_LETTER = 'a';
-  const char h_LETTER = 'h';
-  const char ONE_ch = '1';
-  const char EIGHT_ch = '8';
 
   std::vector<int> coord_str;
   for(unsigned i = 0; i < str.size(); ++i)
@@ -284,6 +280,30 @@ void Board::make_moves_from_str(const std::string& str)
       coord_str.clear();
     }
   }
+}
+
+const std::string Board::get_board_mask() const
+{
+  std::string mask;
+  for(int x = 0; x < BOARD_SIZE; ++x)
+    for(int y = 0; y < BOARD_SIZE; ++y)
+      mask.push_back(char(get_figure(x,y)));
+
+  return mask;
+}
+
+const std::string Board::get_moves_history() const
+{
+  std::string history;
+  for(unsigned i = 0; i < history_copy.size(); ++i)
+  {
+    history.push_back(history_copy[i]._from.x + a_LETTER);
+    history.push_back(history_copy[i]._from.y + ONE_ch);
+    history.push_back('-');
+    history.push_back(history_copy[i]._to.x + a_LETTER);
+    history.push_back(history_copy[i]._to.y + ONE_ch);
+  }
+  return history;
 }
 
 void Board::start_new_game()

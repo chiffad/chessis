@@ -30,7 +30,9 @@ public:
       YRole = Qt::UserRole + 1,
       VisibleRole = Qt::UserRole
   };
+  enum{BOARD_SIZE = 8, FIGURES_NUMBER = 32};
 
+public:
   explicit Board_graphic(QObject *parent = 0);
   ~Board_graphic(){delete _udp_client;}
 
@@ -64,6 +66,10 @@ public:
   Q_INVOKABLE void go_to_history_index(const unsigned index);
   Q_INVOKABLE void path_to_file(QString& path, bool is_moves_from_file);
   Q_INVOKABLE void run_command(const QString& command);
+
+public:
+  bool is_new_command_appear() const;
+  QByteArray pull_command();
 
 public slots:
   void read_data_from_udp();
@@ -107,6 +113,7 @@ private:
   QStringList _str_moves_history;
   QStringList _commands_history;
   QList<Figure> _figures_model;
+  QVector<QByteArray> _commands_stack;
   bool _is_message_from_server;
 };
 

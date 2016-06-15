@@ -11,7 +11,7 @@ public:
                 W_KING = 'k', W_ROOK = 'r', W_ELEPHANT = 'e', W_HORSE = 'h', W_PAWN = 'p', FREE_FIELD = '.'};
    enum COLORLESS_FIG {QUEEN = B_QUEEN + W_QUEEN, KING = W_KING + B_KING, ROOK = W_ROOK + B_ROOK,
          ELEPHANT = W_ELEPHANT + B_ELEPHANT, HORSE = W_HORSE + B_HORSE, PAWN = W_PAWN + B_PAWN, NOT_FIGURE = 92};
-   enum {X_SIZE = 8, Y_SIZE = 8, FIGURES_NUMBER = 32};
+   enum {BOARD_SIZE = 8, FIGURES_NUMBER = 32 , a_LETTER = 'a', h_LETTER = 'h', ONE_ch = '1', EIGHT_ch = '8'};
 
 public:
    struct Coord
@@ -28,6 +28,8 @@ public:
    void go_to_history_index(const unsigned index);
    void make_moves_from_str(const std::string& str);
    void start_new_game();
+   const std::string get_board_mask() const;
+   const std::string get_moves_history() const;
    FIGURES get_figure(const Coord& c) const;
    FIGURES get_figure(const int x, const int y) const;
    COLORLESS_FIG get_colorless_figure(const Coord& c) const;
@@ -59,7 +61,7 @@ private:
    }m;
    std::vector<Moves> moves;
    unsigned  _move_num;
-   FIGURES _field[X_SIZE][Y_SIZE];
+   FIGURES _field[BOARD_SIZE][BOARD_SIZE];
    bool _is_go_to_history_in_progress;
 
    struct Fool_move_coord

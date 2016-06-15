@@ -3,6 +3,7 @@
 #include <QChar>
 #include <ctype.h>
 #include <QModelIndex>
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include "headers/board_graphic.h"
@@ -14,7 +15,7 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
 {
   _udp_client = new UDP_client();
 
-  for(int i = 0; i < Board::FIGURES_NUMBER; ++i)
+  for(int i = 0; i < FIGURES_NUMBER; ++i)
     addFigure(Figure(MOVE_COLOR_W, 0, 0, true));
 
   addFigure(Board_graphic::Figure(HILIGHT_IM, 0, 0, false));
@@ -78,11 +79,11 @@ void Board_graphic::move(const unsigned x, const unsigned y, bool is_correct_coo
   if(is_from)
   {
     correct_figure_coord(from,x,y,is_correct_coord);
-    if(_board->get_figure(from) != Board::FREE_FIELD)
+    /*if(_board->get_figure(from) != Board::FREE_FIELD)
     {
       update_hilight(from, FIRST_HILIGHT);
       is_from = false;
-    }
+    }*/
   }
 
   else
@@ -90,7 +91,7 @@ void Board_graphic::move(const unsigned x, const unsigned y, bool is_correct_coo
     is_from = true;
     correct_figure_coord(to, x, y, is_correct_coord);
 
-    if(_board->move(from, to))
+    /*if(_board->move(from, to))
     {
       update_hilight(to, SECOND_HILIGHT);
       add_move_to_str_history(from, to);
@@ -104,21 +105,21 @@ void Board_graphic::move(const unsigned x, const unsigned y, bool is_correct_coo
       qDebug()<<"====move problem";
       qDebug()<<"from: x = "<<from.x<<" y = "<<from.y;
       qDebug()<<"to: x = "<<to.x<<" y = "<<to.y;
-    }
+    }*/
     update_coordinates();
   }
 }
 
 void Board_graphic::back_move()
 {
-  if(_board->back_move())
-  {
+  //if(_board->back_move())
+  //{
     qDebug()<<"====back_move";
-    update_hilight(_board->get_prev_from_coord(), FIRST_HILIGHT);
-    update_hilight(_board->get_prev_to_coord(), SECOND_HILIGHT);
+   // update_hilight(_board->get_prev_from_coord(), FIRST_HILIGHT);
+   // update_hilight(_board->get_prev_to_coord(), SECOND_HILIGHT);
     update_coordinates();
     send_data_on_server(BACK_MOVE);
-  }
+  //}
 }
 
 void Board_graphic::correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct)
@@ -135,18 +136,18 @@ void Board_graphic::update_coordinates()
   {
     a.x = _figures_model[index].x();
     a.y = _figures_model[index].y();
-    if(_board->get_figure(a) == Board::FREE_FIELD)
+    /*if(_board->get_figure(a) == Board::FREE_FIELD)
     {
       _figures_model[index].set_visible(false);
       emit_data_changed(index);
-    }
+    }*/
   }
 
   index = 0;
   Coord coord;
-  for(coord.y = 0; coord.y < Board::Y_SIZE; ++coord.y)
-    for(coord.x = 0; coord.x < Board::X_SIZE; ++coord.x)
-      if(_board->get_figure(coord) != Board::FREE_FIELD)
+  for(coord.y = 0; coord.y < BOARD_SIZE; ++coord.y)
+    for(coord.x = 0; coord.x < BOARD_SIZE; ++coord.x)
+      /*if(_board->get_figure(coord) != Board::FREE_FIELD)
       {
         QString fig_name_color = _board->get_color(coord) == Board::W_FIG ? "w_" : "b_";
         fig_name_color += _board->get_figure(coord);
@@ -157,7 +158,7 @@ void Board_graphic::update_coordinates()
 
         emit_data_changed(index);
         ++index;
-      }
+      }*/
   switch_move_color();
 }
 
@@ -176,9 +177,9 @@ void Board_graphic::update_hilight(const Coord& coord, HILIGHT hilight_index)
 
 void Board_graphic::switch_move_color()
 {
-  if(_board->get_move_color() == Board::W_FIG)
-    _move_color = MOVE_COLOR_W;
-  else  _move_color = MOVE_COLOR_B;
+  //if(_board->get_move_color() == Board::W_FIG)
+  //  _move_color = MOVE_COLOR_W;
+  //else  _move_color = MOVE_COLOR_B;
 
   emit move_turn_color_changed();
 }
@@ -191,9 +192,9 @@ void Board_graphic::emit_data_changed(const unsigned INDEX)
 
 bool Board_graphic::is_check_mate() const
 {
-  if(!_board->is_mate(_board->get_move_color()))
+  /*if(!_board->is_mate(_board->get_move_color()))
     return false;
-
+*/
   emit check_mate();
   return true;
 }
@@ -201,11 +202,11 @@ bool Board_graphic::is_check_mate() const
 void Board_graphic::start_new_game()
 {
   qDebug()<<"====start_new_game";
-  while(_board->get_current_move() != 1)
+/*  while(_board->get_current_move() != 1)
   {
     back_move();
     _str_moves_history.pop_back();
-  }
+  }*/
   _figures_model[FIRST_HILIGHT].set_visible(false);
   emit_data_changed(FIRST_HILIGHT);
   _figures_model[SECOND_HILIGHT].set_visible(false);
@@ -218,24 +219,24 @@ void Board_graphic::go_to_history_index(const unsigned index)
 {
   qDebug()<<"====go to history index: " <<index;
 
-  if(_board->go_to_history_index(index))
+  /*if(_board->go_to_history_index(index))
   {
     //update_hilight(history_copy[i].from, FIRST_HILIGHT);
     //update_hilight(history_copy[i].to, SECOND_HILIGHT);
     update_coordinates();
     send_data_on_server(GO_TO_HISTORY, index);
     switch_move_color();
-  }
+  }*/
 }
 
-void Board_graphic::add_move_to_str_history(const Board::Coord& coord_from, const Board::Coord& coord_to)
+void Board_graphic::add_move_to_str_history(const Coord& coord_from, const Coord& coord_to)
 {
-  const int LIST_SIZE = _str_moves_history.size() + ZERO_AND_ACTUAL_MOVES;
-  for(int i = _board->get_current_move(); i < LIST_SIZE; ++i)
-    _str_moves_history.pop_back();
+  //const int LIST_SIZE = _str_moves_history.size() + ZERO_AND_ACTUAL_MOVES;
+  //for(int i = _board->get_current_move(); i < LIST_SIZE; ++i)
+   // _str_moves_history.pop_back();
 
-  QString move = QChar(a_LETTER + coord_from.x) + QString::number(Board::Y_SIZE - coord_from.y) + " - "
-                 + QChar(a_LETTER + coord_to.x) + QString::number(Board::Y_SIZE - coord_to.y);
+  QString move = QChar(a_LETTER + coord_from.x) + QString::number(BOARD_SIZE - coord_from.y) + " - "
+                 + QChar(a_LETTER + coord_to.x) + QString::number(BOARD_SIZE - coord_to.y);
 
   _str_moves_history.append(move);
   emit moves_history_changed();
@@ -337,9 +338,9 @@ void Board_graphic::make_move_from_str(const QString& str)
     if(!str[i].isLetterOrNumber())
       continue;
 
-    int coord = str[i].isNumber() ? Board::Y_SIZE - str[i].digitValue() : str[i].unicode() - a_LETTER;
+    int coord = str[i].isNumber() ? BOARD_SIZE - str[i].digitValue() : str[i].unicode() - a_LETTER;
 
-    if(coord < Board::X_SIZE)
+    if(coord < BOARD_SIZE)
       coord_str.push_back(coord);
 
     if(coord_str.size() == COORD_NEED_TO_MOVE)
@@ -359,13 +360,25 @@ void Board_graphic::set_connect_status(const QString& status)
   emit udp_connection_status_changed();
 }
 
+bool Board_graphic::is_new_command_appear() const
+{
+  return _commands_stack.size();
+}
+
+QByteArray Board_graphic::pull_command()
+{
+  QByteArray command(_commands_stack.first());
+  _commands_stack.removeFirst();
+  return command;
+}
+
 //===================================================================================================
 
 void Board_graphic::read_data_from_udp()
 {
   _is_message_from_server = true;
   QString message;
-  _udp_client->export_readed_data_to_chess(message);
+  //_udp_client->export_readed_data_to_chess(message);
 
   qDebug()<<"=====integrator read_data_from_udp(): "<<message;
 
@@ -432,7 +445,7 @@ void Board_graphic::send_data_on_server(MESSAGE_TYPE type, const int index)
     message += FREE_SPACE;
     message += (type == MOVE) ? _str_moves_history.last() : QByteArray::number(index);
   }
-  _udp_client->send_data(message);
+  //_udp_client->send_data(message);
 }
 
 //===========================================================================================================

@@ -167,6 +167,13 @@ void UDP_server::push_message_to_logic(QByteArray message, User& u)
   send_data(message, *_user[u._opponent_index]);
 }
 
+void UDP_server::send_board_state(User& u)
+{
+  QString board_mask = QString::fromStdString(_board[u.get_board_ind()]->get_board_mask());
+  QString moves_history = QString::fromStdString(_board[u.get_board_ind()]->get_moves_history());
+
+}
+
 void UDP_server::show_information(const User& u, bool is_to_opponent)
 {
   QByteArray inf;
