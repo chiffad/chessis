@@ -21,7 +21,7 @@ public:
   const QChar FREE_SPASE = ' ';
 
 public:
-  void pull_message_from
+  //void pull_message_from
 private:
 
 private:

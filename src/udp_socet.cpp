@@ -67,7 +67,7 @@ void UDP_socet::read_data()
 
   qDebug()<<"====socket read"<<message;
 
-  if(sender_IP != SERVER_IP || sender_port != SERVER_PORT || _last_send_message == message)
+  if(sender_IP != SERVER_IP || sender_port != SERVER_PORT)
   {
     qDebug()<<"wrong sender!";
     return;
@@ -92,11 +92,11 @@ void UDP_socet::read_data()
   _received_message_stack.push_back(message);
 }
 
-QByteArray UDP_socet::get_received_message()
+QByteArray UDP_socet::pull_received_message()
 {
-  QByteArray m_copy(_received_message_stack.first());
+  QByteArray mess_copy(_received_message_stack.first());
   _received_message_stack.removeFirst();
-  return m_copy;
+  return mess_copy;
 }
 
 bool UDP_socet::is_new_message_received() const

@@ -23,49 +23,7 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
   update_coordinates();
 
   connect(_udp_client, SIGNAL(some_data_came()), this, SLOT(read_data_from_udp()));
-
-  timer_kill = new QTimer(this);
-  connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  timer_kill->start(1000);
 }
-
-void Board_graphic::timer_timeout()
-{
-  timer_kill->stop();
-
-  static int i = 0;
-  ++i;
-
-  if( i == 1)
-  {
-    move(4,6,true);
-    move(4,5,true);
-  }
-  if( i == 2)
-  {
-    move(4,1,true);
-    move(4,2,true);
-  }
-
-  if( i == 3)
-  {
-    move(1,7,true);
-    move(0,5,true);
-  }
-
-  if( i == 4)
-  {
-     go_to_history_index(0);
-  }
-
-  if( i == 5)
-  {
-     go_to_history_index(2);
-  }
-
-  timer_kill->start(1000);
-}
-
 
 Board_graphic::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
     : _name(name), _x(x), _y(y), _visible(visible)
@@ -75,51 +33,25 @@ Board_graphic::Figure::Figure(const QString& name, const int x, const int y, con
 void Board_graphic::move(const unsigned x, const unsigned y, bool is_correct_coord)
 {
   static bool is_from = true;
-
   if(is_from)
   {
-    correct_figure_coord(from,x,y,is_correct_coord);
-    /*if(_board->get_figure(from) != Board::FREE_FIELD)
-    {
-      update_hilight(from, FIRST_HILIGHT);
-      is_from = false;
-    }*/
+    correct_figure_coord(_from,x,y,is_correct_coord);
+      //update_hilight(from, FIRST_HILIGHT);
   }
-
   else
   {
     is_from = true;
-    correct_figure_coord(to, x, y, is_correct_coord);
+    correct_figure_coord(_to, x, y, is_correct_coord);
 
-    /*if(_board->move(from, to))
-    {
-      update_hilight(to, SECOND_HILIGHT);
-      add_move_to_str_history(from, to);
-
-      is_check_mate();
-
-      send_data_on_server(MOVE);
-    }
-    else
-    {
-      qDebug()<<"====move problem";
-      qDebug()<<"from: x = "<<from.x<<" y = "<<from.y;
-      qDebug()<<"to: x = "<<to.x<<" y = "<<to.y;
-    }*/
-    update_coordinates();
+    add_to_commands_stack(MOVE, move_coord_to_str(_from, _to));
+   // update_hilight(to, SECOND_HILIGHT);
   }
 }
 
 void Board_graphic::back_move()
 {
-  //if(_board->back_move())
-  //{
-    qDebug()<<"====back_move";
-   // update_hilight(_board->get_prev_from_coord(), FIRST_HILIGHT);
-   // update_hilight(_board->get_prev_to_coord(), SECOND_HILIGHT);
-    update_coordinates();
-    send_data_on_server(BACK_MOVE);
-  //}
+  qDebug()<<"====back_move";
+  add_to_commands_stack(BACK_MOVE);
 }
 
 void Board_graphic::correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct)
@@ -130,36 +62,87 @@ void Board_graphic::correct_figure_coord(Coord& coord, const unsigned x, const u
 
 void Board_graphic::update_coordinates()
 {
-  int index = 0;
-  Coord a;
-  for(; index < rowCount() - HILIGHT_CELLS; ++index)
+  for(int i = 0; i < rowCount() - HILIGHT_CELLS; ++i)
   {
-    a.x = _figures_model[index].x();
-    a.y = _figures_model[index].y();
-    /*if(_board->get_figure(a) == Board::FREE_FIELD)
-    {
-      _figures_model[index].set_visible(false);
-      emit_data_changed(index);
-    }*/
+    _figures_model[i].set_visible(false);
+    emit_figure_changed(i);
   }
 
-  index = 0;
+  int index = 0;
   Coord coord;
-  for(coord.y = 0; coord.y < BOARD_SIZE; ++coord.y)
-    for(coord.x = 0; coord.x < BOARD_SIZE; ++coord.x)
-      /*if(_board->get_figure(coord) != Board::FREE_FIELD)
+  for(coord.x = 0; coord.x < BOARD_SIZE; ++coord.x)
+    for(coord.y = 0; coord.y < BOARD_SIZE; ++coord.y)
+      if(_field[coord.x][coord.y] != FREE_FIELD)
       {
-        QString fig_name_color = _board->get_color(coord) == Board::W_FIG ? "w_" : "b_";
-        fig_name_color += _board->get_figure(coord);
+        QString fig_name_color = _field[coord.x][coord.y].isLower() ? "w_" : "b_";
+        fig_name_color.append(_field[coord.x][coord.y]);
 
         _figures_model[index].set_coord(coord);
         _figures_model[index].set_name(fig_name_color);
         _figures_model[index].set_visible(true);
 
-        emit_data_changed(index);
+        emit_figure_changed(index);
         ++index;
-      }*/
-  switch_move_color();
+      }
+  update_move_color();
+}
+
+void Board_graphic::set_board_mask(const QString& mask)
+{
+  if(mask.size() != BOARD_SIZE * BOARD_SIZE)
+  {
+    qDebug()<<"mask is wrong!"<<mask;
+    return;
+  }
+
+  int i = 0;
+  for(int x = 0; x < BOARD_SIZE; ++x)
+    for(int y = 0; y < BOARD_SIZE; ++y, ++i)
+      _field[x][y] = mask[i];
+
+qDebug()<<"mask: "; //temporary thing
+  for(int x = 0, i = 0; x < BOARD_SIZE; ++x, ++i)
+    for(int y = 0; y < BOARD_SIZE; ++y, ++i)
+      qDebug()<<_field[x][y];
+}
+
+void Board_graphic::set_moves_history(const QString& history)
+{
+  _str_moves_history.clear();
+
+  QString move;
+  for(int i = 0; i < history.size(); ++i)
+  {
+    if(history[i].isLetter() && (move.isEmpty() || move[move.size() - 1].isNumber()))
+      move.push_back(history[i]);
+    else if(history[i].isNumber() && !move.isEmpty() && move[move.size() - 1].isLetter())
+      move.push_back(history[i]);
+
+    if(move.size() == NEED_SIMB_TO_MOVE)
+    {
+      move.insert(2, " - ");
+      _str_moves_history.append(move);
+      move.clear();
+    }
+  }
+  emit moves_history_changed();
+}
+
+const QString Board_graphic::move_coord_to_str(const Coord& from, const Coord& to) const
+{
+  return (QChar(a_LETTER + from.x) + QString::number(BOARD_SIZE - from.y)
+          + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIZE - to.y));
+}
+
+void Board_graphic::add_to_commands_stack(MESSAGE_TYPE type, const QString& content)
+{
+  qDebug()<<"====send_data_on_server_chess";
+
+  QString message;
+  message.setNum(type);
+  message.append(content);
+
+  _commands_stack.append(message);
 }
 
 void Board_graphic::update_hilight(const Coord& coord, HILIGHT hilight_index)
@@ -170,20 +153,18 @@ void Board_graphic::update_hilight(const Coord& coord, HILIGHT hilight_index)
   if(hilight_index == FIRST_HILIGHT)
   {
     _figures_model[SECOND_HILIGHT].set_visible(false);
-    emit_data_changed(SECOND_HILIGHT);
+    emit_figure_changed(SECOND_HILIGHT);
   }
-  emit_data_changed(hilight_index);
+  emit_figure_changed(hilight_index);
 }
 
-void Board_graphic::switch_move_color()
+void Board_graphic::update_move_color()
 {
-  //if(_board->get_move_color() == Board::W_FIG)
-  //  _move_color = MOVE_COLOR_W;
-  //else  _move_color = MOVE_COLOR_B;
-
+  _move_color = (_commands_history.size() % 2 == 0) ? MOVE_COLOR_W : MOVE_COLOR_B;
   emit move_turn_color_changed();
 }
-void Board_graphic::emit_data_changed(const unsigned INDEX)
+
+void Board_graphic::emit_figure_changed(const unsigned INDEX)
 {
   QModelIndex topLeft = index(INDEX, 0);
   QModelIndex bottomRight = index(INDEX, 0);
@@ -195,51 +176,21 @@ bool Board_graphic::is_check_mate() const
   /*if(!_board->is_mate(_board->get_move_color()))
     return false;
 */
-  emit check_mate();
-  return true;
+  //emit check_mate();
+  //return true;
+    return false; // temporary
 }
 
 void Board_graphic::start_new_game()
 {
   qDebug()<<"====start_new_game";
-/*  while(_board->get_current_move() != 1)
-  {
-    back_move();
-    _str_moves_history.pop_back();
-  }*/
-  _figures_model[FIRST_HILIGHT].set_visible(false);
-  emit_data_changed(FIRST_HILIGHT);
-  _figures_model[SECOND_HILIGHT].set_visible(false);
-  emit_data_changed(SECOND_HILIGHT);
-  emit moves_history_changed();
-  send_data_on_server(NEW_GAME);
+  add_to_commands_stack(NEW_GAME);
 }
 
 void Board_graphic::go_to_history_index(const unsigned index)
 {
   qDebug()<<"====go to history index: " <<index;
-
-  /*if(_board->go_to_history_index(index))
-  {
-    //update_hilight(history_copy[i].from, FIRST_HILIGHT);
-    //update_hilight(history_copy[i].to, SECOND_HILIGHT);
-    update_coordinates();
-    send_data_on_server(GO_TO_HISTORY, index);
-    switch_move_color();
-  }*/
-}
-
-void Board_graphic::add_move_to_str_history(const Coord& coord_from, const Coord& coord_to)
-{
-  //const int LIST_SIZE = _str_moves_history.size() + ZERO_AND_ACTUAL_MOVES;
-  //for(int i = _board->get_current_move(); i < LIST_SIZE; ++i)
-   // _str_moves_history.pop_back();
-
-  QString move = QChar(a_LETTER + coord_from.x) + QString::number(BOARD_SIZE - coord_from.y) + " - "
-                 + QChar(a_LETTER + coord_to.x) + QString::number(BOARD_SIZE - coord_to.y);
-
-  _str_moves_history.append(move);
-  emit moves_history_changed();
+  add_to_commands_stack(GO_TO_HISTORY, QString::number(index));
 }
 
 void Board_graphic::run_command(const QString& command)
@@ -255,14 +206,14 @@ void Board_graphic::run_command(const QString& command)
   if(command == HELP_WORD)
   {
     qDebug()<<"help_word";
-    add_to_comman_history("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + "d2-d4).");
-    add_to_comman_history("To see opponent information, print '" + SHOW_OPPONENT + " .");
-    add_to_comman_history("To view your information, print '" + SHOW_ME + " .");
+    add_to_command_history("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + "d2-d4).");
+    add_to_command_history("To see opponent information, print '" + SHOW_OPPONENT + " .");
+    add_to_command_history("To view your information, print '" + SHOW_ME + " .");
   }
-  else if(command == SHOW_OPPONENT)
-    send_data_on_server(OPPONENT_INF_REQUEST);
-  else if(command == SHOW_ME)
-    send_data_on_server(MY_INF_REQUEST);
+  //else if(command == SHOW_OPPONENT)
+    //send_data_on_server(OPPONENT_INF_REQUEST);
+  //else if(command == SHOW_ME)
+  //  send_data_on_server(MY_INF_REQUEST);
   else
   {
     QString command_copy = command;
@@ -278,14 +229,14 @@ void Board_graphic::run_command(const QString& command)
     }
     if(first_word == MOVE_WORD)
     {
-      make_move_from_str(command_copy);
+     // make_move_from_str(command_copy);
       qDebug()<<"move word";
     }
-    else add_to_comman_history("Unknown command ('" + HELP_WORD + "' for help).");
+    else add_to_command_history("Unknown command ('" + HELP_WORD + "' for help).");
   }
 }
 
-void Board_graphic::add_to_comman_history(const QString& str)
+void Board_graphic::add_to_command_history(const QString& str)
 {
   _commands_history.append(str);
   emit commands_list_changed();
@@ -324,32 +275,7 @@ void Board_graphic::read_moves_from_file(const QString& path)
   start_new_game();
   std::cout<<"data_from_file std: "<<data_from_file<<std::endl;
   qDebug()<<QString::fromStdString(data_from_file);
-  make_move_from_str(QString::fromStdString(data_from_file));
-}
 
-void Board_graphic::make_move_from_str(const QString& str)
-{
-  qDebug()<<"==make_move_from_str CHESS: "<<str;
-  QVector<int> coord_str;
-  enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4};
-
-  for(int i = 0; i < str.size(); ++i)
-  {
-    if(!str[i].isLetterOrNumber())
-      continue;
-
-    int coord = str[i].isNumber() ? BOARD_SIZE - str[i].digitValue() : str[i].unicode() - a_LETTER;
-
-    if(coord < BOARD_SIZE)
-      coord_str.push_back(coord);
-
-    if(coord_str.size() == COORD_NEED_TO_MOVE)
-    {
-      move(coord_str[FROM_X], coord_str[FROM_Y], true);
-      move(coord_str[TO_X], coord_str[TO_Y], true);
-      coord_str.clear();
-    }
-  }
 }
 
 void Board_graphic::set_connect_status(const QString& status)
@@ -365,107 +291,29 @@ bool Board_graphic::is_new_command_appear() const
   return _commands_stack.size();
 }
 
-QByteArray Board_graphic::pull_command()
+const QString Board_graphic::pull_first_command()
 {
-  QByteArray command(_commands_stack.first());
+  QString command(_commands_stack.first());
   _commands_stack.removeFirst();
   return command;
 }
 
-//===================================================================================================
-
-void Board_graphic::read_data_from_udp()
-{
-  _is_message_from_server = true;
-  QString message;
-  //_udp_client->export_readed_data_to_chess(message);
-
-  qDebug()<<"=====integrator read_data_from_udp(): "<<message;
-
-  QString message_type;
-  while(message.size())
-  {
-    while(message[0].isLetterOrNumber())
-    {
-      message_type.append(message[0]);
-      message.remove(0,1);
-    }
-    message.remove(0,1);
-    if(message_type.size())
-      break;
-  }
-
-  switch(message_type.toInt())
-  {
-    case SERVER_LOST:
-      set_connect_status(DISCONNECT);
-      break;
-    case OPPONENT_LOST:
-      set_connect_status(OPPONENT_DISCONNECT);
-      break;
-    case SERVER_HERE:
-      set_connect_status(CONNECT);
-      break;
-    case BACK_MOVE:
-      back_move();
-      break;
-    case NEW_GAME:
-      start_new_game();
-      break;
-    case OPPONENT_INF_REQUEST:
-      add_to_comman_history(message);
-      if(_udp_connection_status == DISCONNECT)
-        set_connect_status(CONNECT);
-      break;
-    case GO_TO_HISTORY:
-      go_to_history_index(message.toInt());
-      break;
-    default:
-      make_move_from_str(message);
-  }
-  if(message_type.toInt() >= MOVE && message_type.toInt() <= NEW_GAME)
-    set_connect_status(CONNECT);
-}
-
-void Board_graphic::send_data_on_server(MESSAGE_TYPE type, const int index)
-{
-  qDebug()<<"====send_data_on_server_chess";
-  if(_is_message_from_server)
-  {
-    _is_message_from_server = false;
-    qDebug()<<"message from server";
-    return;
-  }
-
-  QByteArray message;
-  message.setNum(type);
-
-  if((type == MOVE && !_str_moves_history.isEmpty()) || type == GO_TO_HISTORY)
-  {
-    message += FREE_SPACE;
-    message += (type == MOVE) ? _str_moves_history.last() : QByteArray::number(index);
-  }
-  //_udp_client->send_data(message);
-}
-
-//===========================================================================================================
-
-QStringList Board_graphic::moves_history() const
+QStringList Board_graphic::get_moves_history() const
 {
   return _str_moves_history;
 }
 
-QStringList Board_graphic::commands_list() const
+QStringList Board_graphic::get_commands_list() const
 {
   return _commands_history;
 }
 
-QString Board_graphic::move_turn_color() const
+QString Board_graphic::get_move_turn_color() const
 {
   return _move_color;
 }
 
-QString Board_graphic::udp_connection_status() const
+QString Board_graphic::get_udp_connection_status() const
 {
   return _udp_connection_status;
 }

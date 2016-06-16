@@ -15,12 +15,21 @@
 class Board_graphic : public QAbstractListModel
 {
   Q_OBJECT
+
+public:
+  enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4,IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a', FREE_FIELD = '.'};
+  enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
+  const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
+  const QString DISCONNECT = "Disconnect"; const QString OPPONENT_DISCONNECT = "Opponent disconnect"; const QString CONNECT = "Connect";
+  const char FREE_SPACE = ' ';
+  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, OPPONENT_INF_REQUEST, MY_INF_REQUEST, SERVER_HERE, SERVER_LOST, OPPONENT_LOST};
+
 private:  
   struct Coord
   {
     int x;
     int y;
-  }from, to;
+  };
   class Figure;
 
 public:
@@ -44,20 +53,20 @@ protected:
   QHash<int, QByteArray> roleNames() const;
 
 public:
-  Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
-  QString move_turn_color() const;
+  Q_PROPERTY(QString get_move_turn_color READ get_move_turn_color NOTIFY move_turn_color_changed)
+  const QString get_move_turn_color() const;
 
-  Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)
-  QStringList moves_history() const;
+  Q_PROPERTY(QStringList get_moves_history READ get_moves_history NOTIFY moves_history_changed)
+  QStringList get_moves_history() const;
 
-  Q_PROPERTY(QStringList commands_list READ commands_list NOTIFY commands_list_changed)
-  QStringList commands_list() const;
+  Q_PROPERTY(QStringList get_commands_list READ get_commands_list NOTIFY commands_list_changed)
+  QStringList get_commands_list() const;
 
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
   bool is_check_mate() const;
 
-  Q_PROPERTY(QString udp_connection_status READ udp_connection_status NOTIFY udp_connection_status_changed)
-  QString udp_connection_status() const;
+  Q_PROPERTY(QString get_udp_connection_status READ get_udp_connection_status NOTIFY udp_connection_status_changed)
+  QString get_udp_connection_status() const;
 
   Q_INVOKABLE void move(const unsigned x, const unsigned y, bool is_correct_coord = false);
   Q_INVOKABLE void back_move();
@@ -69,11 +78,9 @@ public:
 
 public:
   bool is_new_command_appear() const;
-  QByteArray pull_command();
-
-public slots:
-  void read_data_from_udp();
-  void timer_timeout();
+  const QString pull_first_command();
+  void set_board_mask(const QString& mask);
+  void set_moves_history(const QString& history);
 
 signals:
   void move_turn_color_changed();
@@ -82,39 +89,28 @@ signals:
   void udp_connection_status_changed();
   void commands_list_changed();
 
-public:
-  enum{ZERO_AND_ACTUAL_MOVES = 2, IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a'};
-  enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
-  const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
-  const QString DISCONNECT = "Disconnect"; const QString OPPONENT_DISCONNECT = "Opponent disconnect"; const QString CONNECT = "Connect";
-  const char FREE_SPACE = ' ';
-
-  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, OPPONENT_INF_REQUEST, MY_INF_REQUEST, SERVER_HERE, SERVER_LOST, OPPONENT_LOST};
-
 private:
   void update_coordinates();
-  void switch_move_color();
-  void emit_data_changed(const unsigned index);
-  void make_move_from_str(const QString& str);
-  void send_data_on_server(MESSAGE_TYPE m_type, const int index = -1);
+  void update_move_color();
+  void emit_figure_changed(const unsigned index);
   void correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct);
   void update_hilight(const Coord& coord, HILIGHT hilight_index);
-  void add_move_to_str_history(const Coord& coord_from, const Coord& coord_to);
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
   void set_connect_status(const QString& status);
-  void add_to_comman_history(const QString& str);
+  void add_to_command_history(const QString& str);
+  void add_to_commands_stack(MESSAGE_TYPE type, const QString& content = QString());
+  const QString move_coord_to_str(const Coord& from, const Coord& to) const;
 
 private:
-  QTimer* timer_kill;
-  UDP_client* _udp_client;
   QString _move_color;
   QString _udp_connection_status;
   QStringList _str_moves_history;
   QStringList _commands_history;
   QList<Figure> _figures_model;
-  QVector<QByteArray> _commands_stack;
-  bool _is_message_from_server;
+  QVector<QString> _commands_stack;
+  QChar _field[BOARD_SIZE][BOARD_SIZE];
+  Coord _from, _to;
 };
 
 class Board_graphic::Figure
