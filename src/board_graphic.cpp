@@ -7,22 +7,15 @@
 #include <fstream>
 #include <sstream>
 #include "headers/board_graphic.h"
-#include "headers/udp_client.h"
-
 
 Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
-                                                     _udp_connection_status(DISCONNECT), _is_message_from_server(false)
+                                                _udp_connection_status(DISCONNECT)
 {
-  _udp_client = new UDP_client();
-
   for(int i = 0; i < FIGURES_NUMBER; ++i)
     addFigure(Figure(MOVE_COLOR_W, 0, 0, true));
 
   addFigure(Board_graphic::Figure(HILIGHT_IM, 0, 0, false));
   addFigure(Board_graphic::Figure(HILIGHT_IM, 0, 0, false));
-  update_coordinates();
-
-  connect(_udp_client, SIGNAL(some_data_came()), this, SLOT(read_data_from_udp()));
 }
 
 Board_graphic::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
@@ -62,6 +55,8 @@ void Board_graphic::correct_figure_coord(Coord& coord, const unsigned x, const u
 
 void Board_graphic::update_coordinates()
 {
+  qDebug()<<"====update_coord";
+
   for(int i = 0; i < rowCount() - HILIGHT_CELLS; ++i)
   {
     _figures_model[i].set_visible(false);
@@ -89,25 +84,30 @@ void Board_graphic::update_coordinates()
 
 void Board_graphic::set_board_mask(const QString& mask)
 {
+  qDebug()<<"====set_board_mask";
+
   if(mask.size() != BOARD_SIZE * BOARD_SIZE)
   {
     qDebug()<<"mask is wrong!"<<mask;
     return;
   }
 
-  int i = 0;
-  for(int x = 0; x < BOARD_SIZE; ++x)
+  for(int x = 0, i = 0; x < BOARD_SIZE; ++x)
     for(int y = 0; y < BOARD_SIZE; ++y, ++i)
       _field[x][y] = mask[i];
 
 qDebug()<<"mask: "; //temporary thing
-  for(int x = 0, i = 0; x < BOARD_SIZE; ++x, ++i)
+  for(int x = 0, i = 0; x < BOARD_SIZE; ++x)
     for(int y = 0; y < BOARD_SIZE; ++y, ++i)
       qDebug()<<_field[x][y];
+
+  update_coordinates();
 }
 
 void Board_graphic::set_moves_history(const QString& history)
 {
+  qDebug()<<"====set_moves_history";
+
   _str_moves_history.clear();
 
   QString move;
@@ -134,9 +134,9 @@ const QString Board_graphic::move_coord_to_str(const Coord& from, const Coord& t
           + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIZE - to.y));
 }
 
-void Board_graphic::add_to_commands_stack(MESSAGE_TYPE type, const QString& content)
+void Board_graphic::add_to_commands_stack(const enum MESSAGE_TYPE type, const QString& content)
 {
-  qDebug()<<"====send_data_on_server_chess";
+  qDebug()<<"====add_to_commands_stack";
 
   QString message;
   message.setNum(type);
@@ -145,7 +145,7 @@ void Board_graphic::add_to_commands_stack(MESSAGE_TYPE type, const QString& cont
   _commands_stack.append(message);
 }
 
-void Board_graphic::update_hilight(const Coord& coord, HILIGHT hilight_index)
+void Board_graphic::update_hilight(const Coord& coord, const enum HILIGHT hilight_index)
 {
   _figures_model[hilight_index].set_visible(true);
   _figures_model[hilight_index].set_coord(coord);
@@ -288,11 +288,13 @@ void Board_graphic::set_connect_status(const QString& status)
 
 bool Board_graphic::is_new_command_appear() const
 {
+  qDebug()<<"=====is new command appear: "<<_commands_stack.size();
   return _commands_stack.size();
 }
 
 const QString Board_graphic::pull_first_command()
 {
+  qDebug()<<"=====pull_first_command()";
   QString command(_commands_stack.first());
   _commands_stack.removeFirst();
   return command;

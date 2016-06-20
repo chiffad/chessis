@@ -8,14 +8,12 @@
 #include <QStringList>
 #include <vector>
 #include <fstream>
-#include "headers/udp_client.h"
 
 #include <QTimer>
 
 class Board_graphic : public QAbstractListModel
 {
   Q_OBJECT
-
 public:
   enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4,IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a', FREE_FIELD = '.'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
@@ -43,7 +41,7 @@ public:
 
 public:
   explicit Board_graphic(QObject *parent = 0);
-  ~Board_graphic(){delete _udp_client;}
+  ~Board_graphic(){}
 
   void addFigure(const Figure &figure);
   int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -54,7 +52,7 @@ protected:
 
 public:
   Q_PROPERTY(QString get_move_turn_color READ get_move_turn_color NOTIFY move_turn_color_changed)
-  const QString get_move_turn_color() const;
+  QString get_move_turn_color() const;
 
   Q_PROPERTY(QStringList get_moves_history READ get_moves_history NOTIFY moves_history_changed)
   QStringList get_moves_history() const;
@@ -94,12 +92,12 @@ private:
   void update_move_color();
   void emit_figure_changed(const unsigned index);
   void correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct);
-  void update_hilight(const Coord& coord, HILIGHT hilight_index);
+  void update_hilight(const Coord& coord, const enum HILIGHT hilight_index);
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
   void set_connect_status(const QString& status);
   void add_to_command_history(const QString& str);
-  void add_to_commands_stack(MESSAGE_TYPE type, const QString& content = QString());
+  void add_to_commands_stack(const enum MESSAGE_TYPE type, const QString& content = QString());
   const QString move_coord_to_str(const Coord& from, const Coord& to) const;
 
 private:

@@ -101,6 +101,11 @@ void UDP_server::read_data()
 
 void UDP_server::run_message(QByteArray message, User& u)
 {
+  qDebug()<<"===run_message";
+
+  if(message.toInt() != MESSAGE_RECEIVED)
+    send_data(MESSAGE_RECEIVED, u);
+
   switch(message.toInt())
   {
     case MESSAGE_RECEIVED:
@@ -125,12 +130,11 @@ void UDP_server::run_message(QByteArray message, User& u)
       push_message_to_logic(message, u);
   }
   u._timer_last_received_message->start(TEN_SEC);
-  if(message.toInt() != MESSAGE_RECEIVED)
-    send_data(MESSAGE_RECEIVED, u);
 }
 
 void UDP_server::push_message_to_logic(QByteArray message, User& u)
 {
+  qDebug()<<"===push_message_to_logic";
   if(u.get_board_ind() == NO_OPPONENT)
     return;
 
@@ -147,17 +151,21 @@ void UDP_server::push_message_to_logic(QByteArray message, User& u)
   {
     case MOVE:
     {
+      qDebug()<<"MOVE";
       std::string str(message_content.constData(), message_content.length());
       board->make_moves_from_str(str);
       break;
     }
     case BACK_MOVE:
+      qDebug()<<"BACK_MOVE";
       board->back_move();
       break;
     case NEW_GAME:
+      qDebug()<<"NEW_GAME";
       board->start_new_game();
       break;
     case GO_TO_HISTORY:
+      qDebug()<<"GO_TO_HISTORY: "<<message_content.toInt();
       board->go_to_history_index(message_content.toInt());
       break;
     default:
@@ -169,6 +177,8 @@ void UDP_server::push_message_to_logic(QByteArray message, User& u)
 
 void UDP_server::send_board_state(User& u)
 {
+  qDebug()<<"====send_board_state";
+
   QByteArray message;
   message.append(QString::fromStdString(_board[u.get_board_ind()]->get_board_mask()));
   message.push_back(";");

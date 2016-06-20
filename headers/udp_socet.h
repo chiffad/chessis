@@ -11,7 +11,7 @@ class UDP_socet : public QObject
 {
   Q_OBJECT
 public:
-  explicit UDP_socet(QObject *parent = 0);
+  explicit UDP_socet(QObject *parent = nullptr);
   ~UDP_socet(){delete _socket; delete _timer; delete _timer_from_last_received_message;}
 
 public:
@@ -20,7 +20,7 @@ public:
   const QChar FREE_SPASE = ' ';
 
 public:
-  void send_data(QByteArray& message, bool is_prev_serial_need = false);
+  void send_data(QByteArray message, bool is_prev_serial_need = false);
   void send_data(MESSAGE_TYPE r_mes, bool is_prev_serial_need = false);
   QByteArray pull_received_message();
   bool is_new_message_received() const;
@@ -31,9 +31,9 @@ public slots:
   void timer_from_last_received_message_timeout();
 
 private:
-  void add_serial_num(QByteArray& data, bool is_prev_serial_need = false);
-  QByteArray cut_serial_num(QByteArray& data) const;
-  void begin_wait_receive(const QByteArray& message);
+  void add_serial_num(QByteArray &data, bool is_prev_serial_need = false);
+  QByteArray cut_serial_num(QByteArray &data) const;
+  void begin_wait_receive(const QByteArray &message);
 
 private:
   QUdpSocket *_socket;

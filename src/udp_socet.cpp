@@ -19,9 +19,9 @@ UDP_socet::UDP_socet(QObject *parent) : QObject(parent), _received_serial_num(0)
   send_data(HELLO_SERVER);
 }
 
-void UDP_socet::send_data(QByteArray& message, bool is_prev_serial_need)
+void UDP_socet::send_data(QByteArray message, bool is_prev_serial_need)
 {
-  /*if(!checked_is_message_received())
+  if(!checked_is_message_received())
   {
     qDebug()<<"can't send, prev message not reach";
     _send_message_stack.push_back(message);
@@ -32,12 +32,12 @@ void UDP_socet::send_data(QByteArray& message, bool is_prev_serial_need)
 
   qDebug()<<"====Sending data to server"<<message;
   _socket->writeDatagram(message, SERVER_IP, SERVER_PORT);
-  begin_wait_receive(message);*/
+  begin_wait_receive(message);
 }
 
 void UDP_socet::send_data(MESSAGE_TYPE r_mes, bool is_prev_serial_need)
 {
- /* QByteArray message;
+  QByteArray message;
   message.setNum(r_mes);
 
   if(r_mes != MESSAGE_RECEIVED)
@@ -53,7 +53,7 @@ void UDP_socet::send_data(MESSAGE_TYPE r_mes, bool is_prev_serial_need)
   qDebug()<<"====Sending data to server"<<message;
   _socket->writeDatagram(message, SERVER_IP, SERVER_PORT);
   if(r_mes != MESSAGE_RECEIVED)
-    begin_wait_receive(message);*/
+    begin_wait_receive(message);
 }
 
 void UDP_socet::read_data()
@@ -101,6 +101,7 @@ QByteArray UDP_socet::pull_received_message()
 
 bool UDP_socet::is_new_message_received() const
 {
+  qDebug()<<"=====is_new_message_received(): "<<_received_message_stack.size();
   return _received_message_stack.size();
 }
 
@@ -140,7 +141,7 @@ bool UDP_socet::checked_is_message_received()
   return _is_message_received;
 }
 
-void UDP_socet::add_serial_num(QByteArray& data, bool is_prev_serial_need)
+void UDP_socet::add_serial_num(QByteArray &data, bool is_prev_serial_need)
 {
   if(!is_prev_serial_need)
      ++_send_serial_num;
@@ -152,7 +153,7 @@ void UDP_socet::add_serial_num(QByteArray& data, bool is_prev_serial_need)
   data.prepend(serial_num);
 }
 
-QByteArray UDP_socet::cut_serial_num(QByteArray& data) const
+QByteArray UDP_socet::cut_serial_num(QByteArray &data) const
 {
   QByteArray serial_num;
   QChar first_data_simbol = QChar(data[0]);
