@@ -54,21 +54,21 @@ private:
 private:
    struct Moves
    {
-     Coord _from;
-     Coord _to;
-     COLOR _color;
-     FIGURES _fig_on_captured_field;
+     Coord from;
+     Coord to;
+    // COLOR _color;
+     FIGURES fig_on_captured_field;
    }m;
-   std::vector<Moves> moves;
-   unsigned  _move_num;
-   FIGURES _field[BOARD_SIZE][BOARD_SIZE];
-   bool _is_go_to_history_in_progress;
+   std::vector<Moves> m_moves;
+   unsigned  m_move_num;
+   FIGURES m_field[BOARD_SIZE][BOARD_SIZE];
+   bool m_is_go_to_history_in_progress;
 
    struct Fool_move_coord
    {
-     Coord _from;
-     Coord _to;
+     Coord from;
+     Coord to;
    };
-   std::vector<Fool_move_coord> history_copy;
+   std::vector<Fool_move_coord> m_history_copy;
 };
 #endif //_VILVIVYVKCKYVLVUYFDKYUFYTF
