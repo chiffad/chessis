@@ -1,6 +1,7 @@
 #include<cstdlib>
 #include<cctype>
 #include<fstream>
+#include<sstream>
 #include<math.h>
 #include"headers/chess.h"
 
@@ -283,6 +284,7 @@ void Board::make_moves_from_str(const std::string& str)
 
 const std::string Board::get_board_mask() const
 {
+  std::cout<<"====istory"<<std::endl;
   std::string mask;
   for(int x = 0; x < BOARD_SIZE; ++x)
     for(int y = 0; y < BOARD_SIZE; ++y)
@@ -293,6 +295,7 @@ const std::string Board::get_board_mask() const
 
 const std::string Board::get_moves_history() const
 {
+  std::cout<<"====get_moves_history"<<std::endl;
   std::string history;
   for(unsigned i = 0; i < m_history_copy.size(); ++i)
   {
@@ -303,6 +306,35 @@ const std::string Board::get_moves_history() const
     history.push_back(m_history_copy[i].to.y + ONE_ch);
   }
   return history;
+}
+
+void Board::write_moves_to_file(const std::string& path) const
+{
+  std::cout<<"====write_moves_to_file "<<std::endl;
+  std::ofstream in_file(path);
+  const std::string history = get_moves_history();
+  for(unsigned i = 0; i < history.size(); ++i)
+  {
+    in_file<<history[i];
+    in_file<<FREE_SPACE;
+  }
+  in_file.close();
+}
+
+void Board::read_moves_from_file(const std::string& path)
+{
+  std::cout<<"====read_moves_from_file "<<std::endl;
+  std::ifstream from_file(path);
+  std::ostringstream out;
+  out<<from_file.rdbuf();
+
+  std::string data_from_file;
+  out.str().swap(data_from_file);
+  from_file.close();
+
+  std::cout<<"data_from_file: "<<data_from_file<<std::endl;
+  start_new_game();
+  make_moves_from_str(data_from_file);
 }
 
 void Board::start_new_game()
@@ -396,5 +428,5 @@ Board::COLOR Board::get_color(const Coord& c) const
   if(m_field[c.x][c.y] == FREE_FIELD)
     return NONE;
 
-  return (m_field[c.x][c.y] > a_LETTER) ? W_FIG : B_FIG;
+  return islower(m_field[c.x][c.y]) ? W_FIG : B_FIG;
 }

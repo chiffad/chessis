@@ -11,7 +11,7 @@ public:
                 W_KING = 'k', W_ROOK = 'r', W_ELEPHANT = 'e', W_HORSE = 'h', W_PAWN = 'p', FREE_FIELD = '.'};
    enum COLORLESS_FIG {QUEEN = B_QUEEN + W_QUEEN, KING = W_KING + B_KING, ROOK = W_ROOK + B_ROOK,
          ELEPHANT = W_ELEPHANT + B_ELEPHANT, HORSE = W_HORSE + B_HORSE, PAWN = W_PAWN + B_PAWN, NOT_FIGURE = 92};
-   enum {BOARD_SIZE = 8, FIGURES_NUMBER = 32 , a_LETTER = 'a', h_LETTER = 'h', ONE_ch = '1', EIGHT_ch = '8'};
+   enum {BOARD_SIZE = 8, FIGURES_NUMBER = 32 , a_LETTER = 'a', h_LETTER = 'h', ONE_ch = '1', EIGHT_ch = '8', FREE_SPACE = ' '};
 
 public:
    struct Coord
@@ -29,8 +29,11 @@ public:
    void start_new_game();
    void make_moves_from_str(const std::string& str);
 
-   const std::string get_board_mask() const;
+   void write_moves_to_file(const std::string& path) const;
+   void read_moves_from_file(const std::string& path);
    const std::string get_moves_history() const;
+
+   const std::string get_board_mask() const;
    FIGURES get_figure(const Coord& c) const;
    FIGURES get_figure(const int x, const int y) const;
    COLORLESS_FIG get_colorless_figure(const Coord& c) const;
@@ -42,6 +45,9 @@ public:
    unsigned get_last_made_move() const;
 
 private:
+   Board(const Board&) = delete;
+   void operator=(const Board&) = delete;
+
    void next_move(const Coord& fr = Coord(), const Coord& t = Coord());
    void add_move_to_history_copy(const Coord& coord_from, const Coord& coord_to);
    void field_change(const Coord& fr, const Coord& t);
