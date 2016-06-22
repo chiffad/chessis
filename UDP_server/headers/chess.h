@@ -26,9 +26,8 @@ public:
    bool is_mate(COLOR color);
    void back_move();
    void go_to_history_index(const unsigned index);
-   void start_new_game();
    void make_moves_from_str(const std::string& str);
-
+   void start_new_game();
    const std::string get_board_mask() const;
    const std::string get_moves_history() const;
    FIGURES get_figure(const Coord& c) const;
@@ -57,8 +56,9 @@ private:
    {
      Coord from;
      Coord to;
+    // COLOR _color;
      FIGURES fig_on_captured_field;
-   };
+   }m;
    std::vector<Moves> m_moves;
    unsigned  m_move_num;
    FIGURES m_field[BOARD_SIZE][BOARD_SIZE];
