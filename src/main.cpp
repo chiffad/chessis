@@ -3,33 +3,55 @@
 #include <QApplication>
 #include <QQmlComponent>
 #include <QQmlProperty>
+#include <ctime>
 #include "headers/board_graphic.h"
 #include "headers/exporter.h"
 #include "headers/udp_socet.h"
 
+bool is_gui_quit = false;
+void gui_is_quit();
+
 int main(int argc, char *argv[])
 {
-  QGuiApplication app(argc, argv);
+  QGuiApplication *app = new QGuiApplication(argc, argv);
+  QQmlApplicationEngine *engine = new QQmlApplicationEngine;
   Board_graphic *board_graphic = new Board_graphic;
+
+  engine->rootContext()->setContextProperty("FigureModel", board_graphic);
+  //engine->load(QUrl(QStringLiteral("chessis/res/app.qml")));
+  QObject::connect(engine, &QQmlApplicationEngine::quit, &gui_is_quit);
+
   UDP_socet *udp_socet = new UDP_socet;
   Exporter *exporter = new Exporter(board_graphic, udp_socet);
 
-  QQmlApplicationEngine engine;
-  engine.rootContext()->setContextProperty("FigureModel", board_graphic);
-  //engine.load(QUrl(QStringLiteral("chessis/res/app.qml")));
-
-  while(!app.closingDown())
+  const double foo = 0.15 * CLOCKS_PER_SEC;
+  clock_t timer = clock();
+  while(!is_gui_quit)
   {
-    if(board_graphic->is_new_command_appear())
-      exporter->push_to_socet(exporter->pull_from_graphic());
+    app->processEvents();
 
-    if(udp_socet->is_new_message_received())
-      exporter->push_to_graphic(exporter->pull_from_socet());
+    if((clock() - timer) > foo)
+    {
+      t = clock();
+
+      if(board_graphic->is_new_command_appear())
+        exporter->push_to_socet(exporter->pull_from_graphic());
+
+      if(udp_socet->is_new_message_received())
+        exporter->push_to_graphic(exporter->pull_from_socet());
+    }
   }
 
-  delete board_graphic;
-  delete udp_socet;
   delete exporter;
+  delete udp_socet;
+  delete board_graphic;
+  delete engine;
+  delete app;
 
-  return app.exec();
+  return 0;
+}
+
+void gui_is_quit()
+{
+  is_gui_quit = true;
 }
