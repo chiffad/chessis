@@ -36,70 +36,67 @@ Board::Board()
   next_move();
 }
 
-bool Board::move(const Coord& fr, const Coord& t)
+bool Board::move(const Coord& from, const Coord& to)
 {
-  if(is_right_move_turn(fr) && (is_can_move(fr, t) || is_castling(fr, t)))
-    field_change(fr, t);
+  if(is_right_move_turn(from) && (is_can_move(from, to) || is_castling(from, to)))
+    field_change(from, to);
   else return false;
 
-  if(!is_check(get_color(t)))
+  if(!is_check(get_color(to)))
   {
-    if_castling(fr,t);
-    next_move(fr, t);
+    if_castling(from,to);
+    next_move(from, to);
     return true;
   }
-  field_change(t, fr);
+  field_change(to, from);
   return false;
 }
 
 bool Board::is_right_move_turn(const Coord& coord) const
 {
-  if((get_act_move() == 1 && get_color(coord) == B_FIG)
-     || (get_act_move() > 1 && get_color(coord) != get_move_color()))
+  if((get_actual_move() == 1 && get_color(coord) == B_FIG)
+     || (get_actual_move() > 1 && get_color(coord) != get_move_color()))
    return false;
 
   return true;
 }
 
-void Board::field_change(const Coord& fr, const Coord& t)
+void Board::field_change(const Coord& from, const Coord& to)
 {
-  m_moves[get_act_move()].fig_on_captured_field = get_figure(t);
-  FIGURES fig = get_figure(fr);
-  set_field(fr, FREE_FIELD);
-  set_field(t, fig);
+  m_moves[get_actual_move()].fig_on_captured_field = get_figure(to);
+  FIGURES fig = get_figure(from);
+  set_field(from, FREE_FIELD);
+  set_field(to, fig);
 }
 
-bool Board::is_can_move(const Coord& f, const Coord& t) const
+bool Board::is_can_move(const Coord& fr, const Coord& to) const
 {
-  const int dx = abs(t.x - f.x);
-  const int dy = abs(t.y - f.y);
+  const int dx = abs(to.x - fr.x);
+  const int dy = abs(to.y - fr.y);
 
-  const int X_UNIT_VECTOR = dx == 0 ? 0 : (t.x - f.x)/dx;
-  const int Y_UNIT_VECTOR = dy == 0 ? 0 : (t.y - f.y)/dy;
+  const int X_UNIT_VECTOR = dx == 0 ? 0 : (to.x - fr.x)/dx;
+  const int Y_UNIT_VECTOR = dy == 0 ? 0 : (to.y - fr.y)/dy;
 
-  if(get_colorless_figure(f) == HORSE && dx*dy == 2 && get_color(f) != get_color(t))
+  if(get_colorless_figure(fr) == HORSE && dx*dy == 2 && get_color(fr) != get_color(to))
     return true;
-  else if(get_colorless_figure(f) == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(f) == W_FIG)
-                                              || (Y_UNIT_VECTOR > 0 && get_color(f) == B_FIG)))
+  else if(get_colorless_figure(fr) == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
+                                              || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
   {
-      return ((get_figure(t) != FREE_FIELD && dy * dx == 1 && get_color(f) != get_color(t))
-              || (dx == 0 && ((dy == 1 && get_figure(t) == FREE_FIELD)
-                  || (dy == 2 && get_figure(t.x,f.y + Y_UNIT_VECTOR) == FREE_FIELD && (f.y == 6 || f.y == 1)))));
+    return((get_figure(to) != FREE_FIELD && dy * dx == 1 && get_color(fr) != get_color(to))
+           || (dx == 0 && ((dy == 1 && get_figure(to) == FREE_FIELD)
+               || (dy == 2 && get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD && (fr.y == 6 || fr.y == 1)))));
   }
-  else if(get_colorless_figure(f) == KING && dx <= 1 && dy <= 1);
-  else if((get_colorless_figure(f) == ROOK || get_colorless_figure(f) == QUEEN) && (dx*dy == 0));
-  else if((get_colorless_figure(f) == ELEPHANT || get_colorless_figure(f) == QUEEN) && (dx == dy));
+  else if(get_colorless_figure(fr) == KING && dx <= 1 && dy <= 1);
+  else if((get_colorless_figure(fr) == ROOK || get_colorless_figure(fr) == QUEEN) && (dx*dy == 0));
+  else if((get_colorless_figure(fr) == ELEPHANT || get_colorless_figure(fr) == QUEEN) && (dx == dy));
   else return false;
 
-  Coord coord;
-  coord.x = f.x;
-  coord.y = f.y;
-
-  while(!(coord == t))
+  Coord coord(fr);
+  while(!(coord == to))
   {
     coord.x += X_UNIT_VECTOR;
     coord.y += Y_UNIT_VECTOR;
-    if(get_figure(coord) != FREE_FIELD && get_color(t) != get_color(f) && !(coord == t))
+    if(get_figure(coord) != FREE_FIELD && get_color(to) != get_color(fr) && !(coord == to))
       goto failed;
   }
   return true;
@@ -107,17 +104,17 @@ bool Board::is_can_move(const Coord& f, const Coord& t) const
     return false;
 }
 
-void Board::if_castling(const Coord& fr, const Coord& t)
+void Board::if_castling(const Coord& fr, const Coord& to)
 {
-  const int dx = abs(t.x - fr.x);
-  const int X_UNIT_VEC = dx == 0 ? 0 : (t.x - fr.x)/dx;
+  const int dx = abs(to.x - fr.x);
+  const int X_UNIT_VEC = dx == 0 ? 0 : (to.x - fr.x)/dx;
 
-  if(get_colorless_figure(t) == KING && dx > 1)
+  if(get_colorless_figure(to) == KING && dx > 1)
   {
     Coord rook_fr;
     Coord rook_to;
 
-    rook_fr.y = rook_to.y = t.y;
+    rook_fr.y = rook_to.y = to.y;
     if(fr.x == 6 || fr.x == 2)
     {
       rook_fr.x = fr.x + X_UNIT_VEC;
@@ -125,8 +122,8 @@ void Board::if_castling(const Coord& fr, const Coord& t)
     }
     else
     {
-      rook_fr.x = t.x + X_UNIT_VEC * (X_UNIT_VEC > 0 ? 1 : 2);
-      rook_to.x = t.x - X_UNIT_VEC;
+      rook_fr.x = to.x + X_UNIT_VEC * (X_UNIT_VEC > 0 ? 1 : 2);
+      rook_to.x = to.x - X_UNIT_VEC;
     }
     FIGURES fig = get_figure(rook_fr);
     set_field(rook_fr, FREE_FIELD);
@@ -134,25 +131,23 @@ void Board::if_castling(const Coord& fr, const Coord& t)
   }
 }
 
-bool Board::is_castling(const Coord& f, const Coord& t) const
+bool Board::is_castling(const Coord& fr, const Coord& to) const
 {
-  const int dx = abs(t.x - f.x);
-  const int X_UNIT_VECTOR = dx == 0 ? 0 : (t.x - f.x)/dx;
+  const int dx = abs(to.x - fr.x);
+  const int X_UNIT_VECTOR = dx == 0 ? 0 : (to.x - fr.x)/dx;
 
-  if(get_colorless_figure(f) != KING || abs(t.y - f.y) != 0 || dx != 2);
-
-  else if((get_figure(f.x + X_UNIT_VECTOR, f.y) == FREE_FIELD && get_figure(f.x + 2 * X_UNIT_VECTOR,f.y) == FREE_FIELD)
-     && (X_UNIT_VECTOR > 0 || get_figure(f.x + 3 * X_UNIT_VECTOR, f.y) == FREE_FIELD))
+  if(get_colorless_figure(fr) != KING || abs(to.y - fr.y) != 0 || dx != 2);
+  else if((get_figure(fr.x + X_UNIT_VECTOR, fr.y) == FREE_FIELD
+           && get_figure(fr.x + 2 * X_UNIT_VECTOR,fr.y) == FREE_FIELD)
+          && (X_UNIT_VECTOR > 0 || get_figure(fr.x + 3 * X_UNIT_VECTOR, fr.y) == FREE_FIELD))
   {
-    const bool IS_TWO_ZEROS = t.x > 4;
-    Coord coord;
-    coord.x = IS_TWO_ZEROS ? 7 : 0;
-    coord.y = get_color(f) == W_FIG ? 7 : 0;
+    const bool IS_TWO_ZEROS = to.x > 4;
+    Coord coord((IS_TWO_ZEROS ? 7 : 0), (get_color(fr) == W_FIG ? 7 : 0));
 
-    for(unsigned i = 0; i < get_act_move(); ++i)
-      if(is_check(get_color(f)) || ((get_colorless_figure(m_moves[i].from) == KING
-         && get_color(m_moves[i].from) == get_color(f)) || coord == m_moves[i].from || coord == m_moves[i].to))
-         goto cant_castling;
+    for(unsigned i = 0; i < get_actual_move(); ++i)
+      if(is_check(get_color(fr)) || ((get_colorless_figure(m_moves[i].from) == KING
+         && get_color(m_moves[i].from) == get_color(fr)) || coord == m_moves[i].from || coord == m_moves[i].to))
+        goto cant_castling;
 
     return true;
   }
@@ -161,9 +156,9 @@ bool Board::is_castling(const Coord& f, const Coord& t) const
     return false;
 }
 
-bool Board::is_check(const enum COLOR& color) const
+bool Board::is_check(const enum COLOR color) const
 {
-  if(get_act_move() < 2 || color == NONE)
+  if(get_actual_move() < 2 || color == NONE)
     return false;
 
   Coord f;
@@ -189,9 +184,9 @@ bool Board::is_check(const enum COLOR& color) const
     return true;
 }
 
-bool Board::is_mate(const enum COLOR& color)
+bool Board::is_mate(const enum COLOR color)
 {
-  if(get_act_move() < 2 || color == NONE)
+  if(get_actual_move() < 2 || color == NONE)
     return false;
 
   Coord f;
@@ -228,23 +223,11 @@ bool Board::is_mate(const enum COLOR& color)
     return false;
 }
 
-void Board::add_move_to_history_copy(const Coord& coord_from, const Coord& coord_to)
-{
-  m_history_copy.shrink_to_fit();
-  for(unsigned i = get_act_move(); i < m_history_copy.size(); ++i)
-    m_history_copy.pop_back();
-
-  Fool_move_coord copy;
-  copy.from = coord_from;
-  copy.to = coord_to;
-  m_history_copy.push_back(copy);
-}
-
 void Board::go_to_history_index(const unsigned index)
 {
   m_is_go_to_history_in_progress = true;
 
-  if(index < get_act_move())
+  if(index < get_actual_move())
     for(unsigned i = 0; i < get_last_made_move() - index; ++i)
       back_move();
 
@@ -270,13 +253,10 @@ void Board::make_moves_from_str(const std::string& str)
 
     if(coord_str.size() == COORD_NEED_TO_MOVE)
     {
-      Fool_move_coord coord;
-      coord.from.x = coord_str[FROM_X];
-      coord.from.y = coord_str[FROM_Y];
-      coord.to.x = coord_str[TO_X];
-      coord.to.y = coord_str[TO_Y];
+      Coord from(coord_str[FROM_X], coord_str[FROM_Y]);
+      Coord to(coord_str[TO_X], coord_str[TO_Y]);
 
-      move(coord.from, coord.to);
+      move(from, to);
       coord_str.clear();
     }
   }
@@ -339,14 +319,13 @@ void Board::read_moves_from_file(const std::string& path)
 
 void Board::start_new_game()
 {
-  std::cout<<"====start_new_game chess"<<std::endl;
   while(!m_moves.empty())
     back_move();
 }
 
 void Board::back_move()
 {
-  if(get_act_move() < 1)
+  if(get_actual_move() < 1)
     return;
 
   Moves *curr_move  = &m_moves[get_last_made_move()];
@@ -356,31 +335,31 @@ void Board::back_move()
   m_moves.pop_back();
 }
 
-void Board::next_move(const Coord& fr, const Coord& t)
+void Board::next_move(const Coord& from, const Coord& to)
 {
-  if(!m_moves.empty() && !m_is_go_to_history_in_progress)
-    add_move_to_history_copy(fr, t);
-
   Moves m;
-  m.from = fr;
-  m.to = t;
+  m.from = from;
+  m.to = to;
 
   m_moves.push_back(m);
+
+  if(m_moves.size() > 1 && !m_is_go_to_history_in_progress)
+  {
+    for(unsigned i = get_actual_move(); i < m_history_copy.size(); ++i)
+      m_history_copy.pop_back();
+
+    m_history_copy.push_back(m_moves[get_last_made_move()]);
+  }
 }
 
-bool Board::Coord::operator==(const Coord& rhs)
-{
-  return(x == rhs.x && y == rhs.y);
-}
-
-unsigned Board::get_act_move() const
+unsigned Board::get_actual_move() const
 {
   return m_moves.size();
 }
 
 unsigned Board::get_last_made_move() const
 {
-  return get_act_move() - 1;
+  return get_actual_move() - 1;
 }
 
 Board::FIGURES Board::get_figure(const Coord& c) const
@@ -393,9 +372,14 @@ Board::FIGURES Board::get_figure(const int x, const int y) const
   return FIGURES(m_field[x][y]);
 }
 
+Board::COLORLESS_FIG Board::get_colorless_figure(const Coord& c) const
+{
+  return COLORLESS_FIG(tolower(m_field[c.x][c.y]) + toupper(m_field[c.x][c.y]));
+}
+
 Board::COLOR Board::get_move_color() const
 {
-  return get_act_move() % 2 ? B_FIG : W_FIG;
+  return get_actual_move() % 2 ? B_FIG : W_FIG;
 }
 
 const Board::Coord& Board::get_prev_from_coord() const
@@ -406,11 +390,6 @@ const Board::Coord& Board::get_prev_from_coord() const
 const Board::Coord& Board::get_prev_to_coord() const
 {
   return m_moves[get_last_made_move() - 1].to;
-}
-
-Board::COLORLESS_FIG Board::get_colorless_figure(const Coord& c) const
-{
-  return COLORLESS_FIG(tolower(m_field[c.x][c.y]) + toupper(m_field[c.x][c.y]));
 }
 
 void Board::set_field(const Coord& lhs, const Coord& rhs)
@@ -429,4 +408,15 @@ Board::COLOR Board::get_color(const Coord& c) const
     return NONE;
 
   return islower(m_field[c.x][c.y]) ? W_FIG : B_FIG;
+}
+
+Board::Coord::Coord(const int X, const int Y)
+{
+  x = X;
+  y = Y;
+}
+
+bool Board::Coord::operator==(const Coord& rhs)
+{
+  return(x == rhs.x && y == rhs.y);
 }
