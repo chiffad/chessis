@@ -9,18 +9,19 @@
 #include <vector>
 #include <fstream>
 
-#include <QTimer>
-
 class Board_graphic : public QAbstractListModel
 {
   Q_OBJECT
 public:
-  enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4,IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a', FREE_FIELD = '.'};
+  enum MESSAGE_TYPE {MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, OPPONENT_INF_REQUEST, MY_INF_REQUEST,
+                     SERVER_HERE, SERVER_LOST, OPPONENT_LOST};
+  enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4,IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a',
+       FREE_FIELD = '.'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
-  const QString MOVE_COLOR_W = "img/w_k.png"; const QString MOVE_COLOR_B = "img/b_K.png"; const QString HILIGHT_IM = "hilight";
-  const QString DISCONNECT = "Disconnect"; const QString OPPONENT_DISCONNECT = "Opponent disconnect"; const QString CONNECT = "Connect";
+  const QString MOVE_COLOR_W = "img/w_k.png";
+  const QString MOVE_COLOR_B = "img/b_K.png";
+  const QString HILIGHT_IM = "hilight";
   const char FREE_SPACE = ' ';
-  enum MESSAGE_TYPE{MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, OPPONENT_INF_REQUEST, MY_INF_REQUEST, SERVER_HERE, SERVER_LOST, OPPONENT_LOST};
 
 private:  
   struct Coord
@@ -79,6 +80,7 @@ public:
   const QString pull_first_command();
   void set_board_mask(const QString& mask);
   void set_moves_history(const QString& history);
+  void set_connect_status(const int status);
 
 signals:
   void move_turn_color_changed();
@@ -95,7 +97,6 @@ private:
   void update_hilight(const Coord& coord, const enum HILIGHT hilight_index);
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
-  void set_connect_status(const QString& status);
   void add_to_command_history(const QString& str);
   void add_to_commands_stack(const enum MESSAGE_TYPE type, const QString& content = QString());
   const QString move_coord_to_str(const Coord& from, const Coord& to) const;

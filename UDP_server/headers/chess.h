@@ -16,20 +16,20 @@ public:
 public:
    struct Coord
    {
-     Coord(const int X  = 0, const int Y = 0);
+     Coord(const int X = 0, const int Y = 0);
      bool operator==(const Coord& rhs);
-
      int x;
      int y;
    };
 
+public:
    Board();
    bool move(const Coord& from, const Coord& to);
    void back_move();
    void start_new_game();
    void make_moves_from_str(const std::string& str);
    void go_to_history_index(const unsigned index);
-   bool is_mate(const enum COLOR color);
+   bool is_mate(const COLOR color);
 
    const std::string get_moves_history() const;
    void read_moves_from_file(const std::string& path);
@@ -52,14 +52,14 @@ private:
 
    void field_change(const Coord& from, const Coord& to);
    void next_move(const Coord& from = Coord(), const Coord& to = Coord());
-   void set_field(const Coord& coord, const enum FIGURES& fig);
+   void set_field(const Coord& coord, const FIGURES& fig);
    void set_field(const Coord& lhs, const Coord& rhs);
    void if_castling(const Coord& fr, const Coord& to);
 
    bool is_castling(const Coord& from, const Coord& to) const;
    bool is_can_move(const Coord& fr, const Coord& to) const;
    bool is_right_move_turn(const Coord& coord) const;
-   bool is_check(const enum COLOR color) const;
+   bool is_check(const COLOR color) const;
 
 private:
    struct Moves

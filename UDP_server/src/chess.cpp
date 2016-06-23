@@ -156,7 +156,7 @@ bool Board::is_castling(const Coord& fr, const Coord& to) const
     return false;
 }
 
-bool Board::is_check(const enum COLOR color) const
+bool Board::is_check(const COLOR color) const
 {
   if(get_actual_move() < 2 || color == NONE)
     return false;
@@ -184,7 +184,7 @@ bool Board::is_check(const enum COLOR color) const
     return true;
 }
 
-bool Board::is_mate(const enum COLOR color)
+bool Board::is_mate(const COLOR color)
 {
   if(get_actual_move() < 2 || color == NONE)
     return false;
@@ -397,7 +397,7 @@ void Board::set_field(const Coord& lhs, const Coord& rhs)
   m_field[lhs.x][lhs.y] = m_field[rhs.x][rhs.y];
 }
 
-void Board::set_field(const Coord& c, const enum FIGURES& fig)
+void Board::set_field(const Coord& c, const FIGURES& fig)
 {
   m_field[c.x][c.y] = fig;
 }

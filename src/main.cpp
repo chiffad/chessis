@@ -1,8 +1,7 @@
 #include <qqmlcontext.h>
 #include <QQmlApplicationEngine>
 #include <QApplication>
-#include <QQmlComponent>
-#include <QQmlProperty>
+#include <QWindow>
 #include <ctime>
 #include "headers/board_graphic.h"
 #include "headers/exporter.h"
@@ -41,7 +40,7 @@ int main(int argc, char *argv[])
         exporter->push_to_graphic(exporter->pull_from_socet());
     }
 
-    if(!app.allWindows()[0]->visibility())
+    if(!app->allWindows()[0]->visibility())
         gui_is_quit();
   }
 

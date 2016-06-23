@@ -8,21 +8,25 @@ Exporter::Exporter(Board_graphic *const board_graphic, UDP_socet *const udp_soce
                   : _board_graphic(board_graphic), _udp_socet(udp_socet)
 {}
 
-void Exporter::push_to_graphic(const QString &message)
+void Exporter::push_to_graphic(const QString& message)
 {
-  qDebug()<<"===push_message";
+  qDebug()<<"===push_message"<<message;
 
-  QString board_mask = message.mid(0, message.indexOf(";"));
-  QString moves_history = message.mid(message.indexOf(";"));
+  if(message.indexOf(";") > 0)
+  {
+    QString board_mask = message.mid(0, message.indexOf(";"));
+    QString moves_history = message.mid(message.indexOf(";"));
 
-  qDebug()<<"board_mask: "<<board_mask;
-  qDebug()<<"moves_history: "<<moves_history;
+    qDebug()<<"board_mask: "<<board_mask;
+    qDebug()<<"moves_history: "<<moves_history;
 
-  _board_graphic->set_moves_history(moves_history);
-  _board_graphic->set_board_mask(board_mask);
+    _board_graphic->set_moves_history(moves_history);
+    _board_graphic->set_board_mask(board_mask);
+  }
+  else _board_graphic->set_connect_status(message.toInt());
 }
 
-void Exporter::push_to_socet(const QString &message)
+void Exporter::push_to_socet(const QString& message)
 {
   qDebug()<<"====push_message_to_socet";
   QByteArray m;

@@ -2,7 +2,6 @@
 #define UDP_CLIENT_H
 
 #include <QString>
-#include <QByteArray>
 #include "headers/board_graphic.h"
 #include "headers/udp_socet.h"
 
@@ -13,8 +12,8 @@ public:
   ~Exporter(){}
 
 public:
-  void push_to_graphic(const QString &message);
-  void push_to_socet(const QString &message);
+  void push_to_graphic(const QString& message);
+  void push_to_socet(const QString& message);
   const QString pull_from_graphic();
   const QString pull_from_socet();
 

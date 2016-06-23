@@ -28,7 +28,7 @@ void Board_graphic::move(const unsigned x, const unsigned y, bool is_correct_coo
   static bool is_from = true;
   if(is_from)
   {
-    correct_figure_coord(_from,x,y,is_correct_coord);
+    correct_figure_coord(_from, x, y, is_correct_coord);
       //update_hilight(from, FIRST_HILIGHT);
   }
   else
@@ -160,7 +160,7 @@ void Board_graphic::update_hilight(const Coord& coord, const enum HILIGHT hiligh
 
 void Board_graphic::update_move_color()
 {
-  _move_color = (_commands_history.size() % 2 == 0) ? MOVE_COLOR_W : MOVE_COLOR_B;
+  _move_color = (_str_moves_history.size() % 2 == 0) ? MOVE_COLOR_B : MOVE_COLOR_W;
   emit move_turn_color_changed();
 }
 
@@ -206,33 +206,40 @@ void Board_graphic::run_command(const QString& command)
   if(command == HELP_WORD)
   {
     qDebug()<<"help_word";
-    add_to_command_history("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + "d2-d4).");
+    add_to_command_history("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4).");
     add_to_command_history("To see opponent information, print '" + SHOW_OPPONENT + " .");
     add_to_command_history("To view your information, print '" + SHOW_ME + " .");
   }
-  //else if(command == SHOW_OPPONENT)
-    //send_data_on_server(OPPONENT_INF_REQUEST);
-  //else if(command == SHOW_ME)
-  //  send_data_on_server(MY_INF_REQUEST);
+  else if(command == SHOW_OPPONENT)
+  {
+    qDebug()<<"show opponent";
+    add_to_commands_stack(OPPONENT_INF_REQUEST);
+  }
+  else if(command == SHOW_ME)
+  {
+    add_to_commands_stack(MY_INF_REQUEST);
+    qDebug()<<"show me";
+  }
   else
   {
     QString command_copy = command;
     QString first_word;
-    while(command_copy.size())
+    while(!command_copy.isEmpty())
     {
       if(command_copy[0].isLetter())
         first_word.append(command_copy[0]);
 
       command_copy.remove(0,1);
-      if(first_word.size() == 4)
+
+      if(first_word == MOVE_WORD)
+      {
+        qDebug()<<"move word";
+        add_to_commands_stack(MOVE, command_copy);
         break;
+      }
+      else if(command_copy.isEmpty())
+        add_to_command_history("Unknown command ('" + HELP_WORD + "' for help).");
     }
-    if(first_word == MOVE_WORD)
-    {
-     // make_move_from_str(command_copy);
-      qDebug()<<"move word";
-    }
-    else add_to_command_history("Unknown command ('" + HELP_WORD + "' for help).");
   }
 }
 
@@ -275,21 +282,31 @@ void Board_graphic::read_moves_from_file(const QString& path)
   start_new_game();
   std::cout<<"data_from_file std: "<<data_from_file<<std::endl;
   qDebug()<<QString::fromStdString(data_from_file);
-
 }
 
-void Board_graphic::set_connect_status(const QString& status)
+void Board_graphic::set_connect_status(const int status)
 {
-  if(_udp_connection_status == status)
-    return;
-  _udp_connection_status = status;
+  switch(status)
+  {
+    case SERVER_HERE:
+      _udp_connection_status = "Connect";
+      break;
+    case SERVER_LOST:
+      _udp_connection_status = "Disconnect";
+      break;
+    case OPPONENT_LOST:
+      _udp_connection_status = "Opponent disconnect";
+      break;
+    default:
+      qDebug()<<"set_connect_status wrong: "<<status;
+  }
   emit udp_connection_status_changed();
 }
 
 bool Board_graphic::is_new_command_appear() const
 {
-  qDebug()<<"=====is new command appear: "<<_commands_stack.size();
-  return _commands_stack.size();
+  qDebug()<<"=====is new command appear: "<<!_commands_stack.isEmpty();
+  return !_commands_stack.isEmpty();
 }
 
 const QString Board_graphic::pull_first_command()

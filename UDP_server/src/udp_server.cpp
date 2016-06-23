@@ -24,7 +24,7 @@ UDP_server::~UDP_server()
     delete i;
 }
 
-void UDP_server::send_data(QByteArray& message, User& u)
+void UDP_server::send_data(QByteArray message, User& u)
 {
   if(!is_message_reach(message, u))
     return;
@@ -36,7 +36,7 @@ void UDP_server::send_data(QByteArray& message, User& u)
   begin_wait_receive(u);
 }
 
-void UDP_server::send_data(REQUEST_MESSAGES r_mes, User& u, bool is_prev_serial_need)
+void UDP_server::send_data(const REQUEST_MESSAGES r_mes, User& u, bool is_prev_serial_need)
 {
   QByteArray message;
   message.setNum(r_mes);
@@ -63,40 +63,39 @@ void UDP_server::read_data()
   _socket->readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
   qDebug()<<"====reading"<<message;
 
-  int sender_i = 0;
-  for(; sender_i < _user.size(); ++sender_i)
-    if(_user[sender_i]->_port == sender_port && _user[sender_i]->_ip == sender_IP)
+  int sender = 0;
+  for(; sender < _user.size(); ++sender)
+    if(_user[sender]->_port == sender_port && _user[sender]->_ip == sender_IP)
       break;
 
-  QByteArray serial_num = cut_serial_num_from_data(message);
+  const QByteArray serial_num = cut_serial_num_from_data(message);
 
   if(message.toInt() == HELLO_SERVER)
   {
     qDebug()<<"HELLO_SERVER";
-    if(sender_i < _user.size())
+    if(sender < _user.size())
     {
       qDebug()<<"this client already have";
       return;
     }
 
     _user.append(new User(this, this, sender_port, sender_IP, serial_num.toInt(), _user.size()));
-    set_opponent(*_user[sender_i]);
+    set_opponent(*_user[sender]);
 
     send_data(MESSAGE_RECEIVED, *_user.last());
   }
-  else if(serial_num.toInt() != ++_user[sender_i]->_received_serial_num)
+  else if(serial_num.toInt() != ++_user[sender]->_received_serial_num)
   {
-    --_user[sender_i]->_received_serial_num;
+    --_user[sender]->_received_serial_num;
     qDebug()<<"wrong serial num";
-    if(serial_num.toInt() == _user[sender_i]->_received_serial_num && message.toInt() != MESSAGE_RECEIVED)
+    if(serial_num.toInt() == _user[sender]->_received_serial_num && message.toInt() != MESSAGE_RECEIVED)
     {
-      _user[sender_i]->_timer_last_received_message->start(TEN_SEC);
-      send_data(MESSAGE_RECEIVED, *_user[sender_i], true);
+      _user[sender]->_timer_last_received_message->start(TEN_SEC);
+      send_data(MESSAGE_RECEIVED, *_user[sender], true);
       qDebug()<<"prev serial num. Resent message";
     }
-    return;
   }
-  else run_message(message, *_user[sender_i]);
+  else run_message(message, *_user[sender]);
 }
 
 void UDP_server::run_message(QByteArray message, User& u)
@@ -119,6 +118,7 @@ void UDP_server::run_message(QByteArray message, User& u)
       }
       break;
     case IS_SERVER_LOST:
+      send_data(SERVER_HERE, u);
       break;
     case OPPONENT_INF:
       show_information(u);
@@ -185,36 +185,36 @@ void UDP_server::send_board_state(User& u)
   message.append(QString::fromStdString(_board[u.get_board_ind()]->get_moves_history()));
 
   send_data(message, *_user[u._opponent_index]);
-  send_data(message, *_user[u._my_index]);
+  send_data(message, u);
 }
 
-void UDP_server::show_information(const User& u, bool is_to_opponent)
+void UDP_server::show_information(const User& u, bool is_opponent)
 {
   QByteArray inf;
-  int receiver = u._my_index;
-  if(is_to_opponent && u._opponent_index == NO_OPPONENT)
+
+  if(is_opponent && u._opponent_index == NO_OPPONENT)
      inf.append("No opponent!");
   else
   {
-    if(is_to_opponent)
-      receiver = u._opponent_index;
-    inf.append(" Login: " + _user[receiver]->_login + "; Rating ELO: "
-           + QByteArray::number(_user[receiver]->_rating_ELO));
+    const int WHOSE_INF = is_opponent ? u._opponent_index : u._my_index;
+    inf.append(" Login: " + _user[WHOSE_INF]->_login + "; Rating ELO: "
+           + QByteArray::number(_user[WHOSE_INF]->_rating_ELO));
   }
-  send_data(inf, *_user[receiver]);
+  send_data(inf, u);
 }
 
 void UDP_server::set_opponent(User& u)
 {
   u._opponent_index = NO_OPPONENT;
 
-  for(int i = 0; i < _user.size() - 1; ++i)
-    if(_user[i]->_opponent_index == NO_OPPONENT)
+  for(int i = 0; i < _user.size(); ++i)
+    if(_user[i]->_opponent_index == NO_OPPONENT && u._my_index != i)
     {
       u._opponent_index = i;
-      _user[i]->_opponent_index = _user.size() - 1;
+      _user[i]->_opponent_index = u._my_index;
       qDebug()<<"_user[i].opponent_index: "<<_user[i]->_opponent_index;
       _board.append(new Desk(u._my_index, u._opponent_index));
+      send_board_state(u);
       break;
     }
   qDebug()<<"u.opponent_index: "<<u._opponent_index;
@@ -286,8 +286,6 @@ void UDP_server::User::timer_timeout()
 void UDP_server::User::timer_last_received_message_timeout()
 {
   qDebug()<<"===timer_from_last_received_message_timeout "<<_my_index;
-
-  _timer_last_received_message->stop();
   _parent_class->send_data(CLIENT_LOST, *_parent_class->_user[_my_index]);
 }
 

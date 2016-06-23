@@ -11,6 +11,7 @@
 class UDP_server : public QObject
 {
   Q_OBJECT
+
 public:
   explicit UDP_server(QObject *parent = nullptr);
   ~UDP_server();
@@ -28,8 +29,8 @@ public:
   const QChar FREE_SPASE = ' ';
 
 public:
-  void send_data(QByteArray& message, User& u);
-  void send_data(REQUEST_MESSAGES r_mes, User& u, bool is_prev_serial_need = false);
+  void send_data(QByteArray message, User& u);
+  void send_data(const REQUEST_MESSAGES r_mes, User& u, bool is_prev_serial_need = false);
 
 private:
   bool is_message_reach(QByteArray& message, User& u);
@@ -37,7 +38,7 @@ private:
   QByteArray cut_serial_num_from_data(QByteArray& message) const;
   void begin_wait_receive(User& u);
   void set_opponent(User& u);
-  void show_information(const User& u, bool is_to_opponent = true);
+  void show_information(const User& u, bool is_opponent = true);
   void run_message(QByteArray message, User& u);
   void push_message_to_logic(QByteArray message, User& u);
   void send_board_state(User& u);
@@ -54,11 +55,12 @@ private:
 class UDP_server::User : public QObject
 {
   Q_OBJECT
+
 public:
   explicit User(QObject *parent = nullptr, UDP_server *parent_class = nullptr, const quint16& port = 0,
-                const QHostAddress& ip = QHostAddress::LocalHost, const int received_serial_num = 0, const int index = 0);
+                const QHostAddress& ip = QHostAddress::LocalHost, const int received_serial_num = 0,
+                const int index = 0);
   ~User() {delete _timer; delete _timer_last_received_message;}
-
   int get_board_ind();
 
 public slots:
