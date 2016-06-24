@@ -5,7 +5,7 @@
 #include "headers/udp_server.h"
 #include "headers/chess.h"
 
-UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(1234), _SERVER_IP(QHostAddress::LocalHost)
+UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(12345), _SERVER_IP(QHostAddress::LocalHost)
 {
   _socket = new QUdpSocket(this);
   _socket->bind(_SERVER_IP, _SERVER_PORT);
@@ -118,7 +118,7 @@ void UDP_server::run_message(QByteArray message, User& u)
       }
       break;
     case IS_SERVER_LOST:
-      send_data(SERVER_HERE, u);
+      //send_data(SERVER_HERE, u);
       break;
     case OPPONENT_INF:
       show_information(u);
@@ -188,7 +188,7 @@ void UDP_server::send_board_state(User& u)
   send_data(message, u);
 }
 
-void UDP_server::show_information(const User& u, bool is_opponent)
+void UDP_server::show_information(User& u, bool is_opponent)
 {
   QByteArray inf;
 
@@ -265,7 +265,7 @@ void UDP_server::User::timer_timeout()
   if(!_is_message_reach)
   {
     ++count;
-    if(_last_sent_message.toInt() == CLIENT_LOST || count > 5)
+    if(_opponent_index != NO_OPPONENT && (_last_sent_message.toInt() == CLIENT_LOST || count > 5))
     {
       qDebug()<<"last message was client lost";
       _parent_class->send_data(OPPONENT_LOST_FROM_SERVER, *_parent_class->_user[_opponent_index]);
@@ -314,6 +314,7 @@ UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16&
 
   _timer_last_received_message = new QTimer;
   connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
+  _timer_last_received_message->start(TEN_SEC);
 }
 
 int UDP_server::User::get_board_ind()
@@ -323,8 +324,10 @@ int UDP_server::User::get_board_ind()
 
   int i = 0;
   for(; i < _parent_class->_board.size(); ++i)
-    if(_parent_class->_board[i]->_first_player_ind == _my_index
-       && _parent_class->_board[i]->_second_player_ind == _opponent_index)
+    if((_parent_class->_board[i]->_first_player_ind == _my_index
+        && _parent_class->_board[i]->_second_player_ind == _opponent_index)
+       || (_parent_class->_board[i]->_first_player_ind == _opponent_index
+           && _parent_class->_board[i]->_second_player_ind == _my_index))
       break;
 
   if(i >= _parent_class->_board.size())

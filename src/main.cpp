@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
   UDP_socet *udp_socet = new UDP_socet;
   Exporter *exporter = new Exporter(board_graphic, udp_socet);
 
-  const double CHECK_TIME = 0.15 * CLOCKS_PER_SEC;
+  const double CHECK_TIME = 1.15 * CLOCKS_PER_SEC;
   clock_t timer = clock();
   while(!is_gui_quit)
   {
@@ -33,15 +33,15 @@ int main(int argc, char *argv[])
     {
       timer = clock();
 
-      if(board_graphic->is_new_command_appear())
+      if(board_graphic->is_new_message_for_server_appear())
         exporter->push_to_socet(exporter->pull_from_graphic());
 
       if(udp_socet->is_new_message_received())
         exporter->push_to_graphic(exporter->pull_from_socet());
     }
 
-    if(!app->allWindows()[0]->visibility())
-        gui_is_quit();
+    //if(app->allWindows().isEmpty() || !app->allWindows()[0]->visibility())
+     // gui_is_quit();
   }
 
   delete exporter;

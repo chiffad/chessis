@@ -9,6 +9,8 @@
 #include <vector>
 #include <fstream>
 
+#include <QTimer>
+
 class Board_graphic : public QAbstractListModel
 {
   Q_OBJECT
@@ -22,6 +24,9 @@ public:
   const QString MOVE_COLOR_B = "img/b_K.png";
   const QString HILIGHT_IM = "hilight";
   const char FREE_SPACE = ' ';
+
+public slots:
+  void timer_timeout();
 
 private:  
   struct Coord
@@ -42,7 +47,7 @@ public:
 
 public:
   explicit Board_graphic(QObject *parent = 0);
-  ~Board_graphic(){}
+  ~Board_graphic(){delete timer_kill;}
 
   void addFigure(const Figure &figure);
   int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -76,8 +81,8 @@ public:
   Q_INVOKABLE void run_command(const QString& command);
 
 public:
-  bool is_new_command_appear() const;
-  const QString pull_first_command();
+  bool is_new_message_for_server_appear() const;
+  const QString pull_first_messages_for_server();
   void set_board_mask(const QString& mask);
   void set_moves_history(const QString& history);
   void set_connect_status(const int status);
@@ -98,16 +103,17 @@ private:
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
   void add_to_command_history(const QString& str);
-  void add_to_commands_stack(const enum MESSAGE_TYPE type, const QString& content = QString());
+  void add_to_messages_for_server_stack(const enum MESSAGE_TYPE type, const QString& content = QString());
   const QString move_coord_to_str(const Coord& from, const Coord& to) const;
 
 private:
+  QTimer *timer_kill;
   QString _move_color;
   QString _udp_connection_status;
   QStringList _str_moves_history;
   QStringList _commands_history;
   QList<Figure> _figures_model;
-  QVector<QString> _commands_stack;
+  QVector<QString> _messages_for_server_stack;
   QChar _field[BOARD_SIZE][BOARD_SIZE];
   Coord _from, _to;
 };

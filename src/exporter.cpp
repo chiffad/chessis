@@ -37,7 +37,7 @@ void Exporter::push_to_socet(const QString& message)
 const QString Exporter::pull_from_graphic()
 {
   qDebug()<<"====pull_message_from_graphic";
-  return _board_graphic->pull_first_command();
+  return _board_graphic->pull_first_messages_for_server();
 }
 
 const QString Exporter::pull_from_socet()

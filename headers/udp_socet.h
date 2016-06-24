@@ -16,7 +16,7 @@ public:
 
 public:
   enum{SECOND = 1000, TEN_SEC = 10000};
-  enum MESSAGE_TYPE{HELLO_SERVER, MESSAGE_RECEIVED = 2, IS_SERVER_LOST};
+  enum MESSAGE_TYPE{HELLO_SERVER = 1, MESSAGE_RECEIVED, IS_SERVER_LOST};
   const QChar FREE_SPASE = ' ';
 
 public:
@@ -27,7 +27,7 @@ public:
 
 public slots:
   void read_data();
-  bool checked_is_message_received();
+  bool is_message_received();
   void timer_from_last_received_message_timeout();
 
 private:

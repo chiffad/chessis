@@ -9,13 +9,17 @@
 #include "headers/board_graphic.h"
 
 Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
-                                                _udp_connection_status(DISCONNECT)
+                                                _udp_connection_status("Disconnect")
 {
   for(int i = 0; i < FIGURES_NUMBER; ++i)
     addFigure(Figure(MOVE_COLOR_W, 0, 0, true));
 
   addFigure(Board_graphic::Figure(HILIGHT_IM, 0, 0, false));
   addFigure(Board_graphic::Figure(HILIGHT_IM, 0, 0, false));
+
+  timer_kill = new QTimer(this);
+  connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
+  timer_kill->start(2000);
 }
 
 Board_graphic::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
@@ -23,20 +27,59 @@ Board_graphic::Figure::Figure(const QString& name, const int x, const int y, con
 {
 }
 
+void Board_graphic::timer_timeout()
+{
+  timer_kill->stop();
+
+  static int i = 0;
+  ++i;
+
+  if( i == 1)
+  {
+    move(4,6,true);
+    move(4,5,true);
+  }
+  if( i == 2)
+  {
+    move(4,1,true);
+    move(4,2,true);
+  }
+
+  if( i == 3)
+  {
+    move(1,7,true);
+    move(0,5,true);
+  }
+
+ /* if( i == 4)
+  {
+     go_to_history_index(0);
+  }
+
+  if( i == 5)
+  {
+     go_to_history_index(2);
+  }*/
+
+  timer_kill->start(2000);
+}
+
 void Board_graphic::move(const unsigned x, const unsigned y, bool is_correct_coord)
 {
+    qDebug()<<"===move";
   static bool is_from = true;
   if(is_from)
   {
     correct_figure_coord(_from, x, y, is_correct_coord);
       //update_hilight(from, FIRST_HILIGHT);
+    is_from = false;
   }
   else
   {
     is_from = true;
     correct_figure_coord(_to, x, y, is_correct_coord);
 
-    add_to_commands_stack(MOVE, move_coord_to_str(_from, _to));
+    add_to_messages_for_server_stack(MOVE, move_coord_to_str(_from, _to));
    // update_hilight(to, SECOND_HILIGHT);
   }
 }
@@ -44,7 +87,7 @@ void Board_graphic::move(const unsigned x, const unsigned y, bool is_correct_coo
 void Board_graphic::back_move()
 {
   qDebug()<<"====back_move";
-  add_to_commands_stack(BACK_MOVE);
+  add_to_messages_for_server_stack(BACK_MOVE);
 }
 
 void Board_graphic::correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct)
@@ -134,19 +177,21 @@ const QString Board_graphic::move_coord_to_str(const Coord& from, const Coord& t
           + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIZE - to.y));
 }
 
-void Board_graphic::add_to_commands_stack(const enum MESSAGE_TYPE type, const QString& content)
+void Board_graphic::add_to_messages_for_server_stack(const enum MESSAGE_TYPE type, const QString& content)
 {
-  qDebug()<<"====add_to_commands_stack";
+  qDebug()<<"====add_to_messages_for_server_stack";
 
   QString message;
   message.setNum(type);
+  message.append(FREE_SPACE);
   message.append(content);
 
-  _commands_stack.append(message);
+  _messages_for_server_stack.append(message);
 }
 
 void Board_graphic::update_hilight(const Coord& coord, const enum HILIGHT hilight_index)
 {
+  qDebug()<<"====update_hilight";
   _figures_model[hilight_index].set_visible(true);
   _figures_model[hilight_index].set_coord(coord);
 
@@ -160,6 +205,7 @@ void Board_graphic::update_hilight(const Coord& coord, const enum HILIGHT hiligh
 
 void Board_graphic::update_move_color()
 {
+  qDebug()<<"====update_move_color";
   _move_color = (_str_moves_history.size() % 2 == 0) ? MOVE_COLOR_B : MOVE_COLOR_W;
   emit move_turn_color_changed();
 }
@@ -184,13 +230,13 @@ bool Board_graphic::is_check_mate() const
 void Board_graphic::start_new_game()
 {
   qDebug()<<"====start_new_game";
-  add_to_commands_stack(NEW_GAME);
+  add_to_messages_for_server_stack(NEW_GAME);
 }
 
 void Board_graphic::go_to_history_index(const unsigned index)
 {
   qDebug()<<"====go to history index: " <<index;
-  add_to_commands_stack(GO_TO_HISTORY, QString::number(index));
+  add_to_messages_for_server_stack(GO_TO_HISTORY, QString::number(index));
 }
 
 void Board_graphic::run_command(const QString& command)
@@ -213,11 +259,11 @@ void Board_graphic::run_command(const QString& command)
   else if(command == SHOW_OPPONENT)
   {
     qDebug()<<"show opponent";
-    add_to_commands_stack(OPPONENT_INF_REQUEST);
+    add_to_messages_for_server_stack(OPPONENT_INF_REQUEST);
   }
   else if(command == SHOW_ME)
   {
-    add_to_commands_stack(MY_INF_REQUEST);
+    add_to_messages_for_server_stack(MY_INF_REQUEST);
     qDebug()<<"show me";
   }
   else
@@ -234,7 +280,7 @@ void Board_graphic::run_command(const QString& command)
       if(first_word == MOVE_WORD)
       {
         qDebug()<<"move word";
-        add_to_commands_stack(MOVE, command_copy);
+        add_to_messages_for_server_stack(MOVE, command_copy);
         break;
       }
       else if(command_copy.isEmpty())
@@ -245,6 +291,7 @@ void Board_graphic::run_command(const QString& command)
 
 void Board_graphic::add_to_command_history(const QString& str)
 {
+  qDebug()<<"====add_to_command_history";
   _commands_history.append(str);
   emit commands_list_changed();
 }
@@ -286,6 +333,7 @@ void Board_graphic::read_moves_from_file(const QString& path)
 
 void Board_graphic::set_connect_status(const int status)
 {
+  qDebug()<<"set_connect_status";
   switch(status)
   {
     case SERVER_HERE:
@@ -303,17 +351,17 @@ void Board_graphic::set_connect_status(const int status)
   emit udp_connection_status_changed();
 }
 
-bool Board_graphic::is_new_command_appear() const
+bool Board_graphic::is_new_message_for_server_appear() const
 {
-  qDebug()<<"=====is new command appear: "<<!_commands_stack.isEmpty();
-  return !_commands_stack.isEmpty();
+  qDebug()<<"=====is new command appear:"<<!_messages_for_server_stack.isEmpty();
+  return !_messages_for_server_stack.isEmpty();
 }
 
-const QString Board_graphic::pull_first_command()
+const QString Board_graphic::pull_first_messages_for_server()
 {
   qDebug()<<"=====pull_first_command()";
-  QString command(_commands_stack.first());
-  _commands_stack.removeFirst();
+  QString command(_messages_for_server_stack.first());
+  _messages_for_server_stack.removeFirst();
   return command;
 }
 
