@@ -64,7 +64,7 @@ bool Board::is_right_move_turn(const Coord& coord) const
 
 void Board::field_change(const Coord& from, const Coord& to)
 {
-  m_moves[get_actual_move()].fig_on_captured_field = get_figure(to);
+  m.fig_on_captured_field = get_figure(to);
   FIGURES fig = get_figure(from);
   set_field(from, FREE_FIELD);
   set_field(to, fig);
@@ -228,12 +228,12 @@ void Board::go_to_history_index(const unsigned index)
 {
   m_is_go_to_history_in_progress = true;
 
-  if(index < get_actual_move())
-    for(unsigned i = 0; i < get_last_made_move() - index; ++i)
-      back_move();
+  if(index < get_last_made_move())
+    for(unsigned i = index; i < get_actual_move(); ++i)
+      back_move(); 
 
-  else if(index > get_last_made_move() && index < m_history_copy.size())
-    for(unsigned i = get_last_made_move(); i <= index; ++i)
+  else if(index > get_last_made_move() && index <= m_history_copy.size())
+    for(unsigned i = get_last_made_move(); i < index; ++i)
       move(m_history_copy[i].from, m_history_copy[i].to);
 
   m_is_go_to_history_in_progress = false;
@@ -321,13 +321,14 @@ void Board::read_moves_from_file(const std::string& path)
 
 void Board::start_new_game()
 {
-  while(!m_moves.empty())
+  while(get_actual_move() > 1)
     back_move();
+  m_history_copy.clear();
 }
 
 void Board::back_move()
 {
-  if(get_actual_move() < 1)
+  if(get_actual_move() <= 1)
     return;
 
   Moves *curr_move  = &m_moves[get_last_made_move()];
@@ -339,13 +340,11 @@ void Board::back_move()
 
 void Board::next_move(const Coord& from, const Coord& to)
 {
-  Moves m;
   m.from = from;
   m.to = to;
-
   m_moves.push_back(m);
 
-  if(m_moves.size() > 1 && !m_is_go_to_history_in_progress)
+  if(get_actual_move() > 1 && !m_is_go_to_history_in_progress)
   {
     for(unsigned i = get_actual_move(); i < m_history_copy.size(); ++i)
       m_history_copy.pop_back();

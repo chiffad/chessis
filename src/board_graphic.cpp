@@ -136,18 +136,12 @@ void Board_graphic::set_board_mask(const QString& mask)
     for(int y = 0; y < BOARD_SIZE; ++y, ++i)
       _field[x][y] = mask[i];
 
-qDebug()<<"mask: "; //temporary thing
-  for(int x = 0, i = 0; x < BOARD_SIZE; ++x)
-    for(int y = 0; y < BOARD_SIZE; ++y, ++i)
-      qDebug()<<_field[x][y];
-
   update_coordinates();
 }
 
 void Board_graphic::set_moves_history(const QString& history)
 {
   qDebug()<<"====set_moves_history";
-
   _str_moves_history.clear();
 
   QString move;

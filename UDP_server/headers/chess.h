@@ -67,7 +67,7 @@ private:
      Coord from;
      Coord to;
      FIGURES fig_on_captured_field;
-   };
+   }m;
    std::vector<Moves> m_moves;
    std::vector<Moves> m_history_copy;
    FIGURES m_field[BOARD_SIZE][BOARD_SIZE];

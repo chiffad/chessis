@@ -16,7 +16,7 @@ void Exporter::push_to_graphic(const QString& message)
   {
     const int SERVER_HERE = 16;
     QString board_mask = message.mid(0, message.indexOf(";"));
-    QString moves_history = message.mid(message.indexOf(";"));
+    QString moves_history = message.mid(message.indexOf(";") + 1);
 
     qDebug()<<"board_mask: "<<board_mask;
     qDebug()<<"moves_history: "<<moves_history;

@@ -15,7 +15,7 @@ Rectangle
     anchors.margins: bORDER_WIDTH
     clip: true
 
-    model: FigureModel.moves_history
+    model: FigureModel.get_moves_history
 
     cellWidth: parent.width / 2 - 2
     cellHeight: eLEMENT_HEIGHT
@@ -44,7 +44,7 @@ Rectangle
         onPressed:
         {
           parent.color = "	lightskyblue"
-          FigureModel.go_to_history_index(index)
+          FigureModel.go_to_history_index(index + 1)
         }
         onReleased: parent.color = (index % 2) == 1 ? "navajowhite" : "lightyellow"
       }    
