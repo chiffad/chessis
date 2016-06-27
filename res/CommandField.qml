@@ -49,9 +49,9 @@ Rectangle
 
   Keys.onPressed:
   {
-    if(event.key == Qt.Key_AsciiTilde)
+    if(event.key === Qt.Key_F1)
       _root.visible = true;
-    if(event.key == Qt.Key_Escape)
+    if(event.key === Qt.Key_Escape)
       _root.visible = false
   }
 }
