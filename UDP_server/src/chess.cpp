@@ -5,7 +5,7 @@
 #include<math.h>
 #include"headers/chess.h"
 
-Board::Board()
+Board::Board() : m_is_go_to_history_in_progress(false)
 {
   for(int i = 0; i < BOARD_SIZE; ++i)
     for(int j = 0; j < BOARD_SIZE; ++j)
@@ -38,6 +38,7 @@ Board::Board()
 
 bool Board::move(const Coord& from, const Coord& to)
 {
+  std::cout<<"====move"<<std::endl;
   if(is_right_move_turn(from) && (is_can_move(from, to) || is_castling(from, to)))
     field_change(from, to);
   else return false;
@@ -246,10 +247,10 @@ void Board::make_moves_from_str(const std::string& str)
   std::vector<int> coord_str;
   for(unsigned i = 0; i < str.size(); ++i)
   {
-    if(!(str[i] >= a_LETTER && str[i] <= h_LETTER) || (str[i] >= ONE_ch && str[i] <= EIGHT_ch))
+    if(!((str[i] >= a_LETTER && str[i] <= h_LETTER) || (str[i] >= ONE_ch && str[i] <= EIGHT_ch)))
       continue;
 
-    coord_str.push_back((str[i] >= a_LETTER) ? str[i] - a_LETTER : str[i] - ONE_ch);
+    coord_str.push_back((str[i] >= a_LETTER) ? str[i] - a_LETTER : EIGHT_ch - str[i]);
 
     if(coord_str.size() == COORD_NEED_TO_MOVE)
     {
@@ -264,7 +265,7 @@ void Board::make_moves_from_str(const std::string& str)
 
 const std::string Board::get_board_mask() const
 {
-  std::cout<<"====istory"<<std::endl;
+  std::cout<<"====get_board_mask()"<<std::endl;
   std::string mask;
   for(int x = 0; x < BOARD_SIZE; ++x)
     for(int y = 0; y < BOARD_SIZE; ++y)
@@ -275,15 +276,16 @@ const std::string Board::get_board_mask() const
 
 const std::string Board::get_moves_history() const
 {
-  std::cout<<"====get_moves_history"<<std::endl;
+  std::cout<<"====get_moves_history: "<<std::endl;
+
   std::string history;
   for(unsigned i = 0; i < m_history_copy.size(); ++i)
   {
     history.push_back(m_history_copy[i].from.x + a_LETTER);
-    history.push_back(m_history_copy[i].from.y + ONE_ch);
+    history.push_back(EIGHT_ch - m_history_copy[i].from.y);
     history.push_back('-');
     history.push_back(m_history_copy[i].to.x + a_LETTER);
-    history.push_back(m_history_copy[i].to.y + ONE_ch);
+    history.push_back(EIGHT_ch - m_history_copy[i].to.y);
   }
   return history;
 }
@@ -379,7 +381,7 @@ Board::COLORLESS_FIG Board::get_colorless_figure(const Coord& c) const
 
 Board::COLOR Board::get_move_color() const
 {
-  return get_actual_move() % 2 ? B_FIG : W_FIG;
+  return get_actual_move() % 2 ? W_FIG : B_FIG;
 }
 
 const Board::Coord& Board::get_prev_from_coord() const
