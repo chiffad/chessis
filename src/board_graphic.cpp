@@ -11,15 +11,12 @@
 Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
                                                 _udp_connection_status("Disconnect")
 {
-  for(int i = 0; i < FIGURES_NUMBER; ++i)
-    addFigure(Figure(MOVE_COLOR_W, 0, 0, true));
-
-  addFigure(Board_graphic::Figure(HILIGHT_IM, 0, 0, false));
-  addFigure(Board_graphic::Figure(HILIGHT_IM, 0, 0, false));
+  for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
+    addFigure(Figure(HILIGHT_IM, 0, 0, false));
 
   timer_kill = new QTimer(this);
   connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  timer_kill->start(2000);
+  //timer_kill->start(2000);
 }
 
 Board_graphic::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
@@ -206,7 +203,7 @@ void Board_graphic::update_hilight(const Coord& coord, const enum HILIGHT hiligh
 void Board_graphic::update_move_color()
 {
   qDebug()<<"====update_move_color";
-  _move_color = (_str_moves_history.size() % 2 == 0) ? MOVE_COLOR_B : MOVE_COLOR_W;
+  _move_color = (_str_moves_history.size() % 2 == 0) ? MOVE_COLOR_W : MOVE_COLOR_B;
   emit move_turn_color_changed();
 }
 

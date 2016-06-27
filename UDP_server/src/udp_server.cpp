@@ -5,9 +5,9 @@
 #include "headers/udp_server.h"
 #include "headers/chess.h"
 
-UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(12345), _SERVER_IP(QHostAddress::LocalHost)
+UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(12345), _SERVER_IP(QHostAddress::LocalHost),
+                                          _socket(new QUdpSocket(this))
 {
-  _socket = new QUdpSocket(this);
   _socket->bind(_SERVER_IP, _SERVER_PORT);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
@@ -268,11 +268,11 @@ void UDP_server::User::timer_timeout()
     if(_opponent_index != NO_OPPONENT && (_last_sent_message.toInt() == CLIENT_LOST || count > 5))
     {
       qDebug()<<"last message was client lost";
-      _parent_class->send_data(OPPONENT_LOST_FROM_SERVER, *_parent_class->_user[_opponent_index]);
+      _parent_class->send_data(OPPONENT_LOST, *_parent_class->_user[_opponent_index]);
     }
     _timer->start(SECOND);
 
-    _parent_class->add_serial_num(_last_sent_message, *_parent_class->_user[_my_index], true);
+    _parent_class->add_serial_num(_last_sent_message, *this, true);
     _parent_class->_socket->writeDatagram(_last_sent_message, _ip, _port);
   }
   else
@@ -286,7 +286,7 @@ void UDP_server::User::timer_timeout()
 void UDP_server::User::timer_last_received_message_timeout()
 {
   qDebug()<<"===timer_from_last_received_message_timeout "<<_my_index;
-  _parent_class->send_data(CLIENT_LOST, *_parent_class->_user[_my_index]);
+  _parent_class->send_data(CLIENT_LOST, *this);
 }
 
 bool UDP_server::is_message_reach(QByteArray& message, User& u)
@@ -304,15 +304,12 @@ bool UDP_server::is_message_reach(QByteArray& message, User& u)
 
 UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16& port, const QHostAddress& ip,
                        const int received_serial_num, const int index)
-                     : QObject(parent), _parent_class(parent_class),_port(port), _ip(ip), _my_index(index),
-                       _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true)
+                     : QObject(parent), _timer(new QTimer), _timer_last_received_message(new QTimer),
+                       _parent_class(parent_class),_port(port), _ip(ip), _my_index(index),
+                       _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true),
+                       _login("login"), _rating_ELO(1200)
 {
-  _login = "login";
-  _rating_ELO = 1200;
-  _timer = new QTimer;
   connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-
-  _timer_last_received_message = new QTimer;
   connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
   _timer_last_received_message->start(TEN_SEC);
 }

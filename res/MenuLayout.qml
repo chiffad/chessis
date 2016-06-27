@@ -142,7 +142,7 @@ Rectangle
     Text
     {
       anchors.fill: parent
-      text: FigureModel.udp_connection_status
+      text: FigureModel.get_udp_connection_status
     }
   }
 

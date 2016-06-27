@@ -11,8 +11,8 @@ public:
   {}
   ~Desk(){}
 
-  int _first_player_ind;
-  int _second_player_ind;
+  const int _first_player_ind;
+  const int _second_player_ind;
 };
 #endif // DESK
 

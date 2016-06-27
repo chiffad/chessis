@@ -14,6 +14,7 @@ void Exporter::push_to_graphic(const QString& message)
 
   if(message.indexOf(";") > 0)
   {
+    const int SERVER_HERE = 16;
     QString board_mask = message.mid(0, message.indexOf(";"));
     QString moves_history = message.mid(message.indexOf(";"));
 
@@ -22,6 +23,7 @@ void Exporter::push_to_graphic(const QString& message)
 
     _board_graphic->set_moves_history(moves_history);
     _board_graphic->set_board_mask(board_mask);
+    _board_graphic->set_connect_status(SERVER_HERE);
   }
   else _board_graphic->set_connect_status(message.toInt());
 }

@@ -4,15 +4,14 @@
 #include <QTimer>
 #include "headers/udp_socet.h"
 
-UDP_socet::UDP_socet(QObject *parent) : QObject(parent), _received_serial_num(0), _send_serial_num(0),
-                                          _is_message_received(true), SERVER_PORT(12345), SERVER_IP(QHostAddress::LocalHost)
+UDP_socet::UDP_socet(QObject *parent) : QObject(parent), _socket(new QUdpSocket(this)), _timer(new QTimer(this)),
+                                        _timer_from_last_received_message(new QTimer(this)),
+                                        _received_serial_num(0), _send_serial_num(0), _is_message_received(true),
+                                        SERVER_PORT(12345), SERVER_IP(QHostAddress::LocalHost)
 {
-  _timer = new QTimer(this);
-  _timer_from_last_received_message = new QTimer(this);
   connect(_timer, SIGNAL(timeout()), this, SLOT(is_message_received()));
   connect(_timer_from_last_received_message, SIGNAL(timeout()), this, SLOT(timer_from_last_received_message_timeout()));
 
-  _socket = new QUdpSocket(this);
   _socket->bind(SERVER_IP, SERVER_PORT);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
@@ -140,7 +139,7 @@ bool UDP_socet::is_message_received()
     _timer->start(SECOND);
     _socket->writeDatagram(_last_send_message, SERVER_IP, SERVER_PORT);
     if(_last_send_message.toInt() == IS_SERVER_LOST || num_of_restarts > 5)
-     //?!!
+      _received_message_stack.push_back(QByteArray::number(SERVER_LOST));
 
     ++num_of_restarts;
   }
