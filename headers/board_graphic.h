@@ -86,6 +86,7 @@ public:
   void set_board_mask(const QString& mask);
   void set_moves_history(const QString& history);
   void set_connect_status(const int status);
+  void set_move_color(const int move_num);
 
 signals:
   void move_turn_color_changed();
@@ -96,7 +97,6 @@ signals:
 
 private:
   void update_coordinates();
-  void update_move_color();
   void emit_figure_changed(const unsigned index);
   void correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct);
   void update_hilight(const Coord& coord, const enum HILIGHT hilight_index);

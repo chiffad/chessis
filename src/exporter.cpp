@@ -16,13 +16,16 @@ void Exporter::push_to_graphic(const QString& message)
   {
     const int SERVER_HERE = 16;
     QString board_mask = message.mid(0, message.indexOf(";"));
-    QString moves_history = message.mid(message.indexOf(";") + 1);
+    QString moves_history = message.mid(message.indexOf(";") + 1, message.indexOf(";", message.indexOf(";") + 1));
+    QString move_num = message.mid(message.indexOf(";", message.indexOf(";") + 1) + 1);
 
     qDebug()<<"board_mask: "<<board_mask;
     qDebug()<<"moves_history: "<<moves_history;
+    qDebug()<<"move_num: "<<move_num;
 
     _board_graphic->set_moves_history(moves_history);
     _board_graphic->set_board_mask(board_mask);
+    _board_graphic->set_move_color(move_num.toInt());
     _board_graphic->set_connect_status(SERVER_HERE);
   }
   else _board_graphic->set_connect_status(message.toInt());

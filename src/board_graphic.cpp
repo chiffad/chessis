@@ -119,7 +119,6 @@ void Board_graphic::update_coordinates()
         emit_figure_changed(index);
         ++index;
       }
-  update_move_color();
 }
 
 void Board_graphic::set_board_mask(const QString& mask)
@@ -162,6 +161,13 @@ void Board_graphic::set_moves_history(const QString& history)
   emit moves_history_changed();
 }
 
+void Board_graphic::set_move_color(const int move_num)
+{
+  qDebug()<<"====set_move_color";
+  _move_color = (move_num % 2 == 0) ? MOVE_COLOR_B : MOVE_COLOR_W;
+  emit move_turn_color_changed();
+}
+
 const QString Board_graphic::move_coord_to_str(const Coord& from, const Coord& to) const
 {
   return (QChar(a_LETTER + from.x) + QString::number(BOARD_SIZE - from.y)
@@ -192,13 +198,6 @@ void Board_graphic::update_hilight(const Coord& coord, const enum HILIGHT hiligh
     emit_figure_changed(SECOND_HILIGHT);
   }
   emit_figure_changed(hilight_index);
-}
-
-void Board_graphic::update_move_color()
-{
-  qDebug()<<"====update_move_color";
-  _move_color = (_str_moves_history.size() % 2 == 0) ? MOVE_COLOR_W : MOVE_COLOR_B;
-  emit move_turn_color_changed();
 }
 
 void Board_graphic::emit_figure_changed(const unsigned INDEX)
