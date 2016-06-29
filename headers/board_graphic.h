@@ -43,8 +43,8 @@ public:
   ~Board_graphic(){delete timer_kill;}
 
   void addFigure(const Figure &figure);
-  int rowCount(const QModelIndex & parent = QModelIndex()) const;
-  QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
 protected:
   QHash<int, QByteArray> roleNames() const;
@@ -80,6 +80,7 @@ public:
   void set_moves_history(const QString& history);
   void set_connect_status(const int status);
   void set_move_color(const int move_num);
+  void set_check_mate();
 
 signals:
   void move_turn_color_changed();
@@ -104,13 +105,14 @@ private:
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
   void add_to_command_history(const QString& str);
-  void add_to_messages_for_server_stack(const Messages::MESSAGE type, const QString& content = QString());
-  const QString move_coord_to_str(const Coord& from, const Coord& to) const;
+  void add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content = QString());
+  const QString coord_to_str(const Coord& from, const Coord& to) const;
 
 private:
   QTimer *timer_kill;
   QString _move_color;
   QString _udp_connection_status;
+  bool _is_check_mate;
   QStringList _str_moves_history;
   QStringList _commands_history;
   QList<Figure> _figures_model;

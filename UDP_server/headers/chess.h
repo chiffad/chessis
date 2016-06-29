@@ -29,7 +29,7 @@ public:
    void start_new_game();
    void make_moves_from_str(const std::string& str);
    void go_to_history_index(const unsigned index);
-   bool is_mate(const COLOR color);
+   bool is_mate();
 
    const std::string get_moves_history() const;
    void read_moves_from_file(const std::string& path);

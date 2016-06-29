@@ -107,7 +107,7 @@ QByteArray UDP_socket::pull_received_message()
 
 bool UDP_socket::is_new_message_received() const
 {
-  qDebug()<<"=====is_new_message_received:"<<!_received_message_stack.isEmpty();
+  //qDebug()<<"=====is_new_message_received:"<<!_received_message_stack.isEmpty();
   return !_received_message_stack.isEmpty();
 }
 

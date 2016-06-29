@@ -99,7 +99,7 @@ void UDP_server::read_data()
   else run_message(message, *_user[sender]);
 }
 
-void UDP_server::run_message(QByteArray message, User& u)
+void UDP_server::run_message(const QByteArray &message, User& u)
 {
   qDebug()<<"===run_message";
 
@@ -133,7 +133,7 @@ void UDP_server::run_message(QByteArray message, User& u)
   u._timer_last_received_message->start(TEN_SEC);
 }
 
-void UDP_server::push_message_to_logic(QByteArray message, User& u)
+void UDP_server::push_message_to_logic(const QByteArray &message, User& u)
 {
   qDebug()<<"===push_message_to_logic";
   if(u.get_board_ind() == NO_OPPONENT)
@@ -184,6 +184,8 @@ void UDP_server::send_board_state(User& u)
   message.append(QString::fromStdString(_board[u.get_board_ind()]->get_board_mask()));
   message.push_back(";");
   message.append(QString::fromStdString(_board[u.get_board_ind()]->get_moves_history()));
+  if(_board[u.get_board_ind()]->is_mate())
+    message.append("#");
   message.push_back(";");
   message.append(QByteArray::number(_board[u.get_board_ind()]->get_actual_move()));
 

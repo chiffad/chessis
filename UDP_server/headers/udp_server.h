@@ -38,8 +38,8 @@ private:
   void begin_wait_receive(User& u);
   void set_opponent(User& u);
   void show_information(User& u, bool is_opponent = true);
-  void run_message(QByteArray message, User& u);
-  void push_message_to_logic(QByteArray message, User& u);
+  void run_message(const QByteArray &message, User& u);
+  void push_message_to_logic(const QByteArray& message, User& u);
   void send_board_state(User& u);
 
 private:

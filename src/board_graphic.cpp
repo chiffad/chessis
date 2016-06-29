@@ -10,7 +10,7 @@
 #include "headers/enums.h"
 
 Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
-                                                _udp_connection_status("Disconnect")
+                                                _udp_connection_status("Disconnect"), _is_check_mate(false)
 {
   for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
     addFigure(Figure(HILIGHT_IM, 0, 0, false));
@@ -77,7 +77,7 @@ void Board_graphic::move(const unsigned x, const unsigned y, bool is_correct_coo
     is_from = true;
     correct_figure_coord(_to, x, y, is_correct_coord);
 
-    add_to_messages_for_server_stack(Messages::MOVE, move_coord_to_str(_from, _to));
+    add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(_from, _to));
    // update_hilight(to, SECOND_HILIGHT);
   }
 }
@@ -125,7 +125,6 @@ void Board_graphic::update_coordinates()
 void Board_graphic::set_board_mask(const QString& mask)
 {
   qDebug()<<"====set_board_mask";
-
   if(mask.size() != BOARD_SIZE * BOARD_SIZE)
   {
     qDebug()<<"mask is wrong!"<<mask;
@@ -169,18 +168,18 @@ void Board_graphic::set_move_color(const int move_num)
   emit move_turn_color_changed();
 }
 
-const QString Board_graphic::move_coord_to_str(const Coord& from, const Coord& to) const
+const QString Board_graphic::coord_to_str(const Coord& from, const Coord& to) const
 {
   return (QChar(a_LETTER + from.x) + QString::number(BOARD_SIZE - from.y)
           + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIZE - to.y));
 }
 
-void Board_graphic::add_to_messages_for_server_stack(const Messages::MESSAGE type, const QString& content)
+void Board_graphic::add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content)
 {
   qDebug()<<"====add_to_messages_for_server_stack";
 
   QString message;
-  message.setNum(type);
+  message.setNum(mes_type);
   message.append(FREE_SPACE);
   message.append(content);
 
@@ -210,12 +209,13 @@ void Board_graphic::emit_figure_changed(const unsigned INDEX)
 
 bool Board_graphic::is_check_mate() const
 {
-  /*if(!_board->is_mate(_board->get_move_color()))
-    return false;
-*/
-  //emit check_mate();
-  //return true;
-    return false; // temporary
+  return _is_check_mate;
+}
+
+void Board_graphic::set_check_mate()
+{
+  _is_check_mate = true;
+  emit check_mate();
 }
 
 void Board_graphic::start_new_game()
@@ -328,7 +328,8 @@ void Board_graphic::set_connect_status(const int status)
   switch(status)
   {
     case Messages::SERVER_HERE:
-      _udp_connection_status = "Connect";
+      if(_udp_connection_status == "Disconnect")
+        _udp_connection_status = "Connect";
       break;
     case Messages::SERVER_LOST:
       _udp_connection_status = "Disconnect";
@@ -344,7 +345,7 @@ void Board_graphic::set_connect_status(const int status)
 
 bool Board_graphic::is_new_message_for_server_appear() const
 {
-  qDebug()<<"=====is new command appear:"<<!_messages_for_server_stack.isEmpty();
+  //qDebug()<<"=====is new command appear:"<<!_messages_for_server_stack.isEmpty();
   return !_messages_for_server_stack.isEmpty();
 }
 

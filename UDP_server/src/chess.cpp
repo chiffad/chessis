@@ -185,16 +185,16 @@ bool Board::is_check(const COLOR color) const
     return true;
 }
 
-bool Board::is_mate(const COLOR color)
+bool Board::is_mate()
 {
-  if(get_actual_move() < 2 || color == NONE)
+  if(get_actual_move() < 2)
     return false;
 
   Coord f;
   Coord t;
   for(f.x = 0; f.x < BOARD_SIZE; ++f.x)
     for(f.y = 0; f.y < BOARD_SIZE; ++f.y)
-      if(get_figure(f) != FREE_FIELD && get_color(f) == color)
+      if(get_figure(f) != FREE_FIELD && get_color(f) == get_move_color())
       {
         for(t.x = 0; t.x < BOARD_SIZE; ++t.x)
           for(t.y = 0; t.y < BOARD_SIZE; ++t.y)
@@ -204,7 +204,7 @@ bool Board::is_mate(const COLOR color)
               FIGURES fig_to   = get_figure(t);
               set_field(f,FREE_FIELD);
               set_field(t,fig_from);
-              if(!is_check(color))
+              if(!is_check(get_move_color()))
               {
                 set_field(f,fig_from);
                 set_field(t,fig_to);
