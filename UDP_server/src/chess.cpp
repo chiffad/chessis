@@ -331,10 +331,10 @@ void Board::back_move()
   if(get_actual_move() <= 1)
     return;
 
-  Moves *curr_move  = &m_moves[get_last_made_move()];
-  set_field(curr_move->from, curr_move->to);
-  set_field(curr_move->to, curr_move->fig_on_captured_field);
-  if_castling(curr_move->to, curr_move->from);
+  Moves *move  = &m_moves[get_last_made_move()];
+  set_field(move->from, move->to);
+  set_field(move->to, move->fig_on_captured_field);
+  if_castling(move->to, move->from);
   m_moves.pop_back();
 }
 
