@@ -3,12 +3,12 @@
 
 #include <QString>
 #include "headers/board_graphic.h"
-#include "headers/udp_socet.h"
+#include "headers/udp_socket.h"
 
 class Exporter
 {
 public:
-  explicit Exporter(Board_graphic *const board_graphic, UDP_socet *const udp_socet);
+  explicit Exporter(Board_graphic *const board_graphic, UDP_socket *const udp_socet);
   ~Exporter(){}
 
 public:
@@ -19,6 +19,6 @@ public:
 
 private:
   Board_graphic *const _board_graphic;
-  UDP_socet *const _udp_socet;
+  UDP_socket *const _udp_socet;
 };
 #endif // UDP_CLIENT_H

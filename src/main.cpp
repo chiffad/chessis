@@ -5,7 +5,7 @@
 #include <ctime>
 #include "headers/board_graphic.h"
 #include "headers/exporter.h"
-#include "headers/udp_socet.h"
+#include "headers/udp_socket.h"
 
 bool is_gui_quit = false;
 void gui_is_quit();
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
   //engine->load(QUrl(QStringLiteral("chessis/res/app.qml")));
   QObject::connect(engine, &QQmlApplicationEngine::quit, &gui_is_quit);
 
-  UDP_socet *udp_socet = new UDP_socet;
+  UDP_socket *udp_socet = new UDP_socket;
   Exporter *exporter = new Exporter(board_graphic, udp_socet);
 
   const double CHECK_TIME = 1.015 * CLOCKS_PER_SEC;

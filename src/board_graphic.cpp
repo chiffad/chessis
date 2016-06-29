@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include "headers/board_graphic.h"
+#include "headers/enums.h"
 
 Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
                                                 _udp_connection_status("Disconnect")
@@ -76,7 +77,7 @@ void Board_graphic::move(const unsigned x, const unsigned y, bool is_correct_coo
     is_from = true;
     correct_figure_coord(_to, x, y, is_correct_coord);
 
-    add_to_messages_for_server_stack(MOVE, move_coord_to_str(_from, _to));
+    add_to_messages_for_server_stack(Messages::MOVE, move_coord_to_str(_from, _to));
    // update_hilight(to, SECOND_HILIGHT);
   }
 }
@@ -84,7 +85,7 @@ void Board_graphic::move(const unsigned x, const unsigned y, bool is_correct_coo
 void Board_graphic::back_move()
 {
   qDebug()<<"====back_move";
-  add_to_messages_for_server_stack(BACK_MOVE);
+  add_to_messages_for_server_stack(Messages::BACK_MOVE);
 }
 
 void Board_graphic::correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct)
@@ -174,7 +175,7 @@ const QString Board_graphic::move_coord_to_str(const Coord& from, const Coord& t
           + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIZE - to.y));
 }
 
-void Board_graphic::add_to_messages_for_server_stack(const enum MESSAGE_TYPE type, const QString& content)
+void Board_graphic::add_to_messages_for_server_stack(const Messages::MESSAGE type, const QString& content)
 {
   qDebug()<<"====add_to_messages_for_server_stack";
 
@@ -220,13 +221,13 @@ bool Board_graphic::is_check_mate() const
 void Board_graphic::start_new_game()
 {
   qDebug()<<"====start_new_game";
-  add_to_messages_for_server_stack(NEW_GAME);
+  add_to_messages_for_server_stack(Messages::NEW_GAME);
 }
 
 void Board_graphic::go_to_history_index(const unsigned index)
 {
   qDebug()<<"====go to history index: " <<index;
-  add_to_messages_for_server_stack(GO_TO_HISTORY, QString::number(index));
+  add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(index));
 }
 
 void Board_graphic::run_command(const QString& command)
@@ -249,11 +250,11 @@ void Board_graphic::run_command(const QString& command)
   else if(command == SHOW_OPPONENT)
   {
     qDebug()<<"show opponent";
-    add_to_messages_for_server_stack(OPPONENT_INF_REQUEST);
+    add_to_messages_for_server_stack(Messages::OPPONENT_INF_REQUEST);
   }
   else if(command == SHOW_ME)
   {
-    add_to_messages_for_server_stack(MY_INF_REQUEST);
+    add_to_messages_for_server_stack(Messages::MY_INF_REQUEST);
     qDebug()<<"show me";
   }
   else
@@ -270,7 +271,7 @@ void Board_graphic::run_command(const QString& command)
       if(first_word == MOVE_WORD)
       {
         qDebug()<<"move word";
-        add_to_messages_for_server_stack(MOVE, command_copy);
+        add_to_messages_for_server_stack(Messages::MOVE, command_copy);
         break;
       }
       else if(command_copy.isEmpty())
@@ -326,13 +327,13 @@ void Board_graphic::set_connect_status(const int status)
   qDebug()<<"set_connect_status";
   switch(status)
   {
-    case SERVER_HERE:
+    case Messages::SERVER_HERE:
       _udp_connection_status = "Connect";
       break;
-    case SERVER_LOST:
+    case Messages::SERVER_LOST:
       _udp_connection_status = "Disconnect";
       break;
-    case OPPONENT_LOST:
+    case Messages::OPPONENT_LOST:
       _udp_connection_status = "Opponent disconnect";
       break;
     default:

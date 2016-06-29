@@ -17,4 +17,5 @@ include(deployment.pri)
 
 HEADERS += headers/udp_server.h \
            headers/chess.h \
-    headers/desk.h
+    headers/desk.h \
+    headers/enums.h

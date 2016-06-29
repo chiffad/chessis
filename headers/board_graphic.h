@@ -8,6 +8,7 @@
 #include <QStringList>
 #include <vector>
 #include <fstream>
+#include <headers/enums.h>
 
 #include <QTimer>
 
@@ -15,15 +16,7 @@ class Board_graphic : public QAbstractListModel
 {
   Q_OBJECT
 public:
-  enum MESSAGE_TYPE {MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, OPPONENT_INF_REQUEST, MY_INF_REQUEST,
-                     SERVER_HERE, SERVER_LOST, OPPONENT_LOST};
-  enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4,IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a',
-       FREE_FIELD = '.'};
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
-  const QString MOVE_COLOR_W = "img/w_k.png";
-  const QString MOVE_COLOR_B = "img/b_K.png";
-  const QString HILIGHT_IM = "hilight";
-  const char FREE_SPACE = ' ';
 
 public slots:
   void timer_timeout();
@@ -43,7 +36,7 @@ public:
       YRole = Qt::UserRole + 1,
       VisibleRole = Qt::UserRole
   };
-  enum{BOARD_SIZE = 8, FIGURES_NUMBER = 32};
+  enum {BOARD_SIZE = 8, FIGURES_NUMBER = 32};
 
 public:
   explicit Board_graphic(QObject *parent = 0);
@@ -96,14 +89,22 @@ signals:
   void commands_list_changed();
 
 private:
+  enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4,IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a',
+       FREE_FIELD = '.'};
+  const QString MOVE_COLOR_W = "img/w_k.png";
+  const QString MOVE_COLOR_B = "img/b_K.png";
+  const QString HILIGHT_IM = "hilight";
+  const char FREE_SPACE = ' ';
+
+private:
   void update_coordinates();
   void emit_figure_changed(const unsigned index);
   void correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct);
-  void update_hilight(const Coord& coord, const enum HILIGHT hilight_index);
+  void update_hilight(const Coord& coord, const HILIGHT hilight_index);
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
   void add_to_command_history(const QString& str);
-  void add_to_messages_for_server_stack(const enum MESSAGE_TYPE type, const QString& content = QString());
+  void add_to_messages_for_server_stack(const Messages::MESSAGE type, const QString& content = QString());
   const QString move_coord_to_str(const Coord& from, const Coord& to) const;
 
 private:

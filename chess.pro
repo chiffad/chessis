@@ -7,14 +7,15 @@ CONFIG+=c++14
 
 HEADERS +=\
     headers/board_graphic.h \
-    headers/udp_socet.h \
-    headers/exporter.h
+    headers/exporter.h \
+    headers/enums.h \
+    headers/udp_socket.h
 
 SOURCES += \
            src/main.cpp\
     src/board_graphic.cpp \
-    src/udp_socet.cpp \
-    src/exporter.cpp
+    src/exporter.cpp \
+    src/udp_socket.cpp
 
 RESOURCES += \
     res.qrc

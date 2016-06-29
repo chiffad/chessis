@@ -7,6 +7,7 @@
 #include <QTimer>
 #include "headers/chess.h"
 #include "headers/desk.h"
+#include "headers/enums.h"
 
 class UDP_server : public QObject
 {
@@ -23,15 +24,12 @@ private:
   class User;
 
 public:
-  enum REQUEST_MESSAGES{HELLO_SERVER = 1, MESSAGE_RECEIVED, IS_SERVER_LOST, CLIENT_LOST, OPPONENT_INF, MY_INF,
-                        MOVE = 10, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, OPPONENT_INF_REQUEST, MY_INF_REQUEST,
-                        SERVER_HERE, SERVER_LOST, OPPONENT_LOST};
+  void send_data(QByteArray message, User& u);
+  void send_data(const Messages::MESSAGE r_mes, User& u, bool is_prev_serial_need = false);
+
+private:
   enum {NO_OPPONENT = -1, SECOND = 1000, TEN_SEC = 10000};
   const QChar FREE_SPASE = ' ';
-
-public:
-  void send_data(QByteArray message, User& u);
-  void send_data(const REQUEST_MESSAGES r_mes, User& u, bool is_prev_serial_need = false);
 
 private:
   bool is_message_reach(QByteArray& message, User& u);

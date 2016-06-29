@@ -2,9 +2,9 @@
 #include <QString>
 #include "headers/exporter.h"
 #include "headers/board_graphic.h"
-#include "headers/udp_socet.h"
+#include "headers/udp_socket.h"
 
-Exporter::Exporter(Board_graphic *const board_graphic, UDP_socet *const udp_socet)
+Exporter::Exporter(Board_graphic *const board_graphic, UDP_socket *const udp_socet)
                   : _board_graphic(board_graphic), _udp_socet(udp_socet)
 {}
 
