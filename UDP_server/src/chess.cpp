@@ -38,7 +38,7 @@ Board::Board() : m_is_go_to_history_in_progress(false)
 
 bool Board::move(const Coord& from, const Coord& to)
 {
-  std::cout<<"====move"<<std::endl;
+  std::cout<<"====move CHESS"<<std::endl;
   if(is_right_move_turn(from) && (is_can_move(from, to) || is_castling(from, to)))
     field_change(from, to);
   else return false;
@@ -64,10 +64,9 @@ bool Board::is_right_move_turn(const Coord& coord) const
 
 void Board::field_change(const Coord& from, const Coord& to)
 {
-  m.fig_on_captured_field = get_figure(to);
-  FIGURES fig = get_figure(from);
+  m_actual_move.fig_on_captured_field = get_figure(to);
+  set_field(to, from);
   set_field(from, FREE_FIELD);
-  set_field(to, fig);
 }
 
 bool Board::is_can_move(const Coord& fr, const Coord& to) const
@@ -83,7 +82,7 @@ bool Board::is_can_move(const Coord& fr, const Coord& to) const
   else if(get_colorless_figure(fr) == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
                                               || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
   {
-    return((get_figure(to) != FREE_FIELD && dy * dx == 1 && get_color(fr) != get_color(to))
+    return((get_figure(to) != FREE_FIELD && dy*dx == 1 && get_color(fr) != get_color(to))
            || (dx == 0 && ((dy == 1 && get_figure(to) == FREE_FIELD)
                || (dy == 2 && get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD && (fr.y == 6 || fr.y == 1)))));
   }
@@ -331,7 +330,7 @@ void Board::back_move()
   if(get_actual_move() <= 1)
     return;
 
-  Moves *move  = &m_moves[get_last_made_move()];
+  Moves *const move  = &m_moves[get_last_made_move()];
   set_field(move->from, move->to);
   set_field(move->to, move->fig_on_captured_field);
   if_castling(move->to, move->from);
@@ -340,9 +339,9 @@ void Board::back_move()
 
 void Board::next_move(const Coord& from, const Coord& to)
 {
-  m.from = from;
-  m.to = to;
-  m_moves.push_back(m);
+  m_actual_move.from = from;
+  m_actual_move.to = to;
+  m_moves.push_back(m_actual_move);
 
   if(get_actual_move() > 1 && !m_is_go_to_history_in_progress)
   {
@@ -368,7 +367,7 @@ Board::FIGURES Board::get_figure(const Coord& c) const
   return FIGURES(m_field[c.x][c.y]);
 }
 
-Board::FIGURES Board::get_figure(const int x, const int y) const
+Board::FIGURES Board::get_figure(const unsigned x, const unsigned y) const
 {
   return FIGURES(m_field[x][y]);
 }
@@ -411,7 +410,7 @@ Board::COLOR Board::get_color(const Coord& c) const
   return islower(m_field[c.x][c.y]) ? W_FIG : B_FIG;
 }
 
-Board::Coord::Coord(const int X, const int Y)
+Board::Coord::Coord(const unsigned X, const unsigned Y)
 {
   x = X;
   y = Y;

@@ -32,9 +32,9 @@ private:
   const QChar FREE_SPASE = ' ';
 
 private:
-  bool is_message_reach(QByteArray& message, User& u);
+  bool is_message_reach(const QByteArray& message, User& u);
   void add_serial_num(QByteArray& message, User& u, bool is_prev_serial_need = false);
-  QByteArray cut_serial_num_from_data(QByteArray& message) const;
+  QByteArray cut_serial_num(QByteArray& message) const;
   void begin_wait_receive(User& u);
   void set_opponent(User& u);
   void show_information(User& u, bool is_opponent = true);

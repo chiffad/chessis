@@ -16,10 +16,10 @@ public:
 public:
    struct Coord
    {
-     Coord(const int X = 0, const int Y = 0);
+     Coord(const unsigned X = 0, const unsigned Y = 0);
      bool operator==(const Coord& rhs);
-     int x;
-     int y;
+     unsigned x;
+     unsigned y;
    };
 
 public:
@@ -43,7 +43,7 @@ public:
    COLOR get_move_color() const;
    COLOR get_color(const Coord& c) const;
    FIGURES get_figure(const Coord& c) const;
-   FIGURES get_figure(const int x, const int y) const;
+   FIGURES get_figure(const unsigned x, const unsigned y) const;
    COLORLESS_FIG get_colorless_figure(const Coord& c) const;
 
 private:
@@ -67,7 +67,7 @@ private:
      Coord from;
      Coord to;
      FIGURES fig_on_captured_field;
-   }m;
+   }m_actual_move;
    std::vector<Moves> m_moves;
    std::vector<Moves> m_history_copy;
    FIGURES m_field[BOARD_SIZE][BOARD_SIZE];

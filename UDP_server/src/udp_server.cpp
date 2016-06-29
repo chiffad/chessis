@@ -6,6 +6,10 @@
 #include "headers/chess.h"
 #include "headers/enums.h"
 
+#include <iostream>
+#include <vector>
+#include <string>
+
 UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(12345), _SERVER_IP(QHostAddress::LocalHost),
                                           _socket(new QUdpSocket(this))
 {
@@ -69,7 +73,7 @@ void UDP_server::read_data()
     if(_user[sender]->_port == sender_port && _user[sender]->_ip == sender_IP)
       break;
 
-  const QByteArray serial_num = cut_serial_num_from_data(message);
+  const QByteArray serial_num = cut_serial_num(message);
 
   if(message.toInt() == Messages::HELLO_SERVER)
   {
@@ -119,7 +123,6 @@ void UDP_server::run_message(const QByteArray &message, User& u)
       }
       break;
     case Messages::IS_SERVER_LOST:
-      //send_data(SERVER_HERE, u);
       break;
     case Messages::OPPONENT_INF:
       show_information(u);
@@ -244,7 +247,7 @@ void UDP_server::add_serial_num(QByteArray& message, User& u, bool is_prev_seria
   message.prepend(serial_num);
 }
 
-QByteArray UDP_server::cut_serial_num_from_data(QByteArray& data) const
+QByteArray UDP_server::cut_serial_num(QByteArray& data) const
 {
   QByteArray serial_num;
   QChar first_data_simbol = QChar(data[0]);
@@ -294,7 +297,7 @@ void UDP_server::User::timer_last_received_message_timeout()
   _parent_class->send_data(Messages::CLIENT_LOST, *this);
 }
 
-bool UDP_server::is_message_reach(QByteArray& message, User& u)
+bool UDP_server::is_message_reach(const QByteArray& message, User& u)
 {
   if(!u._is_message_reach)
   {
