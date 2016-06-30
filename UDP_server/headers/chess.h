@@ -37,8 +37,6 @@ public:
 
    unsigned get_actual_move() const;
    unsigned get_last_made_move() const;
-   const Coord& get_prev_to_coord() const;
-   const Coord& get_prev_from_coord() const;
    const std::string get_board_mask() const;
    COLOR get_move_color() const;
    COLOR get_color(const Coord& c) const;

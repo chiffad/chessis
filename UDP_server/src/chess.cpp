@@ -382,16 +382,6 @@ Board::COLOR Board::get_move_color() const
   return get_actual_move() % 2 ? W_FIG : B_FIG;
 }
 
-const Board::Coord& Board::get_prev_from_coord() const
-{
-  return m_moves[get_last_made_move() - 1].from;
-}
-
-const Board::Coord& Board::get_prev_to_coord() const
-{
-  return m_moves[get_last_made_move() - 1].to;
-}
-
 void Board::set_field(const Coord& lhs, const Coord& rhs)
 {
   m_field[lhs.x][lhs.y] = m_field[rhs.x][rhs.y];
