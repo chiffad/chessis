@@ -2,6 +2,7 @@
 #include<cctype>
 #include<fstream>
 #include<sstream>
+#include <algorithm>
 #include<math.h>
 #include"headers/chess.h"
 
@@ -53,14 +54,14 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
 {
   const int dx = abs(to.x - fr.x);
   const int dy = abs(to.y - fr.y);
-
-  const int X_UNIT_VECTOR = dx == 0 ? 0 : (to.x - fr.x)/dx;
-  const int Y_UNIT_VECTOR = dy == 0 ? 0 : (to.y - fr.y)/dy;
+  const int X_UNIT_VECTOR = (dx == 0) ? 0 : (to.x - fr.x)/dx;
+  const int Y_UNIT_VECTOR = (dy == 0) ? 0 : (to.y - fr.y)/dy;
 
   if(get_colorless_figure(fr) == HORSE && dx*dy == 2 && get_color(fr) != get_color(to))
     return true;
-  else if(get_colorless_figure(fr) == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
-                                              || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
+
+  if(get_colorless_figure(fr) == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
+                                           || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
   {
     return((get_figure(to) != FREE_FIELD && dy*dx == 1 && get_color(fr) != get_color(to))
            || (dx == 0 && ((dy == 1 && get_figure(to) == FREE_FIELD)
@@ -116,17 +117,16 @@ bool Board::is_castling(const Coord &fr, const Coord &to) const
   const int dx = abs(to.x - fr.x);
   const int X_UNIT_VECTOR = dx == 0 ? 0 : (to.x - fr.x)/dx;
 
-  if(get_colorless_figure(fr) != KING || abs(to.y - fr.y) != 0 || dx != 2);
-  else if((get_figure(fr.x + X_UNIT_VECTOR, fr.y) == FREE_FIELD
-           && get_figure(fr.x + 2 * X_UNIT_VECTOR,fr.y) == FREE_FIELD)
-          && (X_UNIT_VECTOR > 0 || get_figure(fr.x + 3 * X_UNIT_VECTOR, fr.y) == FREE_FIELD))
+  if(get_colorless_figure(fr) == KING && !is_check(get_color(fr)) && abs(to.y - fr.y) == 0 && dx == 2
+     && get_figure(fr.x + X_UNIT_VECTOR, fr.y) == FREE_FIELD
+     && get_figure(fr.x + 2 * X_UNIT_VECTOR, fr.y) == FREE_FIELD
+     && (X_UNIT_VECTOR > 0 || get_figure(fr.x + 3 * X_UNIT_VECTOR, fr.y) == FREE_FIELD))
   {
     const bool IS_TWO_ZEROS = to.x > 4;
     Coord coord((IS_TWO_ZEROS ? 7 : 0), (get_color(fr) == W_FIG ? 7 : 0));
 
     for(unsigned i = 0; i < get_actual_move(); ++i)
-      if(is_check(get_color(fr)) || ((get_colorless_figure(m_moves[i].from) == KING
-         && get_color(m_moves[i].from) == get_color(fr)) || coord == m_moves[i].from || coord == m_moves[i].to))
+      if((fr.x == 4 && (fr.y == 0 || fr.y == 7)) || coord == m_moves[i].from || coord == m_moves[i].to)
         goto cant_castling;
 
     return true;
@@ -246,8 +246,8 @@ const std::string Board::get_board_mask() const
 {
   std::cout<<"====get_board_mask()"<<std::endl;
   std::string mask;
-  for(int x = 0; x < BOARD_SIZE; ++x)
-    for(int y = 0; y < BOARD_SIZE; ++y)
+  for(int x = 0; x < BOARD_SIDE_SIZE; ++x)
+    for(int y = 0; y < BOARD_SIDE_SIZE; ++y)
       mask.push_back(char(get_figure(x,y)));
 
   return mask;
@@ -325,8 +325,8 @@ void Board::next_move(const Coord &from, const Coord &to)
 
   if(get_actual_move() > 1 && !m_is_go_to_history_in_progress)
   {
-    for(unsigned i = get_actual_move(); i < m_history_copy.size(); ++i)
-      m_history_copy.pop_back();
+    if(get_actual_move() < m_history_copy.size())
+      m_history_copy.erase(m_history_copy.begin() + get_last_made_move(), m_history_copy.end());
 
     m_history_copy.push_back(m_moves[get_last_made_move()]);
   }
@@ -349,7 +349,7 @@ Board::FIGURES Board::get_figure(const Coord &c) const
 
 Board::FIGURES Board::get_figure(const unsigned x, const unsigned y) const
 {
-  return FIGURES(m_field[y * BOARD_SIZE + x + (x + y == 0 ? 0 : 1)]);
+  return FIGURES(m_field[y * BOARD_SIZE + x]);
 }
 
 Board::COLORLESS_FIG Board::get_colorless_figure(const Coord &c) const
