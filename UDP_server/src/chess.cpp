@@ -6,37 +6,17 @@
 #include"headers/chess.h"
 
 Board::Board() : m_is_go_to_history_in_progress(false)
-{
-  for(int i = 0; i < BOARD_SIZE; ++i)
-    for(int j = 0; j < BOARD_SIZE; ++j)
-    {
-      m_field[i][j] = FREE_FIELD;
-      if(j == 1) m_field[i][j] = B_PAWN;
-      if(j == 6) m_field[i][j] = W_PAWN;
-    }
+{  
+  m_field = {B_ROOK,B_HORSE,B_ELEPHANT,B_QUEEN,B_KING,B_ELEPHANT,B_HORSE,B_ROOK};
+  m_field.insert(m_field.end(), BOARD_SIZE, B_PAWN);
+  m_field.insert(m_field.end(), BOARD_SIZE * 4, FREE_FIELD);
+  m_field.insert(m_field.end(), BOARD_SIZE, B_PAWN);
 
-  m_field[0][0] = B_ROOK;
-  m_field[7][0] = B_ROOK;
-  m_field[1][0] = B_HORSE;
-  m_field[6][0] = B_HORSE;
-  m_field[2][0] = B_ELEPHANT;
-  m_field[5][0] = B_ELEPHANT;
-  m_field[3][0] = B_QUEEN;
-  m_field[4][0] = B_KING;
-
-  m_field[0][7] = W_ROOK;
-  m_field[7][7] = W_ROOK;
-  m_field[1][7] = W_HORSE;
-  m_field[6][7] = W_HORSE;
-  m_field[2][7] = W_ELEPHANT;
-  m_field[5][7] = W_ELEPHANT;
-  m_field[3][7] = W_QUEEN;
-  m_field[4][7] = W_KING;
-
-  next_move();
+  std::vector<FIGURES> eight_row = {W_ROOK,W_HORSE,W_ELEPHANT,W_QUEEN,W_KING,W_ELEPHANT,W_HORSE,W_ROOK};
+  m_field.insert(m_field.end(), eight_row.begin(), eight_row.end());
 }
 
-bool Board::move(const Coord& from, const Coord& to)
+bool Board::move(const Coord &from, const Coord &to)
 {
   std::cout<<"====move CHESS"<<std::endl;
   if(is_right_move_turn(from) && (is_can_move(from, to) || is_castling(from, to)))
@@ -53,23 +33,23 @@ bool Board::move(const Coord& from, const Coord& to)
   return false;
 }
 
-bool Board::is_right_move_turn(const Coord& coord) const
+bool Board::is_right_move_turn(const Coord &c) const
 {
-  if((get_actual_move() == 1 && get_color(coord) == B_FIG)
-     || (get_actual_move() > 1 && get_color(coord) != get_move_color()))
+  if((get_actual_move() == 1 && get_color(c) == B_FIG)
+     || (get_actual_move() > 1 && get_color(c) != get_move_color()))
    return false;
 
   return true;
 }
 
-void Board::field_change(const Coord& from, const Coord& to)
+void Board::field_change(const Coord &from, const Coord &to)
 {
   m_actual_move.fig_on_captured_field = get_figure(to);
   set_field(to, from);
   set_field(from, FREE_FIELD);
 }
 
-bool Board::is_can_move(const Coord& fr, const Coord& to) const
+bool Board::is_can_move(const Coord &fr, const Coord &to) const
 {
   const int dx = abs(to.x - fr.x);
   const int dy = abs(to.y - fr.y);
@@ -104,7 +84,7 @@ bool Board::is_can_move(const Coord& fr, const Coord& to) const
     return false;
 }
 
-void Board::if_castling(const Coord& fr, const Coord& to)
+void Board::if_castling(const Coord &fr, const Coord &to)
 {
   const int dx = abs(to.x - fr.x);
   const int X_UNIT_VEC = dx == 0 ? 0 : (to.x - fr.x)/dx;
@@ -131,7 +111,7 @@ void Board::if_castling(const Coord& fr, const Coord& to)
   }
 }
 
-bool Board::is_castling(const Coord& fr, const Coord& to) const
+bool Board::is_castling(const Coord &fr, const Coord &to) const
 {
   const int dx = abs(to.x - fr.x);
   const int X_UNIT_VECTOR = dx == 0 ? 0 : (to.x - fr.x)/dx;
@@ -238,7 +218,7 @@ void Board::go_to_history_index(const unsigned index)
   m_is_go_to_history_in_progress = false;
 }
 
-void Board::make_moves_from_str(const std::string& str)
+void Board::make_moves_from_str(const std::string &str)
 {
   std::cout<<"==make_move_from_str CHESS: "<<str<<std::endl;
   enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4};
@@ -289,7 +269,7 @@ const std::string Board::get_moves_history() const
   return history;
 }
 
-void Board::write_moves_to_file(const std::string& path) const
+void Board::write_moves_to_file(const std::string &path) const
 {
   std::cout<<"====write_moves_to_file "<<std::endl;
   std::ofstream in_file(path);
@@ -302,7 +282,7 @@ void Board::write_moves_to_file(const std::string& path) const
   in_file.close();
 }
 
-void Board::read_moves_from_file(const std::string& path)
+void Board::read_moves_from_file(const std::string &path)
 {
   std::cout<<"====read_moves_from_file "<<std::endl;
   std::ifstream from_file(path);
@@ -337,7 +317,7 @@ void Board::back_move()
   m_moves.pop_back();
 }
 
-void Board::next_move(const Coord& from, const Coord& to)
+void Board::next_move(const Coord &from, const Coord &to)
 {
   m_actual_move.from = from;
   m_actual_move.to = to;
@@ -362,19 +342,19 @@ unsigned Board::get_last_made_move() const
   return get_actual_move() - 1;
 }
 
-Board::FIGURES Board::get_figure(const Coord& c) const
+Board::FIGURES Board::get_figure(const Coord &c) const
 {
-  return FIGURES(m_field[c.x][c.y]);
+  return FIGURES(m_field[get_field_index(c)]);
 }
 
 Board::FIGURES Board::get_figure(const unsigned x, const unsigned y) const
 {
-  return FIGURES(m_field[x][y]);
+  return FIGURES(m_field[y * BOARD_SIZE + x + (x + y == 0 ? 0 : 1)]);
 }
 
-Board::COLORLESS_FIG Board::get_colorless_figure(const Coord& c) const
+Board::COLORLESS_FIG Board::get_colorless_figure(const Coord &c) const
 {
-  return COLORLESS_FIG(tolower(m_field[c.x][c.y]) + toupper(m_field[c.x][c.y]));
+  return COLORLESS_FIG(tolower(m_field[get_field_index(c)]) + toupper(m_field[get_field_index(c)]));
 }
 
 Board::COLOR Board::get_move_color() const
@@ -382,22 +362,27 @@ Board::COLOR Board::get_move_color() const
   return get_actual_move() % 2 ? W_FIG : B_FIG;
 }
 
-void Board::set_field(const Coord& lhs, const Coord& rhs)
+void Board::set_field(const Coord &lhs, const Coord &rhs)
 {
-  m_field[lhs.x][lhs.y] = m_field[rhs.x][rhs.y];
+  m_field[get_field_index(lhs)] = m_field[get_field_index(rhs)];
 }
 
-void Board::set_field(const Coord& c, const FIGURES& fig)
+void Board::set_field(const Coord &c, const FIGURES &fig)
 {
-  m_field[c.x][c.y] = fig;
+  m_field[get_field_index(c)] = fig;
 }
 
-Board::COLOR Board::get_color(const Coord& c) const
+Board::COLOR Board::get_color(const Coord &c) const
 {
-  if(m_field[c.x][c.y] == FREE_FIELD)
+  if(m_field[get_field_index(c)] == FREE_FIELD)
     return NONE;
 
-  return islower(m_field[c.x][c.y]) ? W_FIG : B_FIG;
+  return islower(m_field[get_field_index(c)]) ? W_FIG : B_FIG;
+}
+
+unsigned Board::get_field_index(const Coord &c) const
+{
+  return c.y * BOARD_SIZE + c.x;
 }
 
 Board::Coord::Coord(const unsigned X, const unsigned Y)
@@ -406,7 +391,7 @@ Board::Coord::Coord(const unsigned X, const unsigned Y)
   y = Y;
 }
 
-bool Board::Coord::operator==(const Coord& rhs)
+bool Board::Coord::operator==(const Coord &rhs)
 {
   return(x == rhs.x && y == rhs.y);
 }

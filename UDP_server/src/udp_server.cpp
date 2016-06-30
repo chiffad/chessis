@@ -184,13 +184,17 @@ void UDP_server::send_board_state(User& u)
   qDebug()<<"====send_board_state";
 
   QByteArray message;
-  message.append(QString::fromStdString(_board[u.get_board_ind()]->get_board_mask()));
+  Desk *const board = _board[u.get_board_ind()];
+
+  message.append(QString::fromStdString(board->get_board_mask()));
   message.push_back(";");
-  message.append(QString::fromStdString(_board[u.get_board_ind()]->get_moves_history()));
-  if(_board[u.get_board_ind()]->is_mate())
+
+  message.append(QString::fromStdString(board->get_moves_history()));
+  if(board->is_mate())
     message.append("#");
   message.push_back(";");
-  message.append(QByteArray::number(_board[u.get_board_ind()]->get_actual_move()));
+
+  message.append(QByteArray::number(board->get_actual_move()));
 
   send_data(message, *_user[u._opponent_index]);
   send_data(message, u);
