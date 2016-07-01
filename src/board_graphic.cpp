@@ -131,8 +131,8 @@ void Board_graphic::set_board_mask(const QString& mask)
     return;
   }
 
-  for(int x = 0, i = 0; x < BOARD_SIZE; ++x)
-    for(int y = 0; y < BOARD_SIZE; ++y, ++i)
+  for(int y = 0, i = 0; y < BOARD_SIZE; ++y)
+    for(int x = 0; x < BOARD_SIZE; ++x, ++i)
       _field[x][y] = mask[i];
 
   update_coordinates();
@@ -164,7 +164,7 @@ void Board_graphic::set_moves_history(const QString& history)
 void Board_graphic::set_move_color(const int move_num)
 {
   qDebug()<<"====set_move_color";
-  _move_color = (move_num % 2 == 0) ? MOVE_COLOR_B : MOVE_COLOR_W;
+  _move_color = (move_num % 2 == 0) ? MOVE_COLOR_W : MOVE_COLOR_B;
   emit move_turn_color_changed();
 }
 

@@ -17,6 +17,7 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(12345), 
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   qDebug()<<"Server start!";
+
 }
 
 UDP_server::~UDP_server()
@@ -47,15 +48,17 @@ void UDP_server::send_data(const Messages::MESSAGE r_mes, User& u, bool is_prev_
   message.setNum(r_mes);
 
   if(r_mes != Messages::MESSAGE_RECEIVED)
+  {
     if(!is_message_reach(message, u))
       return;
+
+    begin_wait_receive(u);
+  }
 
   add_serial_num(message, u, is_prev_serial_need);
 
   qDebug()<<"====sending"<<message;
   _socket->writeDatagram(message, u._ip, u._port);
-  if(r_mes != Messages::MESSAGE_RECEIVED)
-    begin_wait_receive(u);
 }
 
 void UDP_server::read_data()
@@ -73,7 +76,7 @@ void UDP_server::read_data()
     if(_user[sender]->_port == sender_port && _user[sender]->_ip == sender_IP)
       break;
 
-  const QByteArray serial_num = cut_serial_num(message);
+  const int serial_num = cut_serial_num(message);
 
   if(message.toInt() == Messages::HELLO_SERVER)
   {
@@ -84,16 +87,17 @@ void UDP_server::read_data()
       return;
     }
 
-    _user.append(new User(this, this, sender_port, sender_IP, serial_num.toInt(), _user.size()));
-    set_opponent(*_user[sender]);
+    _user.append(new User(this, this, sender_port, sender_IP, serial_num, _user.size()));
 
     send_data(Messages::MESSAGE_RECEIVED, *_user.last());
+    set_opponent(*_user[sender]);
   }
-  else if(serial_num.toInt() != ++_user[sender]->_received_serial_num)
+  else if(serial_num != ++_user[sender]->_received_serial_num)
   {
-    --_user[sender]->_received_serial_num;
     qDebug()<<"wrong serial num";
-    if(serial_num.toInt() == _user[sender]->_received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
+    --_user[sender]->_received_serial_num;
+
+    if(serial_num == _user[sender]->_received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
     {
       _user[sender]->_timer_last_received_message->start(TEN_SEC);
       send_data(Messages::MESSAGE_RECEIVED, *_user[sender], true);
@@ -244,12 +248,56 @@ void UDP_server::add_serial_num(QByteArray& message, User& u, bool is_prev_seria
   message.prepend(serial_num);
 }
 
-QByteArray UDP_server::cut_serial_num(QByteArray& data) const
+int UDP_server::cut_serial_num(QByteArray& data) const
 {
-  QByteArray serial_num(data.mid(0, data.indexOf(FREE_SPASE) - 1));
-  data.remove(0, data.indexOf(FREE_SPASE));
+  QByteArray serial_num(data.mid(0, data.indexOf(FREE_SPASE)));
+  data.remove(0, data.indexOf(FREE_SPASE) + 1);
 
-  return serial_num;
+  return serial_num.toInt();
+}
+
+bool UDP_server::is_message_reach(const QByteArray& message, User& u)
+{
+  if(!u._is_message_reach)
+  {
+    qDebug()<<"can't send, prev message not reach";
+    u._message_stack.push_back(message);
+    return false;
+  }
+
+  u._last_sent_message = message;
+  return true;
+}
+
+UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16& port, const QHostAddress& ip,
+                       const int received_serial_num, const int index)
+                     : QObject(parent), _timer(new QTimer), _timer_last_received_message(new QTimer),
+                       _parent_class(parent_class), _port(port), _ip(ip), _my_index(index),
+                       _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true),
+                       _login("login"), _rating_ELO(1200)
+{
+  connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
+  connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
+  _timer_last_received_message->start(TEN_SEC);
+}
+
+int UDP_server::User::get_board_ind()
+{
+  if(_opponent_index == NO_OPPONENT)
+    return NO_OPPONENT;
+
+  int i = 0;
+  for(; i < _parent_class->_board.size(); ++i)
+    if((_parent_class->_board[i]->_first_player_ind == _my_index
+        && _parent_class->_board[i]->_second_player_ind == _opponent_index)
+       || (_parent_class->_board[i]->_first_player_ind == _opponent_index
+           && _parent_class->_board[i]->_second_player_ind == _my_index))
+      break;
+
+  if(i >= _parent_class->_board.size())
+    qDebug()<<"crash here";
+
+  return i;
 }
 
 void UDP_server::User::timer_timeout()
@@ -284,46 +332,3 @@ void UDP_server::User::timer_last_received_message_timeout()
   _parent_class->send_data(Messages::CLIENT_LOST, *this);
 }
 
-bool UDP_server::is_message_reach(const QByteArray& message, User& u)
-{
-  if(!u._is_message_reach)
-  {
-    qDebug()<<"can't send, prev message not reach";
-    u._message_stack.push_back(message);
-    return false;
-  }
-
-  u._last_sent_message = message;
-  return true;
-}
-
-UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16& port, const QHostAddress& ip,
-                       const int received_serial_num, const int index)
-                     : QObject(parent), _timer(new QTimer), _timer_last_received_message(new QTimer),
-                       _parent_class(parent_class),_port(port), _ip(ip), _my_index(index),
-                       _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true),
-                       _login("login"), _rating_ELO(1200)
-{
-  connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
-  _timer_last_received_message->start(TEN_SEC);
-}
-
-int UDP_server::User::get_board_ind()
-{
-  if(_opponent_index == NO_OPPONENT)
-    return NO_OPPONENT;
-
-  int i = 0;
-  for(; i < _parent_class->_board.size(); ++i)
-    if((_parent_class->_board[i]->_first_player_ind == _my_index
-        && _parent_class->_board[i]->_second_player_ind == _opponent_index)
-       || (_parent_class->_board[i]->_first_player_ind == _opponent_index
-           && _parent_class->_board[i]->_second_player_ind == _my_index))
-      break;
-
-  if(i >= _parent_class->_board.size())
-    qDebug()<<"crash here";
-
-  return i;
-}

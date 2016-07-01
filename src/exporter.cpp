@@ -15,18 +15,20 @@ void Exporter::push_to_graphic(const QString& message)
 
   if(message.indexOf(";") > 0)
   {
-    const QString board_mask = message.mid(0, message.indexOf(";"));
-    const QString moves_history = message.mid(message.indexOf(";") + 1, message.indexOf(";", message.indexOf(";") + 1));
-    const QString move_num = message.mid(message.indexOf(";", message.indexOf(";") + 1) + 1);
+    const int INDEX = message.indexOf(";");
+    const QString board_mask = message.mid(0, INDEX);
+    const QString moves_history = message.mid(INDEX + 1, message.indexOf(";", INDEX) - INDEX);
+    const QString move_num = message.mid(message.indexOf(";", INDEX + 1) + 1);
 
     qDebug()<<"board_mask: "<<board_mask;
     qDebug()<<"moves_history: "<<moves_history;
     qDebug()<<"move_num: "<<move_num;
 
-    _board_graphic->set_moves_history(moves_history);
     _board_graphic->set_board_mask(board_mask);
     _board_graphic->set_move_color(move_num.toInt());
     _board_graphic->set_connect_status(Messages::SERVER_HERE);
+    if(!moves_history.isEmpty())
+      _board_graphic->set_moves_history(moves_history);
 
     if(moves_history.endsWith("#"))
       _board_graphic->set_check_mate();

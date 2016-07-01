@@ -227,6 +227,7 @@ const std::string Board::get_board_mask() const
   std::cout<<"====get_board_mask()"<<std::endl;
   std::string mask;
   mask.assign(m_field.begin(), m_field.end());
+
   return mask;
 }
 
@@ -326,7 +327,7 @@ Board::FIGURES Board::get_figure(const Coord &c) const
 
 Board::FIGURES Board::get_figure(const unsigned x, const unsigned y) const
 {
-  return m_field[y * BOARD_SIZE + x];
+  return m_field[y * BOARD_SIDE + x];
 }
 
 Board::COLORLESS_FIG Board::get_colorless_figure(const Coord &c) const
@@ -355,7 +356,7 @@ Board::COLOR Board::get_color(const Coord &c) const
 
 unsigned Board::get_field_index(const Coord &c) const
 {
-  return c.y * BOARD_SIZE + c.x;
+  return c.y * BOARD_SIDE + c.x;
 }
 
 Board::Coord::Coord(const unsigned X, const unsigned Y)

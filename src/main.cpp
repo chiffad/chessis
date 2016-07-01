@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     }
 
     //if(app->allWindows().isEmpty() || !app->allWindows()[1]->visibility())
-      //gui_is_quit();
+     // gui_is_quit();
   }
 
   delete exporter;
