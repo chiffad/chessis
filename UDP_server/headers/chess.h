@@ -11,7 +11,7 @@ public:
                  W_KING = 'k', W_ROOK = 'r', W_ELEPHANT = 'e', W_HORSE = 'h', W_PAWN = 'p', FREE_FIELD = '.'};
    enum COLORLESS_FIG {NOT_FIGURE = FREE_FIELD, QUEEN = B_QUEEN + W_QUEEN, KING = W_KING + B_KING, ROOK = W_ROOK + B_ROOK,
                        PAWN = W_PAWN + B_PAWN, ELEPHANT = W_ELEPHANT + B_ELEPHANT, HORSE = W_HORSE + B_HORSE};
-   enum {BOARD_SIDE_SIZE = 8, FIGURES_NUMBER = 32, BOARD_SIZE = BOARD_SIDE_SIZE * BOARD_SIDE_SIZE, a_LETTER = 'a', h_LETTER = 'h', ONE_ch = '1', EIGHT_ch = '8', FREE_SPACE = ' '};
+   enum {BOARD_SIDE = 8, FIGURES_NUMBER = 32, BOARD_SIZE = BOARD_SIDE * BOARD_SIDE, a_LETTER = 'a', h_LETTER = 'h', ONE_ch = '1', EIGHT_ch = '8', FREE_SPACE = ' '};
 
 public:
    struct Coord
@@ -57,7 +57,6 @@ private:
 
    bool is_castling(const Coord &from, const Coord &to) const;
    bool is_can_move(const Coord &from, const Coord &to) const;
-   bool is_right_move_turn(const Coord &c) const;
    bool is_check(const COLOR color) const;
 
 private:

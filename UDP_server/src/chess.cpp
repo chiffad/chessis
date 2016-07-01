@@ -9,9 +9,9 @@
 Board::Board() : m_is_go_to_history_in_progress(false)
 {  
   m_field = {B_ROOK,B_HORSE,B_ELEPHANT,B_QUEEN,B_KING,B_ELEPHANT,B_HORSE,B_ROOK};
-  m_field.insert(m_field.end(), BOARD_SIZE, B_PAWN);
-  m_field.insert(m_field.end(), BOARD_SIZE * 4, FREE_FIELD);
-  m_field.insert(m_field.end(), BOARD_SIZE, B_PAWN);
+  m_field.insert(m_field.end(), BOARD_SIDE, B_PAWN);
+  m_field.insert(m_field.end(), BOARD_SIDE * 4, FREE_FIELD);
+  m_field.insert(m_field.end(), BOARD_SIDE, W_PAWN);
 
   std::vector<FIGURES> eight_row = {W_ROOK,W_HORSE,W_ELEPHANT,W_QUEEN,W_KING,W_ELEPHANT,W_HORSE,W_ROOK};
   m_field.insert(m_field.end(), eight_row.begin(), eight_row.end());
@@ -20,7 +20,7 @@ Board::Board() : m_is_go_to_history_in_progress(false)
 bool Board::move(const Coord &from, const Coord &to)
 {
   std::cout<<"====move CHESS"<<std::endl;
-  if(is_right_move_turn(from) && (is_can_move(from, to) || is_castling(from, to)))
+  if((get_color(from) == get_move_color()) && (is_can_move(from, to) || is_castling(from, to)))
     field_change(from, to);
   else return false;
 
@@ -32,15 +32,6 @@ bool Board::move(const Coord &from, const Coord &to)
   }
   field_change(to, from);
   return false;
-}
-
-bool Board::is_right_move_turn(const Coord &c) const
-{
-  if((get_actual_move() == 1 && get_color(c) == B_FIG)
-     || (get_actual_move() > 1 && get_color(c) != get_move_color()))
-   return false;
-
-  return true;
 }
 
 void Board::field_change(const Coord &from, const Coord &to)
@@ -92,8 +83,7 @@ void Board::if_castling(const Coord &fr, const Coord &to)
 
   if(get_colorless_figure(to) == KING && dx > 1)
   {
-    Coord rook_fr;
-    Coord rook_to;
+    Coord rook_fr, rook_to;
 
     rook_fr.y = rook_to.y = to.y;
     if(fr.x == 6 || fr.x == 2)
@@ -106,34 +96,32 @@ void Board::if_castling(const Coord &fr, const Coord &to)
       rook_fr.x = to.x + X_UNIT_VEC * (X_UNIT_VEC > 0 ? 1 : 2);
       rook_to.x = to.x - X_UNIT_VEC;
     }
-    FIGURES fig = get_figure(rook_fr);
+    set_field(rook_to, rook_fr);
     set_field(rook_fr, FREE_FIELD);
-    set_field(rook_to, fig);
   }
 }
 
 bool Board::is_castling(const Coord &fr, const Coord &to) const
 {
   const int dx = abs(to.x - fr.x);
+  const int dy = abs(to.y - fr.y);
   const int X_UNIT_VECTOR = dx == 0 ? 0 : (to.x - fr.x)/dx;
 
-  if(get_colorless_figure(fr) == KING && !is_check(get_color(fr)) && abs(to.y - fr.y) == 0 && dx == 2
-     && get_figure(fr.x + X_UNIT_VECTOR, fr.y) == FREE_FIELD
-     && get_figure(fr.x + 2 * X_UNIT_VECTOR, fr.y) == FREE_FIELD
-     && (X_UNIT_VECTOR > 0 || get_figure(fr.x + 3 * X_UNIT_VECTOR, fr.y) == FREE_FIELD))
+  std::vector<FIGURES>::const_iterator field = m_field.begin() + get_field_index(fr);
+  if(get_colorless_figure(fr) == KING && !is_check(get_color(fr)) && dy == 0 && dx == 2 && fr.x == 4
+     && fr.y % 7 == 0 && *(field + X_UNIT_VECTOR) == FREE_FIELD && *(field + 2 * X_UNIT_VECTOR) == FREE_FIELD
+     && (X_UNIT_VECTOR > 0 || *(field + 3 * X_UNIT_VECTOR) == FREE_FIELD))
   {
-    const bool IS_TWO_ZEROS = to.x > 4;
-    Coord coord((IS_TWO_ZEROS ? 7 : 0), (get_color(fr) == W_FIG ? 7 : 0));
+    Coord coord((to.x > 4 ? 7 : 0), (get_color(fr) == W_FIG ? 7 : 0));
 
+    bool is_can_castling;
     for(unsigned i = 0; i < get_actual_move(); ++i)
-      if((fr.x == 4 && (fr.y == 0 || fr.y == 7)) || coord == m_moves[i].from || coord == m_moves[i].to)
-        goto cant_castling;
+      if(coord == m_moves[i].from || coord == m_moves[i].to)
+        is_can_castling = false;
 
-    return true;
+    return is_can_castling;
   }
   return false;
-  cant_castling:
-    return false;
 }
 
 bool Board::is_check(const COLOR color) const
@@ -141,19 +129,17 @@ bool Board::is_check(const COLOR color) const
   if(get_actual_move() < 2 || color == NONE)
     return false;
 
-  Coord f;
-  Coord t;
-  for(t.x = 0; t.x < BOARD_SIZE; ++t.x)
-    for(t.y = 0; t.y < BOARD_SIZE; ++t.y)
+  Coord f,t;
+  for(t.x = 0; t.x < BOARD_SIDE; ++t.x)
+    for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
       if(get_colorless_figure(t) == KING && get_color(t) == color)
       {
-        for(f.x = 0; f.x < BOARD_SIZE; ++f.x)
-          for(f.y = 0; f.y < BOARD_SIZE; ++f.y) 
-            if(get_color(f) != color)
-            {
-              if(is_can_move(f, t))
-                goto check;
-            }
+        for(f.x = 0; f.x < BOARD_SIDE; ++f.x)
+        {
+          for(f.y = 0; f.y < BOARD_SIDE; ++f.y)
+            if(get_color(f) != color && is_can_move(f, t))
+              goto check;
+        }
         goto not_check;
       }
 
@@ -166,37 +152,33 @@ bool Board::is_check(const COLOR color) const
 
 bool Board::is_mate()
 {
-  if(get_actual_move() < 2)
+  if(get_actual_move() < 2 || !is_check(get_move_color()))
     return false;
 
-  Coord f;
-  Coord t;
-  for(f.x = 0; f.x < BOARD_SIZE; ++f.x)
-    for(f.y = 0; f.y < BOARD_SIZE; ++f.y)
+  Coord f,t;
+  for(f.x = 0; f.x < BOARD_SIDE; ++f.x)
+  {
+    for(f.y = 0; f.y < BOARD_SIDE; ++f.y)
       if(get_figure(f) != FREE_FIELD && get_color(f) == get_move_color())
       {
-        for(t.x = 0; t.x < BOARD_SIZE; ++t.x)
-          for(t.y = 0; t.y < BOARD_SIZE; ++t.y)
+        for(t.x = 0; t.x < BOARD_SIDE; ++t.x)
+          for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
             if(is_can_move(f, t))
             {
-              FIGURES fig_from = get_figure(f);
-              FIGURES fig_to   = get_figure(t);
+              const FIGURES FIG_FROM = get_figure(f);
+              const FIGURES FIR_TO   = get_figure(t);
               set_field(f,FREE_FIELD);
-              set_field(t,fig_from);
-              if(!is_check(get_move_color()))
-              {
-                set_field(f,fig_from);
-                set_field(t,fig_to);
+              set_field(t,FIG_FROM);
+
+              const bool is_mate = is_check(get_move_color());
+
+              set_field(f,FIG_FROM);
+              set_field(t,FIR_TO);
+              if(!is_mate)
                 goto not_mate;
-              }
-              else
-              {
-                set_field(f,fig_from);
-                set_field(t,fig_to);
-              }
             }
       }
-
+  }
   return true;
 
   not_mate:
@@ -246,8 +228,8 @@ const std::string Board::get_board_mask() const
 {
   std::cout<<"====get_board_mask()"<<std::endl;
   std::string mask;
-  for(int x = 0; x < BOARD_SIDE_SIZE; ++x)
-    for(int y = 0; y < BOARD_SIDE_SIZE; ++y)
+  for(int x = 0; x < BOARD_SIDE; ++x)
+    for(int y = 0; y < BOARD_SIDE; ++y)
       mask.push_back(char(get_figure(x,y)));
 
   return mask;
@@ -344,12 +326,12 @@ unsigned Board::get_last_made_move() const
 
 Board::FIGURES Board::get_figure(const Coord &c) const
 {
-  return FIGURES(m_field[get_field_index(c)]);
+  return m_field[get_field_index(c)];
 }
 
 Board::FIGURES Board::get_figure(const unsigned x, const unsigned y) const
 {
-  return FIGURES(m_field[y * BOARD_SIZE + x]);
+  return m_field[y * BOARD_SIZE + x];
 }
 
 Board::COLORLESS_FIG Board::get_colorless_figure(const Coord &c) const
