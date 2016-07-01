@@ -48,10 +48,9 @@ private:
    Board(const Board&) = delete;
    void operator=(const Board&) = delete;
 
-   void field_change(const Coord &from, const Coord &to);
+   void move_field(const Coord &from, const Coord &to);
    void next_move(const Coord &from = Coord(), const Coord &to = Coord());
-   void set_field(const Coord &c, const FIGURES &fig);
-   void set_field(const Coord &lhs, const Coord &rhs);
+   void set_field(const Coord &lhs, const Coord &rhs, const FIGURES &fig);
    void if_castling(const Coord &fr, const Coord &to);
    unsigned get_field_index(const Coord &c) const;
 

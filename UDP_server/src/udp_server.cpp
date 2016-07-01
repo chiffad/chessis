@@ -115,7 +115,7 @@ void UDP_server::run_message(const QByteArray &message, User& u)
     case Messages::MESSAGE_RECEIVED:
       qDebug()<<"message_type == MESSAGE_RECEIVED";
       u._is_message_reach = true;
-      if(u._message_stack.size())
+      if(!u._message_stack.isEmpty())
       {
         qDebug()<<"message stack not empty: "<<u._message_stack[0];
         send_data(u._message_stack[0], u);
@@ -142,13 +142,8 @@ void UDP_server::push_message_to_logic(const QByteArray &message, User& u)
   if(u.get_board_ind() == NO_OPPONENT)
     return;
 
-  QByteArray message_type;
-  QByteArray message_content = message;
-  while(message_content.size() && QChar(message_content[0]) != FREE_SPASE)
-  {
-    message_type.append(message_content[0]);
-    message_content.remove(0,1);
-  }
+  const QByteArray message_type(message.mid(0, message.indexOf(FREE_SPASE) - 1));
+  const QByteArray message_content(message.mid(message.indexOf(FREE_SPASE) + 1));
 
   Desk *const board = _board[u.get_board_ind()];
   switch(message_type.toInt())
@@ -203,7 +198,6 @@ void UDP_server::send_board_state(User& u)
 void UDP_server::show_information(User& u, bool is_opponent)
 {
   QByteArray inf;
-
   if(is_opponent && u._opponent_index == NO_OPPONENT)
      inf.append("No opponent!");
   else
@@ -224,7 +218,6 @@ void UDP_server::set_opponent(User& u)
     {
       u._opponent_index = i;
       _user[i]->_opponent_index = u._my_index;
-      qDebug()<<"_user[i].opponent_index: "<<_user[i]->_opponent_index;
       _board.append(new Desk(u._my_index, u._opponent_index));
       send_board_state(u);
       break;
@@ -253,18 +246,8 @@ void UDP_server::add_serial_num(QByteArray& message, User& u, bool is_prev_seria
 
 QByteArray UDP_server::cut_serial_num(QByteArray& data) const
 {
-  QByteArray serial_num;
-  QChar first_data_simbol = QChar(data[0]);
-  while(data.size() > 0 && first_data_simbol.isNumber())
-  {
-    qDebug()<<"====cut_serial_num_from_data";
-    serial_num.append(data[0]);
-    data.remove(0,1);
-    first_data_simbol = QChar(data[0]);
-  }
-
-  while(QChar(data[0]) == FREE_SPASE)
-    data.remove(0,1);
+  QByteArray serial_num(data.mid(0, data.indexOf(FREE_SPASE) - 1));
+  data.remove(0, data.indexOf(FREE_SPASE));
 
   return serial_num;
 }

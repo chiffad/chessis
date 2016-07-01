@@ -21,7 +21,7 @@ bool Board::move(const Coord &from, const Coord &to)
 {
   std::cout<<"====move CHESS"<<std::endl;
   if((get_color(from) == get_move_color()) && (is_can_move(from, to) || is_castling(from, to)))
-    field_change(from, to);
+    move_field(from, to);
   else return false;
 
   if(!is_check(get_color(to)))
@@ -30,15 +30,14 @@ bool Board::move(const Coord &from, const Coord &to)
     next_move(from, to);
     return true;
   }
-  field_change(to, from);
+  move_field(to, from);
   return false;
 }
 
-void Board::field_change(const Coord &from, const Coord &to)
+void Board::move_field(const Coord &from, const Coord &to)
 {
   m_actual_move.fig_on_captured_field = get_figure(to);
-  set_field(to, from);
-  set_field(from, FREE_FIELD);
+  set_field(to, from, FREE_FIELD);
 }
 
 bool Board::is_can_move(const Coord &fr, const Coord &to) const
@@ -96,8 +95,7 @@ void Board::if_castling(const Coord &fr, const Coord &to)
       rook_fr.x = to.x + X_UNIT_VEC * (X_UNIT_VEC > 0 ? 1 : 2);
       rook_to.x = to.x - X_UNIT_VEC;
     }
-    set_field(rook_to, rook_fr);
-    set_field(rook_fr, FREE_FIELD);
+    set_field(rook_to, rook_fr, FREE_FIELD);
   }
 }
 
@@ -117,8 +115,10 @@ bool Board::is_castling(const Coord &fr, const Coord &to) const
     bool is_can_castling;
     for(unsigned i = 0; i < get_actual_move(); ++i)
       if(coord == m_moves[i].from || coord == m_moves[i].to)
+      {
         is_can_castling = false;
-
+        break;
+      }
     return is_can_castling;
   }
   return false;
@@ -152,7 +152,7 @@ bool Board::is_check(const COLOR color) const
 
 bool Board::is_mate()
 {
-  if(get_actual_move() < 2 || !is_check(get_move_color()))
+  if(get_actual_move() < 2)
     return false;
 
   Coord f,t;
@@ -165,15 +165,13 @@ bool Board::is_mate()
           for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
             if(is_can_move(f, t))
             {
-              const FIGURES FIG_FROM = get_figure(f);
-              const FIGURES FIR_TO   = get_figure(t);
-              set_field(f,FREE_FIELD);
-              set_field(t,FIG_FROM);
+              const FIGURES FIG_TO   = get_figure(t);
+              set_field(t, f, FREE_FIELD);
 
               const bool is_mate = is_check(get_move_color());
 
-              set_field(f,FIG_FROM);
-              set_field(t,FIR_TO);
+              set_field(f, t, FIG_TO);
+
               if(!is_mate)
                 goto not_mate;
             }
@@ -228,10 +226,7 @@ const std::string Board::get_board_mask() const
 {
   std::cout<<"====get_board_mask()"<<std::endl;
   std::string mask;
-  for(int x = 0; x < BOARD_SIDE; ++x)
-    for(int y = 0; y < BOARD_SIDE; ++y)
-      mask.push_back(char(get_figure(x,y)));
-
+  mask.assign(m_field.begin(), m_field.end());
   return mask;
 }
 
@@ -293,8 +288,8 @@ void Board::back_move()
     return;
 
   Moves *const move  = &m_moves[get_last_made_move()];
-  set_field(move->from, move->to);
-  set_field(move->to, move->fig_on_captured_field);
+  set_field(move->from, move->to, move->fig_on_captured_field);
+
   if_castling(move->to, move->from);
   m_moves.pop_back();
 }
@@ -344,14 +339,10 @@ Board::COLOR Board::get_move_color() const
   return get_actual_move() % 2 ? W_FIG : B_FIG;
 }
 
-void Board::set_field(const Coord &lhs, const Coord &rhs)
+void Board::set_field(const Coord &lhs, const Coord &rhs, const FIGURES & fig)
 {
   m_field[get_field_index(lhs)] = m_field[get_field_index(rhs)];
-}
-
-void Board::set_field(const Coord &c, const FIGURES &fig)
-{
-  m_field[get_field_index(c)] = fig;
+  m_field[get_field_index(rhs)] = fig;
 }
 
 Board::COLOR Board::get_color(const Coord &c) const
