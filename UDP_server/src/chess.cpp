@@ -69,11 +69,9 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
     coord.x += X_UNIT_VECTOR;
     coord.y += Y_UNIT_VECTOR;
     if(get_figure(coord) != FREE_FIELD && get_color(to) != get_color(fr) && !(coord == to))
-      goto failed;
+      return false;
   }
   return true;
-  failed:
-    return false;
 }
 
 void Board::if_castling(const Coord &fr, const Coord &to)
@@ -113,14 +111,12 @@ bool Board::is_castling(const Coord &fr, const Coord &to) const
   {
     Coord coord((to.x > 4 ? 7 : 0), (get_color(fr) == W_FIG ? 7 : 0));
 
-    bool is_can_castling;
     for(unsigned i = 0; i < get_actual_move(); ++i)
+    {
       if(coord == m_moves[i].from || coord == m_moves[i].to)
-      {
-        is_can_castling = false;
-        break;
-      }
-    return is_can_castling;
+        return false;
+    }
+    return true;
   }
   return false;
 }
@@ -139,16 +135,11 @@ bool Board::is_check(const COLOR color) const
         {
           for(f.y = 0; f.y < BOARD_SIDE; ++f.y)
             if(get_color(f) != color && is_can_move(f, t))
-              goto check;
+              return true;
         }
-        goto not_check;
+        return false;
       }
-
-  not_check:
-    return false;
-
-  check:
-    return true;
+  return false;
 }
 
 bool Board::is_mate()
@@ -174,14 +165,11 @@ bool Board::is_mate()
               set_field(f, t, FIG_TO);
 
               if(!is_mate)
-                goto not_mate;
+                return false;
             }
       }
   }
   return true;
-
-  not_mate:
-    return false;
 }
 
 void Board::go_to_history_index(const unsigned index)
@@ -205,19 +193,20 @@ void Board::make_moves_from_str(const std::string &str)
   enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4};
 
   std::vector<int> coord_str;
-  for(unsigned i = 0; i < str.size(); ++i)
-  {
-    if(!((str[i] >= a_LETTER && str[i] <= h_LETTER) || (str[i] >= ONE_ch && str[i] <= EIGHT_ch)))
-      continue;
 
-    coord_str.push_back((str[i] >= a_LETTER) ? str[i] - a_LETTER : EIGHT_ch - str[i]);
+  for(int ind = 0; ind < str.size();)
+  {
+    auto res = std::find_if(str.begin() + ind, str.end(),
+                 [](auto const& i) {return ((i >= a_LETTER && i <= h_LETTER) || (i >= ONE_ch && i <= EIGHT_ch));});
+
+    ind = std::distance(str.begin(), res);
+
+    coord_str.push_back(isalpha(*res) ? *res - a_LETTER : EIGHT_ch - *res);
 
     if(coord_str.size() == COORD_NEED_TO_MOVE)
     {
-      Coord from(coord_str[FROM_X], coord_str[FROM_Y]);
-      Coord to(coord_str[TO_X], coord_str[TO_Y]);
-
-      move(from, to);
+      move(Coord(coord_str[FROM_X], coord_str[FROM_Y]),
+           Coord(coord_str[TO_X], coord_str[TO_Y]));
       coord_str.clear();
     }
   }
@@ -226,9 +215,7 @@ void Board::make_moves_from_str(const std::string &str)
 const std::string Board::get_board_mask() const
 {
   std::cout<<"====get_board_mask()"<<std::endl;
-  std::string mask;
-  mask.assign(m_field.begin(), m_field.end());
-
+  const std::string mask(m_field.begin(), m_field.end());
   return mask;
 }
 
