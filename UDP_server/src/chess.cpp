@@ -2,7 +2,8 @@
 #include<cctype>
 #include<fstream>
 #include<sstream>
-#include <algorithm>
+#include<algorithm>
+#include<iterator>
 #include<math.h>
 #include"headers/chess.h"
 
@@ -251,25 +252,16 @@ void Board::write_moves_to_file(const std::string &path) const
 {
   std::cout<<"====write_moves_to_file "<<std::endl;
   std::ofstream in_file(path);
-  const std::string history = get_moves_history();
-  for(unsigned i = 0; i < history.size(); ++i)
-  {
-    in_file<<history[i];
-    in_file<<FREE_SPACE;
-  }
-  in_file.close();
+  std::string history = get_moves_history();
+  std::copy(history.begin(), history.end(), std::ostream_iterator<char>(in_file));
 }
 
 void Board::read_moves_from_file(const std::string &path)
 {
   std::cout<<"====read_moves_from_file "<<std::endl;
   std::ifstream from_file(path);
-  std::ostringstream out;
-  out<<from_file.rdbuf();
-
   std::string data_from_file;
-  out.str().swap(data_from_file);
-  from_file.close();
+  std::copy(std::istream_iterator<char>(from_file), std::istream_iterator<char>(), data_from_file.begin());
 
   std::cout<<"data_from_file: "<<data_from_file<<std::endl;
   start_new_game();
