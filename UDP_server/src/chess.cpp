@@ -20,7 +20,7 @@ Board::Board() : m_is_go_to_history_in_progress(false)
 
 bool Board::move(const Coord &from, const Coord &to)
 {
-  std::cout<<"====move CHESS"<<std::endl;
+  std::cout<<"====move CHESS "<<std::endl;
   if((get_color(from) == get_move_color()) && (is_can_move(from, to) || is_castling(from, to)))
     move_field(from, to);
   else return false;
@@ -193,15 +193,14 @@ void Board::make_moves_from_str(const std::string &str)
   enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4};
 
   std::vector<int> coord_str;
-
-  for(int ind = 0; ind < str.size();)
+  auto res = str.begin();
+  while(res != str.end())
   {
-    auto res = std::find_if(str.begin() + ind, str.end(),
+    res = std::find_if(res, str.end(),
                  [](auto const& i) {return ((i >= a_LETTER && i <= h_LETTER) || (i >= ONE_ch && i <= EIGHT_ch));});
 
-    ind = std::distance(str.begin(), res);
-
     coord_str.push_back(isalpha(*res) ? *res - a_LETTER : EIGHT_ch - *res);
+    ++res;
 
     if(coord_str.size() == COORD_NEED_TO_MOVE)
     {
@@ -257,21 +256,21 @@ void Board::read_moves_from_file(const std::string &path)
 
 void Board::start_new_game()
 {
-  while(get_actual_move() > 1)
-    back_move();
+  while(back_move());
   m_history_copy.clear();
 }
 
-void Board::back_move()
+bool Board::back_move()
 {
-  if(get_actual_move() <= 1)
-    return;
+  if(!get_actual_move())
+    return false;
 
   Moves *const move  = &m_moves[get_last_made_move()];
   set_field(move->from, move->to, move->fig_on_captured_field);
 
   if_castling(move->to, move->from);
   m_moves.pop_back();
+  return true;
 }
 
 void Board::next_move(const Coord &from, const Coord &to)
@@ -280,7 +279,7 @@ void Board::next_move(const Coord &from, const Coord &to)
   m_actual_move.to = to;
   m_moves.push_back(m_actual_move);
 
-  if(get_actual_move() > 1 && !m_is_go_to_history_in_progress)
+  if(get_actual_move() && !m_is_go_to_history_in_progress)
   {
     if(get_actual_move() < m_history_copy.size())
       m_history_copy.erase(m_history_copy.begin() + get_last_made_move(), m_history_copy.end());
@@ -316,7 +315,7 @@ Board::COLORLESS_FIG Board::get_colorless_figure(const Coord &c) const
 
 Board::COLOR Board::get_move_color() const
 {
-  return get_actual_move() % 2 ? W_FIG : B_FIG;
+  return get_actual_move() % 2 ? B_FIG : W_FIG;
 }
 
 void Board::set_field(const Coord &lhs, const Coord &rhs, const FIGURES & fig)

@@ -25,7 +25,7 @@ public:
 public:
    Board();
    bool move(const Coord &from, const Coord &to);
-   void back_move();
+   bool back_move();
    void start_new_game();
    void make_moves_from_str(const std::string &str);
    void go_to_history_index(const unsigned index);

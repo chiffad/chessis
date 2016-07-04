@@ -146,7 +146,7 @@ void UDP_server::push_message_to_logic(const QByteArray &message, User& u)
   if(u.get_board_ind() == NO_OPPONENT)
     return;
 
-  const QByteArray message_type(message.mid(0, message.indexOf(FREE_SPASE) - 1));
+  const QByteArray message_type(message.mid(0, message.indexOf(FREE_SPASE)));
   const QByteArray message_content(message.mid(message.indexOf(FREE_SPASE) + 1));
 
   Desk *const board = _board[u.get_board_ind()];
