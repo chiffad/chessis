@@ -21,6 +21,7 @@ Board::Board() : m_is_go_to_history_in_progress(false)
 bool Board::move(const Coord &from, const Coord &to)
 {
   std::cout<<"====move CHESS "<<std::endl;
+
   if((get_color(from) == get_move_color()) && (is_can_move(from, to) || is_castling(from, to)))
     move_field(from, to);
   else return false;
@@ -176,12 +177,13 @@ void Board::go_to_history_index(const unsigned index)
 {
   m_is_go_to_history_in_progress = true;
 
-  if(index < get_last_made_move())
-    for(unsigned i = index; i < get_actual_move(); ++i)
-      back_move(); 
+  std::cout<<"go_to_history_index: "<<index<<std::endl;
 
-  else if(index > get_last_made_move() && index <= m_history_copy.size())
-    for(unsigned i = get_last_made_move(); i < index; ++i)
+  for(unsigned i = index; i < get_last_made_move();)
+    back_move();
+
+  if(index < m_history_copy.size())
+    for(unsigned i = get_actual_move(); i <= index; ++i)
       move(m_history_copy[i].from, m_history_copy[i].to);
 
   m_is_go_to_history_in_progress = false;
@@ -214,8 +216,7 @@ void Board::make_moves_from_str(const std::string &str)
 const std::string Board::get_board_mask() const
 {
   std::cout<<"====get_board_mask()"<<std::endl;
-  const std::string mask(m_field.begin(), m_field.end());
-  return mask;
+  return std::string(m_field.begin(), m_field.end());
 }
 
 const std::string Board::get_moves_history() const

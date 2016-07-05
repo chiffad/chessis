@@ -17,7 +17,7 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
 
   timer_kill = new QTimer(this);
   connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  //timer_kill->start(2000);
+  timer_kill->start(2000);
 }
 
 Board_graphic::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
@@ -49,15 +49,35 @@ void Board_graphic::timer_timeout()
     move(0,5,true);
   }
 
- /* if( i == 4)
+  if( i == 4)
   {
-     go_to_history_index(0);
+     go_to_history_index(2);
   }
 
   if( i == 5)
   {
+     go_to_history_index(1);
+  }
+
+  if( i == 6)
+  {
+     go_to_history_index(0);
+  }
+
+  if( i == 7)
+  {
+     go_to_history_index(1);
+  }
+
+  if( i == 8)
+  {
      go_to_history_index(2);
-  }*/
+  }
+
+  if( i == 9)
+  {
+     go_to_history_index(2);
+  }
 
   timer_kill->start(2000);
 }

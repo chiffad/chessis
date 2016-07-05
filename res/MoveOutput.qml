@@ -44,7 +44,7 @@ Rectangle
         onPressed:
         {
           parent.color = "	lightskyblue"
-          FigureModel.go_to_history_index(index + 1)
+          FigureModel.go_to_history_index(index)
         }
         onReleased: parent.color = (index % 2) == 1 ? "navajowhite" : "lightyellow"
       }    
