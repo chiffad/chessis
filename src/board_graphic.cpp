@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include "headers/board_graphic.h"
 #include "headers/enums.h"
 
@@ -125,35 +126,40 @@ void Board_graphic::update_coordinates()
   }
 
   int index = 0;
-  Coord coord;
-  for(coord.x = 0; coord.x < BOARD_SIZE; ++coord.x)
-    for(coord.y = 0; coord.y < BOARD_SIZE; ++coord.y)
-      if(_field[coord.x][coord.y] != FREE_FIELD)
-      {
-        QString fig_name_color = _field[coord.x][coord.y].isLower() ? "w_" : "b_";
-        fig_name_color.append(_field[coord.x][coord.y]);
+  for(auto iter = _field.begin(); iter != _field.end();
+      iter = std::find_if(iter + 1, _field.end(), [](auto const &i) {return i != FREE_FIELD;}))
+  {
+    if(*iter == FREE_FIELD) continue;
 
-        _figures_model[index].set_coord(coord);
-        _figures_model[index].set_name(fig_name_color);
-        _figures_model[index].set_visible(true);
+    _figures_model[index].set_coord(get_field_coord(_field.indexOf(*iter)));
+    _figures_model[index].set_name(QString(iter->isLower() ? "w_" : "b_") + *iter);
+    _figures_model[index].set_visible(true);
 
-        emit_figure_changed(index);
-        ++index;
-      }
+    emit_figure_changed(index);
+    ++index;
+  }
+  qDebug()<<"!!!index here"<<index;
+}
+
+
+Board_graphic::Coord Board_graphic::get_field_coord(const int i) const
+{
+  Coord c;
+  c.x = i % BOARD_SIDE;
+  c.y = i / BOARD_SIDE;
+  return c;
 }
 
 void Board_graphic::set_board_mask(const QString& mask)
 {
   qDebug()<<"====set_board_mask";
-  if(mask.size() != BOARD_SIZE * BOARD_SIZE)
+  if(mask.size() != BOARD_SIDE * BOARD_SIDE)
   {
     qDebug()<<"mask is wrong!"<<mask;
     return;
   }
-
-  for(int y = 0, i = 0; y < BOARD_SIZE; ++y)
-    for(int x = 0; x < BOARD_SIZE; ++x, ++i)
-      _field[x][y] = mask[i];
+  _field.clear();
+  std::copy(mask.begin(), mask.end(), _field.begin());
 
   update_coordinates();
 }
@@ -190,8 +196,8 @@ void Board_graphic::set_move_color(const int move_num)
 
 const QString Board_graphic::coord_to_str(const Coord& from, const Coord& to) const
 {
-  return (QChar(a_LETTER + from.x) + QString::number(BOARD_SIZE - from.y)
-          + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIZE - to.y));
+  return (QChar(a_LETTER + from.x) + QString::number(BOARD_SIDE - from.y)
+          + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIDE - to.y));
 }
 
 void Board_graphic::add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content)

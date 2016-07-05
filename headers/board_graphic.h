@@ -36,7 +36,7 @@ public:
       YRole = Qt::UserRole + 1,
       VisibleRole = Qt::UserRole
   };
-  enum {BOARD_SIZE = 8, FIGURES_NUMBER = 32};
+  enum {BOARD_SIDE = 8, FIGURES_NUMBER = 32};
 
 public:
   explicit Board_graphic(QObject *parent = 0);
@@ -107,6 +107,7 @@ private:
   void add_to_command_history(const QString& str);
   void add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content = QString());
   const QString coord_to_str(const Coord& from, const Coord& to) const;
+  Coord get_field_coord(const int i) const;
 
 private:
   QTimer *timer_kill;
@@ -117,7 +118,7 @@ private:
   QStringList _commands_history;
   QList<Figure> _figures_model;
   QVector<QString> _messages_for_server_stack;
-  QChar _field[BOARD_SIZE][BOARD_SIZE];
+  QVector<QChar> _field;
   Coord _from, _to;
 };
 
