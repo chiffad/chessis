@@ -4,7 +4,7 @@
 #include<sstream>
 #include<algorithm>
 #include<iterator>
-#include<math.h>
+#include<cmath>
 #include"headers/chess.h"
 
 Board::Board() : m_is_go_to_history_in_progress(false)
@@ -111,13 +111,8 @@ bool Board::is_castling(const Coord &fr, const Coord &to) const
      && (X_UNIT_VECTOR > 0 || *(field + 3 * X_UNIT_VECTOR) == FREE_FIELD))
   {
     Coord coord((to.x > 4 ? 7 : 0), (get_color(fr) == W_FIG ? 7 : 0));
-
-    for(unsigned i = 0; i < get_actual_move(); ++i)
-    {
-      if(coord == m_moves[i].from || coord == m_moves[i].to)
-        return false;
-    }
-    return true;
+    return (std::find_if(m_moves.begin(), m_moves.end(),
+                        [coord](auto const& i) {return (coord == i.from || coord == i.to);}) == m_moves.end());
   }
   return false;
 }
@@ -344,7 +339,7 @@ Board::Coord::Coord(const unsigned X, const unsigned Y)
   y = Y;
 }
 
-bool Board::Coord::operator==(const Coord &rhs)
+bool Board::Coord::operator==(const Coord &rhs) const
 {
   return(x == rhs.x && y == rhs.y);
 }

@@ -17,7 +17,7 @@ public:
    struct Coord
    {
      Coord(const unsigned X = 0, const unsigned Y = 0);
-     bool operator==(const Coord& rhs);
+     bool operator==(const Coord& rhs) const;
      unsigned x;
      unsigned y;
    };
