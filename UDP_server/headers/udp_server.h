@@ -32,15 +32,15 @@ private:
   const QChar FREE_SPASE = ' ';
 
 private:
-  bool is_message_reach(const QByteArray& message, User& u);
-  QByteArray add_serial_num(const QByteArray& message, User& u, bool is_prev_serial_need = false);
-  int cut_serial_num(QByteArray& message) const;
-  void begin_wait_receive(User& u);
-  void set_opponent(User& u);
-  QByteArray get_usr_info(const User& u, bool is_opponent = true);
-  void run_message(const QByteArray &message, User& u);
-  void push_message_to_logic(const QByteArray& message, User& u);
-  void send_board_state(User& u);
+  bool is_message_reach(const QByteArray &message, User &u);
+  QByteArray add_serial_num(const QByteArray &message, User &u, bool is_prev_serial_need = false);
+  int cut_serial_num(QByteArray &message) const;
+  void begin_wait_receive(User &u);
+  void set_opponent(User &u);
+  QByteArray get_usr_info(const User &u, bool is_opponent = true);
+  void run_message(const QByteArray &message, User &u);
+  void push_message_to_logic(const QByteArray &message, User &u);
+  void send_board_state(User &u);
 
 private:
   const quint16 _SERVER_PORT;
@@ -56,8 +56,8 @@ class UDP_server::User : public QObject
   Q_OBJECT
 
 public:
-  explicit User(QObject *parent = nullptr, UDP_server *parent_class = nullptr, const quint16& port = 0,
-                const QHostAddress& ip = QHostAddress::LocalHost, const int received_serial_num = 0,
+  explicit User(QObject *parent = nullptr, UDP_server *parent_class = nullptr, const quint16 &port = 0,
+                const QHostAddress &ip = QHostAddress::LocalHost, const int received_serial_num = 0,
                 const int index = 0);
   ~User() {delete _timer; delete _timer_last_received_message;}
   int get_board_ind();
