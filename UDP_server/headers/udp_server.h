@@ -24,8 +24,8 @@ private:
   class User;
 
 public:
-  void send_data(QByteArray message, User& u);
-  void send_data(const Messages::MESSAGE r_mes, User& u, bool is_prev_serial_need = false);
+  void send_data(const QByteArray &message, User &u);
+  void send_data(const Messages::MESSAGE r_mes, User &u, bool is_prev_serial_need = false);
 
 private:
   enum {NO_OPPONENT = -1, SECOND = 1000, TEN_SEC = 10000};
@@ -33,11 +33,11 @@ private:
 
 private:
   bool is_message_reach(const QByteArray& message, User& u);
-  void add_serial_num(QByteArray& message, User& u, bool is_prev_serial_need = false);
+  QByteArray add_serial_num(const QByteArray& message, User& u, bool is_prev_serial_need = false);
   int cut_serial_num(QByteArray& message) const;
   void begin_wait_receive(User& u);
   void set_opponent(User& u);
-  void show_information(User& u, bool is_opponent = true);
+  QByteArray get_usr_info(const User& u, bool is_opponent = true);
   void run_message(const QByteArray &message, User& u);
   void push_message_to_logic(const QByteArray& message, User& u);
   void send_board_state(User& u);
@@ -81,7 +81,7 @@ public:
   QByteArray _last_sent_message;
   QVector<QByteArray> _message_stack;
 
-  QString _login;
+  const QString _login;
   int _rating_ELO;
 };
 #endif // UDP_SERVER_H

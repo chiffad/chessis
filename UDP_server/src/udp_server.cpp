@@ -2,13 +2,11 @@
 #include <QChar>
 #include <QUdpSocket>
 #include <QTimer>
+#include <algorithm>
+#include <cmath>
 #include "headers/udp_server.h"
 #include "headers/chess.h"
 #include "headers/enums.h"
-
-#include <iostream>
-#include <vector>
-#include <string>
 
 UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(12345), _SERVER_IP(QHostAddress::LocalHost),
                                           _socket(new QUdpSocket(this))
@@ -17,7 +15,6 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(12345), 
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   qDebug()<<"Server start!";
-
 }
 
 UDP_server::~UDP_server()
@@ -30,19 +27,17 @@ UDP_server::~UDP_server()
     delete i;
 }
 
-void UDP_server::send_data(QByteArray message, User& u)
+void UDP_server::send_data(const QByteArray &message, User &u)
 {
   if(!is_message_reach(message, u))
     return;
 
-  add_serial_num(message,u);
-
   qDebug()<<"====sending"<<message;
-  _socket->writeDatagram(message, u._ip, u._port);
+  _socket->writeDatagram(add_serial_num(message,u), u._ip, u._port);
   begin_wait_receive(u);
 }
 
-void UDP_server::send_data(const Messages::MESSAGE r_mes, User& u, bool is_prev_serial_need)
+void UDP_server::send_data(const Messages::MESSAGE r_mes, User &u, bool is_prev_serial_need)
 {
   QByteArray message;
   message.setNum(r_mes);
@@ -55,10 +50,8 @@ void UDP_server::send_data(const Messages::MESSAGE r_mes, User& u, bool is_prev_
     begin_wait_receive(u);
   }
 
-  add_serial_num(message, u, is_prev_serial_need);
-
   qDebug()<<"====sending"<<message;
-  _socket->writeDatagram(message, u._ip, u._port);
+  _socket->writeDatagram(add_serial_num(message, u, is_prev_serial_need), u._ip, u._port);
 }
 
 void UDP_server::read_data()
@@ -69,32 +62,39 @@ void UDP_server::read_data()
 
   message.resize(_socket->pendingDatagramSize());
   _socket->readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
+
   qDebug()<<"====reading"<<message;
 
-  int sender = 0;
-  for(; sender < _user.size(); ++sender)
-    if(_user[sender]->_port == sender_port && _user[sender]->_ip == sender_IP)
-      break;
-
+  const int sender = std::distance(_user.begin(),
+                             std::find_if(_user.begin(), _user.end(),
+                             [sender_port, sender_IP](auto const &i){return(i->_port == sender_port
+                                                                            && i->_ip == sender_IP);}));
+  //auto it = std::find_if(_user.begin(), _user.end(),
+                    //     [sender_port, sender_IP](auto const &i){return(i->_port == sender_port
+                      //                                                  && i->_ip == sender_IP);});
+  //qDebug()<<*it->_my_index;
   const int serial_num = cut_serial_num(message);
 
   if(message.toInt() == Messages::HELLO_SERVER)
   {
     qDebug()<<"HELLO_SERVER";
+
     if(sender < _user.size())
     {
       qDebug()<<"this client already have";
+
       return;
     }
 
     _user.append(new User(this, this, sender_port, sender_IP, serial_num, _user.size()));
 
     send_data(Messages::MESSAGE_RECEIVED, *_user.last());
-    set_opponent(*_user[sender]);
+    set_opponent(*_user.last());
   }
   else if(serial_num != ++_user[sender]->_received_serial_num)
   {
     qDebug()<<"wrong serial num";
+
     --_user[sender]->_received_serial_num;
 
     if(serial_num == _user[sender]->_received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
@@ -129,10 +129,10 @@ void UDP_server::run_message(const QByteArray &message, User& u)
     case Messages::IS_SERVER_LOST:
       break;
     case Messages::OPPONENT_INF:
-      show_information(u);
+      send_data(get_usr_info(u), u);
       break;
     case Messages::MY_INF:
-      show_information(u, false);
+      send_data(get_usr_info(u, false), u);
       break;
     default:
       push_message_to_logic(message, u);
@@ -184,14 +184,14 @@ void UDP_server::send_board_state(User& u)
 
   QByteArray message;
   Desk *const board = _board[u.get_board_ind()];
-
+qDebug()<<"u.get_board_ind():"<<u.get_board_ind();
   message.append(QString::fromStdString(board->get_board_mask()));
-  message.push_back(";");
+  message.append(";");
 
   message.append(QString::fromStdString(board->get_moves_history()));
   if(board->is_mate())
     message.append("#");
-  message.push_back(";");
+  message.append(";");
 
   message.append(QByteArray::number(board->get_actual_move()));
 
@@ -199,7 +199,7 @@ void UDP_server::send_board_state(User& u)
   send_data(message, u);
 }
 
-void UDP_server::show_information(User& u, bool is_opponent)
+QByteArray UDP_server::get_usr_info(const User& u, bool is_opponent)
 {
   QByteArray inf;
   if(is_opponent && u._opponent_index == NO_OPPONENT)
@@ -210,23 +210,22 @@ void UDP_server::show_information(User& u, bool is_opponent)
     inf.append(" Login: " + _user[WHOSE_INF]->_login + "; Rating ELO: "
            + QByteArray::number(_user[WHOSE_INF]->_rating_ELO));
   }
-  send_data(inf, u);
+  return inf;
 }
 
 void UDP_server::set_opponent(User& u)
 {
-  u._opponent_index = NO_OPPONENT;
+  u._opponent_index = _user.indexOf(*std::find_if(_user.begin(), _user.end(),
+                               [](auto const &i){return(i-> _opponent_index == NO_OPPONENT);}));
 
-  for(int i = 0; i < _user.size(); ++i)
-    if(_user[i]->_opponent_index == NO_OPPONENT && u._my_index != i)
-    {
-      u._opponent_index = i;
-      _user[i]->_opponent_index = u._my_index;
-      _board.append(new Desk(u._my_index, u._opponent_index));
-      send_board_state(u);
-      break;
-    }
-  qDebug()<<"u.opponent_index: "<<u._opponent_index;
+  qDebug()<<"u.opponent_index: "<<u._opponent_index<<" my: "<<u._my_index;
+
+  if(u._opponent_index != NO_OPPONENT)
+  {
+    _user[u._opponent_index]->_opponent_index = u._my_index;
+    _board.append(new Desk(u._my_index, u._opponent_index));
+     send_board_state(u);
+  }
 }
 
 void UDP_server::begin_wait_receive(User& u)
@@ -236,16 +235,16 @@ void UDP_server::begin_wait_receive(User& u)
   u._timer->start(SECOND);
 }
 
-void UDP_server::add_serial_num(QByteArray& message, User& u, bool is_prev_serial_need)
+QByteArray UDP_server::add_serial_num(const QByteArray& message, User& u, bool is_prev_serial_need)
 {
   if(!is_prev_serial_need)
     ++u._send_serial_num;
 
-  QByteArray serial_num;
-  serial_num.setNum(u._send_serial_num);
-  serial_num.append(FREE_SPASE);
-
-  message.prepend(serial_num);
+  QByteArray m;
+  m.setNum(u._send_serial_num);
+  m.append(FREE_SPASE);
+  m.append(message);
+  return m;
 }
 
 int UDP_server::cut_serial_num(QByteArray& data) const
@@ -283,21 +282,12 @@ UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16&
 
 int UDP_server::User::get_board_ind()
 {
-  if(_opponent_index == NO_OPPONENT)
-    return NO_OPPONENT;
-
-  int i = 0;
-  for(; i < _parent_class->_board.size(); ++i)
-    if((_parent_class->_board[i]->_first_player_ind == _my_index
-        && _parent_class->_board[i]->_second_player_ind == _opponent_index)
-       || (_parent_class->_board[i]->_first_player_ind == _opponent_index
-           && _parent_class->_board[i]->_second_player_ind == _my_index))
-      break;
-
-  if(i >= _parent_class->_board.size())
-    qDebug()<<"crash here";
-
-  return i;
+  auto it = std::find_if(_parent_class->_board.begin(), _parent_class->_board.end(),
+                        [this](auto const &i){return((i->_first_player_ind == _my_index
+                                                      || i->_first_player_ind == _opponent_index)
+                                                      &&(i->_second_player_ind == _my_index
+                                                         || i->_second_player_ind == _opponent_index));});
+  return _parent_class->_board.indexOf(*it);
 }
 
 void UDP_server::User::timer_timeout()
@@ -315,8 +305,8 @@ void UDP_server::User::timer_timeout()
     }
     _timer->start(SECOND);
 
-    _parent_class->add_serial_num(_last_sent_message, *this, true);
-    _parent_class->_socket->writeDatagram(_last_sent_message, _ip, _port);
+    _parent_class->_socket->writeDatagram(_parent_class->add_serial_num(_last_sent_message, *this, true),
+                                          _ip, _port);
   }
   else
   {
