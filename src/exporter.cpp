@@ -16,9 +16,10 @@ void Exporter::push_to_graphic(const QString& message)
   if(message.indexOf(";") > 0)
   {
     const int INDEX = message.indexOf(";");
+    const int NEXT_IND = INDEX + 1;
     const QString board_mask = message.mid(0, INDEX);
-    const QString moves_history = message.mid(INDEX + 1, message.indexOf(";", INDEX) - INDEX);
-    const QString move_num = message.mid(message.indexOf(";", INDEX + 1) + 1);
+    const QString moves_history = message.mid(NEXT_IND, message.indexOf(";", NEXT_IND) - NEXT_IND);
+    const QString move_num = message.mid(message.indexOf(";", NEXT_IND) + 1);
 
     qDebug()<<"board_mask: "<<board_mask;
     qDebug()<<"moves_history: "<<moves_history;

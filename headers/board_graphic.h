@@ -65,13 +65,13 @@ public:
   Q_PROPERTY(QString get_udp_connection_status READ get_udp_connection_status NOTIFY udp_connection_status_changed)
   QString get_udp_connection_status() const;
 
-  Q_INVOKABLE void move(const unsigned x, const unsigned y, bool is_correct_coord = false);
+  Q_INVOKABLE void move(const unsigned x, const unsigned y);
   Q_INVOKABLE void back_move();
   Q_INVOKABLE QChar letter_return(const unsigned index) const;
   Q_INVOKABLE void start_new_game();
   Q_INVOKABLE void go_to_history_index(const unsigned index);
   Q_INVOKABLE void path_to_file(QString& path, bool is_moves_from_file);
-  Q_INVOKABLE void run_command(const QString& command);
+  Q_INVOKABLE void run_command(const QString& message);
 
 public:
   bool is_new_message_for_server_appear() const;
@@ -100,7 +100,7 @@ private:
 private:
   void update_coordinates();
   void emit_figure_changed(const unsigned index);
-  void correct_figure_coord(Coord& coord, const unsigned x, const unsigned y, bool is_correct);
+  void set_correct_coord(Coord& coord, const unsigned x, const unsigned y);
   void update_hilight(const Coord& coord, const HILIGHT hilight_index);
   void read_moves_from_file(const QString& path);
   void write_moves_to_file(const QString& path);
@@ -118,7 +118,7 @@ private:
   QStringList _commands_history;
   QList<Figure> _figures_model;
   QVector<QString> _messages_for_server_stack;
-  QVector<QChar> _field;
+  QString _field;
   Coord _from, _to;
 };
 
