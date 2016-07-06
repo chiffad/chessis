@@ -20,10 +20,10 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(12345), 
 UDP_server::~UDP_server()
 {
   delete _socket;
-  for(auto i : _user)
+  for(auto &i : _user)
     delete i;
 
-  for(auto i : _board)
+  for(auto &i : _board)
     delete i;
 }
 
