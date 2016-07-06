@@ -112,7 +112,7 @@ bool Board::is_castling(const Coord &fr, const Coord &to) const
   {
     Coord coord((to.x > 4 ? 7 : 0), (get_color(fr) == W_FIG ? 7 : 0));
     return (std::find_if(m_moves.begin(), m_moves.end(),
-                        [coord](auto const& i) {return (coord == i.from || coord == i.to);}) == m_moves.end());
+                        [coord](auto const &i) {return (coord == i.from || coord == i.to);}) == m_moves.end());
   }
   return false;
 }
@@ -219,13 +219,12 @@ const std::string Board::get_moves_history() const
   std::cout<<"====get_moves_history: "<<std::endl;
 
   std::string history;
-  for(unsigned i = 0; i < m_history_copy.size(); ++i)
+  for(auto hist_elem : m_history_copy)
   {
-    history.push_back(m_history_copy[i].from.x + a_LETTER);
-    history.push_back(EIGHT_ch - m_history_copy[i].from.y);
-    history.push_back('-');
-    history.push_back(m_history_copy[i].to.x + a_LETTER);
-    history.push_back(EIGHT_ch - m_history_copy[i].to.y);
+    history.push_back(hist_elem.from.x + a_LETTER);
+    history.push_back(EIGHT_ch - hist_elem.from.y);
+    history.push_back(hist_elem.to.x + a_LETTER);
+    history.push_back(EIGHT_ch - hist_elem.to.y);
   }
   return history;
 }
