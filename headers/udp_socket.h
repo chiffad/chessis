@@ -31,7 +31,7 @@ private:
   const QChar FREE_SPASE = ' ';
 
 private:
-  void add_serial_num(QByteArray &data, bool is_prev_serial_need = false);
+  QByteArray add_serial_num(const QByteArray &data, bool is_prev_serial_need = false);
   QByteArray cut_serial_num(QByteArray &data) const;
   void begin_wait_receive(const QByteArray &message);
 
