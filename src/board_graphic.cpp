@@ -52,37 +52,32 @@ void Board_graphic::timer_timeout()
 
   if( i == 4)
   {
-     go_to_history_index(2);
+     run_command("to history",2);
   }
 
   if( i == 5)
   {
-     go_to_history_index(1);
+     run_command("to history",1);
   }
 
   if( i == 6)
   {
-     go_to_history_index(0);
+     run_command("to history",0);
   }
 
   if( i == 7)
   {
-     go_to_history_index(1);
+     run_command("to history",1);
   }
 
   if( i == 8)
   {
-     go_to_history_index(2);
+     run_command("to history",2);
   }
 
   if( i == 9)
   {
-     go_to_history_index(2);
-  }
-
-  if( i == 10)
-  {
-     start_new_game();
+     run_command("new game");
   }
 
   timer_kill->start(2000);
@@ -95,7 +90,7 @@ void Board_graphic::move(const unsigned x, const unsigned y)
   if(is_from)
   {
     set_correct_coord(_from, x, y);
-    //update_hilight(from, FIRST_HILIGHT);
+    update_hilight(_from, FIRST_HILIGHT);
     is_from = false;
   }
   else
@@ -104,14 +99,65 @@ void Board_graphic::move(const unsigned x, const unsigned y)
     set_correct_coord(_to, x, y);
 
     add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(_from, _to));
-    //update_hilight(to, SECOND_HILIGHT);
+    update_hilight(_to, SECOND_HILIGHT);
   }
 }
 
-void Board_graphic::back_move()
+void Board_graphic::run_command(const QString& message, const unsigned index)
 {
-  qDebug()<<"====back_move";
-  add_to_messages_for_server_stack(Messages::BACK_MOVE);
+  qDebug()<<"===run_command: "<<message<<"; index: "<<index;
+  _commands_history.append(message);
+
+  if(message == HELP_WORD)
+  {
+    qDebug()<<"help_word";
+    add_to_command_history("For move, type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4).");
+    add_to_command_history("For back move, type " + BACK_MOVE);
+    add_to_command_history("For start new game, type " + NEW_GAME);
+    add_to_command_history("For go to history index, type " + HISTORY + " and index");
+    add_to_command_history("To view opponent information, print '" + SHOW_OPPONENT + " .");
+    add_to_command_history("To view your information, print '" + SHOW_ME + " .");
+  }
+  else if(message == SHOW_OPPONENT)
+  {
+    qDebug()<<"show opponent";
+    add_to_messages_for_server_stack(Messages::OPPONENT_INF_REQUEST);
+  }
+  else if(message == SHOW_ME)
+  {
+    add_to_messages_for_server_stack(Messages::MY_INF_REQUEST);
+    qDebug()<<"show me";
+  }
+  else if(message == NEW_GAME)
+  {
+    qDebug()<<"";
+    add_to_messages_for_server_stack(Messages::NEW_GAME);
+  }
+  else if(message == BACK_MOVE)
+  {
+    qDebug()<<"back_move";
+    add_to_messages_for_server_stack(Messages::BACK_MOVE);
+  }
+  else if(message == HISTORY)
+  {
+    qDebug()<<"history";
+    add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(index));
+  }
+  else
+  {
+    const QString command(message.mid(0,message.indexOf(FREE_SPACE)));
+    const QString command_content(message.mid(message.indexOf(FREE_SPACE) + 1));
+
+    qDebug()<<"command:"<<command;
+    qDebug()<<"content:"<<command_content;
+
+    if(command == MOVE_WORD)
+    {
+      qDebug()<<"move word";
+      add_to_messages_for_server_stack(Messages::MOVE, command_content);
+    }
+    else add_to_command_history("Unknown command ('" + HELP_WORD + "' for help).");
+  }
 }
 
 void Board_graphic::set_correct_coord(Coord& coord, const unsigned x, const unsigned y)
@@ -171,7 +217,7 @@ void Board_graphic::set_moves_history(const QString& history)
   _str_moves_history.clear();
 
   QString move;
-  for(auto simb : history)
+  for(const auto &simb : history)
   {
     move.append(simb);
 
@@ -243,59 +289,6 @@ void Board_graphic::set_check_mate()
   emit check_mate();
 }
 
-void Board_graphic::start_new_game()
-{
-  qDebug()<<"====start_new_game";
-  add_to_messages_for_server_stack(Messages::NEW_GAME);
-}
-
-void Board_graphic::go_to_history_index(const unsigned index)
-{
-  qDebug()<<"====go to history index: " <<index;
-  add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(index));
-}
-
-void Board_graphic::run_command(const QString& message)
-{
-  qDebug()<<"===run_command: "<<message;
-  _commands_history.append(message);
-
-  const QString HELP_WORD = "help";
-  const QString MOVE_WORD = "move";
-  const QString SHOW_OPPONENT = "show opponent";
-  const QString SHOW_ME = "show me";
-
-  if(message == HELP_WORD)
-  {
-    qDebug()<<"help_word";
-    add_to_command_history("For move type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4).");
-    add_to_command_history("To see opponent information, print '" + SHOW_OPPONENT + " .");
-    add_to_command_history("To view your information, print '" + SHOW_ME + " .");
-  }
-  else if(message == SHOW_OPPONENT)
-  {
-    qDebug()<<"show opponent";
-    add_to_messages_for_server_stack(Messages::OPPONENT_INF_REQUEST);
-  }
-  else if(message == SHOW_ME)
-  {
-    add_to_messages_for_server_stack(Messages::MY_INF_REQUEST);
-    qDebug()<<"show me";
-  }
-  else
-  {
-    const QString command(message.mid(0,message.indexOf(FREE_SPACE)));
-    const QString command_content(message.mid(message.indexOf(FREE_SPACE) + 1));
-
-    if(command == MOVE_WORD)
-    {
-      qDebug()<<"move word";
-      add_to_messages_for_server_stack(Messages::MOVE, command_content);
-    }
-    else add_to_command_history("Unknown command ('" + HELP_WORD + "' for help).");
-  }
-}
-
 void Board_graphic::add_to_command_history(const QString& str)
 {
   qDebug()<<"====add_to_command_history";
@@ -332,7 +325,7 @@ void Board_graphic::read_moves_from_file(const QString& path)
   std::string data_from_file;
   std::copy(std::istream_iterator<char>(from_file), std::istream_iterator<char>(), data_from_file.begin());
 
-  start_new_game();
+  run_command(NEW_GAME);
   add_to_messages_for_server_stack(Messages::MOVE, QString::fromStdString(data_from_file));
 }
 

@@ -17,6 +17,13 @@ class Board_graphic : public QAbstractListModel
   Q_OBJECT
 public:
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
+  const QString HELP_WORD = "help";
+  const QString MOVE_WORD = "move";
+  const QString BACK_MOVE = "back";
+  const QString SHOW_ME = "show me";
+  const QString NEW_GAME = "new game";
+  const QString HISTORY = "to history";
+  const QString SHOW_OPPONENT = "show opponent";
 
 public slots:
   void timer_timeout();
@@ -66,12 +73,9 @@ public:
   QString get_udp_connection_status() const;
 
   Q_INVOKABLE void move(const unsigned x, const unsigned y);
-  Q_INVOKABLE void back_move();
   Q_INVOKABLE QChar letter_return(const unsigned index) const;
-  Q_INVOKABLE void start_new_game();
-  Q_INVOKABLE void go_to_history_index(const unsigned index);
+  Q_INVOKABLE void run_command(const QString& message, const unsigned index = 0);
   Q_INVOKABLE void path_to_file(QString& path, bool is_moves_from_file);
-  Q_INVOKABLE void run_command(const QString& message);
 
 public:
   bool is_new_message_for_server_appear() const;
