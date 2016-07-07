@@ -298,9 +298,8 @@ void Board_graphic::add_to_command_history(const QString& str)
 
 void Board_graphic::path_to_file(QString& path, bool is_moves_from_file)
 {
-  for(auto& i : path)
-    if(i != '/')
-      path.remove(0,1);
+  for(int i = indexOf("/"); !path[path.indexOf("/", i) + 1].isLetter(); ++i)
+    path.remove(0,i);
 
   qDebug()<<"===path_to_file: "<<path;
   is_moves_from_file ? read_moves_from_file(path) : write_moves_to_file(path);
