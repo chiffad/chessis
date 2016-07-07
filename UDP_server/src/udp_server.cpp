@@ -193,16 +193,16 @@ void UDP_server::send_board_state(User &u)
   send_data(message, u);
 }
 
-QByteArray UDP_server::get_usr_info(const User &u, bool is_opponent)
+QByteArray UDP_server::get_usr_info(const User &u, bool is_opponent) const
 {
   QByteArray inf;
   if(is_opponent && u._opponent_index == NO_OPPONENT)
      inf.append("No opponent!");
   else
   {
-    const int WHOSE_INF = is_opponent ? u._opponent_index : u._my_index;
-    inf.append(" Login: " + _user[WHOSE_INF]->_login + "; Rating ELO: "
-           + QByteArray::number(_user[WHOSE_INF]->_rating_ELO));
+    const User &user = is_opponent ? *_user[u._opponent_index] : u;
+    inf.append("Login: " + user._login + "; Rating ELO: "
+                + QByteArray::number(user._rating_ELO));
   }
   return inf;
 }

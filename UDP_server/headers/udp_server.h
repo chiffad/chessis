@@ -37,7 +37,7 @@ private:
   int cut_serial_num(QByteArray &message) const;
   void begin_wait_receive(User &u);
   void set_opponent(User &u);
-  QByteArray get_usr_info(const User &u, bool is_opponent = true);
+  QByteArray get_usr_info(const User &u, bool is_opponent = true) const;
   void run_message(const QByteArray &message, User &u);
   void push_message_to_logic(const QByteArray &message, User &u);
   void send_board_state(User &u);
