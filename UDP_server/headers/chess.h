@@ -7,7 +7,7 @@ class Board
 {
 public:
    enum COLOR {NONE, W_FIG, B_FIG};
-   enum FIGURES {B_QUEEN = 'Q', B_KING = 'K', B_ROOK = 'R', B_ELEPHANT = 'E', B_HORSE = 'H', B_PAWN = 'P',
+   enum FIGURE {B_QUEEN = 'Q', B_KING = 'K', B_ROOK = 'R', B_ELEPHANT = 'E', B_HORSE = 'H', B_PAWN = 'P',
                  W_QUEEN = 'q', W_KING = 'k', W_ROOK = 'r', W_ELEPHANT = 'e', W_HORSE = 'h', W_PAWN = 'p',
                  FREE_FIELD = '.'};
    enum COLORLESS_FIG {NOT_FIGURE = FREE_FIELD, QUEEN = B_QUEEN + W_QUEEN, KING = W_KING + B_KING,
@@ -44,8 +44,8 @@ public:
    const std::string get_board_mask() const;
    COLOR get_move_color() const;
    COLOR get_color(const Coord &c) const;
-   FIGURES get_figure(const Coord &c) const;
-   FIGURES get_figure(const unsigned x, const unsigned y) const;
+   FIGURE get_figure(const Coord &c) const;
+   FIGURE get_figure(const unsigned x, const unsigned y) const;
    COLORLESS_FIG get_colorless_figure(const Coord &c) const;
 
 private:
@@ -56,7 +56,7 @@ private:
    void if_castling(const Coord &fr, const Coord &to);
    void move_field(const Coord &from, const Coord &to);
    void next_move(const Coord &from = Coord(), const Coord &to = Coord());
-   void set_field(const Coord &lhs, const Coord &rhs, const FIGURES &fig);
+   void set_field(const Coord &lhs, const Coord &rhs, const FIGURE &fig);
 
    bool is_check(const COLOR color) const;
    bool is_castling(const Coord &from, const Coord &to) const;
@@ -67,11 +67,11 @@ private:
    {
      Coord from;
      Coord to;
-     FIGURES fig_on_captured_field;
+     FIGURE fig_on_captured_field;
    }m_actual_move;
    std::vector<Moves> m_moves;
    std::vector<Moves> m_history_copy;
-   std::vector<FIGURES> m_field;
+   std::vector<FIGURE> m_field;
    bool m_is_go_to_history_in_progress;
 };
 #endif //_VILVIVYVKCKYVLVUYFDKYUFYTF

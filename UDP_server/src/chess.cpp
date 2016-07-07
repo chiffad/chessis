@@ -14,7 +14,7 @@ Board::Board() : m_is_go_to_history_in_progress(false)
   m_field.insert(m_field.end(), BOARD_SIDE * 4, FREE_FIELD);
   m_field.insert(m_field.end(), BOARD_SIDE, W_PAWN);
 
-  std::vector<FIGURES> eight_row = {W_ROOK,W_HORSE,W_ELEPHANT,W_QUEEN,W_KING,W_ELEPHANT,W_HORSE,W_ROOK};
+  std::vector<FIGURE> eight_row = {W_ROOK,W_HORSE,W_ELEPHANT,W_QUEEN,W_KING,W_ELEPHANT,W_HORSE,W_ROOK};
   m_field.insert(m_field.end(), eight_row.begin(), eight_row.end());
 }
 
@@ -48,21 +48,21 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
   const int dy = abs(to.y - fr.y);
   const int X_UNIT_VECTOR = (dx == 0) ? 0 : (to.x - fr.x)/dx;
   const int Y_UNIT_VECTOR = (dy == 0) ? 0 : (to.y - fr.y)/dy;
-  const COLORLESS_FIG figure = get_colorless_figure(fr);
+  const COLORLESS_FIG fr_fig = get_colorless_figure(fr);
 
-  if(figure == HORSE && dx*dy == 2 && get_color(fr) != get_color(to))
+  if(fr_fig == HORSE && dx*dy == 2 && get_color(fr) != get_color(to))
     return true;
 
-  if(figure == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
+  if(fr_fig == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
                         || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
   {
     return((get_figure(to) != FREE_FIELD && dy*dx == 1 && get_color(fr) != get_color(to))
            || (dx == 0 && ((dy == 1 && get_figure(to) == FREE_FIELD)
                || (dy == 2 && get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD && (fr.y == 6 || fr.y == 1)))));
   }
-  else if(figure == KING && dx <= 1 && dy <= 1);
-  else if((figure == ROOK || figure == QUEEN) && (dx*dy == 0));
-  else if((figure == ELEPHANT || figure == QUEEN) && (dx == dy));
+  else if(fr_fig == KING && dx <= 1 && dy <= 1);
+  else if((fr_fig == ROOK || fr_fig == QUEEN) && (dx*dy == 0));
+  else if((fr_fig == ELEPHANT || fr_fig == QUEEN) && (dx == dy));
   else return false;
 
   Coord coord(fr);
@@ -106,7 +106,7 @@ bool Board::is_castling(const Coord &fr, const Coord &to) const
   const int dy = abs(to.y - fr.y);
   const int X_UNIT_VECTOR = dx == 0 ? 0 : (to.x - fr.x)/dx;
 
-  std::vector<FIGURES>::const_iterator field = m_field.begin() + get_field_index(fr);
+  std::vector<FIGURE>::const_iterator field = m_field.begin() + get_field_index(fr);
   if(get_colorless_figure(fr) == KING && !is_check(get_color(fr)) && dy == 0 && dx == 2 && fr.x == 4
      && fr.y % 7 == 0 && *(field + X_UNIT_VECTOR) == FREE_FIELD && *(field + 2 * X_UNIT_VECTOR) == FREE_FIELD
      && (X_UNIT_VECTOR > 0 || *(field + 3 * X_UNIT_VECTOR) == FREE_FIELD))
@@ -154,7 +154,7 @@ bool Board::is_mate()
           for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
             if(is_can_move(f, t))
             {
-              const FIGURES FIG_TO = get_figure(t);
+              const FIGURE FIG_TO = get_figure(t);
               set_field(t, f, FREE_FIELD);
 
               const bool is_mate = is_check(get_move_color());
@@ -294,12 +294,12 @@ unsigned Board::get_last_made_move() const
   return get_actual_move() - 1;
 }
 
-Board::FIGURES Board::get_figure(const Coord &c) const
+Board::FIGURE Board::get_figure(const Coord &c) const
 {
   return m_field[get_field_index(c)];
 }
 
-Board::FIGURES Board::get_figure(const unsigned x, const unsigned y) const
+Board::FIGURE Board::get_figure(const unsigned x, const unsigned y) const
 {
   return m_field[y * BOARD_SIDE + x];
 }
@@ -314,7 +314,7 @@ Board::COLOR Board::get_move_color() const
   return get_actual_move() % 2 ? B_FIG : W_FIG;
 }
 
-void Board::set_field(const Coord &lhs, const Coord &rhs, const FIGURES & fig)
+void Board::set_field(const Coord &lhs, const Coord &rhs, const FIGURE & fig)
 {
   m_field[get_field_index(lhs)] = m_field[get_field_index(rhs)];
   m_field[get_field_index(rhs)] = fig;
