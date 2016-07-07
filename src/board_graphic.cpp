@@ -35,19 +35,19 @@ void Board_graphic::timer_timeout()
 
   if( i == 1)
   {
-    move(4 * CELL_SIZE,6*CELL_SIZE);
-    move(4 * CELL_SIZE,5 * CELL_SIZE);
+    run_command(MOVE_WORD, 4 * CELL_SIZE,6*CELL_SIZE);
+    run_command(MOVE_WORD,4 * CELL_SIZE,5 * CELL_SIZE);
   }
   if( i == 2)
   {
-    move(4*CELL_SIZE,1*CELL_SIZE);
-    move(4*CELL_SIZE,2*CELL_SIZE);
+    run_command(MOVE_WORD,4*CELL_SIZE,1*CELL_SIZE);
+    run_command(MOVE_WORD,4*CELL_SIZE,2*CELL_SIZE);
   }
 
   if( i == 3)
   {
-    move(1*CELL_SIZE,7*CELL_SIZE);
-    move(0*CELL_SIZE,5*CELL_SIZE);
+    run_command(MOVE_WORD,1*CELL_SIZE,7*CELL_SIZE);
+    run_command(MOVE_WORD,0*CELL_SIZE,5*CELL_SIZE);
   }
 
   if( i == 4)
@@ -83,29 +83,9 @@ void Board_graphic::timer_timeout()
   timer_kill->start(2000);
 }
 
-void Board_graphic::move(const unsigned x, const unsigned y)
+void Board_graphic::run_command(const QString& message, const unsigned first_v, const unsigned second_v)
 {
-    qDebug()<<"===move";
-  static bool is_from = true;
-  if(is_from)
-  {
-    set_correct_coord(_from, x, y);
-    update_hilight(_from, FIRST_HILIGHT);
-    is_from = false;
-  }
-  else
-  {
-    is_from = true;
-    set_correct_coord(_to, x, y);
-
-    add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(_from, _to));
-    update_hilight(_to, SECOND_HILIGHT);
-  }
-}
-
-void Board_graphic::run_command(const QString& message, const unsigned index)
-{
-  qDebug()<<"===run_command: "<<message<<"; index: "<<index;
+  qDebug()<<"===run_command: "<<message<<"; index: "<<first_v;
   _commands_history.append(message);
 
   if(message == HELP_WORD)
@@ -141,7 +121,7 @@ void Board_graphic::run_command(const QString& message, const unsigned index)
   else if(message == HISTORY)
   {
     qDebug()<<"history";
-    add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(index));
+    add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(first_v));
   }
   else
   {
@@ -154,7 +134,26 @@ void Board_graphic::run_command(const QString& message, const unsigned index)
     if(command == MOVE_WORD)
     {
       qDebug()<<"move word";
-      add_to_messages_for_server_stack(Messages::MOVE, command_content);
+      if(!command_content.isEmpty())
+        add_to_messages_for_server_stack(Messages::MOVE, command_content);
+      else
+      {
+        static bool is_from = true;
+        if(is_from)
+        {
+          set_correct_coord(_from, first_v, second_v);
+          //update_hilight(_from, FIRST_HILIGHT);
+          is_from = false;
+        }
+        else
+        {
+          is_from = true;
+          set_correct_coord(_to, first_v, second_v);
+
+          add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(_from, _to));
+          //update_hilight(_to, SECOND_HILIGHT);
+        }
+      }
     }
     else add_to_command_history("Unknown command ('" + HELP_WORD + "' for help).");
   }
@@ -296,9 +295,9 @@ void Board_graphic::add_to_command_history(const QString& str)
   emit commands_list_changed();
 }
 
-void Board_graphic::path_to_file(QString& path, bool is_moves_from_file)
+void Board_graphic::path_to_file(QString &path, bool is_moves_from_file)
 {
-  for(int i = indexOf("/"); !path[path.indexOf("/", i) + 1].isLetter(); ++i)
+  for(int i = path.indexOf("/"); !path[path.indexOf("/", i) + 1].isLetter(); ++i)
     path.remove(0,i);
 
   qDebug()<<"===path_to_file: "<<path;

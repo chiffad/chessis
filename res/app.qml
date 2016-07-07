@@ -59,7 +59,7 @@ ApplicationWindow
         onReleased:
         {
           _figureDelegate.z = pASSIVE_FIGURE_Z
-          FigureModel.move(parent.x, parent.y)
+          FigureModel.run_command(FigureModel.MOVE_WORD, parent.x, parent.y)
         }
       }
     }

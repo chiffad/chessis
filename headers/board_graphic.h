@@ -29,11 +29,6 @@ public slots:
   void timer_timeout();
 
 private:  
-  struct Coord
-  {
-    int x;
-    int y;
-  };
   class Figure;
 
 public:
@@ -72,26 +67,25 @@ public:
   Q_PROPERTY(QString get_udp_connection_status READ get_udp_connection_status NOTIFY udp_connection_status_changed)
   QString get_udp_connection_status() const;
 
-  Q_INVOKABLE void move(const unsigned x, const unsigned y);
   Q_INVOKABLE QChar letter_return(const unsigned index) const;
-  Q_INVOKABLE void run_command(const QString& message, const unsigned index = 0);
-  Q_INVOKABLE void path_to_file(QString& path, bool is_moves_from_file);
+  Q_INVOKABLE void run_command(const QString &message, const unsigned first_v = 0, const unsigned second_v = 0);
+  Q_INVOKABLE void path_to_file(QString &path, bool is_moves_from_file);
 
 public:
+  void set_check_mate();
+  void set_move_color(const int move_num);
+  void set_board_mask(const QString &mask);
+  void set_connect_status(const int status);
   bool is_new_message_for_server_appear() const;
   const QString pull_first_messages_for_server();
-  void set_board_mask(const QString& mask);
-  void set_moves_history(const QString& history);
-  void set_connect_status(const int status);
-  void set_move_color(const int move_num);
-  void set_check_mate();
+  void set_moves_history(const QString &history);
 
 signals:
-  void move_turn_color_changed();
-  void moves_history_changed();
   void check_mate() const;
-  void udp_connection_status_changed();
+  void moves_history_changed();
   void commands_list_changed();
+  void move_turn_color_changed();
+  void udp_connection_status_changed();
 
 private:
   enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4,IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a',
@@ -102,16 +96,23 @@ private:
   const char FREE_SPACE = ' ';
 
 private:
+  struct Coord
+  {
+    int x;
+    int y;
+  };
+
+private:
   void update_coordinates();
-  void emit_figure_changed(const unsigned index);
-  void set_correct_coord(Coord& coord, const unsigned x, const unsigned y);
-  void update_hilight(const Coord& coord, const HILIGHT hilight_index);
-  void read_moves_from_file(const QString& path);
-  void write_moves_to_file(const QString& path);
-  void add_to_command_history(const QString& str);
-  void add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content = QString());
-  const QString coord_to_str(const Coord& from, const Coord& to) const;
   Coord get_field_coord(const int i) const;
+  void write_moves_to_file(const QString& path);
+  void emit_figure_changed(const unsigned index);
+  void read_moves_from_file(const QString& path);
+  void add_to_command_history(const QString& str);
+  void update_hilight(const Coord& coord, const HILIGHT hilight_index);
+  const QString coord_to_str(const Coord& from, const Coord& to) const;
+  void set_correct_coord(Coord& coord, const unsigned x, const unsigned y);
+  void add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content = QString());
 
 private:
   QTimer *timer_kill;
@@ -131,14 +132,14 @@ class Board_graphic::Figure
 public:
   Figure(const QString& name, const int x, const int y, const bool visible);
 
-  inline QString name() const {return _name;}
   inline int x() const {return _x;}
   inline int y() const {return _y;}
+  inline QString name() const {return _name;}
   inline bool visible() const {return _visible;}
 
   inline void set_name(const QString& new_name) {_name = new_name;}
-  inline void set_coord(const Coord& new_coord) {_x = new_coord.x; _y = new_coord.y;}
   inline void set_visible(const bool new_visible) {_visible = new_visible;}
+  inline void set_coord(const Coord& new_coord) {_x = new_coord.x; _y = new_coord.y;}
 
 private:
   QString _name;
