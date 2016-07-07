@@ -16,7 +16,7 @@ public:
   ~UDP_socket(){delete _socket; delete _timer; delete _timer_from_last_received_message;}
 
 public:
-  void send_data(QByteArray message, bool is_prev_serial_need = false);
+  void send_data(const QByteArray &message, bool is_prev_serial_need = false);
   void send_data(const Messages::MESSAGE r_mes, bool is_prev_serial_need = false);
   QByteArray pull_received_message();
   bool is_new_message_received() const;

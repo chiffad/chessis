@@ -19,7 +19,7 @@ UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocke
   send_data(Messages::HELLO_SERVER);
 }
 
-void UDP_socket::send_data(QByteArray message, bool is_prev_serial_need)
+void UDP_socket::send_data(const QByteArray &message, bool is_prev_serial_need)
 {
   if(!is_message_received())
   {
