@@ -48,20 +48,21 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
   const int dy = abs(to.y - fr.y);
   const int X_UNIT_VECTOR = (dx == 0) ? 0 : (to.x - fr.x)/dx;
   const int Y_UNIT_VECTOR = (dy == 0) ? 0 : (to.y - fr.y)/dy;
+  const COLORLESS_FIG figure = get_colorless_figure(fr);
 
-  if(get_colorless_figure(fr) == HORSE && dx*dy == 2 && get_color(fr) != get_color(to))
+  if(figure == HORSE && dx*dy == 2 && get_color(fr) != get_color(to))
     return true;
 
-  if(get_colorless_figure(fr) == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
-                                           || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
+  if(figure == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
+                        || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
   {
     return((get_figure(to) != FREE_FIELD && dy*dx == 1 && get_color(fr) != get_color(to))
            || (dx == 0 && ((dy == 1 && get_figure(to) == FREE_FIELD)
                || (dy == 2 && get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD && (fr.y == 6 || fr.y == 1)))));
   }
-  else if(get_colorless_figure(fr) == KING && dx <= 1 && dy <= 1);
-  else if((get_colorless_figure(fr) == ROOK || get_colorless_figure(fr) == QUEEN) && (dx*dy == 0));
-  else if((get_colorless_figure(fr) == ELEPHANT || get_colorless_figure(fr) == QUEEN) && (dx == dy));
+  else if(figure == KING && dx <= 1 && dy <= 1);
+  else if((figure == ROOK || figure == QUEEN) && (dx*dy == 0));
+  else if((figure == ELEPHANT || figure == QUEEN) && (dx == dy));
   else return false;
 
   Coord coord(fr);
@@ -153,7 +154,7 @@ bool Board::is_mate()
           for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
             if(is_can_move(f, t))
             {
-              const FIGURES FIG_TO   = get_figure(t);
+              const FIGURES FIG_TO = get_figure(t);
               set_field(t, f, FREE_FIELD);
 
               const bool is_mate = is_check(get_move_color());
