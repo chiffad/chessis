@@ -319,9 +319,7 @@ void Board_graphic::read_moves_from_file(const QString& path)
 {
   qDebug()<<"===read_move_from_file: "<<path;
   std::ifstream from_file(path.toUtf8().constData());
-
-  std::string data_from_file;
-  std::copy(std::istream_iterator<char>(from_file), std::istream_iterator<char>(), data_from_file.begin());
+  std::string data_from_file(std::istream_iterator<char>(from_file), (std::istream_iterator<char>()));
 
   run_command(NEW_GAME);
   add_to_messages_for_server_stack(Messages::MOVE, QString::fromStdString(data_from_file));
