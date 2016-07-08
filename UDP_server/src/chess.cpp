@@ -235,15 +235,14 @@ void Board::write_moves_to_file(const std::string &path) const
   std::cout<<"====write_moves_to_file "<<std::endl;
   std::ofstream in_file(path);
   std::string history = get_moves_history();
-  std::copy(history.begin(), history.end(), std::ostream_iterator<char>(in_file));
+  std::copy(history.begin(), history.end(), std::ostreambuf_iterator<char>(in_file));
 }
 
 void Board::read_moves_from_file(const std::string &path)
 {
   std::cout<<"====read_moves_from_file "<<std::endl;
   std::ifstream from_file(path);
-  std::string data_from_file;
-  std::copy(std::istream_iterator<char>(from_file), std::istream_iterator<char>(), data_from_file.begin());
+  std::string data_from_file(std::istreambuf_iterator<char>(from_file), (std::istreambuf_iterator<char>()));
 
   std::cout<<"data_from_file: "<<data_from_file<<std::endl;
   start_new_game();
