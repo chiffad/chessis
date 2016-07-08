@@ -57,8 +57,8 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
                         || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
   {
     return((get_figure(to) != FREE_FIELD && dy*dx == 1 && get_color(fr) != get_color(to))
-           || (dx == 0 && ((dy == 1 && get_figure(to) == FREE_FIELD)
-               || (dy == 2 && get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD && (fr.y == 6 || fr.y == 1)))));
+           || (dx == 0 && get_figure(to) == FREE_FIELD && (dy == 1 ||
+               (dy == 2 && get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD && (fr.y == 6 || fr.y == 1)))));
   }
   else if(fr_fig == KING && dx <= 1 && dy <= 1);
   else if((fr_fig == ROOK || fr_fig == QUEEN) && (dx*dy == 0));
@@ -106,10 +106,10 @@ bool Board::is_castling(const Coord &fr, const Coord &to) const
   const int dy = abs(to.y - fr.y);
   const int X_UNIT_VECTOR = dx == 0 ? 0 : (to.x - fr.x)/dx;
 
-  std::vector<FIGURE>::const_iterator field = m_field.begin() + get_field_index(fr);
+  std::vector<FIGURE>::const_iterator field = m_field.begin() + get_field_index(fr) + X_UNIT_VECTOR;
   if(get_colorless_figure(fr) == KING && !is_check(get_color(fr)) && dy == 0 && dx == 2 && fr.x == 4
-     && fr.y % 7 == 0 && *(field + X_UNIT_VECTOR) == FREE_FIELD && *(field + 2 * X_UNIT_VECTOR) == FREE_FIELD
-     && (X_UNIT_VECTOR > 0 || *(field + 3 * X_UNIT_VECTOR) == FREE_FIELD))
+     && fr.y % 7 == 0 && *field == FREE_FIELD && *(field + X_UNIT_VECTOR) == FREE_FIELD
+     && (X_UNIT_VECTOR > 0 || *(field + 2 * X_UNIT_VECTOR) == FREE_FIELD))
   {
     Coord coord((to.x > 4 ? 7 : 0), (get_color(fr) == W_FIG ? 7 : 0));
     return (std::find_if(m_moves.begin(), m_moves.end(),
