@@ -18,7 +18,7 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
 
   timer_kill = new QTimer(this);
   connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  timer_kill->start(2000);
+  //timer_kill->start(2000);
 }
 
 Board_graphic::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
@@ -149,7 +149,6 @@ void Board_graphic::run_command(const QString& message, const unsigned first_v, 
         {
           is_from = true;
           set_correct_coord(_to, first_v, second_v);
-
           add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(_from, _to));
           //update_hilight(_to, SECOND_HILIGHT);
         }
