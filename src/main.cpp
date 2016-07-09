@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
   Board_graphic *board_graphic = new Board_graphic;
 
   engine->rootContext()->setContextProperty("FigureModel", board_graphic);
-  //engine->load(QUrl(QStringLiteral("chessis/res/app.qml")));
+  engine->load(QUrl(QStringLiteral("chessis/res/app.qml")));
   QObject::connect(engine, &QQmlApplicationEngine::quit, &gui_is_quit);
 
   UDP_socket *udp_socet = new UDP_socket;
@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
         exporter->push_to_graphic(exporter->pull_from_socet());
     }
 
-    //if(app->allWindows().isEmpty() || !app->allWindows()[1]->visibility())
-     // gui_is_quit();
+    if(app->allWindows().isEmpty() || !app->allWindows()[1]->visibility())
+      gui_is_quit();
   }
 
   delete exporter;

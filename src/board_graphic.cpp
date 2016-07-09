@@ -85,18 +85,18 @@ void Board_graphic::timer_timeout()
 
 void Board_graphic::run_command(const QString& message, const unsigned first_v, const unsigned second_v)
 {
-  qDebug()<<"===run_command: "<<message<<"; index: "<<first_v;
+  qDebug()<<"===run_command: "<<message<<"; first_v: "<<first_v<< "second_v"<< second_v;
   _commands_history.append(message);
 
   if(message == HELP_WORD)
   {
     qDebug()<<"help_word";
-    add_to_command_history("For move, type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4).");
+    add_to_command_history("For move, type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4)");
     add_to_command_history("For back move, type " + BACK_MOVE);
     add_to_command_history("For start new game, type " + NEW_GAME);
     add_to_command_history("For go to history index, type " + HISTORY + " and index");
-    add_to_command_history("To view opponent information, print '" + SHOW_OPPONENT + " .");
-    add_to_command_history("To view your information, print '" + SHOW_ME + " .");
+    add_to_command_history("To view opponent information, print '" + SHOW_OPPONENT);
+    add_to_command_history("To view your information, print '" + SHOW_ME);
   }
   else if(message == SHOW_OPPONENT)
   {
@@ -110,7 +110,7 @@ void Board_graphic::run_command(const QString& message, const unsigned first_v, 
   }
   else if(message == NEW_GAME)
   {
-    qDebug()<<"";
+    qDebug()<<"new game";
     add_to_messages_for_server_stack(Messages::NEW_GAME);
   }
   else if(message == BACK_MOVE)
@@ -126,7 +126,7 @@ void Board_graphic::run_command(const QString& message, const unsigned first_v, 
   else
   {
     const QString command(message.mid(0,message.indexOf(FREE_SPACE)));
-    const QString command_content(message.mid(message.indexOf(FREE_SPACE) + 1));
+    const QString command_content(message.mid(command.size()));
 
     qDebug()<<"command:"<<command;
     qDebug()<<"content:"<<command_content;
@@ -180,7 +180,7 @@ void Board_graphic::update_coordinates()
   {
     iter = std::find_if(iter, _field.end(), [](auto const &i) {return i != FREE_FIELD;});
 
-    _figures_model[index].set_coord(get_field_coord(_field.indexOf(*iter)));
+    _figures_model[index].set_coord(get_field_coord(_field.indexOf(*iter, (iter - _field.begin()))));
     _figures_model[index].set_name(QString(iter->isLower() ? "w_" : "b_") + *iter);
     _figures_model[index].set_visible(true);
 

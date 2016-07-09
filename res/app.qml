@@ -17,6 +17,14 @@ ApplicationWindow
   readonly property int aCTIVE_FIGURE_Z: 3
   readonly property int cHECK_MATE_IMG_Z: 4
 
+  readonly property string hELP_WORD : "help"
+  readonly property string mOVE_WORD : "move"
+  readonly property string bACK_MOVE : "back"
+  readonly property string sHOW_ME : "show me"
+  readonly property string nEW_GAME : "new game"
+  readonly property string hISTORY : "to history"
+  readonly property string sHOW_OPPONENT : "show opponent"
+
   BoardInit{id: _board}
 
   MenuLayout
@@ -53,13 +61,15 @@ ApplicationWindow
         onPressed:
         {    
           _figureDelegate.z = aCTIVE_FIGURE_Z
-          FigureModel.move(parent.x, parent.y)
+
+
+          FigureModel.run_command(mOVE_WORD, parent.x, parent.y)
         }
 
         onReleased:
         {
           _figureDelegate.z = pASSIVE_FIGURE_Z
-          FigureModel.run_command(FigureModel.MOVE_WORD, parent.x, parent.y)
+          FigureModel.run_command(mOVE_WORD, parent.x, parent.y)
         }
       }
     }

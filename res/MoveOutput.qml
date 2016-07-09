@@ -44,7 +44,7 @@ Rectangle
         onPressed:
         {
           parent.color = "	lightskyblue"
-          FigureModel.run_command(FigureModel.HISTORY,index)
+          FigureModel.run_command(hISTORY,index)
         }
         onReleased: parent.color = (index % 2) == 1 ? "navajowhite" : "lightyellow"
       }    

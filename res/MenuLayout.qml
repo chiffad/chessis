@@ -46,7 +46,7 @@ Rectangle
     text: "Back move"
 
     onClicked:
-      FigureModel.run_command(FigureModel.BACK_MOVE);
+      FigureModel.run_command(bACK_MOVE);
   }
 
   Button
@@ -63,7 +63,7 @@ Rectangle
     text: "New game"
 
     onClicked:
-      FigureModel.run_command(FigureModel.NEW_GAME);
+      FigureModel.run_command(nEW_GAME);
   }
 
   Button
