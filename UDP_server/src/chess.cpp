@@ -44,8 +44,6 @@ void Board::move_field(const Coord &from, const Coord &to)
 
 bool Board::is_can_move(const Coord &fr, const Coord &to) const
 {
-    std::cout<<"!!!!!->here"<<std::endl;
-
   const int dx = abs(int(to.x - fr.x));
   const int dy = abs(int(to.y - fr.y));
   const int X_UNIT_VECTOR = (dx == 0) ? 0 : int(to.x - fr.x)/dx;
@@ -175,7 +173,7 @@ void Board::go_to_history_index(const unsigned index)
 {
   m_is_go_to_history_in_progress = true;
 
-  std::cout<<"go_to_history_index: "<<index<<std::endl;
+  std::cout<<"===go_to_history_index: "<<index<<std::endl;
 
   for(unsigned i = index; i < get_last_made_move();)
     back_move();
