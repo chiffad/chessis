@@ -46,16 +46,11 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
 {
     std::cout<<"!!!!!->here"<<std::endl;
 
-  const int dx = abs(to.x - fr.x);
-  const int dy = abs(to.y - fr.y);
-  const int X_UNIT_VECTOR = (dx == 0) ? 0 : (to.x - fr.x)/dx;
-  const int Y_UNIT_VECTOR = (dy == 0) ? 0 : (to.y - fr.y)/dy;
+  const int dx = abs(int(to.x - fr.x));
+  const int dy = abs(int(to.y - fr.y));
+  const int X_UNIT_VECTOR = (dx == 0) ? 0 : int(to.x - fr.x)/dx;
+  const int Y_UNIT_VECTOR = (dy == 0) ? 0 : int(to.y - fr.y)/dy;
   const COLORLESS_FIG fr_fig = get_colorless_figure(fr);
-
-  std::cout<<"fr_fig == PAWN"<<bool(fr_fig == PAWN)<<std::endl;
-  std::cout<<"get_color(fr)"<<get_color(fr)<<std::endl;
-  std::cout<<"get_color(to)"<<get_color(to)<<std::endl;
-  std::cout<<"get_field_index(fr)"<<get_field_index(fr)<<std::endl;
 
   if(fr_fig == HORSE && dx*dy == 2 && get_color(fr) != get_color(to))
     return true;
@@ -63,11 +58,6 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
   if(fr_fig == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
                         || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
   {
-    std::cout<<"first bool"<<bool(dx == 0 && get_figure(to) == FREE_FIELD)<<std::endl;
-    std::cout<<"dy == 1"<<bool(dy == 1)<<std::endl;
-    std::cout<<"dy == 2"<<bool(dy == 2)<<std::endl;
-    std::cout<<"get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD"<<bool((get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD))<<std::endl;
-    std::cout<<"fr.y"<< fr.y<<std::endl;
     return((get_figure(to) != FREE_FIELD && dy*dx == 1 && get_color(fr) != get_color(to))
            || (dx == 0 && get_figure(to) == FREE_FIELD && (dy == 1 ||
                (dy == 2 && get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD && (fr.y == 6 || fr.y == 1)))));
@@ -90,8 +80,8 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
 
 void Board::if_castling(const Coord &fr, const Coord &to)
 {
-  const int dx = abs(to.x - fr.x);
-  const int X_UNIT_VEC = dx == 0 ? 0 : (to.x - fr.x)/dx;
+  const int dx = abs(int(to.x - fr.x));
+  const int X_UNIT_VEC = dx == 0 ? 0 : int(to.x - fr.x)/dx;
 
   if(get_colorless_figure(to) == KING && dx > 1)
   {
@@ -114,9 +104,9 @@ void Board::if_castling(const Coord &fr, const Coord &to)
 
 bool Board::is_castling(const Coord &fr, const Coord &to) const
 {
-  const int dx = abs(to.x - fr.x);
-  const int dy = abs(to.y - fr.y);
-  const int X_UNIT_VECTOR = dx == 0 ? 0 : (to.x - fr.x)/dx;
+  const int dx = abs(int(to.x - fr.x));
+  const int dy = abs(int(to.y - fr.y));
+  const int X_UNIT_VECTOR = dx == 0 ? 0 : int(to.x - fr.x)/dx;
 
   std::vector<FIGURE>::const_iterator field = m_field.begin() + get_field_index(fr) + X_UNIT_VECTOR;
   if(get_colorless_figure(fr) == KING && !is_check(get_color(fr)) && dy == 0 && dx == 2 && fr.x == 4

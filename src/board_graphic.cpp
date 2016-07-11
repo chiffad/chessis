@@ -18,7 +18,7 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
 
   timer_kill = new QTimer(this);
   connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  //timer_kill->start(2000);
+  timer_kill->start(2000);
 }
 
 Board_graphic::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
@@ -36,9 +36,9 @@ void Board_graphic::timer_timeout()
   if( i == 1)
   {
     run_command(MOVE_WORD, 4 * CELL_SIZE,6*CELL_SIZE);
-    run_command(MOVE_WORD,4 * CELL_SIZE,5 * CELL_SIZE);
+    run_command(MOVE_WORD,4 * CELL_SIZE,4 * CELL_SIZE);
   }
-  if( i == 2)
+ /* if( i == 2)
   {
     run_command(MOVE_WORD,4*CELL_SIZE,1*CELL_SIZE);
     run_command(MOVE_WORD,4*CELL_SIZE,2*CELL_SIZE);
@@ -78,7 +78,7 @@ void Board_graphic::timer_timeout()
   if( i == 9)
   {
      run_command("new game");
-  }
+  }*/
 
   timer_kill->start(2000);
 }
