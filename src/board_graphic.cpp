@@ -35,19 +35,16 @@ void Board_graphic::timer_timeout()
 
   if( i == 1)
   {
-    run_command(MOVE_WORD, 4 * CELL_SIZE,6*CELL_SIZE);
-    run_command(MOVE_WORD,4 * CELL_SIZE,4 * CELL_SIZE);
+    run_command(MOVE_WORD, 4 * CELL_SIZE,6*CELL_SIZE, 4 * CELL_SIZE,4 * CELL_SIZE);
   }
  /* if( i == 2)
   {
-    run_command(MOVE_WORD,4*CELL_SIZE,1*CELL_SIZE);
-    run_command(MOVE_WORD,4*CELL_SIZE,2*CELL_SIZE);
+    run_command(MOVE_WORD,4*CELL_SIZE,1*CELL_SIZE ,4*CELL_SIZE,2*CELL_SIZE);
   }
 
   if( i == 3)
   {
-    run_command(MOVE_WORD,1*CELL_SIZE,7*CELL_SIZE);
-    run_command(MOVE_WORD,0*CELL_SIZE,5*CELL_SIZE);
+    run_command(MOVE_WORD,1*CELL_SIZE,7*CELL_SIZE, 0*CELL_SIZE,5*CELL_SIZE);
   }
 
   if( i == 4)
@@ -83,9 +80,9 @@ void Board_graphic::timer_timeout()
   timer_kill->start(2000);
 }
 
-void Board_graphic::run_command(const QString& message, const unsigned first_v, const unsigned second_v)
+void Board_graphic::run_command(const QString& message, const unsigned x1, const unsigned y1, const unsigned x2, const unsigned y2)
 {
-  qDebug()<<"===run_command: "<<message<<"; first_v: "<<first_v<< "second_v"<< second_v;
+  qDebug()<<"===run_command: "<<message<<"; first_v: "<<x1<< "second_v"<< y1;
   _commands_history.append(message);
 
   if(message == HELP_WORD)
@@ -121,7 +118,7 @@ void Board_graphic::run_command(const QString& message, const unsigned first_v, 
   else if(message == HISTORY)
   {
     qDebug()<<"history";
-    add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(first_v));
+    add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(x1));
   }
   else
   {
@@ -138,20 +135,11 @@ void Board_graphic::run_command(const QString& message, const unsigned first_v, 
         add_to_messages_for_server_stack(Messages::MOVE, command_content);
       else
       {
-        static bool is_from = true;
-        if(is_from)
-        {
-          set_correct_coord(_from, first_v, second_v);
+        Coord from,to;
+        set_correct_coord(from, x1, y1);
+        set_correct_coord(to, x2, y2);
+        add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(from, to));
           //update_hilight(_from, FIRST_HILIGHT);
-          is_from = false;
-        }
-        else
-        {
-          is_from = true;
-          set_correct_coord(_to, first_v, second_v);
-          add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(_from, _to));
-          //update_hilight(_to, SECOND_HILIGHT);
-        }
       }
     }
     else add_to_command_history("Unknown command ('" + HELP_WORD + "' for help).");

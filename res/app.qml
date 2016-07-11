@@ -52,6 +52,8 @@ ApplicationWindow
       {
         id: _dragArea
 
+        property int x1
+        property int y1
         drag.target: parent
         anchors.fill: parent
         drag.minimumX: 0
@@ -61,15 +63,13 @@ ApplicationWindow
         onPressed:
         {    
           _figureDelegate.z = aCTIVE_FIGURE_Z
-
-
-          FigureModel.run_command(mOVE_WORD, parent.x, parent.y)
+          _dragArea.x1 = parent.x
+          _dragArea.y1 = parent.y
         }
-
         onReleased:
         {
           _figureDelegate.z = pASSIVE_FIGURE_Z
-          FigureModel.run_command(mOVE_WORD, parent.x, parent.y)
+          FigureModel.run_command(mOVE_WORD, x1, y1, parent.x, parent.y)
         }
       }
     }

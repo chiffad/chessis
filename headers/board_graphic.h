@@ -68,7 +68,8 @@ public:
   QString get_udp_connection_status() const;
 
   Q_INVOKABLE QChar letter_return(const unsigned index) const;
-  Q_INVOKABLE void run_command(const QString &message, const unsigned first_v = 0, const unsigned second_v = 0);
+  Q_INVOKABLE void run_command(const QString &message,  const unsigned x1 = 0, const unsigned y1 = 0,
+                                                        const unsigned x2 = 0, const unsigned y2 = 0);
   Q_INVOKABLE void path_to_file(QString &path, bool is_moves_from_file);
 
 public:
@@ -124,7 +125,6 @@ private:
   QList<Figure> _figures_model;
   QVector<QString> _messages_for_server_stack;
   QString _field;
-  Coord _from, _to;
 };
 
 class Board_graphic::Figure
