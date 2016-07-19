@@ -139,7 +139,6 @@ void Board_graphic::run_command(const QString& message, const unsigned x1, const
         set_correct_coord(from, x1, y1);
         set_correct_coord(to, x2, y2);
         add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(from, to));
-          //update_hilight(_from, FIRST_HILIGHT);
       }
     }
     else add_to_command_history("Unknown command ('" + HELP_WORD + "' for help).");
@@ -214,6 +213,18 @@ void Board_graphic::set_moves_history(const QString& history)
       move.clear();
     }
   }
+
+  std::string::reverse_iterator r_simb = history.rbegin();
+  Coord coord;
+
+  coord.y = *(r_simb--) - '1';
+  coord.x = *(r_simb--) - a_LETTER;
+  update_hilight(coord, SECOND_HILIGHT);
+
+  coord.y = *(r_simb--) - '1';
+  coord.x = *(r_simb--) - a_LETTER;
+  update_hilight(coord, FIRST_HILIGHT);
+
   emit moves_history_changed();
 }
 
@@ -224,7 +235,7 @@ void Board_graphic::set_move_color(const int move_num)
   emit move_turn_color_changed();
 }
 
-const QString Board_graphic::coord_to_str(const Coord& from, const Coord& to) const
+const QString Board_graphic::coord_to_str(const Coord &from, const Coord &to) const
 {
   return (QChar(a_LETTER + from.x) + QString::number(BOARD_SIDE - from.y)
           + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIDE - to.y));
@@ -236,25 +247,13 @@ void Board_graphic::add_to_messages_for_server_stack(const Messages::MESSAGE mes
   _messages_for_server_stack.append(QString::number(mes_type) + FREE_SPACE + content);
 }
 
-void Board_graphic::update_hilight(const Coord& coord, const enum HILIGHT hilight_index)
+void Board_graphic::update_hilight(const Coord &coord, const enum HILIGHT hilight_index)
 {
-  qDebug()<<"====update_hilight";
-
-  const auto& figure = std::find_if(_figures_model.begin(), _figures_model.end() - HILIGHT_CELLS,
-                             [coord](const auto& i){ return ((i.x() == coord.x) && (i.y() == coord.y));});
-
-  if(figure == _figures_model.end() - HILIGHT_CELLS)
-    return;
+  qDebug()<<"====update_hilight; "<<coord.x<<" "<<coord.y;
 
   _figures_model[hilight_index].set_visible(true);
   _figures_model[hilight_index].set_coord(coord);
   emit_figure_changed(hilight_index);
-
-  if(hilight_index == FIRST_HILIGHT)
-  {
-    _figures_model[SECOND_HILIGHT].set_visible(false);
-    emit_figure_changed(SECOND_HILIGHT);
-  }
 }
 
 void Board_graphic::emit_figure_changed(const unsigned INDEX)
