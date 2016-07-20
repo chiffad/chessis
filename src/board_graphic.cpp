@@ -157,6 +157,7 @@ void Board_graphic::set_correct_coord(Coord& coord, const unsigned x, const unsi
 void Board_graphic::update_coordinates()
 {
   qDebug()<<"====update_coord";
+  auto iter = _field.begin();
   for(auto &fig_mod : _figures_model)
   {
     iter = std::find_if(iter, _field.end(), [](auto const &i) {return i != FREE_FIELD;});
