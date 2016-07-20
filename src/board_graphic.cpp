@@ -157,16 +157,16 @@ void Board_graphic::set_correct_coord(Coord& coord, const unsigned x, const unsi
 void Board_graphic::update_coordinates()
 {
   qDebug()<<"====update_coord";
-  auto iter = _field.begin();
+  auto f_it = _field.begin();
   for(auto &fig_mod : _figures_model)
   {
-    iter = std::find_if(iter, _field.end(), [](auto const &i) {return i != FREE_FIELD;});
-    if(iter != _field.end())
+    f_it = std::find_if(f_it, _field.end(), [](auto const &i) {return i != FREE_FIELD;});
+    if(f_it != _field.end())
     {
-      fig_mod.set_coord(get_field_coord(_field.indexOf(*iter, (iter - _field.begin()))));
-      fig_mod.set_name(QString(iter->isLower() ? "w_" : "b_") + *iter);
+      fig_mod.set_coord(get_field_coord(_field.indexOf(*f_it, (f_it - _field.begin()))));
+      fig_mod.set_name(QString(f_it->isLower() ? "w_" : "b_") + *f_it);
       fig_mod.set_visible(true);
-      ++iter;
+      ++f_it;
     }
     else fig_mod.set_visible(false);
 
