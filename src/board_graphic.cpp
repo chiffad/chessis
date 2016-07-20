@@ -157,23 +157,19 @@ void Board_graphic::set_correct_coord(Coord& coord, const unsigned x, const unsi
 void Board_graphic::update_coordinates()
 {
   qDebug()<<"====update_coord";
-
-  for(int i = 0; i < rowCount() - HILIGHT_CELLS; ++i)
-  {
-    _figures_model[i].set_visible(false);
-    emit_figure_changed(i);
-  }
-
-  int index = 0;
-  for(auto iter = _field.begin(); iter != _field.end(); ++iter, ++index)
+  for(auto &fig_mod : _figures_model)
   {
     iter = std::find_if(iter, _field.end(), [](auto const &i) {return i != FREE_FIELD;});
+    if(iter != _field.end())
+    {
+      fig_mod.set_coord(get_field_coord(_field.indexOf(*iter, (iter - _field.begin()))));
+      fig_mod.set_name(QString(iter->isLower() ? "w_" : "b_") + *iter);
+      fig_mod.set_visible(true);
+      ++iter;
+    }
+    else fig_mod.set_visible(false);
 
-    _figures_model[index].set_coord(get_field_coord(_field.indexOf(*iter, (iter - _field.begin()))));
-    _figures_model[index].set_name(QString(iter->isLower() ? "w_" : "b_") + *iter);
-    _figures_model[index].set_visible(true);
-
-    emit_figure_changed(index);
+    emit_figure_changed(i - _figures_model.begin());
   }
 }
 
