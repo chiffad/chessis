@@ -215,10 +215,9 @@ void Board_graphic::set_moves_history(const QString& history)
   }
 
   auto r_simb = history.rbegin();
+  Coord coord;
   for(int i = 0; i < 2; ++i)
   {
-    Coord coord;
-
     coord.y = (*(r_simb++)).digitValue();
     coord.x = (*(r_simb++)).unicode() - a_LETTER;
     update_hilight(coord, ((i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT));
