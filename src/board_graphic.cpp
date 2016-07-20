@@ -33,11 +33,11 @@ void Board_graphic::timer_timeout()
   static int i = 0;
   ++i;
 
-  if( i == 1)
+  /*if( i == 1)
   {
     run_command(MOVE_WORD, 4 * CELL_SIZE,6*CELL_SIZE, 4 * CELL_SIZE,4 * CELL_SIZE);
   }
- /* if( i == 2)
+  if( i == 2)
   {
     run_command(MOVE_WORD,4*CELL_SIZE,1*CELL_SIZE ,4*CELL_SIZE,2*CELL_SIZE);
   }
@@ -45,8 +45,14 @@ void Board_graphic::timer_timeout()
   if( i == 3)
   {
     run_command(MOVE_WORD,1*CELL_SIZE,7*CELL_SIZE, 0*CELL_SIZE,5*CELL_SIZE);
-  }
+  }*/
 
+  if( i == 1)
+  {
+    QString s("/home/dprokofiev/prj/!chess/chess_hist.txt");
+    path_to_file(s, true);
+     //run_command("new game");
+  }/*
   if( i == 4)
   {
      run_command("to history",2);
@@ -72,10 +78,7 @@ void Board_graphic::timer_timeout()
      run_command("to history",2);
   }
 
-  if( i == 9)
-  {
-     run_command("new game");
-  }*/
+ */
 
   timer_kill->start(2000);
 }
@@ -214,16 +217,15 @@ void Board_graphic::set_moves_history(const QString& history)
     }
   }
 
-  std::string::reverse_iterator r_simb = history.rbegin();
-  Coord coord;
+  auto r_simb = history.rbegin();
+  for(int i = 0; i < 2; ++i)
+  {
+    Coord coord;
 
-  coord.y = *(r_simb--) - '1';
-  coord.x = *(r_simb--) - a_LETTER;
-  update_hilight(coord, SECOND_HILIGHT);
-
-  coord.y = *(r_simb--) - '1';
-  coord.x = *(r_simb--) - a_LETTER;
-  update_hilight(coord, FIRST_HILIGHT);
+    coord.y = (*(r_simb++)).digitValue();
+    coord.x = (*(r_simb++)).unicode() - a_LETTER;
+    update_hilight(coord, ((i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT));
+  }
 
   emit moves_history_changed();
 }
@@ -245,6 +247,7 @@ void Board_graphic::add_to_messages_for_server_stack(const Messages::MESSAGE mes
 {
   qDebug()<<"====add_to_messages_for_server_stack";
   _messages_for_server_stack.append(QString::number(mes_type) + FREE_SPACE + content);
+  qDebug()<<"!!!!!_messages_for_server_stack.last"<<_messages_for_server_stack.last();
 }
 
 void Board_graphic::update_hilight(const Coord &coord, const enum HILIGHT hilight_index)
@@ -286,16 +289,22 @@ void Board_graphic::path_to_file(QString &path, bool is_moves_from_file)
   for(int i = path.indexOf("/"); !path[path.indexOf("/", i) + 1].isLetter(); ++i)
     path.remove(0,i);
 
-  qDebug()<<"===path_to_file: "<<path;
-  is_moves_from_file ? read_moves_from_file(path) : write_moves_to_file(path);
+  if(is_moves_from_file)
+    read_moves_from_file(path);
+  else
+  {
+    path += "/chess_hist.txt";
+    write_moves_to_file(path);
+  }
 }
 
 void Board_graphic::write_moves_to_file(const QString& path)
 {
-  std::ofstream in_file(path.toUtf8().constData());
-  for(int i = 0; i < _str_moves_history.size(); ++i)
+  qDebug()<<"====write_moves_to_file";
+  std::ofstream in_file(path.toStdString());
+  for(auto &s : _str_moves_history)
   {
-    in_file<<_str_moves_history[i].toUtf8().constData();
+    in_file<<s.toStdString();
     in_file<<FREE_SPACE;
   }
   in_file.close();
@@ -304,11 +313,10 @@ void Board_graphic::write_moves_to_file(const QString& path)
 void Board_graphic::read_moves_from_file(const QString& path)
 {
   qDebug()<<"===read_move_from_file: "<<path;
-  std::ifstream from_file(path.toUtf8().constData());
+  std::ifstream from_file(path.toStdString());
   std::string data_from_file(std::istream_iterator<char>(from_file), (std::istream_iterator<char>()));
 
-  run_command(NEW_GAME);
-  add_to_messages_for_server_stack(Messages::MOVE, QString::fromStdString(data_from_file));
+  add_to_messages_for_server_stack(Messages::FROM_FILE, QString::fromStdString(data_from_file));
 }
 
 void Board_graphic::set_connect_status(const int status)

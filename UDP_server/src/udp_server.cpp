@@ -149,8 +149,7 @@ void UDP_server::push_message_to_logic(const QByteArray &message, User& u)
     case Messages::MOVE:
     {
       qDebug()<<"MOVE";
-      std::string str(message_content.constData(), message_content.length());
-      board->make_moves_from_str(str);
+      board->make_moves_from_str(message_content.toStdString());
       break;
     }
     case Messages::BACK_MOVE:
@@ -162,8 +161,13 @@ void UDP_server::push_message_to_logic(const QByteArray &message, User& u)
       board->start_new_game();
       break;
     case Messages::GO_TO_HISTORY:
-      qDebug()<<"GO_TO_HISTORY: "<<message_content.toInt();
+      qDebug()<<"GO_TO_HISTORY";
       board->go_to_history_index(message_content.toInt());
+      break;
+    case Messages::FROM_FILE:
+      qDebug()<<"FROM_FILE: "<<message_content.toInt();
+      board->start_new_game();
+      board->make_moves_from_str(message_content.toStdString());
       break;
     default:
       qDebug()<<"sheet message!";
