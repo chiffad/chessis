@@ -175,7 +175,7 @@ void Board::go_to_history_index(const unsigned index)
 
   std::cout<<"===go_to_history_index: "<<index<<std::endl;
 
-  for(unsigned i = index; i < get_last_made_move();)
+  while(index < get_last_made_move())
     back_move();
 
   if(index < m_history_copy.size())
