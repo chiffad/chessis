@@ -33,7 +33,7 @@ void Board_graphic::timer_timeout()
   static int i = 0;
   ++i;
 
-  /*if( i == 1)
+  if( i == 1)
   {
     run_command(MOVE_WORD, 4 * CELL_SIZE,6*CELL_SIZE, 4 * CELL_SIZE,4 * CELL_SIZE);
   }
@@ -45,14 +45,14 @@ void Board_graphic::timer_timeout()
   if( i == 3)
   {
     run_command(MOVE_WORD,1*CELL_SIZE,7*CELL_SIZE, 0*CELL_SIZE,5*CELL_SIZE);
-  }*/
+  }
 
-  if( i == 1)
+ /* if( i == 1)
   {
     QString s("/home/dprokofiev/prj/!chess/chess_hist.txt");
     path_to_file(s, true);
      //run_command("new game");
-  }/*
+  }*/
   if( i == 4)
   {
      run_command("to history",2);
@@ -77,8 +77,6 @@ void Board_graphic::timer_timeout()
   {
      run_command("to history",2);
   }
-
- */
 
   timer_kill->start(2000);
 }
@@ -170,7 +168,7 @@ void Board_graphic::update_coordinates()
     }
     else fig_mod.set_visible(false);
 
-    emit_figure_changed(i - _figures_model.begin());
+    emit_figure_changed(_figures_model.indexOf(fig_mod));
   }
 }
 

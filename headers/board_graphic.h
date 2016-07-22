@@ -141,10 +141,15 @@ public:
   inline void set_visible(const bool new_visible) {_visible = new_visible;}
   inline void set_coord(const Coord& new_coord) {_x = new_coord.x; _y = new_coord.y;}
 
+  bool operator==(const Figure &rhs)
+  {return(name() == rhs.name() && x() == rhs.x() && y() == rhs.y() && visible() == rhs.visible());}
+
 private:
   QString _name;
   int _x;
   int _y;
   bool _visible;
 };
+
+
 #endif
