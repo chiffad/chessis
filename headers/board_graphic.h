@@ -104,6 +104,9 @@ private:
   };
 
 private:
+  Board_graphic(const Board_graphic&) = delete;
+  void operator=(const Board_graphic&) = delete;
+
   void update_coordinates();
   Coord get_field_coord(const int i) const;
   void write_moves_to_file(const QString& path);

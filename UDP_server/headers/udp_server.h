@@ -32,6 +32,9 @@ private:
   const QChar FREE_SPASE = ' ';
 
 private:
+  UDP_server(const UDP_server&) = delete;
+  void operator=(const UDP_server&) = delete;
+
   void set_opponent(User &u);
   void send_board_state(User &u);
   void begin_wait_receive(User &u);
@@ -83,5 +86,9 @@ public:
 
   const QString _login;
   int _rating_ELO;
+
+private:
+   User(const User&) = delete;
+   void operator=(const User&) = delete;
 };
 #endif // UDP_SERVER_H

@@ -18,7 +18,7 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
 
   timer_kill = new QTimer(this);
   connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  timer_kill->start(2000);
+ // timer_kill->start(2000);
 }
 
 Board_graphic::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
@@ -216,7 +216,7 @@ void Board_graphic::set_moves_history(const QString& history)
   Coord coord;
   for(int i = 0; i < 2; ++i)
   {
-    coord.y = (*(r_simb++)).digitValue();
+    coord.y = BOARD_SIDE - (*(r_simb++)).digitValue();
     coord.x = (*(r_simb++)).unicode() - a_LETTER;
     update_hilight(coord, ((i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT));
   }

@@ -31,6 +31,9 @@ private:
   const QChar FREE_SPASE = ' ';
 
 private:
+  UDP_socket(const UDP_socket&) = delete;
+  void operator=(const UDP_socket&) = delete;
+
   QByteArray add_serial_num(const QByteArray &data, bool is_prev_serial_need = false);
   QByteArray cut_serial_num(QByteArray &data) const;
   void begin_wait_receive(const QByteArray &message);

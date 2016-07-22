@@ -18,6 +18,10 @@ public:
   const QString pull_from_socet();
 
 private:
+  Exporter(const Exporter&) = delete;
+  void operator=(const Exporter&) = delete;
+
+private:
   Board_graphic *const _board_graphic;
   UDP_socket *const _udp_socet;
 };

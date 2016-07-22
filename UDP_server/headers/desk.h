@@ -13,6 +13,10 @@ public:
 
   const int _first_player_ind;
   const int _second_player_ind;
+
+private:
+   Desk(const Desk&) = delete;
+   void operator=(const Desk&) = delete;
 };
 #endif // DESK
 
