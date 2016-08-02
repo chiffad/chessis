@@ -161,7 +161,7 @@ void UDP_server::push_message_to_logic(const QByteArray &message, User& u)
       board->start_new_game();
       break;
     case Messages::GO_TO_HISTORY:
-      qDebug()<<"GO_TO_HISTORY";
+      qDebug()<<"GO_TO_HISTORY"<<message_content.toInt();
       board->go_to_history_index(message_content.toInt());
       break;
     case Messages::FROM_FILE:

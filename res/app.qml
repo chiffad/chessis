@@ -29,9 +29,9 @@ ApplicationWindow
 
   MenuLayout
   {
-    width: mENU_SIZE
     height: parent.height
     anchors.left: _board.right
+    anchors.right: parent.right
   }
 
   Repeater

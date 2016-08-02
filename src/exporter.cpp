@@ -28,8 +28,7 @@ void Exporter::push_to_graphic(const QString& message)
     _board_graphic->set_board_mask(board_mask);
     _board_graphic->set_move_color(move_num.toInt());
     _board_graphic->set_connect_status(Messages::SERVER_HERE);
-    if(!moves_history.isEmpty())
-      _board_graphic->set_moves_history(moves_history);
+    _board_graphic->set_moves_history(moves_history);
 
     if(moves_history.endsWith("#"))
       _board_graphic->set_check_mate();

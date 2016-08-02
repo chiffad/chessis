@@ -84,17 +84,17 @@ void Board_graphic::timer_timeout()
 void Board_graphic::run_command(const QString& message, const unsigned x1, const unsigned y1, const unsigned x2, const unsigned y2)
 {
   qDebug()<<"===run_command: "<<message<<"; first_v: "<<x1<< "second_v"<< y1;
-  _commands_history.append(message);
+  add_to_command_history("command: " + message);
 
   if(message == HELP_WORD)
   {
     qDebug()<<"help_word";
-    add_to_command_history("For move, type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4)");
-    add_to_command_history("For back move, type " + BACK_MOVE);
-    add_to_command_history("For start new game, type " + NEW_GAME);
-    add_to_command_history("For go to history index, type " + HISTORY + " and index");
-    add_to_command_history("To view opponent information, print '" + SHOW_OPPONENT);
-    add_to_command_history("To view your information, print '" + SHOW_ME);
+    add_to_command_history("1.For move, type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4)" + "\n"+
+    "2.For back move, type '" + BACK_MOVE + "'" + "\n"+
+    "3.For start new game, type '" + NEW_GAME + "'" + "\n"+
+    "4.For go to history index, type '" + HISTORY + "' and index" + "\n"+
+    "5.To view opponent information, print '" + SHOW_OPPONENT + "'" + "\n"+
+    "6.To view your information, print '" + SHOW_ME + "'");
   }
   else if(message == SHOW_OPPONENT)
   {

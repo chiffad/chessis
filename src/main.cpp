@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
   UDP_socket *udp_socet = new UDP_socket;
   Exporter *exporter = new Exporter(board_graphic, udp_socet);
 
-  const double CHECK_TIME = 1.015 * CLOCKS_PER_SEC;
+  const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();
   while(!is_gui_quit)
   {
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
         exporter->push_to_graphic(exporter->pull_from_socet());
     }
 
-    if(app->allWindows().isEmpty() || !app->allWindows()[1]->visibility())
+    if(app->allWindows().isEmpty() || !app->allWindows().last()->visibility())
       gui_is_quit();
   }
 

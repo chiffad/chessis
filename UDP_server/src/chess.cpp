@@ -9,6 +9,7 @@
 
 Board::Board() : m_is_go_to_history_in_progress(false)
 {  
+  m_field.resize(BOARD_SIZE);
   m_field = {B_ROOK,B_HORSE,B_ELEPHANT,B_QUEEN,B_KING,B_ELEPHANT,B_HORSE,B_ROOK};
   m_field.insert(m_field.end(), BOARD_SIDE, B_PAWN);
   m_field.insert(m_field.end(), BOARD_SIDE * 4, FREE_FIELD);
@@ -48,21 +49,21 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
   const int dy = abs(int(to.y - fr.y));
   const int X_UNIT_VECTOR = (dx == 0) ? 0 : int(to.x - fr.x)/dx;
   const int Y_UNIT_VECTOR = (dy == 0) ? 0 : int(to.y - fr.y)/dy;
-  const COLORLESS_FIG fr_fig = get_colorless_figure(fr);
+  const COLORLESS_FIG FIG = get_colorless_figure(fr);
 
-  if(fr_fig == HORSE && dx*dy == 2 && get_color(fr) != get_color(to))
+  if(FIG == HORSE && dx*dy == 2 && get_color(fr) != get_color(to))
     return true;
 
-  if(fr_fig == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
+  if(FIG == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
                         || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
   {
     return((get_figure(to) != FREE_FIELD && dy*dx == 1 && get_color(fr) != get_color(to))
            || (dx == 0 && get_figure(to) == FREE_FIELD && (dy == 1 ||
                (dy == 2 && get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD && (fr.y == 6 || fr.y == 1)))));
   }
-  else if(fr_fig == KING && dx <= 1 && dy <= 1);
-  else if((fr_fig == ROOK || fr_fig == QUEEN) && (dx*dy == 0));
-  else if((fr_fig == ELEPHANT || fr_fig == QUEEN) && (dx == dy));
+  else if(FIG == KING && dx <= 1 && dy <= 1);
+  else if((FIG == ROOK || FIG == QUEEN) && (dx*dy == 0));
+  else if((FIG == ELEPHANT || FIG == QUEEN) && (dx == dy));
   else return false;
 
   Coord coord(fr);
@@ -173,7 +174,7 @@ void Board::go_to_history_index(const unsigned index)
 {
   m_is_go_to_history_in_progress = true;
 
-  std::cout<<"===go_to_history_index: "<<index<<std::endl;
+  std::cout<<"===go_to_history_index: "<<index<<" "<<get_actual_move()<<std::endl;
 
   while(index < get_last_made_move())
     back_move();
@@ -257,6 +258,7 @@ void Board::start_new_game()
 
 bool Board::back_move()
 {
+  std::cout<<"====back_move"<<std::endl;
   if(!get_actual_move())
     return false;
 
@@ -290,7 +292,7 @@ unsigned Board::get_actual_move() const
 
 unsigned Board::get_last_made_move() const
 {
-  return get_actual_move() - 1;
+  return get_actual_move() ? get_actual_move() - 1 : 0;
 }
 
 Board::FIGURE Board::get_figure(const Coord &c) const

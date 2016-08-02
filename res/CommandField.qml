@@ -4,25 +4,29 @@ import QtQuick.Controls 1.4
 Rectangle
 {
   id: _root
-  width: parent.width
-  border.width: bORDER_WIDTH
   border.color: "white"
   radius: rADIUS
-  color: "darkorchid"
+  color: "blue"
   visible: false
 
   ListView
   {
     id: _history_view
-    width: parent.width
-    height: count * 20
-    model: FigureModel.commands_list
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.leftMargin: 2
+    anchors.rightMargin: 2
+    anchors.top: parent.top
+    anchors.bottom: text_input.top
+
+    clip:true
+
+    model: FigureModel.get_commands_list
     delegate:
       Text
       {
         width: _root.width
-        height: 20
-        color: "grey"
+        color: "yellow"
         wrapMode: Text.Wrap
         text: modelData
       }
@@ -30,15 +34,18 @@ Rectangle
 
   TextInput
   {
-    anchors.top: _history_view.bottom
+    id: text_input
+    anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.leftMargin: _root.border.width
-    anchors.rightMargin: _root.border.width
+    anchors.leftMargin: 2
+    anchors.rightMargin: 2
+    anchors.bottomMargin: 2
     visible: parent.visible
     clip: true
     focus: true
     wrapMode: TextInput.Wrap
+    color: "white"
 
     onAccepted:
     {
