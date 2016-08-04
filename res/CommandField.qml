@@ -43,14 +43,14 @@ Rectangle
     anchors.bottomMargin: 2
     visible: parent.visible
     clip: true
-    focus: true
+    focus: _root.visible
     wrapMode: TextInput.Wrap
     color: "white"
 
     onAccepted:
     {
       FigureModel.run_command(text);
-      text = "";
+      clear();
     }
   }
 
