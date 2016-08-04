@@ -62,7 +62,7 @@ public:
   QStringList get_commands_hist() const;
 
   Q_PROPERTY(int get_command_hist_size READ get_command_hist_size NOTIFY commands_hist_changed)
-  int get_command_hist_last_message_index() const;
+  int get_command_hist_size() const;
 
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
   bool is_check_mate() const;
@@ -87,7 +87,7 @@ public:
 signals:
   void check_mate() const;
   void moves_history_changed();
-  void commands_list_changed();
+  void commands_hist_changed();
   void move_turn_color_changed();
   void udp_connection_status_changed();
 

@@ -1,4 +1,4 @@
-#include <qqmlcontext.h>
+#include <QQmlContext>
 #include <QQmlApplicationEngine>
 #include <QApplication>
 #include <QWindow>

@@ -275,7 +275,7 @@ void Board_graphic::add_to_command_history(const QString& str)
 {
   qDebug()<<"====add_to_command_history";
   _commands_history.append(str);
-  emit commands_list_changed();
+  emit commands_hist_changed();
 }
 
 void Board_graphic::path_to_file(QString &path, bool is_moves_from_file)
@@ -358,7 +358,7 @@ QStringList Board_graphic::get_commands_hist() const
   return _commands_history;
 }
 
-int Board_graphic::	get_command_hist_size() const
+int Board_graphic::get_command_hist_size() const
 {
   return _commands_history.size();
 }
