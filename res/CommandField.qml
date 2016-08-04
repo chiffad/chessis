@@ -11,7 +11,6 @@ Rectangle
 
   ListView
   {
-    id: _history_view
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.leftMargin: 2
@@ -20,6 +19,7 @@ Rectangle
     anchors.bottom: text_input.top
 
     clip:true
+    currentIndex: FigureModel.get_command_hist_size
 
     model: FigureModel.get_commands_list
     delegate:

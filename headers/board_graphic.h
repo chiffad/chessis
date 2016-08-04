@@ -58,8 +58,11 @@ public:
   Q_PROPERTY(QStringList get_moves_history READ get_moves_history NOTIFY moves_history_changed)
   QStringList get_moves_history() const;
 
-  Q_PROPERTY(QStringList get_commands_list READ get_commands_list NOTIFY commands_list_changed)
-  QStringList get_commands_list() const;
+  Q_PROPERTY(QStringList get_commands_hist READ get_commands_hist NOTIFY commands_hist_changed)
+  QStringList get_commands_hist() const;
+
+  Q_PROPERTY(int get_command_hist_size READ get_command_hist_size NOTIFY commands_hist_changed)
+  int get_command_hist_last_message_index() const;
 
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
   bool is_check_mate() const;
@@ -69,7 +72,7 @@ public:
 
   Q_INVOKABLE QChar letter_return(const unsigned index) const;
   Q_INVOKABLE void run_command(const QString &message,  const unsigned x1 = 0, const unsigned y1 = 0,
-                                                        const unsigned x2 = 0, const unsigned y2 = 0);
+                               const unsigned x2 = 0, const unsigned y2 = 0);
   Q_INVOKABLE void path_to_file(QString &path, bool is_moves_from_file);
 
 public:

@@ -353,9 +353,14 @@ QStringList Board_graphic::get_moves_history() const
   return _str_moves_history;
 }
 
-QStringList Board_graphic::get_commands_list() const
+QStringList Board_graphic::get_commands_hist() const
 {
   return _commands_history;
+}
+
+int Board_graphic::	get_command_hist_size() const
+{
+  return _commands_history.size();
 }
 
 QString Board_graphic::get_move_turn_color() const
