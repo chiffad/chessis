@@ -15,6 +15,7 @@
 class Board_graphic : public QAbstractListModel
 {
   Q_OBJECT
+
 public:
   enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
   const QString HELP_WORD = "help";
@@ -61,8 +62,8 @@ public:
   Q_PROPERTY(QStringList get_commands_hist READ get_commands_hist NOTIFY commands_hist_changed)
   QStringList get_commands_hist() const;
 
-  Q_PROPERTY(int get_command_hist_size READ get_command_hist_size NOTIFY commands_hist_changed)
-  int get_command_hist_size() const;
+  Q_PROPERTY(int get_last_elem_ind READ get_last_elem_ind NOTIFY commands_hist_changed)
+  int get_last_elem_ind() const;
 
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
   bool is_check_mate() const;
@@ -155,6 +156,5 @@ private:
   int _y;
   bool _visible;
 };
-
 
 #endif

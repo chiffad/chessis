@@ -142,7 +142,7 @@ void Board_graphic::run_command(const QString& message, const unsigned x1, const
         add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(from, to));
       }
     }
-    else add_to_command_history("Unknown command ('" + HELP_WORD + "' for help).");
+    else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
   }
 }
 
@@ -358,9 +358,9 @@ QStringList Board_graphic::get_commands_hist() const
   return _commands_history;
 }
 
-int Board_graphic::get_command_hist_size() const
+int Board_graphic::get_last_elem_ind() const
 {
-  return _commands_history.size();
+  return _commands_history.size() - 1;
 }
 
 QString Board_graphic::get_move_turn_color() const
