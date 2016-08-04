@@ -8,6 +8,11 @@ ApplicationWindow
   width: bOARD_SIZE + mENU_SIZE
   height: bOARD_SIZE
 
+  maximumHeight: height
+  minimumHeight: height
+  maximumWidth: width
+  minimumWidth: width
+
   readonly property int bOARD_SIZE: 560
   readonly property int mENU_SIZE: 200
   readonly property int cELL_SIZE: bOARD_SIZE / 8
@@ -16,14 +21,6 @@ ApplicationWindow
   readonly property int pASSIVE_FIGURE_Z: 2
   readonly property int aCTIVE_FIGURE_Z: 3
   readonly property int cHECK_MATE_IMG_Z: 4
-
-  readonly property string hELP_WORD : "help"
-  readonly property string mOVE_WORD : "move"
-  readonly property string bACK_MOVE : "back"
-  readonly property string sHOW_ME : "show me"
-  readonly property string nEW_GAME : "new game"
-  readonly property string hISTORY : "to history"
-  readonly property string sHOW_OPPONENT : "show opponent"
 
   BoardInit{id: _board}
 
@@ -45,7 +42,6 @@ ApplicationWindow
 
       x: x_coord * cELL_SIZE
       y: y_coord * cELL_SIZE
-      source: 'img/' + figure_name +'.png'
       visible: figure_visible
 
       MouseArea
@@ -61,7 +57,7 @@ ApplicationWindow
         enabled: figure_name != "hilight"
 
         onPressed:
-        {    
+        {
           _figureDelegate.z = aCTIVE_FIGURE_Z
           _dragArea.x1 = parent.x
           _dragArea.y1 = parent.y

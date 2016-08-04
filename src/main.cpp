@@ -6,6 +6,7 @@
 #include "headers/board_graphic.h"
 #include "headers/exporter.h"
 #include "headers/udp_socket.h"
+#include "headers/fb_obj.h"
 
 bool is_gui_quit = false;
 void gui_is_quit();
@@ -15,6 +16,8 @@ int main(int argc, char *argv[])
   QGuiApplication *app = new QGuiApplication(argc, argv);
   QQmlApplicationEngine *engine = new QQmlApplicationEngine;
   Board_graphic *board_graphic = new Board_graphic;
+
+  qmlRegisterType<Fb_obj>("CubeRendering", 1, 0, "Cube");
 
   engine->rootContext()->setContextProperty("FigureModel", board_graphic);
   engine->load(QUrl(QStringLiteral("chessis/res/app.qml")));

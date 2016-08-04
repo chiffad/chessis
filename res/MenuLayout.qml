@@ -12,6 +12,14 @@ Rectangle
   border.width: bORDER_WIDTH
   border.color: "black"
 
+  readonly property string hELP_WORD : "help"
+  readonly property string mOVE_WORD : "move"
+  readonly property string bACK_MOVE : "back"
+  readonly property string sHOW_ME : "show me"
+  readonly property string nEW_GAME : "new game"
+  readonly property string hISTORY : "to history"
+  readonly property string sHOW_OPPONENT : "show opponent"
+
   MoveOutput
   {
     id: _moveOutput
