@@ -7,8 +7,6 @@
 #include <QtGui/qopenglfunctions.h>
 #include <QOpenGLTexture>
 #include <QOpenGLBuffer>
-
-#include <QTime>
 #include <QVector>
 
 class Cube_renderer : protected QOpenGLFunctions
@@ -19,14 +17,13 @@ public:
   void render();
   void initialize();
   void set_cube_updates(const QVector3D scale_vect);
-  //void set_angle(const double x_angle, const double y_angle, const double z_angle);
 
 private:
   void create_geometry();
   void update_modelview();
 
 private:
-   enum CUBE_CHARACteRS{VERT_COORD = 3, VERTEX = 4, SIDES = 6};
+   enum CUBE_CHARACTERS{VERTEX = 4, SIDES = 6};
 
 private:
   QVector<QOpenGLTexture*> m_board_texture;

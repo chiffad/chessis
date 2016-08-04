@@ -373,11 +373,6 @@ QString Board_graphic::get_udp_connection_status() const
   return _udp_connection_status;
 }
 
-QChar Board_graphic::letter_return(const unsigned index) const
-{
-  return QChar(a_LETTER + index);
-}
-
 void Board_graphic::addFigure(const Figure &figure)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());

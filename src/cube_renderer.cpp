@@ -99,7 +99,7 @@ void Cube_renderer::render()
   m_program->setAttributeBuffer(m_VERTEX_ATTRIBUTE, GL_FLOAT,   0                  , 3, 5 * sizeof(GLfloat));
   m_program->setAttributeBuffer(m_TEXCOORD_ATTRIBUTE, GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
 
-  m_board_texture[0]->bind();
+  m_board_texture.first()->bind();
 
   for(int i = 0; i < SIDES; ++i)
   {

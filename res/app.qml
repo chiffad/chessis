@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.4
+import CubeRendering 1.0
 
 ApplicationWindow
 {
@@ -22,7 +23,12 @@ ApplicationWindow
   readonly property int aCTIVE_FIGURE_Z: 3
   readonly property int cHECK_MATE_IMG_Z: 4
 
-  BoardInit{id: _board}
+  BoardInit
+  {
+    id: _board
+    width: bOARD_SIZE
+    height: bOARD_SIZE
+  }
 
   MenuLayout
   {
@@ -31,7 +37,7 @@ ApplicationWindow
     anchors.right: parent.right
   }
 
-  Repeater
+ /* Repeater
   {
     id: _repeater
     model: FigureModel
@@ -69,7 +75,7 @@ ApplicationWindow
         }
       }
     }
-  }
+  }*/
 
   Image
   {
