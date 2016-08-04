@@ -1,3 +1,5 @@
+TEMPLATE = app
+
 QT += qml quick \
       widgets \
       core\

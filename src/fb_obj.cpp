@@ -6,6 +6,7 @@
 
 Fb_obj::Fb_obj()
 {
+  qDebug()<<"here";
 }
 
 Fb_obj::~Fb_obj()

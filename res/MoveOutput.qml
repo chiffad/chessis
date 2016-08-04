@@ -47,7 +47,7 @@ Rectangle
           FigureModel.run_command(hISTORY, index)
         }
         onReleased: parent.color = (index % 2) == 1 ? "navajowhite" : "lightyellow"
-      }    
+      }
     }
   }
 }

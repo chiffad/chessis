@@ -1,8 +1,9 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.4
+import QtQuick.Window 2.2
 import CubeRendering 1.0
 
-ApplicationWindow
+Window
 {
   id: root
   visible: true
@@ -23,13 +24,6 @@ ApplicationWindow
   readonly property int aCTIVE_FIGURE_Z: 3
   readonly property int cHECK_MATE_IMG_Z: 4
 
-  BoardInit
-  {
-    id: _board
-    width: bOARD_SIZE
-    height: bOARD_SIZE
-  }
-
   MenuLayout
   {
     height: parent.height
@@ -37,7 +31,31 @@ ApplicationWindow
     anchors.right: parent.right
   }
 
- /* Repeater
+  Image
+  {
+    id: _checkMate
+    source: "img/checkMate.png"
+    z: cHECK_MATE_IMG_Z
+    width: _board.width
+    height: _board.height / 2
+    anchors.centerIn: _board
+    visible: false//FigureModel.is_check_mate
+
+    MouseArea
+    {
+      anchors.fill: parent
+      onClicked: parent.visible = false
+    }
+  }
+
+  BoardInit
+  {
+    id: _board
+    width: bOARD_SIZE
+    height: bOARD_SIZE
+  }
+
+  Repeater
   {
     id: _repeater
     model: FigureModel
@@ -46,9 +64,9 @@ ApplicationWindow
     {
       id: _figureDelegate
 
-      x: x_coord * cELL_SIZE
-      y: y_coord * cELL_SIZE
-      visible: figure_visible
+      //x: x_coord * cELL_SIZE
+      //y: y_coord * cELL_SIZE
+      visible: true//figure_visible
 
       MouseArea
       {
@@ -62,7 +80,7 @@ ApplicationWindow
         drag.minimumY: 0
         enabled: figure_name != "hilight"
 
-        onPressed:
+        /*onPressed:
         {
           _figureDelegate.z = aCTIVE_FIGURE_Z
           _dragArea.x1 = parent.x
@@ -72,25 +90,8 @@ ApplicationWindow
         {
           _figureDelegate.z = pASSIVE_FIGURE_Z
           FigureModel.run_command(mOVE_WORD, x1, y1, parent.x, parent.y)
-        }
+        }*/
       }
-    }
-  }*/
-
-  Image
-  {
-    id: _checkMate
-    source: "img/checkMate.png"
-    z: cHECK_MATE_IMG_Z
-    width: _board.width
-    height: _board.height / 2
-    anchors.centerIn: _board
-    visible: FigureModel.is_check_mate
-
-    MouseArea
-    {
-      anchors.fill: parent
-      onClicked: parent.visible = false
     }
   }
 }

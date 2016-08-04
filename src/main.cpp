@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
   UDP_socket *udp_socet = new UDP_socket;
   Exporter *exporter = new Exporter(board_graphic, udp_socet);
 
-  const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
+  const double CHECK_TIME = 2.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();
   while(!is_gui_quit)
   {

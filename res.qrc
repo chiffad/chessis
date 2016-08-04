@@ -22,5 +22,6 @@
         <file>res/img/checkMate.png</file>
         <file>res/img/hilight.png</file>
         <file>res/CommandField.qml</file>
+        <file>res/img/board_side_2.jpg</file>
     </qresource>
 </RCC>

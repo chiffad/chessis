@@ -11,8 +11,9 @@
 Cube_renderer::Cube_renderer() : m_program(new QOpenGLShaderProgram), m_x_angle(-30), m_y_angle(0), m_z_angle(0),
                                  m_scale_vect(1,1,1), m_VERTEX_ATTRIBUTE(0), m_TEXCOORD_ATTRIBUTE(1)
 {
-  m_board_texture.append(new QOpenGLTexture(QImage("chessis/res/img/board.png")));
-  m_board_texture.append(new QOpenGLTexture(QImage("chessis/res/img/board_side_2.jpg")));
+  qDebug()<<"Cube_renderer()";
+  m_board_texture.append(new QOpenGLTexture(QImage("/home/chiffa/prj/!chess/chessis/res/img/board.png")));
+  m_board_texture.append(new QOpenGLTexture(QImage("/home/chiffa/prj/!chess/chessis/res/img/board_side_2.jpg")));
   update_modelview();
 }
 
@@ -99,7 +100,7 @@ void Cube_renderer::render()
   m_program->setAttributeBuffer(m_VERTEX_ATTRIBUTE, GL_FLOAT,   0                  , 3, 5 * sizeof(GLfloat));
   m_program->setAttributeBuffer(m_TEXCOORD_ATTRIBUTE, GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
 
-  m_board_texture.first()->bind();
+  m_board_texture[0]->bind();
 
   for(int i = 0; i < SIDES; ++i)
   {
