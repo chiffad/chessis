@@ -53,6 +53,7 @@ Window
     id: _board
     width: bOARD_SIZE
     height: bOARD_SIZE
+    _board.pressEvent();
   }
 
   Repeater
@@ -80,12 +81,14 @@ Window
         drag.minimumY: 0
         enabled: figure_name != "hilight"
 
-        /*onPressed:
+        onPressed:
         {
-          _figureDelegate.z = aCTIVE_FIGURE_Z
-          _dragArea.x1 = parent.x
-          _dragArea.y1 = parent.y
+           _figure_delegate.pressEvent();
+//          _figureDelegate.z = aCTIVE_FIGURE_Z
+//          _dragArea.x1 = parent.x
+//          _dragArea.y1 = parent.y
         }
+  /*
         onReleased:
         {
           _figureDelegate.z = pASSIVE_FIGURE_Z

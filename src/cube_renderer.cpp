@@ -12,8 +12,8 @@ Cube_renderer::Cube_renderer() : m_program(new QOpenGLShaderProgram), m_x_angle(
                                  m_scale_vect(1,1,1), m_VERTEX_ATTRIBUTE(0), m_TEXCOORD_ATTRIBUTE(1)
 {
   qDebug()<<"Cube_renderer()";
-  m_board_texture.append(new QOpenGLTexture(QImage("/home/chiffa/prj/!chess/chessis/res/img/board.png")));
-  m_board_texture.append(new QOpenGLTexture(QImage("/home/chiffa/prj/!chess/chessis/res/img/board_side_2.jpg")));
+  m_board_texture.append(new QOpenGLTexture(QImage("../chessis/res/img/board.png")));
+  m_board_texture.append(new QOpenGLTexture(QImage("../chessis/res/img/board_side_2.jpg")));
   update_modelview();
 }
 

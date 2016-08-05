@@ -13,14 +13,14 @@ void gui_is_quit();
 
 int main(int argc, char *argv[])
 {
-  QGuiApplication *app = new QGuiApplication(argc, argv);
-  QQmlApplicationEngine *engine = new QQmlApplicationEngine;
-  Board_graphic *board_graphic = new Board_graphic;
-
   qmlRegisterType<Fb_obj>("CubeRendering", 1, 0, "Cube");
 
+  QGuiApplication *app = new QGuiApplication(argc, argv);
+  QQmlApplicationEngine *engine = new QQmlApplicationEngine("../chessis/res/app.qml");
+  Board_graphic *board_graphic = new Board_graphic;
+
   engine->rootContext()->setContextProperty("FigureModel", board_graphic);
-  engine->load(QUrl(QStringLiteral("chessis/res/app.qml")));
+
   QObject::connect(engine, &QQmlApplicationEngine::quit, &gui_is_quit);
 
   UDP_socket *udp_socet = new UDP_socket;

@@ -16,6 +16,8 @@ public:
   QString get_fig_type() const;
   void set_fig_type(const QString &name);
 
+  Q_INVOKABLE void pressEvent();
+
 private:
   QString m_fig_type;
 };
