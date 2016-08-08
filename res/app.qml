@@ -28,7 +28,8 @@ Window
   MenuLayout
   {
     height: parent.height
-    anchors.left: _board.right
+    width: mENU_SIZE
+    //anchors.left: _board.right
     anchors.right: parent.right
   }
 
@@ -40,7 +41,7 @@ Window
     width: _board.width
     height: _board.height / 2
     anchors.centerIn: _board
-    visible: false//FigureModel.is_check_mate
+    visible: FigureModel.is_check_mate
 
     MouseArea
     {
@@ -56,17 +57,18 @@ Window
     width: bOARD_SIZE
     height: bOARD_SIZE
     anchors.left: parent.left
+    z: bOARD_Z
 
     fig_type: "board"
 
     MouseArea
     {
       anchors.fill: parent
-      onPressed: _board.pressEvent();
+      onPressed: _board.pressEvent("board");
     }
   }
 
-  /*Repeater
+  Repeater
   {
     id: _repeater
 
@@ -81,12 +83,12 @@ Window
 
       fig_type: "cube"
 
-      //x: x_coord * cELL_SIZE
-      //y: y_coord * cELL_SIZE
+     // x: x_coord * cELL_SIZE
+     // y: y_coord * cELL_SIZE
       //z: figure_name == "hilight"? cELL_HILIGHT_Z : pASSIVE_FIGURE_Z
 
       visible: true//figure_visible
-      opacity: figure_name == "hilight" ? 0.5 : 1.0
+     // opacity: figure_name == "hilight" ? 0.5 : 1.0
 
       MouseArea
       {
@@ -94,26 +96,28 @@ Window
 
         property int x1
         property int y1
-        drag.target: parent
+
+        Drag.active: true
+        drag.target: _figure_delegate
         anchors.fill: parent
         drag.minimumX: 0
         drag.minimumY: 0
-        enabled: figure_name != "hilight"
+      //  enabled: figure_name != "hilight"
 
         onPressed:
         {
-          _figure_delegate.pressEvent();
-          _figureDelegate.z = aCTIVE_FIGURE_Z
+          _figure_delegate.pressEvent("pawn");
+          _figure_delegate.z = aCTIVE_FIGURE_Z
           _dragArea.x1 = parent.x
           _dragArea.y1 = parent.y
         }
 
-        onReleased:
-        {
-          _figureDelegate.z = pASSIVE_FIGURE_Z
-          FigureModel.run_command(mOVE_WORD, x1, y1, parent.x, parent.y)
-        }
+//        onReleased:
+//        {
+//          _figureDelegate.z = pASSIVE_FIGURE_Z
+//          FigureModel.run_command(mOVE_WORD, x1, y1, parent.x, parent.y)
+//        }
       }
     }
-  }*/
+  }
 }

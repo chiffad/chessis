@@ -12,9 +12,9 @@ Fb_obj::~Fb_obj()
 {
 }
 
-void Fb_obj::pressEvent()
+void Fb_obj::pressEvent(QString str)
 {
-  qDebug()<<"pressEvent()";
+  qDebug()<<str;
 }
 
 QQuickFramebufferObject::Renderer* Fb_obj::createRenderer() const

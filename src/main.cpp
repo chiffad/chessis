@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
   QGuiApplication *app = new QGuiApplication(argc, argv);
   QQmlApplicationEngine *engine = new QQmlApplicationEngine("../chessis/res/app.qml");
-  Board_graphic *board_graphic = new Board_graphic;
+  Board_graphic *board_graphic = new Board_graphic();
 
   engine->rootContext()->setContextProperty("FigureModel", board_graphic);
 
