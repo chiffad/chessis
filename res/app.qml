@@ -1,6 +1,7 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.4
 import QtQuick.Window 2.2
+
 import CubeRendering 1.0
 
 Window
@@ -48,26 +49,44 @@ Window
     }
   }
 
-  BoardInit
+  Cube
   {
     id: _board
+
     width: bOARD_SIZE
     height: bOARD_SIZE
-    _board.pressEvent();
+    anchors.left: parent.left
+
+    fig_type: "board"
+
+    MouseArea
+    {
+      anchors.fill: parent
+      onPressed: _board.pressEvent();
+    }
   }
 
-  Repeater
+  /*Repeater
   {
     id: _repeater
+
     model: FigureModel
 
-    delegate: FigureDelegate
+    delegate: Cube
     {
-      id: _figureDelegate
+      id: _figure_delegate
+
+      width: cELL_SIZE
+      height: width
+
+      fig_type: "cube"
 
       //x: x_coord * cELL_SIZE
       //y: y_coord * cELL_SIZE
+      //z: figure_name == "hilight"? cELL_HILIGHT_Z : pASSIVE_FIGURE_Z
+
       visible: true//figure_visible
+      opacity: figure_name == "hilight" ? 0.5 : 1.0
 
       MouseArea
       {
@@ -83,18 +102,18 @@ Window
 
         onPressed:
         {
-           _figure_delegate.pressEvent();
-//          _figureDelegate.z = aCTIVE_FIGURE_Z
-//          _dragArea.x1 = parent.x
-//          _dragArea.y1 = parent.y
+          _figure_delegate.pressEvent();
+          _figureDelegate.z = aCTIVE_FIGURE_Z
+          _dragArea.x1 = parent.x
+          _dragArea.y1 = parent.y
         }
-  /*
+
         onReleased:
         {
           _figureDelegate.z = pASSIVE_FIGURE_Z
           FigureModel.run_command(mOVE_WORD, x1, y1, parent.x, parent.y)
-        }*/
+        }
       }
     }
-  }
+  }*/
 }

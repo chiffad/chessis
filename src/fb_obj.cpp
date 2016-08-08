@@ -61,7 +61,6 @@ void Fbo_renderer::render()
 
 void Fbo_renderer::synchronize(QQuickFramebufferObject *item)
 {
-  qDebug()<<"synchronize";
   Fb_obj *fb_item = static_cast<Fb_obj *>(item);
   m_fig_type = fb_item->get_fig_type();
   update_cube();
