@@ -36,7 +36,6 @@ private:
   float m_y_angle;
   float m_z_angle;
   QVector3D m_scale_vect;
-  QVector<QString> figures_names;
 
   const int m_VERTEX_ATTRIBUTE;
   const int m_TEXCOORD_ATTRIBUTE;
