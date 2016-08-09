@@ -16,7 +16,7 @@ public:
   ~Cube_renderer();
   void render();
   void initialize();
-  void set_cube_updates(const QVector3D scale_vect);
+  void set_cube_updates(const QString &fig_type);
 
 private:
   void create_geometry();
@@ -36,6 +36,7 @@ private:
   float m_y_angle;
   float m_z_angle;
   QVector3D m_scale_vect;
+  QVector<QString> figures_names;
 
   const int m_VERTEX_ATTRIBUTE;
   const int m_TEXCOORD_ATTRIBUTE;

@@ -11,9 +11,9 @@
 Cube_renderer::Cube_renderer() : m_program(new QOpenGLShaderProgram), m_x_angle(-30), m_y_angle(0), m_z_angle(0),
                                  m_scale_vect(1,1,1), m_VERTEX_ATTRIBUTE(0), m_TEXCOORD_ATTRIBUTE(1)
 {
-  qDebug()<<"cube renderer";
   m_board_texture.append(new QOpenGLTexture(QImage("../chessis/res/img/board.png")));
   m_board_texture.append(new QOpenGLTexture(QImage("../chessis/res/img/board_side_2.jpg")));
+
   update_modelview();
 }
 
@@ -68,9 +68,17 @@ void Cube_renderer::initialize()
   m_program->setUniformValue("texture", 0);
 }
 
-void Cube_renderer::set_cube_updates(const QVector3D scale_vect)
+void Cube_renderer::set_cube_updates(const QString &fig_name)
 {
-  m_scale_vect = scale_vect;
+  if(fig_name == "board")
+  {
+    m_scale_vect = QVector3D(1,1,0.06);
+  }
+  else
+  {
+    m_scale_vect =  QVector3D(1,1,1);
+  }
+
   update_modelview();
   render();
 }

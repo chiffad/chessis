@@ -12,14 +12,14 @@
         <file>res/img/w_p.png</file>
         <file>res/img/w_q.png</file>
         <file>res/img/w_r.png</file>
-        <file>res/app.qml</file>
         <file>res/img/board.png</file>
+        <file>res/img/board_side_2.jpg</file>
+        <file>res/img/checkMate.png</file>
+        <file>res/img/hilight.png</file>
+        <file>res/app.qml</file>
         <file>res/MenuLayout.qml</file>
         <file>res/MoveTurn.qml</file>
         <file>res/MoveOutput.qml</file>
-        <file>res/img/checkMate.png</file>
-        <file>res/img/hilight.png</file>
         <file>res/CommandField.qml</file>
-        <file>res/img/board_side_2.jpg</file>
     </qresource>
 </RCC>
