@@ -2,7 +2,10 @@ import QtQuick 2.0
 
 Rectangle
 {
-  border.width: bORDER_WIDTH
+  property alias im_source: _image.source
+
+  anchors.topMargin: border.width
+
   border.color: "black"
   radius: rADIUS
 
@@ -11,7 +14,7 @@ Rectangle
     id: _text
     anchors.left: parent.left
     anchors.top: parent.top
-    anchors.leftMargin: bORDER_WIDTH
+    anchors.leftMargin: parent.border.width
     anchors.verticalCenter: parent.verticalCenter
     width: parent.width - cELL_SIZE - parent.width/10
 
@@ -35,7 +38,5 @@ Rectangle
 
     width: cELL_SIZE
     height: width
-
-    source: FigureModel.get_move_turn_color
   }
 }

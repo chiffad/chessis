@@ -25,10 +25,12 @@ Rectangle
     id: _moveOutput
     anchors.left: parent.left
     anchors.top: parent.top
-    anchors.topMargin: bORDER_WIDTH
 
     width: parent.width
     height: parent.height/4
+    border.width: bORDER_WIDTH
+
+    model: FigureModel.get_moves_history
   }
 
   MoveTurn
@@ -36,9 +38,12 @@ Rectangle
     id: _moveTurn
     anchors.left: parent.left
     anchors.top: _moveOutput.bottom
-    anchors.topMargin: bORDER_WIDTH
     width: parent.width
     height: parent.height/8
+
+    border.width: bORDER_WIDTH
+
+    im_source: FigureModel.get_move_turn_color
   }
 
   Button
@@ -161,5 +166,8 @@ Rectangle
     anchors.bottomMargin: bORDER_WIDTH
     anchors.rightMargin: bORDER_WIDTH
     anchors.leftMargin: bORDER_WIDTH
+
+    currentIndex: FigureModel.get_last_elem_ind
+    model: FigureModel.get_commands_hist
   }
 }

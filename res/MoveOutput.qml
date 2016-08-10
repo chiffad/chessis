@@ -3,19 +3,22 @@ import QtQml.Models 2.2
 
 Rectangle
 {
+  property alias model: _grid.model
+
   readonly property int eLEMENT_HEIGHT: 20
 
-  border.width: bORDER_WIDTH
+  anchors.topMargin: border.width
+
   border.color: "black"
   radius: rADIUS
 
   GridView
   {
-    anchors.fill: parent
-    anchors.margins: bORDER_WIDTH
-    clip: true
+    id: _grid
 
-    model: FigureModel.get_moves_history
+    anchors.fill: parent
+    anchors.margins: parent.border.width
+    clip: true
 
     cellWidth: parent.width / 2 - 2
     cellHeight: eLEMENT_HEIGHT
@@ -23,6 +26,7 @@ Rectangle
     delegate:  Rectangle
     {
       id: _moveNumber
+
       width: parent.width / 2
       height: eLEMENT_HEIGHT
       radius: rADIUS
@@ -43,7 +47,7 @@ Rectangle
         anchors.fill: parent
         onPressed:
         {
-          parent.color = "	lightskyblue"
+          parent.color = "lightskyblue"
           FigureModel.run_command(hISTORY, index)
         }
         onReleased: parent.color = (index % 2) == 1 ? "navajowhite" : "lightyellow"

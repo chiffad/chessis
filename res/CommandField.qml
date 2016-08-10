@@ -4,6 +4,11 @@ import QtQuick.Controls 1.4
 Rectangle
 {
   id: _root
+
+  property alias currentIndex: _list_view.currentIndex
+
+  property alias model: _list_view.model
+
   border.color: "white"
   radius: rADIUS
   color: "blue"
@@ -11,8 +16,9 @@ Rectangle
 
   ListView
   {
-    anchors.left: parent.left
-    anchors.right: parent.right
+    id: _list_view
+
+    anchors.horizontalCenter: parent.horizontalCenter
     anchors.leftMargin: 2
     anchors.rightMargin: 2
     anchors.top: parent.top
@@ -20,7 +26,6 @@ Rectangle
 
     clip:true
 
-    model: FigureModel.get_commands_hist
     delegate:
       Text
       {
@@ -29,16 +34,14 @@ Rectangle
         wrapMode: Text.Wrap
         text: modelData
       }
-
-    currentIndex: FigureModel.get_last_elem_ind
   }
 
   TextInput
   {
     id: text_input
+
+    anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
     anchors.leftMargin: 2
     anchors.rightMargin: 2
     anchors.bottomMargin: 2
@@ -51,7 +54,7 @@ Rectangle
     onAccepted:
     {
       FigureModel.run_command(text);
-      text = "";
+      clear();
     }
   }
 
