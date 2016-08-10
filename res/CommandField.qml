@@ -6,8 +6,9 @@ Rectangle
   id: _root
 
   property alias currentIndex: _list_view.currentIndex
-
   property alias model: _list_view.model
+  property alias text_inp: _text_input
+  signal text_inp_accepted
 
   border.color: "white"
   radius: rADIUS
@@ -22,7 +23,7 @@ Rectangle
     anchors.leftMargin: 2
     anchors.rightMargin: 2
     anchors.top: parent.top
-    anchors.bottom: text_input.top
+    anchors.bottom: _text_input.top
 
     clip:true
 
@@ -38,7 +39,7 @@ Rectangle
 
   TextInput
   {
-    id: text_input
+    id: _text_input
 
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
@@ -51,21 +52,17 @@ Rectangle
     wrapMode: TextInput.Wrap
     color: "white"
 
-    onAccepted:
-    {
-      FigureModel.run_command(text);
-      clear();
-    }
+    onAccepted: _root.text_inp_accepted()
   }
 
   Keys.onPressed:
   {
     if(event.key === Qt.Key_F1)
     {
-      text_input.text = ""
+      _text_input.clear();
       _root.visible = true;
     }
     if(event.key === Qt.Key_Escape)
-      _root.visible = false
+      _root.visible = false;
   }
 }

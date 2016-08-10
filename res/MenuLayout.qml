@@ -23,19 +23,53 @@ Rectangle
   MoveOutput
   {
     id: _moveOutput
+
     anchors.left: parent.left
     anchors.top: parent.top
 
     width: parent.width
     height: parent.height/4
     border.width: bORDER_WIDTH
+    radius: rADIUS
 
     model: FigureModel.get_moves_history
+
+    delegate:  Rectangle
+    {
+      id: _moveNumber
+
+      width: parent.width / 2
+      height: eLEMENT_HEIGHT
+      radius: parent.radius
+
+      color: (index % 2) == 1 ? "navajowhite" : "lightyellow"
+
+      border.width: 1
+      border.color: Qt.darker(color)
+
+      Text
+      {
+        text: (index % 2 == 0 ? ((index / 2) + 1) + ". " : "") + modelData;
+        anchors.horizontalCenter: parent.horizontalCenter
+      }
+
+      MouseArea
+      {
+        anchors.fill: parent
+        onPressed:
+        {
+          parent.color = "lightskyblue"
+          FigureModel.run_command(hISTORY, index)
+        }
+        onReleased: parent.color = (index % 2) == 1 ? "navajowhite" : "lightyellow"
+      }
+    }
   }
 
   MoveTurn
   {
-    id: _moveTurn
+    id: _move_turn
+
     anchors.left: parent.left
     anchors.top: _moveOutput.bottom
     width: parent.width
@@ -49,8 +83,9 @@ Rectangle
   Button
   {
     id: _back_move_button
+
     anchors.left: parent.left
-    anchors.top: _moveTurn.bottom
+    anchors.top: _move_turn.bottom
     anchors.topMargin: bORDER_WIDTH
     anchors.leftMargin: bORDER_WIDTH
     width: parent.width/2
@@ -65,9 +100,10 @@ Rectangle
   Button
   {
     id: _start_new_game
+
     anchors.left: _back_move_button.right
     anchors.right: parent.right
-    anchors.top: _moveTurn.bottom
+    anchors.top: _move_turn.bottom
     anchors.topMargin: bORDER_WIDTH
     anchors.rightMargin: bORDER_WIDTH
     width: parent.width/2
@@ -82,6 +118,7 @@ Rectangle
   Button
   {
     id: _moves_from_file
+
     anchors.left: parent.left
     anchors.top: _start_new_game.bottom
     anchors.topMargin: bORDER_WIDTH
@@ -101,6 +138,7 @@ Rectangle
   Button
   {
     id: _moves_to_file
+
     anchors.left:  _moves_from_file.right
     anchors.right: parent.right
     anchors.top: _start_new_game.bottom
@@ -139,8 +177,8 @@ Rectangle
   Rectangle
   {
     id: _connection_status
-    anchors.left: parent.left
-    anchors.right: parent.right
+
+    anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
     anchors.leftMargin: bORDER_WIDTH
     anchors.rightMargin: bORDER_WIDTH
@@ -150,6 +188,7 @@ Rectangle
 
     Text
     {
+      id: _text
       anchors.fill: parent
       text: FigureModel.get_udp_connection_status
     }
@@ -158,8 +197,8 @@ Rectangle
   CommandField
   {
     id: _command_field
-    anchors.left: parent.left
-    anchors.right: parent.right
+
+    anchors.horizontalCenter: parent.horizontalCenter
     anchors.top: _moves_from_file.bottom
     anchors.bottom: _connection_status.top
     anchors.topMargin: bORDER_WIDTH
@@ -169,5 +208,11 @@ Rectangle
 
     currentIndex: FigureModel.get_last_elem_ind
     model: FigureModel.get_commands_hist
+
+    onText_inp_accepted:
+    {
+      FigureModel.run_command(text_inp.text);
+      text_inp.clear()
+    }
   }
 }

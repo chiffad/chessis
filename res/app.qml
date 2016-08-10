@@ -7,6 +7,7 @@ import CubeRendering 1.0
 Window
 {
   id: root
+
   visible: true
   width: bOARD_SIZE + mENU_SIZE
   height: bOARD_SIZE
@@ -35,7 +36,8 @@ Window
 
   Image
   {
-    id: _checkMate
+    id: _check_mate
+
     source: "img/checkMate.png"
     z: cHECK_MATE_IMG_Z
     width: _board.width
@@ -70,7 +72,7 @@ Window
 
   Repeater
   {
-    id: _repeater
+    id: _figures
 
     model: FigureModel
 
