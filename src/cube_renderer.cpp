@@ -8,12 +8,11 @@
 #include <algorithm>
 #include "headers/cube_renderer.h"
 
-Cube_renderer::Cube_renderer() : m_program(new QOpenGLShaderProgram), m_x_angle(-30), m_y_angle(0), m_z_angle(0),
-                                 m_scale_vect(1,1,1), m_VERTEX_ATTRIBUTE(0), m_TEXCOORD_ATTRIBUTE(1)
+Cube_renderer::Cube_renderer(const QString &fig_type) : m_program(new QOpenGLShaderProgram), m_x_angle(-30), m_y_angle(0),
+                                                        m_z_angle(0), m_scale_vect(1,1,1), m_VERTEX_ATTRIBUTE(0),
+                                                        m_TEXCOORD_ATTRIBUTE(1)
 {
-  m_board_texture.append(new QOpenGLTexture(QImage("../chessis/res/img/board.png")));
-  m_board_texture.append(new QOpenGLTexture(QImage("../chessis/res/img/board_side_2.jpg")));
-
+  load_correct_textur(fig_type);
   update_modelview();
 }
 
@@ -70,18 +69,31 @@ void Cube_renderer::initialize()
 
 void Cube_renderer::set_cube_updates(const QString &fig_name)
 {
-  if(fig_name == "board")
+  load_correct_textur(fig_name);
+  update_modelview();
+  render();
+}
+
+void Cube_renderer::load_correct_textur(const QString &fig_type)
+{
+  m_board_texture.clear();
+
+  const QString PATH_TO_IMG = "../chessis/res/img/";
+
+  if(fig_type == "board")
   {
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board.png")));
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board_side.png")));
     m_scale_vect = QVector3D(1,1,0.06);
   }
   else
   {
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "b_P.png")));//fig_type + ".png")));
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "b" + ".png")));//*fig_type.begin() + ".png")));
     m_scale_vect =  QVector3D(1,1,1);
   }
-
-  update_modelview();
-  render();
 }
+
 
 void Cube_renderer::update_modelview()
 {
@@ -108,11 +120,11 @@ void Cube_renderer::render()
   m_program->setAttributeBuffer(m_VERTEX_ATTRIBUTE, GL_FLOAT,   0                  , 3, 5 * sizeof(GLfloat));
   m_program->setAttributeBuffer(m_TEXCOORD_ATTRIBUTE, GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
 
-  m_board_texture[0]->bind();
+  m_board_texture.first()->bind();
 
   for(int i = 0; i < SIDES; ++i)
   {
-    if(i) m_board_texture[1]->bind();
+    if(i == 1) m_board_texture.last()->bind();
     glDrawArrays(GL_TRIANGLE_FAN, i * VERTEX, VERTEX);
   }
 }

@@ -13,7 +13,9 @@
         <file>res/img/w_q.png</file>
         <file>res/img/w_r.png</file>
         <file>res/img/board.png</file>
-        <file>res/img/board_side_2.jpg</file>
+        <file>res/img/board_side.png</file>
+        <file>res/img/w.png</file>
+        <file>res/img/b.png</file>
         <file>res/img/checkMate.png</file>
         <file>res/img/hilight.png</file>
         <file>res/app.qml</file>

@@ -34,7 +34,7 @@ public:
   void update_cube();
 
 private:
-  Cube_renderer *cube;
   QString m_fig_type;
+  Cube_renderer *cube;
 };
 #endif

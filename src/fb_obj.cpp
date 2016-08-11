@@ -34,7 +34,7 @@ void Fb_obj::set_fig_type(const QString &name)
 
 //======================================================
 
-Fbo_renderer::Fbo_renderer() : cube(new Cube_renderer())
+Fbo_renderer::Fbo_renderer() : m_fig_type("board"), cube(new Cube_renderer(m_fig_type))
 {
   cube->initialize();
   update();

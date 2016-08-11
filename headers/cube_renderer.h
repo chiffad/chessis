@@ -12,7 +12,7 @@
 class Cube_renderer : protected QOpenGLFunctions
 {
 public:
-  explicit Cube_renderer();
+  explicit Cube_renderer(const QString &fig_type);
   ~Cube_renderer();
   void render();
   void initialize();
@@ -21,6 +21,7 @@ public:
 private:
   void create_geometry();
   void update_modelview();
+  void load_correct_textur(const QString &fig_type);
 
 private:
    enum CUBE_CHARACTERS{VERTEX = 4, SIDES = 6};

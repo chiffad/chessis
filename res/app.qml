@@ -92,11 +92,11 @@ Window
       width: cELL_SIZE
       height: width
 
-      fig_type: "cube"
+      fig_type: figure_name
 
-     // x: x_coord * cELL_SIZE
-     // y: y_coord * cELL_SIZE
-      //z: figure_name == "hilight"? cELL_HILIGHT_Z : pASSIVE_FIGURE_Z
+      x: x_coord * cELL_SIZE
+      y: y_coord * cELL_SIZE
+      z: figure_name == "hilight"? cELL_HILIGHT_Z : pASSIVE_FIGURE_Z
 
       visible: true//figure_visible
      // opacity: figure_name == "hilight" ? 0.5 : 1.0
