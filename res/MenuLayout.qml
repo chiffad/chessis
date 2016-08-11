@@ -4,6 +4,17 @@ import QtQuick.Dialogs 1.2
 
 Rectangle
 {
+  id: _root
+
+  property alias _move_output_model: _move_output.model
+  property alias _move_turn_im_source: _move_turn.im_source
+  property alias _connection_status_text: _connection_status.text
+  property alias _command_field_current_ind: _command_field.currentIndex
+  property alias _command_field_model: _command_field.model
+
+  signal run_command(string command, int num)
+  signal work_with_file(string path_to_file, bool is_from_file)
+
   color: "bisque"
 
   readonly property int bORDER_WIDTH: 2
@@ -12,17 +23,17 @@ Rectangle
   border.width: bORDER_WIDTH
   border.color: "black"
 
+  readonly property string sHOW_OPPONENT : "show opponent"
   readonly property string hELP_WORD : "help"
   readonly property string mOVE_WORD : "move"
   readonly property string bACK_MOVE : "back"
-  readonly property string sHOW_ME : "show me"
   readonly property string nEW_GAME : "new game"
+  readonly property string sHOW_ME : "show me"
   readonly property string hISTORY : "to history"
-  readonly property string sHOW_OPPONENT : "show opponent"
 
   MoveOutput
   {
-    id: _moveOutput
+    id: _move_output
 
     anchors.left: parent.left
     anchors.top: parent.top
@@ -31,8 +42,6 @@ Rectangle
     height: parent.height/4
     border.width: bORDER_WIDTH
     radius: rADIUS
-
-    model: FigureModel.get_moves_history
 
     delegate:  Rectangle
     {
@@ -59,7 +68,7 @@ Rectangle
         onPressed:
         {
           parent.color = "lightskyblue"
-          FigureModel.run_command(hISTORY, index)
+          _root.run_command(hISTORY, index)
         }
         onReleased: parent.color = (index % 2) == 1 ? "navajowhite" : "lightyellow"
       }
@@ -71,13 +80,11 @@ Rectangle
     id: _move_turn
 
     anchors.left: parent.left
-    anchors.top: _moveOutput.bottom
+    anchors.top: _move_output.bottom
     width: parent.width
     height: parent.height/8
 
     border.width: bORDER_WIDTH
-
-    im_source: FigureModel.get_move_turn_color
   }
 
   Button
@@ -93,8 +100,7 @@ Rectangle
 
     text: "Back move"
 
-    onClicked:
-      FigureModel.run_command(bACK_MOVE);
+    onClicked: _root.run_command(bACK_MOVE,0);
   }
 
   Button
@@ -111,8 +117,7 @@ Rectangle
 
     text: "New game"
 
-    onClicked:
-      FigureModel.run_command(nEW_GAME);
+    onClicked: _root.run_command(nEW_GAME,0)
   }
 
   Button
@@ -170,11 +175,11 @@ Rectangle
     onAccepted:
     {
       parent.visible = false;
-      FigureModel.path_to_file(_file_dialog.fileUrls, _file_dialog._is_moves_from_file);
+      _root.work_with_file(_file_dialog.fileUrls, _file_dialog._is_moves_from_file)
     }
   }
 
-  Rectangle
+  ConnectionStatus
   {
     id: _connection_status
 
@@ -183,15 +188,6 @@ Rectangle
     anchors.leftMargin: bORDER_WIDTH
     anchors.rightMargin: bORDER_WIDTH
     anchors.bottomMargin: bORDER_WIDTH
-    height: 20
-    color: parent.color
-
-    Text
-    {
-      id: _text
-      anchors.fill: parent
-      text: FigureModel.get_udp_connection_status
-    }
   }
 
   CommandField
@@ -206,12 +202,9 @@ Rectangle
     anchors.rightMargin: bORDER_WIDTH
     anchors.leftMargin: bORDER_WIDTH
 
-    currentIndex: FigureModel.get_last_elem_ind
-    model: FigureModel.get_commands_hist
-
     onText_inp_accepted:
     {
-      FigureModel.run_command(text_inp.text);
+      _root.run_command(text_inp.text,0)
       text_inp.clear()
     }
   }

@@ -17,6 +17,7 @@
         <file>res/img/checkMate.png</file>
         <file>res/img/hilight.png</file>
         <file>res/app.qml</file>
+        <file>res/ConnectionStatus.qml</file>
         <file>res/MenuLayout.qml</file>
         <file>res/MoveTurn.qml</file>
         <file>res/MoveOutput.qml</file>

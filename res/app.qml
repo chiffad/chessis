@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Window 2.2
 
@@ -29,9 +29,18 @@ Window
   MenuLayout
   {
     height: parent.height
-    width: mENU_SIZE
-    //anchors.left: _board.right
+    //width: mENU_SIZE
+    anchors.left: _board.right
     anchors.right: parent.right
+
+    _move_output_model: FigureModel.get_moves_history
+    _move_turn_im_source: FigureModel.get_move_turn_color
+    _command_field_model: FigureModel.get_commands_hist
+    _command_field_current_ind: FigureModel.get_last_elem_ind
+    _connection_status_text:  FigureModel.get_udp_connection_status
+
+    onRun_command: FigureModel.run_command(command, num)
+    onWork_with_file: FigureModel.path_to_file(path_to_file, is_from_file);
   }
 
   Image

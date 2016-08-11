@@ -16,17 +16,18 @@ int main(int argc, char *argv[])
   qmlRegisterType<Fb_obj>("CubeRendering", 1, 0, "Cube");
 
   QGuiApplication *app = new QGuiApplication(argc, argv);
-  QQmlApplicationEngine *engine = new QQmlApplicationEngine("../chessis/res/app.qml");
-  Board_graphic *board_graphic = new Board_graphic();
+  QQmlApplicationEngine *engine = new QQmlApplicationEngine;
+  Board_graphic *board_graphic = new Board_graphic;
 
   engine->rootContext()->setContextProperty("FigureModel", board_graphic);
+  engine->load(QUrl(QStringLiteral("../chessis/res/app.qml")));
 
   QObject::connect(engine, &QQmlApplicationEngine::quit, &gui_is_quit);
 
   UDP_socket *udp_socet = new UDP_socket;
   Exporter *exporter = new Exporter(board_graphic, udp_socet);
 
-  const double CHECK_TIME = 2.015 * CLOCKS_PER_SEC;
+  const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();
   while(!is_gui_quit)
   {
@@ -43,7 +44,7 @@ int main(int argc, char *argv[])
         exporter->push_to_graphic(exporter->pull_from_socet());
     }
 
-    if(app->allWindows().isEmpty() || !app->allWindows().last()->visibility())
+    //if(app->allWindows().isEmpty() || !app->allWindows().last()->visibility())
       gui_is_quit();
   }
 
