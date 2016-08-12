@@ -11,10 +11,13 @@
 UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(12345), _SERVER_IP(QHostAddress::LocalHost),
                                           _socket(new QUdpSocket(this))
 {
-  _socket->bind(_SERVER_IP, _SERVER_PORT);
+qDebug()<<"is bund:"<<  _socket->bind(_SERVER_IP, _SERVER_PORT);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   qDebug()<<"Server start!";
+
+qDebug()<<"local: "<<_socket->localAddress();
+qDebug()<<"local port: "<<_socket->localPort();
 }
 
 UDP_server::~UDP_server()

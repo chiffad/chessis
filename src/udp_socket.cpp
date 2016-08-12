@@ -13,10 +13,13 @@ UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocke
   connect(_timer, SIGNAL(timeout()), this, SLOT(is_message_received()));
   connect(_timer_from_last_received_message, SIGNAL(timeout()), this, SLOT(timer_from_last_received_message_timeout()));
 
-  _socket->bind(SERVER_IP, SERVER_PORT);
+qDebug()<<"is bund:"<<  _socket->bind(SERVER_IP, SERVER_PORT);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   send_data(Messages::HELLO_SERVER);
+
+qDebug()<<"local: "<<_socket->localAddress();
+qDebug()<<"local port: "<<_socket->localPort();
 }
 
 void UDP_socket::send_data(const QByteArray &message, bool is_prev_serial_need)
