@@ -8,26 +8,25 @@
 #include "headers/chess.h"
 #include "headers/enums.h"
 
-UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(12345), _SERVER_IP(QHostAddress::LocalHost),
+UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(49230), _SERVER_IP(QHostAddress::LocalHost),
                                           _socket(new QUdpSocket(this))
 {
-qDebug()<<"is bund:"<<  _socket->bind(_SERVER_IP, _SERVER_PORT);
+  qDebug()<<"is bind:"<<  _socket->bind(_SERVER_IP, _SERVER_PORT);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   qDebug()<<"Server start!";
-
-qDebug()<<"local: "<<_socket->localAddress();
-qDebug()<<"local port: "<<_socket->localPort();
 }
 
 UDP_server::~UDP_server()
 {
+  
   delete _socket;
   for(auto &i : _user)
     delete i;
 
   for(auto &i : _board)
     delete i;
+
 }
 
 void UDP_server::send_data(const QByteArray &message, User &u)

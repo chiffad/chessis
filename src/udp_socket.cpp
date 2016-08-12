@@ -8,18 +8,15 @@
 UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocket(this)), _timer(new QTimer(this)),
                                           _timer_from_last_received_message(new QTimer(this)),
                                           _received_serial_num(0), _send_serial_num(0), _is_message_received(true),
-                                          SERVER_PORT(12345), SERVER_IP(QHostAddress::LocalHost)
+                                          SERVER_PORT(49230), SERVER_IP(QHostAddress::LocalHost)
 {
   connect(_timer, SIGNAL(timeout()), this, SLOT(is_message_received()));
   connect(_timer_from_last_received_message, SIGNAL(timeout()), this, SLOT(timer_from_last_received_message_timeout()));
 
-qDebug()<<"is bund:"<<  _socket->bind(SERVER_IP, SERVER_PORT);
+  qDebug()<<"is bind:"<<_socket->bind();
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   send_data(Messages::HELLO_SERVER);
-
-qDebug()<<"local: "<<_socket->localAddress();
-qDebug()<<"local port: "<<_socket->localPort();
 }
 
 void UDP_socket::send_data(const QByteArray &message, bool is_prev_serial_need)
@@ -69,9 +66,12 @@ void UDP_socket::read_data()
 
   const QByteArray serial_num = cut_serial_num(message);
 
-  if(sender_IP != SERVER_IP || sender_port != SERVER_PORT || _last_send_message == message)
+  for
+
+  if(sender_IP != SERVER_IP || sender_port != SERVER_PORT)
   {
-    qDebug()<<"wrong sender!";
+    qDebug()<<"wrong sender!"<< (sender_port != SERVER_PORT)<<" "<<(sender_IP != SERVER_IP);
+    qDebug()<<SERVER_IP<<""<<sender_IP;
     return;
   }
 
