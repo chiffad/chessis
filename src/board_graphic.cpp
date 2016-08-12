@@ -14,7 +14,8 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
                                                 _udp_connection_status("Disconnect"), _is_check_mate(false)
 {
   for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
-    addFigure(Figure(HILIGHT_IM, 0, 0, false));
+    addFigure(Figure("b_P", 0, 0, false));
+//    addFigure(Figure(HILIGHT_IM, 0, 0, false));
 
   timer_kill = new QTimer(this);
   connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));

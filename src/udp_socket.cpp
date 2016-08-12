@@ -6,9 +6,9 @@
 #include "headers/enums.h"
 
 UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocket(this)), _timer(new QTimer(this)),
-                                        _timer_from_last_received_message(new QTimer(this)),
-                                        _received_serial_num(0), _send_serial_num(0), _is_message_received(true),
-                                        SERVER_PORT(12345), SERVER_IP(QHostAddress::LocalHost)
+                                          _timer_from_last_received_message(new QTimer(this)),
+                                          _received_serial_num(0), _send_serial_num(0), _is_message_received(true),
+                                          SERVER_PORT(12345), SERVER_IP(QHostAddress::LocalHost)
 {
   connect(_timer, SIGNAL(timeout()), this, SLOT(is_message_received()));
   connect(_timer_from_last_received_message, SIGNAL(timeout()), this, SLOT(timer_from_last_received_message_timeout()));

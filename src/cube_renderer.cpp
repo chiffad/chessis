@@ -82,15 +82,15 @@ void Cube_renderer::load_correct_textur(const QString &fig_type)
 
   if(fig_type == "board")
   {
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board.png")));
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board.png").mirrored()));
     m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board_side.png")));
-    m_scale_vect = QVector3D(1,1,0.06);
+    m_scale_vect = QVector3D(1, 1, 0.6);
   }
   else
   {
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "b_P.png")));//fig_type + ".png")));
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "b_P.png").mirrored()));//fig_type + ".png")));
     m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "b" + ".png")));//*fig_type.begin() + ".png")));
-    m_scale_vect =  QVector3D(1,1,1);
+    m_scale_vect =  QVector3D(1, 1, 1);
   }
 }
 
