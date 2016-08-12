@@ -29,7 +29,6 @@ Window
   MenuLayout
   {
     height: parent.height
-    //width: mENU_SIZE
     anchors.left: _board.right
     anchors.right: parent.right
 
@@ -47,11 +46,13 @@ Window
   {
     id: _check_mate
 
-    source: "img/checkMate.png"
-    z: cHECK_MATE_IMG_Z
     width: _board.width
     height: _board.height / 2
     anchors.centerIn: _board
+    z: cHECK_MATE_IMG_Z
+
+    source: "img/checkMate.png"
+
     visible: FigureModel.is_check_mate
 
     MouseArea
@@ -75,7 +76,7 @@ Window
     MouseArea
     {
       anchors.fill: parent
-      onPressed: _board.pressEvent("board");
+
     }
   }
 
@@ -98,7 +99,7 @@ Window
       y: y_coord * cELL_SIZE
       z: figure_name == "hilight"? cELL_HILIGHT_Z : pASSIVE_FIGURE_Z
 
-      visible: true//figure_visible
+      visible: figure_visible
      // opacity: figure_name == "hilight" ? 0.5 : 1.0
 
       MouseArea
@@ -117,7 +118,6 @@ Window
 
         onPressed:
         {
-          _figure_delegate.pressEvent("pawn");
           _figure_delegate.z = aCTIVE_FIGURE_Z
           _dragArea.x1 = parent.x
           _dragArea.y1 = parent.y

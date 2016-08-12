@@ -11,7 +11,6 @@ Rectangle
   signal text_inp_accepted
 
   border.color: "white"
-  radius: rADIUS
   color: "blue"
   visible: false
 
@@ -19,7 +18,8 @@ Rectangle
   {
     id: _list_view
 
-    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.leftMargin: 2
     anchors.rightMargin: 2
     anchors.top: parent.top
@@ -41,7 +41,8 @@ Rectangle
   {
     id: _text_input
 
-    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.bottom: parent.bottom
     anchors.leftMargin: 2
     anchors.rightMargin: 2

@@ -66,14 +66,12 @@ void UDP_socket::read_data()
 
   const QByteArray serial_num = cut_serial_num(message);
 
-  for
-
-  if(sender_IP != SERVER_IP || sender_port != SERVER_PORT)
+ /* if(sender_IP != SERVER_IP || sender_port != SERVER_PORT || _last_send_message == message)
   {
     qDebug()<<"wrong sender!"<< (sender_port != SERVER_PORT)<<" "<<(sender_IP != SERVER_IP);
     qDebug()<<SERVER_IP<<""<<sender_IP;
     return;
-  }
+  }*/
 
   qDebug()<<"!serial_num"<<serial_num;
 

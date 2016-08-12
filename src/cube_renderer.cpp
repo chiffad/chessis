@@ -69,6 +69,7 @@ void Cube_renderer::initialize()
 
 void Cube_renderer::set_cube_updates(const QString &fig_name)
 {
+  qDebug()<<"set_cube_updates";
   load_correct_textur(fig_name);
   update_modelview();
   render();
@@ -84,12 +85,12 @@ void Cube_renderer::load_correct_textur(const QString &fig_type)
   {
     m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board.png").mirrored()));
     m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board_side.png")));
-    m_scale_vect = QVector3D(1, 1, 0.6);
+    m_scale_vect = QVector3D(1, 1, 0.1);
   }
   else
   {
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "b_P.png").mirrored()));//fig_type + ".png")));
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "b" + ".png")));//*fig_type.begin() + ".png")));
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + fig_type + ".png").mirrored()));
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + *fig_type.begin() + ".png")));
     m_scale_vect =  QVector3D(1, 1, 1);
   }
 }

@@ -12,11 +12,6 @@ Fb_obj::~Fb_obj()
 {
 }
 
-void Fb_obj::pressEvent(QString str)
-{
-  qDebug()<<str;
-}
-
 QQuickFramebufferObject::Renderer* Fb_obj::createRenderer() const
 {
   return new Fbo_renderer();
@@ -30,6 +25,7 @@ QString Fb_obj::get_fig_type() const
 void Fb_obj::set_fig_type(const QString &name)
 {
   m_fig_type = name;
+  update();
 }
 
 //======================================================

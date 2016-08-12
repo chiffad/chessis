@@ -183,7 +183,8 @@ Rectangle
   {
     id: _connection_status
 
-    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.bottom: parent.bottom
     anchors.leftMargin: bORDER_WIDTH
     anchors.rightMargin: bORDER_WIDTH
@@ -194,13 +195,15 @@ Rectangle
   {
     id: _command_field
 
-    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.top: _moves_from_file.bottom
     anchors.bottom: _connection_status.top
     anchors.topMargin: bORDER_WIDTH
     anchors.bottomMargin: bORDER_WIDTH
     anchors.rightMargin: bORDER_WIDTH
     anchors.leftMargin: bORDER_WIDTH
+    radius: rADIUS
 
     onText_inp_accepted:
     {

@@ -3,12 +3,12 @@ import QtQuick 2.5
 Rectangle
 {
   property alias text: _text.text
-
   height: 20
+  color: parent.color
 
   Text
   {
     id: _text
-    anchors.fill: parent
+    anchors.left: parent.left
   }
 }
