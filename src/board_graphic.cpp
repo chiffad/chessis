@@ -36,16 +36,16 @@ void Board_graphic::timer_timeout()
 
   if( i == 1)
   {
-    run_command(MOVE_WORD, 4 * CELL_SIZE,6*CELL_SIZE, 4 * CELL_SIZE,4 * CELL_SIZE);
+    run_command(MOVE_WORD, 4 * CELL_SIZE_X,6*CELL_SIZE_Y, 4 * CELL_SIZE_X,4 * CELL_SIZE_Y);
   }
   if( i == 2)
   {
-    run_command(MOVE_WORD,4*CELL_SIZE,1*CELL_SIZE ,4*CELL_SIZE,2*CELL_SIZE);
+    run_command(MOVE_WORD,4*CELL_SIZE_X,1*CELL_SIZE_Y ,4*CELL_SIZE_X,2*CELL_SIZE_Y);
   }
 
   if( i == 3)
   {
-    run_command(MOVE_WORD,1*CELL_SIZE,7*CELL_SIZE, 0*CELL_SIZE,5*CELL_SIZE);
+    run_command(MOVE_WORD,1*CELL_SIZE_X,7*CELL_SIZE_Y, 0*CELL_SIZE_X,5*CELL_SIZE_Y);
   }
 
  /* if( i == 1)
@@ -149,8 +149,8 @@ void Board_graphic::run_command(const QString& message, const unsigned x1, const
 
 void Board_graphic::set_correct_coord(Coord& coord, const unsigned x, const unsigned y)
 {
-  coord.x = (x + IMG_MID) / CELL_SIZE;
-  coord.y = (y + IMG_MID) / CELL_SIZE;
+  coord.x = (x + IMG_MID) / CELL_SIZE_X;
+  coord.y = (y + IMG_MID) / CELL_SIZE_Y;
 }
 
 void Board_graphic::update_coordinates()
@@ -234,6 +234,8 @@ void Board_graphic::set_move_color(const int move_num)
 
 const QString Board_graphic::coord_to_str(const Coord &from, const Coord &to) const
 {
+  qDebug()<<"cord_o_str:"<<  (QChar(a_LETTER + from.x) + QString::number(BOARD_SIDE - from.y)
+                              + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIDE - to.y));
   return (QChar(a_LETTER + from.x) + QString::number(BOARD_SIDE - from.y)
           + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIDE - to.y));
 }

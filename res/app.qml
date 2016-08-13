@@ -19,7 +19,10 @@ Window
 
   readonly property int bOARD_SIZE: 560
   readonly property int mENU_SIZE: 200
-  readonly property int cELL_SIZE: bOARD_SIZE / 8
+  readonly property int sTART_FIG_X_POS: 56
+  readonly property int sTART_FIG_Y_POS: 86
+  readonly property int cELL_SIZE_X: 56
+  readonly property int cELL_SIZE_Y: 39
   readonly property int bOARD_Z : 0
   readonly property int cELL_HILIGHT_Z: 1
   readonly property int pASSIVE_FIGURE_Z: 2
@@ -69,14 +72,18 @@ Window
     width: bOARD_SIZE
     height: bOARD_SIZE
     anchors.left: parent.left
-    z: bOARD_Z
+    //z: bOARD_Z
 
     fig_type: "board"
 
     MouseArea
     {
       anchors.fill: parent
-
+      onPressed:
+      {
+          console.log("x: ",mouseX)
+          console.log("y: ",mouseY)
+      }
     }
   }
 
@@ -90,13 +97,13 @@ Window
     {
       id: _figure_delegate
 
-      width: cELL_SIZE
+      width: cELL_SIZE_X
       height: width
 
       fig_type: figure_name
 
-      x: x_coord * cELL_SIZE
-      y: y_coord * cELL_SIZE
+      x: sTART_FIG_X_POS + (x_coord * cELL_SIZE_X)
+      y: sTART_FIG_Y_POS + (y_coord * cELL_SIZE_Y)
       z: figure_name == "hilight"? cELL_HILIGHT_Z : pASSIVE_FIGURE_Z
 
       visible: figure_visible
@@ -123,11 +130,11 @@ Window
           _dragArea.y1 = parent.y
         }
 
-//        onReleased:
-//        {
-//          _figureDelegate.z = pASSIVE_FIGURE_Z
-//          FigureModel.run_command(mOVE_WORD, x1, y1, parent.x, parent.y)
-//        }
+        onReleased:
+        {
+          _figure_delegate.z = pASSIVE_FIGURE_Z
+          FigureModel.run_command("move", x1, y1, parent.x, parent.y)
+        }
       }
     }
   }

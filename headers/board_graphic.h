@@ -92,8 +92,8 @@ signals:
   void udp_connection_status_changed();
 
 private:
-  enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4,IMG_MID = 40, CELL_SIZE = 560 / 8, a_LETTER = 'a',
-       FREE_FIELD = '.'};
+  enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4,IMG_MID = 40, CELL_SIZE_X = 56,
+       CELL_SIZE_Y = 39, CELL_SIZE = 560 / 8, a_LETTER = 'a', FREE_FIELD = '.'};
   const QString MOVE_COLOR_W = "img/w_k.png";
   const QString MOVE_COLOR_B = "img/b_K.png";
   const QString HILIGHT_IM = "hilight";

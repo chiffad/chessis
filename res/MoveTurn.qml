@@ -16,7 +16,7 @@ Rectangle
     anchors.top: parent.top
     anchors.leftMargin: parent.border.width
     anchors.verticalCenter: parent.verticalCenter
-    width: parent.width - cELL_SIZE - parent.width/10
+    width: parent.width - cELL_SIZE_X - parent.width/10
 
     Text
     {
@@ -36,7 +36,7 @@ Rectangle
     anchors.left: _text.right
     anchors.verticalCenter: parent.verticalCenter
 
-    width: cELL_SIZE
+    width: cELL_SIZE_X
     height: width
   }
 }
