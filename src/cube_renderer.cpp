@@ -69,7 +69,7 @@ void Cube_renderer::initialize()
 
 void Cube_renderer::set_cube_updates(const QString &fig_name)
 {
-  qDebug()<<"set_cube_updates";
+  //qDebug()<<"set_cube_updates";
   load_correct_textur(fig_name);
   update_modelview();
   render();

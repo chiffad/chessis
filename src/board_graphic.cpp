@@ -11,7 +11,7 @@
 #include "headers/enums.h"
 
 Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
-                                                _udp_connection_status("Disconnect"), _is_check_mate(false)
+                                                _udp_connection_status("Disconnected"), _is_check_mate(false)
 {
   for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
     addFigure(Figure("b_P", 0, 0, false));
@@ -320,14 +320,14 @@ void Board_graphic::set_connect_status(const int status)
   switch(status)
   {
     case Messages::SERVER_HERE:
-      if(_udp_connection_status == "Disconnect")
+      if(_udp_connection_status == "Disconnected")
         _udp_connection_status = "Connect";
       break;
     case Messages::SERVER_LOST:
-      _udp_connection_status = "Disconnect";
+      _udp_connection_status = "Disconnected";
       break;
     case Messages::OPPONENT_LOST:
-      _udp_connection_status = "Opponent disconnect";
+      _udp_connection_status = "Opponent disconnected";
       break;
     default:
       qDebug()<<"set_connect_status wrong: "<<status;

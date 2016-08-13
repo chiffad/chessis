@@ -11,7 +11,7 @@ Exporter::Exporter(Board_graphic *const board_graphic, UDP_socket *const udp_soc
 
 void Exporter::push_to_graphic(const QString& message)
 {
- // qDebug()<<"===push_message"<<message;
+  qDebug()<<"===push_message"<<message;
 
   if(message.indexOf(";") > 0)
   {

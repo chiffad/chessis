@@ -73,14 +73,14 @@ void UDP_socket::read_data()
     return;
   }*/
 
-  qDebug()<<"!serial_num"<<serial_num;
+ // qDebug()<<"!serial_num"<<serial_num;
 
   if(serial_num.toInt() != ++_received_serial_num)
   {
     --_received_serial_num;
     if(serial_num.toInt() == _received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
     {
-      _timer_from_last_received_message->start(TEN_SEC);
+      _timer_from_last_received_message->start(FIVE_SEC);
       send_data(Messages::MESSAGE_RECEIVED, true);
       qDebug()<<"prev serial num. Resent message";
     }
@@ -91,11 +91,16 @@ void UDP_socket::read_data()
   if(message.toInt() != Messages::MESSAGE_RECEIVED)
   {
     send_data(Messages::MESSAGE_RECEIVED);
-    _received_message_stack.push_back(message);
+    if(message.toInt() != Messages::CLIENT_LOST)
+      _received_message_stack.push_back(message);
   }
-  else _is_message_received = true;
+  else
+  {
+    _is_message_received = true;
+    _received_message_stack.push_back(QByteArray::number(Messages::SERVER_HERE));
+  }
 
-  _timer_from_last_received_message->start(TEN_SEC);
+  _timer_from_last_received_message->start(FIVE_SEC);
 }
 
 QByteArray UDP_socket::pull_received_message()

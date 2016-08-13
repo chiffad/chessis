@@ -27,7 +27,7 @@ public slots:
   void timer_from_last_received_message_timeout();
 
 private:
-  enum {SECOND = 1000, TEN_SEC = 10000};
+  enum {SECOND = 1000, FIVE_SEC = 5000};
   const QChar FREE_SPASE = ' ';
 
 private:
