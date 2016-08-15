@@ -8,7 +8,7 @@
 #include "headers/chess.h"
 #include "headers/enums.h"
 
-UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(49230), _SERVER_IP(QHostAddress::LocalHost),
+UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(49238), _SERVER_IP(QHostAddress::LocalHost),
                                           _socket(new QUdpSocket(this))
 {
   qDebug()<<"is bind:"<<  _socket->bind(_SERVER_IP, _SERVER_PORT);

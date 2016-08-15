@@ -43,7 +43,7 @@ public:
 
 public:
   explicit Board_graphic(QObject *parent = 0);
-  ~Board_graphic(){delete timer_kill;}
+  ~Board_graphic();
 
   void addFigure(const Figure &figure);
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -85,7 +85,7 @@ public:
   void set_moves_history(const QString &history);
 
 signals:
-  void check_mate() const;
+  void check_mate();
   void moves_history_changed();
   void commands_hist_changed();
   void move_turn_color_changed();
@@ -137,6 +137,7 @@ class Board_graphic::Figure
 {
 public:
   Figure(const QString& name, const int x, const int y, const bool visible);
+  ~Figure();
 
   inline int x() const {return _x;}
   inline int y() const {return _y;}

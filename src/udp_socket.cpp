@@ -8,7 +8,7 @@
 UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocket(this)), _timer(new QTimer(this)),
                                           _timer_from_last_received_message(new QTimer(this)),
                                           _received_serial_num(0), _send_serial_num(0), _is_message_received(true),
-                                          SERVER_PORT(49230), SERVER_IP(QHostAddress::LocalHost)
+                                          SERVER_PORT(49238), SERVER_IP(QHostAddress::LocalHost)
 {
   connect(_timer, SIGNAL(timeout()), this, SLOT(is_message_received()));
   connect(_timer_from_last_received_message, SIGNAL(timeout()), this, SLOT(timer_from_last_received_message_timeout()));
@@ -17,6 +17,13 @@ UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocke
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   send_data(Messages::HELLO_SERVER);
+}
+
+UDP_socket::~UDP_socket()
+{
+  delete _socket;
+  delete _timer;
+  delete _timer_from_last_received_message;
 }
 
 void UDP_socket::send_data(const QByteArray &message, bool is_prev_serial_need)

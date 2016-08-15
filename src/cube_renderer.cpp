@@ -8,9 +8,9 @@
 #include <algorithm>
 #include "headers/cube_renderer.h"
 
-Cube_renderer::Cube_renderer(const QString &fig_type) : m_program(new QOpenGLShaderProgram), m_x_angle(-30), m_y_angle(0),
-                                                        m_z_angle(0), m_scale_vect(1,1,1), m_VERTEX_ATTRIBUTE(0),
-                                                        m_TEXCOORD_ATTRIBUTE(1)
+Cube_renderer::Cube_renderer(const QString &fig_type, const int x_angle) : m_program(new QOpenGLShaderProgram), m_x_angle(x_angle),
+                                                                           m_y_angle(0), m_z_angle(0), m_scale_vect(1,1,1),
+                                                                           m_VERTEX_ATTRIBUTE(0), m_TEXCOORD_ATTRIBUTE(1)
 {
   load_correct_textur(fig_type);
   update_modelview();
@@ -67,9 +67,10 @@ void Cube_renderer::initialize()
   m_program->setUniformValue("texture", 0);
 }
 
-void Cube_renderer::set_cube_updates(const QString &fig_name)
+void Cube_renderer::set_cube_updates(const QString &fig_name, const int tilt_angle)
 {
   //qDebug()<<"set_cube_updates";
+  m_x_angle = tilt_angle;
   load_correct_textur(fig_name);
   update_modelview();
   render();

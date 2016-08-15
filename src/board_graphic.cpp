@@ -22,8 +22,17 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
  // timer_kill->start(2000);
 }
 
+Board_graphic::~Board_graphic()
+{
+  delete timer_kill;
+}
+
 Board_graphic::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
     : _name(name), _x(x), _y(y), _visible(visible)
+{
+}
+
+Board_graphic::Figure::~Figure()
 {
 }
 

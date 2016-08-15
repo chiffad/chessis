@@ -13,7 +13,7 @@ class UDP_socket : public QObject
   Q_OBJECT
 public:
   explicit UDP_socket(QObject *parent = nullptr);
-  ~UDP_socket(){delete _socket; delete _timer; delete _timer_from_last_received_message;}
+  ~UDP_socket();
 
 public:
   void send_data(const QByteArray &message, bool is_prev_serial_need = false);

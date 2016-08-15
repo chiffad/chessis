@@ -12,11 +12,11 @@
 class Cube_renderer : protected QOpenGLFunctions
 {
 public:
-  explicit Cube_renderer(const QString &fig_type);
+  explicit Cube_renderer(const QString &fig_type, const int x_angle);
   ~Cube_renderer();
   void render();
   void initialize();
-  void set_cube_updates(const QString &fig_type);
+  void set_cube_updates(const QString &fig_type, const int tilt_angle);
 
 private:
   void create_geometry();
