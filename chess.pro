@@ -9,19 +9,19 @@ QT += qml quick \
 CONFIG+=c++14
 
 HEADERS +=\
-    headers/board_graphic.h \
-    headers/exporter.h \
-    headers/enums.h \
-    headers/udp_socket.h \
-    headers/fb_obj.h \
-    headers/cube_renderer.h
+    cpp/board_graphic.h \
+    cpp/exporter.h \
+    cpp/enums.h \
+    cpp/udp_socket.h \
+    cpp/fb_obj.h \
+    cpp/cube_renderer.h
 
-SOURCES += src/main.cpp\
-           src/board_graphic.cpp \
-           src/exporter.cpp \
-           src/udp_socket.cpp \
-           src/fb_obj.cpp \
-           src/cube_renderer.cpp
+SOURCES += cpp/main.cpp\
+           cpp/board_graphic.cpp \
+           cpp/exporter.cpp \
+           cpp/udp_socket.cpp \
+           cpp/fb_obj.cpp \
+           cpp/cube_renderer.cpp
 
 RESOURCES += res.qrc
 

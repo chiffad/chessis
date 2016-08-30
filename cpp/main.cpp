@@ -3,10 +3,10 @@
 #include <QApplication>
 #include <QWindow>
 #include <ctime>
-#include "headers/board_graphic.h"
-#include "headers/exporter.h"
-#include "headers/udp_socket.h"
-#include "headers/fb_obj.h"
+#include "board_graphic.h"
+#include "exporter.h"
+#include "udp_socket.h"
+#include "fb_obj.h"
 
 bool is_gui_quit = false;
 void gui_is_quit();
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
         exporter->push_to_graphic(exporter->pull_from_socet());
     }
 
-    if(app->allWindows().isEmpty() || !app->allWindows().last()->visibility())
+    //if(app->allWindows().isEmpty() || !app->allWindows().last()->visibility())
       gui_is_quit();
   }
 

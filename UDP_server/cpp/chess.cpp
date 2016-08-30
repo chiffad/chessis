@@ -5,7 +5,7 @@
 #include<algorithm>
 #include<iterator>
 #include<cmath>
-#include"headers/chess.h"
+#include"chess.h"
 
 Board::Board() : m_is_go_to_history_in_progress(false)
 {  
@@ -45,21 +45,24 @@ void Board::move_field(const Coord &from, const Coord &to)
 
 bool Board::is_can_move(const Coord &fr, const Coord &to) const
 {
-  const int dx = abs(int(to.x - fr.x));
-  const int dy = abs(int(to.y - fr.y));
-  const int X_UNIT_VECTOR = (dx == 0) ? 0 : int(to.x - fr.x)/dx;
-  const int Y_UNIT_VECTOR = (dy == 0) ? 0 : int(to.y - fr.y)/dy;
+  const int dx = abs(diff(to.x, fr.x));
+  const int dy = abs(diff(to.y, fr.y));
+  const int X_UNIT_VECTOR = (dx == 0) ? 0 : diff(to.x, fr.x)/dx;
+  const int Y_UNIT_VECTOR = (dy == 0) ? 0 : diff(to.y, fr.y)/dy;
   const COLORLESS_FIG FIG = get_colorless_figure(fr);
 
   if(FIG == HORSE && dx*dy == 2 && get_color(fr) != get_color(to))
     return true;
 
-  if(FIG == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG)
-                        || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
+  if(FIG == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG) || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
   {
-    return((get_figure(to) != FREE_FIELD && dy*dx == 1 && get_color(fr) != get_color(to))
-           || (dx == 0 && get_figure(to) == FREE_FIELD && (dy == 1 ||
-               (dy == 2 && get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD && (fr.y == 6 || fr.y == 1)))));
+    if((get_figure(to) != FREE_FIELD)
+      return (dy*dx == 1 && get_color(fr) != get_color(to));
+
+    else if(dx == 0 && get_figure(to) == FREE_FIELD)
+      return (dy == 1 || (dy == 2 && get_figure(to.x,fr.y + Y_UNIT_VECTOR) == FREE_FIELD && (fr.y == 6 || fr.y == 1)));
+
+    return false;
   }
   else if(FIG == KING && dx <= 1 && dy <= 1);
   else if((FIG == ROOK || FIG == QUEEN) && (dx*dy == 0));
@@ -79,8 +82,8 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
 
 void Board::if_castling(const Coord &fr, const Coord &to)
 {
-  const int dx = abs(int(to.x - fr.x));
-  const int X_UNIT_VEC = dx == 0 ? 0 : int(to.x - fr.x)/dx;
+  const int dx = abs(diff(to.x, fr.x));
+  const int X_UNIT_VEC = dx == 0 ? 0 : diff(to.x, fr.x)/dx;
 
   if(get_colorless_figure(to) == KING && dx > 1)
   {
@@ -103,18 +106,22 @@ void Board::if_castling(const Coord &fr, const Coord &to)
 
 bool Board::is_castling(const Coord &fr, const Coord &to) const
 {
-  const int dx = abs(int(to.x - fr.x));
-  const int dy = abs(int(to.y - fr.y));
-  const int X_UNIT_VECTOR = dx == 0 ? 0 : int(to.x - fr.x)/dx;
+  const int dx = abs(diff(to.x, fr.x));
+  const int dy = abs(diff(to.y, fr.y));
+  const int X_UNIT_VECTOR = dx == 0 ? 0 : diff(to.x, fr.x)/dx;
 
   std::vector<FIGURE>::const_iterator field = m_field.begin() + get_field_index(fr) + X_UNIT_VECTOR;
-  if(get_colorless_figure(fr) == KING && !is_check(get_color(fr)) && dy == 0 && dx == 2 && fr.x == 4
-     && fr.y % 7 == 0 && *field == FREE_FIELD && *(field + X_UNIT_VECTOR) == FREE_FIELD
-     && (X_UNIT_VECTOR > 0 || *(field + 2 * X_UNIT_VECTOR) == FREE_FIELD))
+  if(get_colorless_figure(fr) == KING && !is_check(get_color(fr)) && dy == 0 && dx == 2 && *field == FREE_FIELD 
+     && *(field + X_UNIT_VECTOR) == FREE_FIELD && (X_UNIT_VECTOR > 0 || *(field + 2 * X_UNIT_VECTOR) == FREE_FIELD))
   {
     Coord coord((to.x > 4 ? 7 : 0), (get_color(fr) == W_FIG ? 7 : 0));
-    return (std::find_if(m_moves.begin(), m_moves.end(),
-                        [coord](auto const &i) {return (coord == i.from || coord == i.to);}) == m_moves.end());
+    const bool is_rook_not_moved = (std::find_if(m_moves.begin(), m_moves.end(),
+                                   [coord](auto const &i) {return (coord == i.from || coord == i.to);}) == m_moves.end());
+
+    const bool is_king_not_moved = (std::find_if(m_moves.begin(), m_moves.end(),
+                                   [fr](auto const &i) {return (fr == i.from || fr == i.to);}) == m_moves.end());
+
+    return is_king_not_moved && is_rook_not_moved;
   }
   return false;
 }
@@ -329,18 +336,22 @@ Board::COLOR Board::get_color(const Coord &c) const
   return islower(m_field[get_field_index(c)]) ? W_FIG : B_FIG;
 }
 
+int Board::diff(const int _1, const int _2)
+{
+  return (_1 - _2);
+}
+
 unsigned Board::get_field_index(const Coord &c) const
 {
   return c.y * BOARD_SIDE + c.x;
 }
 
-Board::Coord::Coord(const unsigned X, const unsigned Y)
+Board::Coord::Coord(const unsigned X, const unsigned Y) : x(X), y(Y)
 {
-  x = X;
-  y = Y;
 }
 
 bool Board::Coord::operator==(const Coord &rhs) const
 {
   return(x == rhs.x && y == rhs.y);
 }
+

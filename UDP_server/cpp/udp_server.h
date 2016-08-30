@@ -5,9 +5,8 @@
 #include <QVector>
 #include <QString>
 #include <QTimer>
-#include "headers/chess.h"
-#include "headers/desk.h"
-#include "headers/enums.h"
+#include "desk.h"
+#include "enums.h"
 
 class UDP_server : public QObject
 {
@@ -33,7 +32,7 @@ private:
 
 private:
   UDP_server(const UDP_server&) = delete;
-  void operator=(const UDP_server&) = delete;
+  UDP_server& operator=(const UDP_server&) = delete;
 
   void set_opponent(User &u);
   void send_board_state(User &u);
@@ -89,6 +88,6 @@ public:
 
 private:
    User(const User&) = delete;
-   void operator=(const User&) = delete;
+   User& operator=(const User&) = delete;
 };
 #endif // UDP_SERVER_H

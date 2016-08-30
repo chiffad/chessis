@@ -1,7 +1,7 @@
 #ifndef DESK
 #define DESK
 
-#include "headers/chess.h"
+#include "chess.h"
 
 class Desk : public Board
 {
@@ -16,7 +16,7 @@ public:
 
 private:
    Desk(const Desk&) = delete;
-   void operator=(const Desk&) = delete;
+   Desk& operator=(const Desk&) = delete;
 };
 #endif // DESK
 

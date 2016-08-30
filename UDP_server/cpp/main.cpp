@@ -1,5 +1,5 @@
 #include <QApplication>
-#include "headers/udp_server.h"
+#include "udp_server.h"
 
 int main(int argc, char *argv[])
 {

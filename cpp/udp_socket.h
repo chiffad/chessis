@@ -6,7 +6,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QTimer>
-#include "headers/enums.h"
+#include "enums.h"
 
 class UDP_socket : public QObject
 {

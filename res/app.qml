@@ -24,7 +24,7 @@ Window
   readonly property int bOARD_ANGLE: -50
   readonly property double bOARD_ANGLE_RAD: (bOARD_ANGLE * Math.PI)/ 180
 
-  readonly property int bOARD_SIZE: bOARD_LAYOUT_SIZE * 0.8
+  readonly property int bOARD_SIZE: bOARD_LAYOUT_SIZE * _board.cube_scale
   readonly property int cELL_SIZE_X: bOARD_SIZE / 8
   readonly property int cELL_SIZE_Y: bOARD_SIZE / 8 * Math.cos(bOARD_ANGLE_RAD)
 
@@ -84,6 +84,7 @@ Window
 
     fig_type: "board"
     tilt_angle: _root.bOARD_ANGLE
+    cube_scale: 0.8
 
     MouseArea
     {

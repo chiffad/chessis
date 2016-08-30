@@ -26,7 +26,7 @@ public:
    };
 
 public:
-   explicit Board();
+   Board();
 
    bool move(const Coord &from, const Coord &to);
    bool back_move();
@@ -50,7 +50,7 @@ public:
 
 private:
    Board(const Board&) = delete;
-   void operator=(const Board&) = delete;
+   Board& operator=(const Board&) = delete;
 
    unsigned get_field_index(const Coord &c) const;
    void if_castling(const Coord &fr, const Coord &to);
@@ -61,6 +61,8 @@ private:
    bool is_check(const COLOR color) const;
    bool is_castling(const Coord &from, const Coord &to) const;
    bool is_can_move(const Coord &from, const Coord &to) const;
+
+   int diff(const int _1, const int _2) const;
 
 private:
    struct Moves

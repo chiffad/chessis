@@ -4,9 +4,9 @@
 #include <QTimer>
 #include <algorithm>
 #include <cmath>
-#include "headers/udp_server.h"
-#include "headers/chess.h"
-#include "headers/enums.h"
+#include "udp_server.h"
+#include "chess.h"
+#include "enums.h"
 
 UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(49238), _SERVER_IP(QHostAddress::LocalHost),
                                           _socket(new QUdpSocket(this))
@@ -19,7 +19,7 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(49238), 
 
 UDP_server::~UDP_server()
 {
-  
+
   delete _socket;
   for(auto &i : _user)
     delete i;
@@ -68,8 +68,8 @@ void UDP_server::read_data()
   qDebug()<<"====reading"<<message;
 
   auto sender = std::find_if(_user.begin(), _user.end(),
-                         [sender_port, sender_IP](auto const &i){return(i->_port == sender_port
-                                                                        && i->_ip == sender_IP);});
+                             [sender_port, sender_IP](auto const &i){return(i->_port == sender_port && i->_ip == sender_IP);});
+
   const int serial_num = cut_serial_num(message);
 
   if(message.toInt() == Messages::HELLO_SERVER)

@@ -7,8 +7,8 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include "headers/board_graphic.h"
-#include "headers/enums.h"
+#include "board_graphic.h"
+#include "enums.h"
 
 Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
                                                 _udp_connection_status("Disconnected"), _is_check_mate(false)
@@ -156,10 +156,10 @@ void Board_graphic::run_command(const QString& message, const unsigned x1, const
   }
 }
 
-void Board_graphic::set_correct_coord(Coord& coord, const unsigned x, const unsigned y)
+void Board_graphic::set_correct_coord(Coord& c, const unsigned x, const unsigned y)
 {
-  coord.x = (x + IMG_MID) / CELL_SIZE_X;
-  coord.y = (y + IMG_MID) / CELL_SIZE_Y;
+  c.x = (x + IMG_MID) / CELL_SIZE_X;
+  c.y = (y + IMG_MID) / CELL_SIZE_Y;
 }
 
 void Board_graphic::update_coordinates()

@@ -12,11 +12,11 @@
 class Cube_renderer : protected QOpenGLFunctions
 {
 public:
-  explicit Cube_renderer(const QString &fig_type, const int x_angle);
+  explicit Cube_renderer();
   ~Cube_renderer();
   void render();
   void initialize();
-  void set_cube_updates(const QString &fig_type, const int tilt_angle);
+  void set_cube_updates(const QString &fig_type, const int tilt_angle, const float scale);
 
 private:
   void create_geometry();
@@ -36,6 +36,8 @@ private:
   float m_x_angle;
   float m_y_angle;
   float m_z_angle;
+
+  GLfloat m_elem_size;
   QVector3D m_scale_vect;
 
   const int m_VERTEX_ATTRIBUTE;

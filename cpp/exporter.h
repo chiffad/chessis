@@ -2,8 +2,8 @@
 #define UDP_CLIENT_H
 
 #include <QString>
-#include "headers/board_graphic.h"
-#include "headers/udp_socket.h"
+#include "board_graphic.h"
+#include "udp_socket.h"
 
 class Exporter
 {

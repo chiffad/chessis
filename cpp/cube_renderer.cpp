@@ -6,13 +6,12 @@
 #include <QImage>
 #include <QString>
 #include <algorithm>
-#include "headers/cube_renderer.h"
+#include "cube_renderer.h"
 
-Cube_renderer::Cube_renderer(const QString &fig_type, const int x_angle) : m_program(new QOpenGLShaderProgram), m_x_angle(x_angle),
-                                                                           m_y_angle(0), m_z_angle(0), m_scale_vect(1,1,1),
-                                                                           m_VERTEX_ATTRIBUTE(0), m_TEXCOORD_ATTRIBUTE(1)
+Cube_renderer::Cube_renderer() : m_program(new QOpenGLShaderProgram), m_x_angle(0), m_y_angle(0), m_z_angle(0),
+                                 m_elem_size(1), m_scale_vect(1,1,1), m_VERTEX_ATTRIBUTE(0), m_TEXCOORD_ATTRIBUTE(1)
 {
-  load_correct_textur(fig_type);
+  load_correct_textur("board");
   update_modelview();
 }
 
@@ -67,10 +66,11 @@ void Cube_renderer::initialize()
   m_program->setUniformValue("texture", 0);
 }
 
-void Cube_renderer::set_cube_updates(const QString &fig_name, const int tilt_angle)
+void Cube_renderer::set_cube_updates(const QString &fig_name, const int tilt_angle, const float scale)
 {
   //qDebug()<<"set_cube_updates";
   m_x_angle = tilt_angle;
+  m_elem_size = scale;
   load_correct_textur(fig_name);
   update_modelview();
   render();
@@ -133,13 +133,13 @@ void Cube_renderer::render()
 
 void Cube_renderer::create_geometry()
 {
-  const GLfloat v = 0.8;
-  QVector<GLfloat> vert_data = {+v, -v, -v,   1, 1,   -v, -v, -v,   0,1,   -v, +v, -v,   0,0,   +v, +v, -v,   1,0,
-                                +v, +v, -v,   1, 1,   -v, +v, -v,   0,1,   -v, +v, +v,   0,0,   +v, +v, +v,   1,0,
-                                +v, -v, +v,   1, 1,   +v, -v, -v,   0,1,   +v, +v, -v,   0,0,   +v, +v, +v,   1,0,
-                                -v, -v, -v,   1, 1,   -v, -v, +v,   0,1,   -v, +v, +v,   0,0,   -v, +v, -v,   1,0,
-                                +v, -v, +v,   1, 1,   -v, -v, +v,   0,1,   -v, -v, -v,   0,0,   +v, -v, -v,   1,0,
-                                -v, -v, +v,   1, 1,   +v, -v, +v,   0,1,   +v, +v, +v,   0,0,   -v, +v, +v,   1,0};
+  const GLfloat s = m_elem_size;
+  QVector<GLfloat> vert_data = {+s, -s, -s,   1, 1,   -s, -s, -s,   0,1,   -s, +s, -s,   0,0,   +s, +s, -s,   1,0,
+                                +s, +s, -s,   1, 1,   -s, +s, -s,   0,1,   -s, +s, +s,   0,0,   +s, +s, +s,   1,0,
+                                +s, -s, +s,   1, 1,   +s, -s, -s,   0,1,   +s, +s, -s,   0,0,   +s, +s, +s,   1,0,
+                                -s, -s, -s,   1, 1,   -s, -s, +s,   0,1,   -s, +s, +s,   0,0,   -s, +s, -s,   1,0,
+                                +s, -s, +s,   1, 1,   -s, -s, +s,   0,1,   -s, -s, -s,   0,0,   +s, -s, -s,   1,0,
+                                -s, -s, +s,   1, 1,   +s, -s, +s,   0,1,   +s, +s, +s,   0,0,   -s, +s, +s,   1,0};
 
   m_buffer.create();
   m_buffer.bind();

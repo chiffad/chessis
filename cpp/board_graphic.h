@@ -8,7 +8,7 @@
 #include <QStringList>
 #include <vector>
 #include <fstream>
-#include <headers/enums.h>
+#include <enums.h>
 
 #include <QTimer>
 
@@ -29,7 +29,7 @@ public:
 public slots:
   void timer_timeout();
 
-private:  
+private:
   class Figure;
 
 public:

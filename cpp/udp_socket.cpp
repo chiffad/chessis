@@ -2,8 +2,8 @@
 #include <QUdpSocket>
 #include <QByteArray>
 #include <QTimer>
-#include "headers/udp_socket.h"
-#include "headers/enums.h"
+#include "udp_socket.h"
+#include "enums.h"
 
 UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocket(this)), _timer(new QTimer(this)),
                                           _timer_from_last_received_message(new QTimer(this)),

@@ -5,11 +5,11 @@ QT += qml quick\
 
 CONFIG += c++14
 
-SOURCES += src/main.cpp \
-           src/udp_server.cpp \
-           src/chess.cpp
+SOURCES += cpp/main.cpp \
+           cpp/udp_server.cpp \
+           cpp/chess.cpp
 
-HEADERS += headers/udp_server.h \
-           headers/chess.h \
-    headers/desk.h \
-    headers/enums.h
+HEADERS += cpp/udp_server.h \
+           cpp/chess.h \
+           cpp/desk.h \
+           cpp/enums.h
