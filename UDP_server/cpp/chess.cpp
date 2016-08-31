@@ -56,7 +56,7 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
 
   if(FIG == PAWN && ((Y_UNIT_VECTOR < 0 && get_color(fr) == W_FIG) || (Y_UNIT_VECTOR > 0 && get_color(fr) == B_FIG)))
   {
-    if((get_figure(to) != FREE_FIELD)
+    if((get_figure(to) != FREE_FIELD))
       return (dy*dx == 1 && get_color(fr) != get_color(to));
 
     else if(dx == 0 && get_figure(to) == FREE_FIELD)
@@ -336,7 +336,7 @@ Board::COLOR Board::get_color(const Coord &c) const
   return islower(m_field[get_field_index(c)]) ? W_FIG : B_FIG;
 }
 
-int Board::diff(const int _1, const int _2)
+int Board::diff(const int _1, const int _2) const
 {
   return (_1 - _2);
 }

@@ -20,16 +20,16 @@ Window
   readonly property int bOARD_LAYOUT_SIZE: 560
   readonly property int mENU_SIZE: 200
 
-  readonly property int fIG_ANGLE: -50
+  readonly property int fIG_ANGLE: -10
   readonly property int bOARD_ANGLE: -50
-  readonly property double bOARD_ANGLE_RAD: (bOARD_ANGLE * Math.PI)/ 180
+  readonly property double bOARD_COS_ANGLE: Math.cos((bOARD_ANGLE * Math.PI)/ 180)
 
   readonly property int bOARD_SIZE: bOARD_LAYOUT_SIZE * _board.cube_scale
   readonly property int cELL_SIZE_X: bOARD_SIZE / 8
-  readonly property int cELL_SIZE_Y: bOARD_SIZE / 8 * Math.cos(bOARD_ANGLE_RAD)
+  readonly property int cELL_SIZE_Y: bOARD_SIZE / 8 * bOARD_COS_ANGLE
 
-  readonly property int START_X: (bOARD_LAYOUT_SIZE - bOARD_SIZE) / 2
-  readonly property int START_Y: (bOARD_LAYOUT_SIZE - bOARD_SIZE * Math.cos(bOARD_ANGLE_RAD)) / 2
+  readonly property int sTART_X: (bOARD_LAYOUT_SIZE - bOARD_SIZE) / 2
+  readonly property int sTART_Y: (bOARD_LAYOUT_SIZE - (bOARD_SIZE * bOARD_COS_ANGLE)) / 2
 
   readonly property int bOARD_Z : 0
   readonly property int cELL_HILIGHT_Z: 1
@@ -91,10 +91,15 @@ Window
       anchors.fill: parent
       onPressed:
       {
+
           console.log("x: ",mouseX)
           console.log("y: ",mouseY)
-          console.log("start y: ", _root.START_Y, ";y size: ", _root.cELL_SIZE_Y)
-          console.log("ANGLE: ", _root.bOARD_ANGLE_RAD)
+          console.log("start y: ", _root.sTART_Y, ";y size: ", _root.cELL_SIZE_Y)
+          console.log("start x: ", _root.sTART_X, ";x size: ", _root.cELL_SIZE_X)
+          console.log("bOARD_COS_ANGLE: ", _root.bOARD_COS_ANGLE)
+          console.log("bOARD_LAYOUT_SIZE: ", _root.bOARD_LAYOUT_SIZE)
+          console.log("bOARD_SIZE: ", _root.bOARD_SIZE)
+          console.log("ANGLE: ", _root.bOARD_COS_ANGLE)
       }
     }
   }
@@ -115,8 +120,8 @@ Window
       fig_type: figure_name
       tilt_angle: _root.fIG_ANGLE
 
-      x: START_X + (x_coord * cELL_SIZE_X)
-      y: START_Y + (y_coord * cELL_SIZE_Y)
+      x: sTART_X + (x_coord * cELL_SIZE_X)
+      y: sTART_Y + (y_coord * cELL_SIZE_Y)
       z: figure_name == "hilight"? cELL_HILIGHT_Z : pASSIVE_FIGURE_Z
 
       visible: figure_visible
@@ -150,9 +155,9 @@ Window
           console.log("y1: ",_dragArea.y1)
           console.log("x: ", parent.x)
           console.log("y: ", parent.y)
-          console.log("START_X: ", START_X)
-          console.log("START_Y: ", START_Y)
 
+          console.log("start y: ", _root.sTART_Y, ";y size: ", _root.cELL_SIZE_Y)
+          console.log("start x: ", _root.sTART_X, ";x size: ", _root.cELL_SIZE_X)
 
 //          FigureModel.run_command("move", x1 - START_X, y1 - START_Y, parent.x - START_X, parent.y - START_Y)
         }

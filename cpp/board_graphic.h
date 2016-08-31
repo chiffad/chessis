@@ -8,8 +8,7 @@
 #include <QStringList>
 #include <vector>
 #include <fstream>
-#include <enums.h>
-
+#include <cpp/enums.h>
 #include <QTimer>
 
 class Board_graphic : public QAbstractListModel
@@ -117,7 +116,7 @@ private:
   void add_to_command_history(const QString& str);
   void update_hilight(const Coord& coord, const HILIGHT hilight_index);
   const QString coord_to_str(const Coord& from, const Coord& to) const;
-  bool set_correct_coord(Coord& coord, const unsigned x, const unsigned y);
+  bool set_correct_coord(Coord& coord, const int x, const int y);
   void add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content = QString());
 
 private:

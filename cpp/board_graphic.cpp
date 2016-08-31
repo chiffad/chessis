@@ -155,7 +155,7 @@ void Board_graphic::run_command(const QString& message, const unsigned x1, const
   }
 }
 
-bool Board_graphic::set_correct_coord(Coord& c, const unsigned x, const unsigned y)
+bool Board_graphic::set_correct_coord(Coord& c, const int x, const int y)
 {
   if(x < 0 || x > (CELL_SIZE_X * CELL_NUM) || y < 0 || y > (CELL_SIZE_Y * CELL_NUM))
     return false;

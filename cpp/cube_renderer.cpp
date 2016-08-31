@@ -80,7 +80,7 @@ void Cube_renderer::load_correct_textur(const QString &fig_type)
 {
   m_board_texture.clear();
 
-  const QString PATH_TO_IMG = "../chessis/res/img/";
+  const QString PATH_TO_IMG = "chessis/res/img/";
 
   if(fig_type == "board")
   {
