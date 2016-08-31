@@ -39,7 +39,7 @@ public:
       YRole = Qt::UserRole + 1,
       VisibleRole = Qt::UserRole
   };
-  enum {BOARD_SIDE = 8, FIGURES_NUMBER = 32};
+  enum {CELL_NUM = 8, FIGURES_NUMBER = 32};
 
 public:
   explicit Board_graphic(QObject *parent = 0);
@@ -92,8 +92,7 @@ signals:
   void udp_connection_status_changed();
 
 private:
-  enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4,IMG_MID = 40, CELL_SIZE_X = 56,
-       CELL_SIZE_Y = 39, CELL_SIZE = 560 / 8, a_LETTER = 'a', FREE_FIELD = '.'};
+  enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4, CELL_SIZE_X = 56, CELL_SIZE_Y = 39, a_LETTER = 'a', FREE_FIELD = '.'};
   const QString MOVE_COLOR_W = "img/w_k.png";
   const QString MOVE_COLOR_B = "img/b_K.png";
   const QString HILIGHT_IM = "hilight";
@@ -118,7 +117,7 @@ private:
   void add_to_command_history(const QString& str);
   void update_hilight(const Coord& coord, const HILIGHT hilight_index);
   const QString coord_to_str(const Coord& from, const Coord& to) const;
-  void set_correct_coord(Coord& coord, const unsigned x, const unsigned y);
+  bool set_correct_coord(Coord& coord, const unsigned x, const unsigned y);
   void add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content = QString());
 
 private:

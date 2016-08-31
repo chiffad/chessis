@@ -147,19 +147,23 @@ void Board_graphic::run_command(const QString& message, const unsigned x1, const
       else
       {
         Coord from,to;
-        set_correct_coord(from, x1, y1);
-        set_correct_coord(to, x2, y2);
-        add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(from, to));
+        if(set_correct_coord(from, x1, y1) && set_correct_coord(to, x2, y2))
+          add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(from, to));
       }
     }
     else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
   }
 }
 
-void Board_graphic::set_correct_coord(Coord& c, const unsigned x, const unsigned y)
+bool Board_graphic::set_correct_coord(Coord& c, const unsigned x, const unsigned y)
 {
-  c.x = (x + IMG_MID) / CELL_SIZE_X;
-  c.y = (y + IMG_MID) / CELL_SIZE_Y;
+  if(x < 0 || x > (CELL_SIZE_X * CELL_NUM) || y < 0 || y > (CELL_SIZE_Y * CELL_NUM))
+    return false;
+
+  c.x = (x + (CELL_SIZE_X / 2)) / CELL_SIZE_X;
+  c.y = (y + (CELL_SIZE_Y / 2)) / CELL_SIZE_Y;
+
+  return true;
 }
 
 void Board_graphic::update_coordinates()
@@ -185,15 +189,15 @@ void Board_graphic::update_coordinates()
 Board_graphic::Coord Board_graphic::get_field_coord(const int i) const
 {
   Coord c;
-  c.x = i % BOARD_SIDE;
-  c.y = i / BOARD_SIDE;
+  c.x = i % CELL_NUM;
+  c.y = i / CELL_NUM;
   return c;
 }
 
 void Board_graphic::set_board_mask(const QString& mask)
 {
   qDebug()<<"====set_board_mask";
-  if(mask.size() != BOARD_SIDE * BOARD_SIDE)
+  if(mask.size() != CELL_NUM * CELL_NUM)
   {
     qDebug()<<"mask is wrong!"<<mask;
     return;
@@ -226,7 +230,7 @@ void Board_graphic::set_moves_history(const QString& history)
   Coord coord;
   for(int i = 0; i < 2; ++i)
   {
-    coord.y = BOARD_SIDE - (*(r_simb++)).digitValue();
+    coord.y = CELL_NUM - (*(r_simb++)).digitValue();
     coord.x = (*(r_simb++)).unicode() - a_LETTER;
     update_hilight(coord, ((i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT));
   }
@@ -243,10 +247,10 @@ void Board_graphic::set_move_color(const int move_num)
 
 const QString Board_graphic::coord_to_str(const Coord &from, const Coord &to) const
 {
-  qDebug()<<"cord_o_str:"<<  (QChar(a_LETTER + from.x) + QString::number(BOARD_SIDE - from.y)
-                              + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIDE - to.y));
-  return (QChar(a_LETTER + from.x) + QString::number(BOARD_SIDE - from.y)
-          + " - " + QChar(a_LETTER + to.x) + QString::number(BOARD_SIDE - to.y));
+  qDebug()<<"cord_o_str:"<<  (QChar(a_LETTER + from.x) + QString::number(CELL_NUM - from.y)
+                              + " - " + QChar(a_LETTER + to.x) + QString::number(CELL_NUM - to.y));
+  return (QChar(a_LETTER + from.x) + QString::number(CELL_NUM - from.y)
+          + " - " + QChar(a_LETTER + to.x) + QString::number(CELL_NUM - to.y));
 }
 
 void Board_graphic::add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content)

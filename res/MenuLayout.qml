@@ -25,7 +25,6 @@ Rectangle
 
   readonly property string sHOW_OPPONENT : "show opponent"
   readonly property string hELP_WORD : "help"
-  readonly property string mOVE_WORD : "move"
   readonly property string bACK_MOVE : "back"
   readonly property string nEW_GAME : "new game"
   readonly property string sHOW_ME : "show me"

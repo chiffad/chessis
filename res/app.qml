@@ -28,8 +28,8 @@ Window
   readonly property int cELL_SIZE_X: bOARD_SIZE / 8
   readonly property int cELL_SIZE_Y: bOARD_SIZE / 8 * Math.cos(bOARD_ANGLE_RAD)
 
-  readonly property int sTART_FIG_X_POS: (bOARD_LAYOUT_SIZE - bOARD_SIZE) / 2
-  readonly property int sTART_FIG_Y_POS: (bOARD_LAYOUT_SIZE - bOARD_SIZE * Math.cos(bOARD_ANGLE_RAD)) / 2
+  readonly property int START_X: (bOARD_LAYOUT_SIZE - bOARD_SIZE) / 2
+  readonly property int START_Y: (bOARD_LAYOUT_SIZE - bOARD_SIZE * Math.cos(bOARD_ANGLE_RAD)) / 2
 
   readonly property int bOARD_Z : 0
   readonly property int cELL_HILIGHT_Z: 1
@@ -47,7 +47,7 @@ Window
     _move_turn_im_source: FigureModel.get_move_turn_color
     _command_field_model: FigureModel.get_commands_hist
     _command_field_current_ind: FigureModel.get_last_elem_ind
-    _connection_status_text:  FigureModel.get_udp_connection_status
+    _connection_status_text: FigureModel.get_udp_connection_status
 
     onRun_command: FigureModel.run_command(command, num)
     onWork_with_file: FigureModel.path_to_file(path_to_file, is_from_file);
@@ -93,7 +93,7 @@ Window
       {
           console.log("x: ",mouseX)
           console.log("y: ",mouseY)
-          console.log("start y: ", _root.sTART_FIG_Y_POS, ";y size: ", _root.cELL_SIZE_Y)
+          console.log("start y: ", _root.START_Y, ";y size: ", _root.cELL_SIZE_Y)
           console.log("ANGLE: ", _root.bOARD_ANGLE_RAD)
       }
     }
@@ -115,8 +115,8 @@ Window
       fig_type: figure_name
       tilt_angle: _root.fIG_ANGLE
 
-      x: sTART_FIG_X_POS + (x_coord * cELL_SIZE_X)
-      y: sTART_FIG_Y_POS + (y_coord * cELL_SIZE_Y)
+      x: START_X + (x_coord * cELL_SIZE_X)
+      y: START_Y + (y_coord * cELL_SIZE_Y)
       z: figure_name == "hilight"? cELL_HILIGHT_Z : pASSIVE_FIGURE_Z
 
       visible: figure_visible
@@ -146,7 +146,15 @@ Window
         onReleased:
         {
           _figure_delegate.z = pASSIVE_FIGURE_Z
-          FigureModel.run_command("move", x1, y1, parent.x, parent.y)
+          console.log("x1: ",_dragArea.x1)
+          console.log("y1: ",_dragArea.y1)
+          console.log("x: ", parent.x)
+          console.log("y: ", parent.y)
+          console.log("START_X: ", START_X)
+          console.log("START_Y: ", START_Y)
+
+
+//          FigureModel.run_command("move", x1 - START_X, y1 - START_Y, parent.x - START_X, parent.y - START_Y)
         }
       }
     }
