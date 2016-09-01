@@ -105,7 +105,7 @@ void UDP_server::read_data()
 
     if(serial_num == (*sender)->_received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
     {
-      (*sender)->_timer_last_received_message->start(TEN_SEC);
+      (*sender)->_timer_last_received_message->start(CHECK_CONNECT_TIME);
       send_data(Messages::MESSAGE_RECEIVED, *_user[_user.indexOf(*sender)], true);
       qDebug()<<"prev serial num. Resent message";
     }
@@ -143,7 +143,7 @@ void UDP_server::run_message(const QByteArray &message, User &u)
     default:
       push_message_to_logic(message, u);
   }
-  u._timer_last_received_message->start(TEN_SEC);
+  u._timer_last_received_message->start(CHECK_CONNECT_TIME);
 }
 
 void UDP_server::push_message_to_logic(const QByteArray &message, User& u)
@@ -242,7 +242,7 @@ void UDP_server::begin_wait_receive(User &u)
 {
   qDebug()<<"====begin_wait_receive";
   u._is_message_reach = false;
-  u._timer->start(SECOND);
+  u._timer->start(RESPONCE_WAIT_TIME);
 }
 
 QByteArray UDP_server::add_serial_num(const QByteArray &message, User &u, bool is_prev_serial_need)
@@ -287,7 +287,7 @@ UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16 
 {
   connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
   connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
-  _timer_last_received_message->start(TEN_SEC);
+  _timer_last_received_message->start(CHECK_CONNECT_TIME);
 }
 
 int UDP_server::User::get_board_ind()
@@ -313,7 +313,7 @@ void UDP_server::User::timer_timeout()
       qDebug()<<"last message was client lost";
       _parent_class->send_data(Messages::OPPONENT_LOST, *_parent_class->_user[_opponent_index]);
     }
-    _timer->start(SECOND);
+    _timer->start(RESPONCE_WAIT_TIME);
 
     _parent_class->_socket->writeDatagram(_parent_class->add_serial_num(_last_sent_message, *this, true),
                                           _ip, _port);

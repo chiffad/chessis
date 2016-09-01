@@ -8,7 +8,7 @@
 UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocket(this)), _timer(new QTimer(this)),
                                           _timer_from_last_received_message(new QTimer(this)),
                                           _received_serial_num(0), _send_serial_num(0), _is_message_received(true),
-                                          _server_port(49152), SERVER_IP(QHostAddress::LocalHost)
+                                          _server_port(FIRST_PORT), SERVER_IP(QHostAddress::LocalHost)
 {
   for(unsigned i = 0; i + FIRST_PORT < LAST_PORT; ++i)
   {

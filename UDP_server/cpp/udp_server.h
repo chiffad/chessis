@@ -27,7 +27,7 @@ public:
   void send_data(const Messages::MESSAGE r_mes, User &u, bool is_prev_serial_need = false);
 
 private:
-  enum {NO_OPPONENT = -1, SECOND = 1000, TEN_SEC = 10000, FIRST_PORT = 49152, LAST_PORT = 65534};
+  enum {NO_OPPONENT = -1, RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 10000, FIRST_PORT = 49152, LAST_PORT = 65534};
   const QChar FREE_SPASE = ' ';
 
 private:
