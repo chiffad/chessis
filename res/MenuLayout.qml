@@ -23,13 +23,6 @@ Rectangle
   border.width: bORDER_WIDTH
   border.color: "black"
 
-  readonly property string sHOW_OPPONENT : "show opponent"
-  readonly property string hELP_WORD : "help"
-  readonly property string bACK_MOVE : "back"
-  readonly property string nEW_GAME : "new game"
-  readonly property string sHOW_ME : "show me"
-  readonly property string hISTORY : "to history"
-
   MoveOutput
   {
     id: _move_output
@@ -67,7 +60,7 @@ Rectangle
         onPressed:
         {
           parent.color = "lightskyblue"
-          _root.run_command(hISTORY, index)
+          _root.run_command("to history", index)
         }
         onReleased: parent.color = (index % 2) == 1 ? "navajowhite" : "lightyellow"
       }
@@ -99,7 +92,7 @@ Rectangle
 
     text: "Back move"
 
-    onClicked: _root.run_command(bACK_MOVE,0);
+    onClicked: _root.run_command("back",0);
   }
 
   Button
@@ -116,7 +109,7 @@ Rectangle
 
     text: "New game"
 
-    onClicked: _root.run_command(nEW_GAME,0)
+    onClicked: _root.run_command("new game", 0)
   }
 
   Button

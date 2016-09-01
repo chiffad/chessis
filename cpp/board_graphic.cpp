@@ -91,7 +91,7 @@ void Board_graphic::timer_timeout()
   timer_kill->start(2000);
 }
 
-void Board_graphic::run_command(const QString& message, const unsigned x1, const unsigned y1, const unsigned x2, const unsigned y2)
+void Board_graphic::run_command(const QString& message, const int x1, const int y1, const int x2, const int y2)
 {
   qDebug()<<"===run_command: "<<message<<"; first_v: "<<x1<< "second_v"<< y1;
   add_to_command_history("command: " + message);
