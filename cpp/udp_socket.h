@@ -27,7 +27,7 @@ public slots:
   void timer_from_last_received_message_timeout();
 
 private:
-  enum {SECOND = 1000, FIVE_SEC = 5000};
+  enum {RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 5000, FIRST_PORT = 49152, LAST_PORT = 65534};
   const QChar FREE_SPASE = ' ';
 
 private:
@@ -50,7 +50,7 @@ private:
   int _send_serial_num;
   bool _is_message_received;
 
-  const quint16 SERVER_PORT;
+  quint16 _server_port;
   const QHostAddress SERVER_IP;
 };
 #endif // UDP_SOCET

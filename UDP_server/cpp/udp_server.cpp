@@ -8,10 +8,20 @@
 #include "chess.h"
 #include "enums.h"
 
-UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_PORT(49238), _SERVER_IP(QHostAddress::LocalHost),
+UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_IP(QHostAddress::LocalHost),
                                           _socket(new QUdpSocket(this))
 {
-  qDebug()<<"is bind:"<<  _socket->bind(_SERVER_IP, _SERVER_PORT);
+  for(int i = 0; i + FIRST_PORT < LAST_PORT; ++i)
+  {
+    if(_socket->bind(_SERVER_IP, FIRST_PORT + i))
+    {
+      qDebug()<<"bind: "<<FIRST_PORT + i;
+      break;
+    }
+    if(i + FIRST_PORT == LAST_PORT - 1)
+     i = -1;
+  }
+
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   qDebug()<<"Server start!";

@@ -27,7 +27,7 @@ public:
   void send_data(const Messages::MESSAGE r_mes, User &u, bool is_prev_serial_need = false);
 
 private:
-  enum {NO_OPPONENT = -1, SECOND = 1000, TEN_SEC = 10000};
+  enum {NO_OPPONENT = -1, SECOND = 1000, TEN_SEC = 10000, FIRST_PORT = 49152, LAST_PORT = 65534};
   const QChar FREE_SPASE = ' ';
 
 private:
@@ -45,7 +45,6 @@ private:
   QByteArray add_serial_num(const QByteArray &message, User &u, bool is_prev_serial_need = false);
 
 private:
-  const quint16 _SERVER_PORT;
   const QHostAddress _SERVER_IP;
 
   QUdpSocket *_socket;
