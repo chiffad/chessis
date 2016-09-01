@@ -24,12 +24,12 @@ Window
   readonly property int bOARD_ANGLE: -50
   readonly property double bOARD_COS_ANGLE: Math.cos((bOARD_ANGLE * Math.PI)/ 180)
 
-  readonly property int bOARD_SIZE: bOARD_LAYOUT_SIZE * _board.cube_scale
-  readonly property int cELL_SIZE_X: bOARD_SIZE / 8
-  readonly property int cELL_SIZE_Y: bOARD_SIZE / 8 * bOARD_COS_ANGLE
+  readonly property double bOARD_SIZE: bOARD_LAYOUT_SIZE * _board.cube_scale
+  readonly property double cELL_SIZE_X: bOARD_SIZE / 8
+  readonly property double cELL_SIZE_Y: bOARD_SIZE / 8 * bOARD_COS_ANGLE
 
-  readonly property int sTART_X: (bOARD_LAYOUT_SIZE - bOARD_SIZE) / 2
-  readonly property int sTART_Y: (bOARD_LAYOUT_SIZE - (bOARD_SIZE * bOARD_COS_ANGLE)) / 2
+  readonly property double sTART_X: (bOARD_LAYOUT_SIZE - bOARD_SIZE) / 2
+  readonly property double sTART_Y: ((bOARD_LAYOUT_SIZE - (bOARD_SIZE * bOARD_COS_ANGLE)) - (bOARD_LAYOUT_SIZE * 0.1 * bOARD_COS_ANGLE)) / 2
 
   readonly property int bOARD_Z : 0
   readonly property int cELL_HILIGHT_Z: 1
@@ -94,12 +94,14 @@ Window
 
           console.log("x: ",mouseX)
           console.log("y: ",mouseY)
-          console.log("start y: ", _root.sTART_Y, ";y size: ", _root.cELL_SIZE_Y)
+    /*      console.log("start y: ", _root.sTART_Y, ";y size: ", _root.cELL_SIZE_Y)
           console.log("start x: ", _root.sTART_X, ";x size: ", _root.cELL_SIZE_X)
           console.log("bOARD_COS_ANGLE: ", _root.bOARD_COS_ANGLE)
           console.log("bOARD_LAYOUT_SIZE: ", _root.bOARD_LAYOUT_SIZE)
           console.log("bOARD_SIZE: ", _root.bOARD_SIZE)
           console.log("ANGLE: ", _root.bOARD_COS_ANGLE)
+          console.log("board:: ", _root.bOARD_COS_ANGLE * _root.bOARD_SIZE)
+     */
       }
     }
   }
@@ -115,7 +117,7 @@ Window
       id: _figure_delegate
 
       width: cELL_SIZE_X
-      height: width
+      height: cELL_SIZE_Y
 
       fig_type: figure_name
       tilt_angle: _root.fIG_ANGLE
@@ -156,10 +158,7 @@ Window
           console.log("x: ", parent.x)
           console.log("y: ", parent.y)
 
-          console.log("start y: ", _root.sTART_Y, ";y size: ", _root.cELL_SIZE_Y)
-          console.log("start x: ", _root.sTART_X, ";x size: ", _root.cELL_SIZE_X)
-
-//          FigureModel.run_command("move", x1 - START_X, y1 - START_Y, parent.x - START_X, parent.y - START_Y)
+          FigureModel.run_command("move", x1 - START_X, y1 - START_Y, parent.x - START_X, parent.y - START_Y)
         }
       }
     }

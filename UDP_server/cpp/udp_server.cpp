@@ -242,7 +242,7 @@ void UDP_server::begin_wait_receive(User &u)
 {
   qDebug()<<"====begin_wait_receive";
   u._is_message_reach = false;
-  u._timer->start(RESPONCE_WAIT_TIME);
+  u._timer->start(RESPONSE_WAIT_TIME);
 }
 
 QByteArray UDP_server::add_serial_num(const QByteArray &message, User &u, bool is_prev_serial_need)
@@ -313,7 +313,7 @@ void UDP_server::User::timer_timeout()
       qDebug()<<"last message was client lost";
       _parent_class->send_data(Messages::OPPONENT_LOST, *_parent_class->_user[_opponent_index]);
     }
-    _timer->start(RESPONCE_WAIT_TIME);
+    _timer->start(RESPONSE_WAIT_TIME);
 
     _parent_class->_socket->writeDatagram(_parent_class->add_serial_num(_last_sent_message, *this, true),
                                           _ip, _port);
