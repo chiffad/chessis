@@ -82,7 +82,7 @@ void Cube_renderer::load_correct_textur(const QString &fig_type)
 
   QImage fase_im(PATH_TO_IMG + fig_type + ".png");
   QImage side_im(PATH_TO_IMG + *fig_type.begin() + ".png");
-  unsigned z_size = 1;
+  float z_size = 1;
 
   if(fig_type == "board")
   {
@@ -90,7 +90,7 @@ void Cube_renderer::load_correct_textur(const QString &fig_type)
     side_im.load(PATH_TO_IMG + "board_side.png");
     z_size = 0.1;
   }
-  else if(*fig_type.begin() != 'w' || *fig_type.begin() != 'b')
+  else if(fig_type == "hilight")
   {
     side_im = fase_im;
     z_size = 0;

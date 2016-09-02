@@ -27,7 +27,7 @@ public slots:
   void timer_from_last_received_message_timeout();
 
 private:
-  enum {RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 5000, FIRST_PORT = 49152, LAST_PORT = 51000};
+  enum {RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 5000, FIRST_PORT = 49152, LAST_PORT = 49500};
   const QChar FREE_SPASE = ' ';
 
 private:
