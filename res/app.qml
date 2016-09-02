@@ -127,7 +127,7 @@ Window
       z: figure_name == "hilight"? cELL_HILIGHT_Z : pASSIVE_FIGURE_Z
 
       visible: figure_visible
-     // opacity: figure_name == "hilight" ? 0.5 : 1.0
+      // opacity: figure_name == "hilight" ? 0.5 : 1.0
 
       MouseArea
       {
@@ -141,7 +141,7 @@ Window
         anchors.fill: parent
         drag.minimumX: 0
         drag.minimumY: 0
-      //  enabled: figure_name != "hilight"
+        //  enabled: figure_name != "hilight"
 
         onPressed:
         {

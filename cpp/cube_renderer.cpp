@@ -78,22 +78,28 @@ void Cube_renderer::set_cube_updates(const QString &fig_name, const int tilt_ang
 
 void Cube_renderer::load_correct_textur(const QString &fig_type)
 {
-  m_board_texture.clear();
-
   const QString PATH_TO_IMG = "chessis/res/img/";
+
+  QImage fase_im(PATH_TO_IMG + fig_type + ".png");
+  QImage side_im(PATH_TO_IMG + *fig_type.begin() + ".png");
+  unsigned z_size = 1;
 
   if(fig_type == "board")
   {
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board.png").mirrored()));
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board_side.png")));
-    m_scale_vect = QVector3D(1, 1, 0.1);
+    fase_im.load(PATH_TO_IMG + "board.png");
+    side_im.load(PATH_TO_IMG + "board_side.png");
+    z_size = 0.1;
   }
-  else
+  else if(*fig_type.begin() != 'w' || *fig_type.begin() != 'b')
   {
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + fig_type + ".png").mirrored()));
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + *fig_type.begin() + ".png")));
-    m_scale_vect =  QVector3D(1, 1, 1);
+    side_im = fase_im;
+    z_size = 0;
   }
+
+  m_board_texture.clear();
+  m_board_texture.append(new QOpenGLTexture(fase_im.mirrored()));
+  m_board_texture.append(new QOpenGLTexture(side_im));
+  m_scale_vect = QVector3D(1, 1, z_size);
 }
 
 

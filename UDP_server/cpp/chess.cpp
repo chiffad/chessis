@@ -21,7 +21,7 @@ Board::Board() : m_is_go_to_history_in_progress(false)
 
 bool Board::move(const Coord &from, const Coord &to)
 {
-  std::cout<<"====move CHESS "<<std::endl;
+  std::cout<<"Board::move CHESS "<<std::endl;
 
   if((get_color(from) == get_move_color()) && (is_can_move(from, to) || is_castling(from, to)))
     move_field(from, to);
@@ -181,7 +181,7 @@ void Board::go_to_history_index(const unsigned index)
 {
   m_is_go_to_history_in_progress = true;
 
-  std::cout<<"===go_to_history_index: "<<index<<" "<<get_actual_move()<<std::endl;
+  std::cout<<"Board::go_to_history_index: "<<index<<" "<<get_actual_move()<<std::endl;
 
   while(index < get_last_made_move())
     back_move();
@@ -195,7 +195,7 @@ void Board::go_to_history_index(const unsigned index)
 
 void Board::make_moves_from_str(const std::string &str)
 {
-  std::cout<<"==make_move_from_str CHESS: "<<str<<std::endl;
+  std::cout<<"Board::make_move_from_str CHESS: "<<str<<std::endl;
   enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4};
 
   std::vector<int> coord_str;
@@ -219,13 +219,13 @@ void Board::make_moves_from_str(const std::string &str)
 
 const std::string Board::get_board_mask() const
 {
-  std::cout<<"====get_board_mask()"<<std::endl;
+  std::cout<<"Board::get_board_mask()"<<std::endl;
   return std::string(m_field.begin(), m_field.end());
 }
 
 const std::string Board::get_moves_history() const
 {
-  std::cout<<"====get_moves_history: "<<std::endl;
+  std::cout<<"Board::get_moves_history: "<<std::endl;
 
   std::string history;
   for(auto hist_elem : m_history_copy)
@@ -240,7 +240,7 @@ const std::string Board::get_moves_history() const
 
 void Board::write_moves_to_file(const std::string &path) const
 {
-  std::cout<<"====write_moves_to_file "<<std::endl;
+  std::cout<<"Board::write_moves_to_file "<<std::endl;
   std::ofstream in_file(path);
   std::string history = get_moves_history();
   std::copy(history.begin(), history.end(), std::ostreambuf_iterator<char>(in_file));
@@ -248,7 +248,7 @@ void Board::write_moves_to_file(const std::string &path) const
 
 void Board::read_moves_from_file(const std::string &path)
 {
-  std::cout<<"====read_moves_from_file "<<std::endl;
+  std::cout<<"Board::read_moves_from_file "<<std::endl;
   std::ifstream from_file(path);
   std::string data_from_file(std::istreambuf_iterator<char>(from_file), (std::istreambuf_iterator<char>()));
 
@@ -265,7 +265,7 @@ void Board::start_new_game()
 
 bool Board::back_move()
 {
-  std::cout<<"====back_move"<<std::endl;
+  std::cout<<"Board::back_move"<<std::endl;
   if(!get_actual_move())
     return false;
 

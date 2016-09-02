@@ -15,7 +15,7 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_IP(QHostAddre
   {
     if(_socket->bind(_SERVER_IP, FIRST_PORT + i))
     {
-      qDebug()<<"bind: "<<FIRST_PORT + i;
+      qDebug()<<"UDP_server::bind: "<<FIRST_PORT + i;
       break;
     }
     if(i + FIRST_PORT == LAST_PORT - 1)
@@ -44,7 +44,7 @@ void UDP_server::send_data(const QByteArray &message, User &u)
   if(!is_message_reach(message, u))
     return;
 
-  qDebug()<<"====sending"<<message;
+  qDebug()<<"UDP_server::sending"<<message;
   _socket->writeDatagram(add_serial_num(message,u), u._ip, u._port);
   begin_wait_receive(u);
 }
@@ -62,7 +62,7 @@ void UDP_server::send_data(const Messages::MESSAGE r_mes, User &u, bool is_prev_
     begin_wait_receive(u);
   }
 
-  qDebug()<<"====sending"<<message;
+  qDebug()<<"UDP_server::sending"<<message;
   _socket->writeDatagram(add_serial_num(message, u, is_prev_serial_need), u._ip, u._port);
 }
 
@@ -75,7 +75,7 @@ void UDP_server::read_data()
   message.resize(_socket->pendingDatagramSize());
   _socket->readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
 
-  qDebug()<<"====reading"<<message;
+  qDebug()<<"UDP_server::reading"<<message;
 
   auto sender = std::find_if(_user.begin(), _user.end(),
                              [sender_port, sender_IP](auto const &i){return(i->_port == sender_port && i->_ip == sender_IP);});
@@ -115,7 +115,7 @@ void UDP_server::read_data()
 
 void UDP_server::run_message(const QByteArray &message, User &u)
 {
-  qDebug()<<"===run_message";
+  qDebug()<<"UDP_server::run_message";
 
   if(message.toInt() != Messages::MESSAGE_RECEIVED)
     send_data(Messages::MESSAGE_RECEIVED, u);
@@ -148,7 +148,7 @@ void UDP_server::run_message(const QByteArray &message, User &u)
 
 void UDP_server::push_message_to_logic(const QByteArray &message, User& u)
 {
-  qDebug()<<"===push_message_to_logic";
+  qDebug()<<"UDP_server::push_message_to_logic";
   if(u.get_board_ind() == NO_OPPONENT)
     return;
 
@@ -190,7 +190,7 @@ void UDP_server::push_message_to_logic(const QByteArray &message, User& u)
 
 void UDP_server::send_board_state(User &u)
 {
-  qDebug()<<"====send_board_state";
+  qDebug()<<"UDP_server::send_board_state";
 
   QByteArray message;
   Desk *const board = _board[u.get_board_ind()];
@@ -240,7 +240,7 @@ void UDP_server::set_opponent(User &u)
 
 void UDP_server::begin_wait_receive(User &u)
 {
-  qDebug()<<"====begin_wait_receive";
+  qDebug()<<"UDP_server::begin_wait_receive";
   u._is_message_reach = false;
   u._timer->start(RESPONSE_WAIT_TIME);
 }
@@ -302,7 +302,7 @@ int UDP_server::User::get_board_ind()
 
 void UDP_server::User::timer_timeout()
 {
-  qDebug()<<"===time out";
+  qDebug()<<"User::time out";
 
   static int count = 0;
   if(!_is_message_reach)
@@ -328,6 +328,6 @@ void UDP_server::User::timer_timeout()
 
 void UDP_server::User::timer_last_received_message_timeout()
 {
-  qDebug()<<"===timer_from_last_received_message_timeout "<<_my_index;
+  qDebug()<<"User::timer_from_last_received_message_timeout "<<_my_index;
   _parent_class->send_data(Messages::CLIENT_LOST, *this);
 }

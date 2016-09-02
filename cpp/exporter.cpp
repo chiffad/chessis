@@ -11,7 +11,7 @@ Exporter::Exporter(Board_graphic *const board_graphic, UDP_socket *const udp_soc
 
 void Exporter::push_to_graphic(const QString& message)
 {
-  qDebug()<<"===push_message"<<message;
+  qDebug()<<"Exporter::push_message"<<message;
 
   if(message.indexOf(";") > 0)
   {
@@ -38,7 +38,7 @@ void Exporter::push_to_graphic(const QString& message)
 
 void Exporter::push_to_socet(const QString& message)
 {
-  //qDebug()<<"====push_message_to_socet";
+  //qDebug()<<"Exporter::push_message_to_socet";
   QByteArray m;
   m.append(message);
   _udp_socet->send_data(m);
@@ -46,12 +46,12 @@ void Exporter::push_to_socet(const QString& message)
 
 const QString Exporter::pull_from_graphic()
 {
-  //qDebug()<<"====pull_message_from_graphic";
+  //qDebug()<<"Exporter::pull_message_from_graphic";
   return _board_graphic->pull_first_messages_for_server();
 }
 
 const QString Exporter::pull_from_socet()
 {
-  //qDebug()<<"====pull_message_from_socet";
+  //qDebug()<<"Exporter::pull_message_from_socet";
   return _udp_socet->pull_received_message();
 }

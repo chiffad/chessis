@@ -19,7 +19,7 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
 
   timer_kill = new QTimer(this);
   connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
- // timer_kill->start(2000);
+  timer_kill->start(10000);
 }
 
 Board_graphic::~Board_graphic()
@@ -63,7 +63,7 @@ void Board_graphic::timer_timeout()
     path_to_file(s, true);
      //run_command("new game");
   }*/
-  if( i == 4)
+/*  if( i == 4)
   {
      run_command("to history",2);
   }
@@ -86,14 +86,14 @@ void Board_graphic::timer_timeout()
   if( i == 8)
   {
      run_command("to history",2);
-  }
+  }*/
 
-  timer_kill->start(2000);
+  timer_kill->start(5000);
 }
 
 void Board_graphic::run_command(const QString& message, const int x1, const int y1, const int x2, const int y2)
 {
-  qDebug()<<"===run_command: "<<message<<"; first_v: "<<x1<< "second_v"<< y1;
+  qDebug()<<"Board_graphic::run_command: "<<message<<"; first_v: "<<x1<< "second_v"<< y1;
   add_to_command_history("command: " + message);
 
   if(message == HELP_WORD)
@@ -160,6 +160,7 @@ bool Board_graphic::set_correct_coord(Coord& c, const int x, const int y)
   if(x < 0 || x > (CELL_SIZE_X * CELL_NUM) || y < 0 || y > (CELL_SIZE_Y * CELL_NUM))
     return false;
 
+  qDebug()<<"Board_graphic::set_correct_coord true";
   c.x = (x + (CELL_SIZE_X / 2)) / CELL_SIZE_X;
   c.y = (y + (CELL_SIZE_Y / 2)) / CELL_SIZE_Y;
 
@@ -168,7 +169,7 @@ bool Board_graphic::set_correct_coord(Coord& c, const int x, const int y)
 
 void Board_graphic::update_coordinates()
 {
-  qDebug()<<"====update_coord";
+  qDebug()<<"Board_graphic::update_coord";
   auto f_it = _field.begin();
   for(auto &fig_mod : _figures_model)
   {
@@ -196,7 +197,7 @@ Board_graphic::Coord Board_graphic::get_field_coord(const int i) const
 
 void Board_graphic::set_board_mask(const QString& mask)
 {
-  qDebug()<<"====set_board_mask";
+  qDebug()<<"Board_graphic::set_board_mask";
   if(mask.size() != CELL_NUM * CELL_NUM)
   {
     qDebug()<<"mask is wrong!"<<mask;
@@ -210,7 +211,7 @@ void Board_graphic::set_board_mask(const QString& mask)
 
 void Board_graphic::set_moves_history(const QString& history)
 {
-  qDebug()<<"====set_moves_history";
+  qDebug()<<"Board_graphic::set_moves_history"<<history;
   _str_moves_history.clear();
 
   QString move;
@@ -226,13 +227,16 @@ void Board_graphic::set_moves_history(const QString& history)
     }
   }
 
-  auto r_simb = history.rbegin();
-  Coord coord;
-  for(int i = 0; i < 2; ++i)
+  if(!history.isEmpty())
   {
-    coord.y = CELL_NUM - (*(r_simb++)).digitValue();
-    coord.x = (*(r_simb++)).unicode() - a_LETTER;
-    update_hilight(coord, ((i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT));
+    auto r_simb = history.rbegin();
+    Coord coord;
+    for(int i = 0; i < 2; ++i)
+    {
+      coord.y = CELL_NUM - (*(r_simb++)).digitValue();
+      coord.x = (*(r_simb++)).unicode() - a_LETTER;
+      update_hilight(coord, ((i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT));
+    }
   }
 
   emit moves_history_changed();
@@ -240,14 +244,14 @@ void Board_graphic::set_moves_history(const QString& history)
 
 void Board_graphic::set_move_color(const int move_num)
 {
-  qDebug()<<"====set_move_color";
+  qDebug()<<"Board_graphic::set_move_color";
   _move_color = (move_num % 2 == 0) ? MOVE_COLOR_W : MOVE_COLOR_B;
   emit move_turn_color_changed();
 }
 
 const QString Board_graphic::coord_to_str(const Coord &from, const Coord &to) const
 {
-  qDebug()<<"cord_o_str:"<<  (QChar(a_LETTER + from.x) + QString::number(CELL_NUM - from.y)
+  qDebug()<<"Board_graphic::coord_to_str:"<<  (QChar(a_LETTER + from.x) + QString::number(CELL_NUM - from.y)
                               + " - " + QChar(a_LETTER + to.x) + QString::number(CELL_NUM - to.y));
   return (QChar(a_LETTER + from.x) + QString::number(CELL_NUM - from.y)
           + " - " + QChar(a_LETTER + to.x) + QString::number(CELL_NUM - to.y));
@@ -255,14 +259,14 @@ const QString Board_graphic::coord_to_str(const Coord &from, const Coord &to) co
 
 void Board_graphic::add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content)
 {
-  qDebug()<<"====add_to_messages_for_server_stack";
+  qDebug()<<"Board_graphic::add_to_messages_for_server_stack";
   _messages_for_server_stack.append(QString::number(mes_type) + FREE_SPACE + content);
   qDebug()<<"!!!!!_messages_for_server_stack.last"<<_messages_for_server_stack.last();
 }
 
 void Board_graphic::update_hilight(const Coord &coord, const enum HILIGHT hilight_index)
 {
-  qDebug()<<"====update_hilight; "<<coord.x<<" "<<coord.y;
+  qDebug()<<"Board_graphic::update_hilight; "<<coord.x<<" "<<coord.y;
 
   _figures_model[hilight_index].set_visible(true);
   _figures_model[hilight_index].set_coord(coord);
@@ -289,7 +293,7 @@ void Board_graphic::set_check_mate()
 
 void Board_graphic::add_to_command_history(const QString& str)
 {
-  qDebug()<<"====add_to_command_history";
+  qDebug()<<"Board_graphic::add_to_command_history";
   _commands_history.append(str);
   emit commands_hist_changed();
 }
@@ -310,7 +314,7 @@ void Board_graphic::path_to_file(QString &path, bool is_moves_from_file)
 
 void Board_graphic::write_moves_to_file(const QString& path)
 {
-  qDebug()<<"====write_moves_to_file";
+  qDebug()<<"Board_graphic::write_moves_to_file";
   std::ofstream in_file(path.toStdString());
   for(auto &s : _str_moves_history)
   {
@@ -322,7 +326,7 @@ void Board_graphic::write_moves_to_file(const QString& path)
 
 void Board_graphic::read_moves_from_file(const QString& path)
 {
-  qDebug()<<"===read_move_from_file: "<<path;
+  qDebug()<<"Board_graphic::read_move_from_file: "<<path;
   std::ifstream from_file(path.toStdString());
   std::string data_from_file(std::istream_iterator<char>(from_file), (std::istream_iterator<char>()));
 
@@ -331,7 +335,7 @@ void Board_graphic::read_moves_from_file(const QString& path)
 
 void Board_graphic::set_connect_status(const int status)
 {
-  qDebug()<<"====set_connect_status";
+  qDebug()<<"Board_graphic::set_connect_status";
   switch(status)
   {
     case Messages::SERVER_HERE:
@@ -352,13 +356,13 @@ void Board_graphic::set_connect_status(const int status)
 
 bool Board_graphic::is_new_message_for_server_appear() const
 {
-  //qDebug()<<"=====is new command appear:"<<!_messages_for_server_stack.isEmpty();
+  //qDebug()<<"Board_graphic::is new command appear:"<<!_messages_for_server_stack.isEmpty();
   return !_messages_for_server_stack.isEmpty();
 }
 
 const QString Board_graphic::pull_first_messages_for_server()
 {
-  //qDebug()<<"=====pull_first_command()";
+  //qDebug()<<"Board_graphic::pull_first_command()";
   QString command(_messages_for_server_stack.first());
   _messages_for_server_stack.removeFirst();
   return command;
