@@ -14,6 +14,7 @@ UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocke
   {
     if(_socket->bind(SERVER_IP, FIRST_PORT + i))
     {
+      _my_port = FIRST_PORT + i;
       qDebug()<<"UDP_socket::bind: "<<FIRST_PORT + i;
       break;
     }
@@ -84,12 +85,11 @@ void UDP_socket::read_data()
 
   const QByteArray serial_num = cut_serial_num(message);
 
- /* if(sender_IP != SERVER_IP || sender_port != _server_port || _last_send_message == message)
+  if(sender_IP != SERVER_IP || sender_port != _server_port || sender_port == _my_port)
   {
-    qDebug()<<"wrong sender!"<< (sender_port != _server_port)<<" "<<(sender_IP != SERVER_IP);
-    qDebug()<<SERVER_IP<<""<<sender_IP;
+    qDebug()<<"wrong sender!";
     return;
-  }*/
+  }
 
  // qDebug()<<"!serial_num"<<serial_num;
 
@@ -114,6 +114,9 @@ void UDP_socket::read_data()
   }
   else
   {
+    if(_last_send_message.toInt() == Messages::HELLO_SERVER)
+       _server_port = sender_port;
+
     _is_message_received = true;
     _received_message_stack.push_back(QByteArray::number(Messages::SERVER_HERE));
   }
@@ -169,6 +172,7 @@ bool UDP_socket::is_message_received()
 
       if(_server_port == LAST_PORT)
         _server_port = FIRST_PORT;
+      _timer->start(RESPONSE_WAIT_TIME/10);
       qDebug()<<"++server_port";
     }
 

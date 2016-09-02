@@ -50,6 +50,7 @@ private:
   int _send_serial_num;
   bool _is_message_received;
 
+  quint16 _my_port;
   quint16 _server_port;
   const QHostAddress SERVER_IP;
 };
