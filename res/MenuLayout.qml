@@ -33,15 +33,15 @@ Rectangle
     width: parent.width
     height: parent.height/4
     border.width: bORDER_WIDTH
-    radius: rADIUS
+    radius: _root.rADIUS
 
     delegate:  Rectangle
     {
       id: _moveNumber
 
       width: parent.width / 2
-      height: eLEMENT_HEIGHT
-      radius: parent.radius
+      height: _move_output.height / 6
+      radius: _move_output.radius
 
       color: (index % 2) == 1 ? "navajowhite" : "lightyellow"
 

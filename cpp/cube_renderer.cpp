@@ -11,12 +11,13 @@
 Cube_renderer::Cube_renderer() : m_program(new QOpenGLShaderProgram), m_x_angle(0), m_y_angle(0), m_z_angle(0),
                                  m_elem_size(1), m_scale_vect(1,1,1), m_VERTEX_ATTRIBUTE(0), m_TEXCOORD_ATTRIBUTE(1)
 {
-  load_correct_textur("board");
+    qDebug()<<"!Cube_renderer::Cube_renderer()";
   update_modelview();
 }
 
 Cube_renderer::~Cube_renderer()
 {
+    qDebug()<<"Cube_renderer::~Cube_renderer()";
   for(auto &i : m_board_texture)
     delete i;
   delete m_program;
@@ -24,12 +25,10 @@ Cube_renderer::~Cube_renderer()
 
 void Cube_renderer::initialize()
 {
+    qDebug()<<"Cube_renderer::initialize()";
   initializeOpenGLFunctions();
 
   create_geometry();
-
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
 
   //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -68,43 +67,51 @@ void Cube_renderer::initialize()
 
 void Cube_renderer::set_cube_updates(const QString &fig_name, const int tilt_angle, const float scale)
 {
-  //qDebug()<<"set_cube_updates";
-  m_x_angle = tilt_angle;
-  m_elem_size = scale;
-  load_correct_textur(fig_name);
-  update_modelview();
-  render();
+//    qDebug()<<"Cube_renderer::set_cube_updates()";
+
+  //if(m_name != fig_name)
+  //{
+    m_x_angle = tilt_angle;
+    m_elem_size = scale;
+    m_name = fig_name;
+    load_correct_texture();
+    update_modelview();
+    render();
+  //}
+
 }
 
-void Cube_renderer::load_correct_textur(const QString &fig_type)
+void Cube_renderer::load_correct_texture()
 {
-  const QString PATH_TO_IMG = "chessis/res/img/";
-
-  QImage fase_im(PATH_TO_IMG + fig_type + ".png");
-  QImage side_im(PATH_TO_IMG + *fig_type.begin() + ".png");
-  float z_size = 1;
-
-  if(fig_type == "board")
-  {
-    fase_im.load(PATH_TO_IMG + "board.png");
-    side_im.load(PATH_TO_IMG + "board_side.png");
-    z_size = 0.1;
-  }
-  else if(fig_type == "hilight")
-  {
-    side_im = fase_im;
-    z_size = 0;
-  }
+  qDebug()<<"Cube_renderer::load_correct_textur: "<<m_name;
 
   m_board_texture.clear();
-  m_board_texture.append(new QOpenGLTexture(fase_im.mirrored()));
-  m_board_texture.append(new QOpenGLTexture(side_im));
-  m_scale_vect = QVector3D(1, 1, z_size);
+  const QString PATH_TO_IMG = "chessis/res/img/";
+
+  if(m_name == "board")
+  {
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board.png").mirrored()));
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board_side.png")));
+    m_scale_vect = QVector3D(1, 1, 0.1);
+  }
+  else if(m_name == "hilight")
+  {
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + m_name + ".png")));
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + m_name + ".png")));
+    m_scale_vect = QVector3D(1, 1, 0);
+  }
+  else if(!m_name.isEmpty())
+  {
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + m_name + ".png").mirrored()));
+    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + *m_name.begin() + ".png")));
+    m_scale_vect = QVector3D(1, 1, 2);
+  }
 }
 
 
 void Cube_renderer::update_modelview()
 {
+  qDebug()<<"Cube_renderer::update_modelview()";
   modelview.rotate(m_x_angle, 1.0f, 0.0f, 0.0f);
   modelview.rotate(m_y_angle, 0.0f, 1.0f, 0.0f);
   modelview.rotate(m_z_angle, 0.0f, 0.0f, 1.0f);
@@ -115,12 +122,13 @@ void Cube_renderer::update_modelview()
 void Cube_renderer::render()
 {
   glDepthMask(true);
-
+m_buffer.destroy();
   create_geometry();
 
   //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
   m_program->setUniformValue("matrix", modelview);
   m_program->enableAttributeArray(m_VERTEX_ATTRIBUTE);

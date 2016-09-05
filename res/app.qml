@@ -20,7 +20,7 @@ Window
   readonly property int bOARD_LAYOUT_SIZE: 560
   readonly property int mENU_SIZE: 200
 
-  readonly property int fIG_ANGLE: -10
+  readonly property int fIG_ANGLE: -5
   readonly property int bOARD_ANGLE: -50
   readonly property double bOARD_COS_ANGLE: Math.cos((bOARD_ANGLE * Math.PI)/ 180)
 
@@ -85,25 +85,6 @@ Window
     fig_type: "board"
     tilt_angle: _root.bOARD_ANGLE
     cube_scale: 0.8
-
-    MouseArea
-    {
-      anchors.fill: parent
-      onPressed:
-      {
-
-          console.log("x: ",mouseX)
-          console.log("y: ",mouseY)
-    /*      console.log("start y: ", _root.sTART_Y, ";y size: ", _root.cELL_SIZE_Y)
-          console.log("start x: ", _root.sTART_X, ";x size: ", _root.cELL_SIZE_X)
-          console.log("bOARD_COS_ANGLE: ", _root.bOARD_COS_ANGLE)
-          console.log("bOARD_LAYOUT_SIZE: ", _root.bOARD_LAYOUT_SIZE)
-          console.log("bOARD_SIZE: ", _root.bOARD_SIZE)
-          console.log("ANGLE: ", _root.bOARD_COS_ANGLE)
-          console.log("board:: ", _root.bOARD_COS_ANGLE * _root.bOARD_SIZE)
-     */
-      }
-    }
   }
 
   Repeater
@@ -121,13 +102,14 @@ Window
 
       fig_type: figure_name
       tilt_angle: _root.fIG_ANGLE
+      cube_scale: 0.8
 
       x: sTART_X + (x_coord * cELL_SIZE_X)
       y: sTART_Y + (y_coord * cELL_SIZE_Y)
       z: figure_name == "hilight"? cELL_HILIGHT_Z : pASSIVE_FIGURE_Z
 
       visible: figure_visible
-      // opacity: figure_name == "hilight" ? 0.5 : 1.0
+      opacity: figure_name == "hilight" ? 0.5 : 1.0
 
       MouseArea
       {
@@ -141,7 +123,7 @@ Window
         anchors.fill: parent
         drag.minimumX: 0
         drag.minimumY: 0
-        //  enabled: figure_name != "hilight"
+        enabled: figure_name != "hilight"
 
         onPressed:
         {
@@ -153,12 +135,8 @@ Window
         onReleased:
         {
           _figure_delegate.z = pASSIVE_FIGURE_Z
-          console.log("x1: ",_dragArea.x1)
-          console.log("y1: ",_dragArea.y1)
-          console.log("x: ", parent.x)
-          console.log("y: ", parent.y)
-
-          FigureModel.run_command("move", x1 - START_X, y1 - START_Y, parent.x - START_X, parent.y - START_Y)
+          FigureModel.run_command("move", x1 - _root.sTART_X, y1 - _root.sTART_Y,
+                                          parent.x - _root.sTART_X, parent.y - _root.sTART_Y)
         }
       }
     }

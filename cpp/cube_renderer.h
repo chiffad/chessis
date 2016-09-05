@@ -21,7 +21,7 @@ public:
 private:
   void create_geometry();
   void update_modelview();
-  void load_correct_textur(const QString &fig_type);
+  void load_correct_texture();
 
 private:
    enum CUBE_CHARACTERS{VERTEX = 4, SIDES = 6};
@@ -32,6 +32,8 @@ private:
 
   QMatrix4x4 modelview;
   QOpenGLBuffer m_buffer;
+
+  QString m_name;
 
   float m_x_angle;
   float m_y_angle;

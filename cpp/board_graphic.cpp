@@ -15,11 +15,11 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
 {
   for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
     addFigure(Figure("b_P", 0, 0, false));
-//    addFigure(Figure(HILIGHT_IM, 0, 0, false));
+ //   addFigure(Figure(HILIGHT_IM, 0, 0, false));
 
   timer_kill = new QTimer(this);
   connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  timer_kill->start(10000);
+  //timer_kill->start(10000);
 }
 
 Board_graphic::~Board_graphic()
@@ -93,7 +93,7 @@ void Board_graphic::timer_timeout()
 
 void Board_graphic::run_command(const QString& message, const int x1, const int y1, const int x2, const int y2)
 {
-  qDebug()<<"Board_graphic::run_command: "<<message<<"; first_v: "<<x1<< "second_v"<< y1;
+  qDebug()<<"Board_graphic::run_command: "<<message<<" x1: "<<x1<< "y1"<< y1<<" x2: "<<x2<< "y2"<< y2;
   add_to_command_history("command: " + message);
 
   if(message == HELP_WORD)
