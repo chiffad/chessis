@@ -152,6 +152,9 @@ void Cube_renderer::render()
     glDrawArrays(GL_TRIANGLE_FAN, i * VERTEX, VERTEX);
   }
 
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_CULL_FACE);
+
   m_program->disableAttributeArray(m_TEXCOORD_ATTRIBUTE);
   m_program->disableAttributeArray(m_VERTEX_ATTRIBUTE);
   m_program->release();
