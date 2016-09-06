@@ -10,8 +10,6 @@ Fb_obj::Fb_obj() : m_fig_type("board"), m_tilt_angle(0), m_cube_scale(1)
 
 Fb_obj::~Fb_obj()
 {
-
-    qDebug()<<"Fb_obj::~Fb_obj()";
 }
 
 QQuickFramebufferObject::Renderer* Fb_obj::createRenderer() const
@@ -65,7 +63,6 @@ Fbo_renderer::Fbo_renderer() : m_cube(new Cube_renderer())
 
 Fbo_renderer::~Fbo_renderer()
 {
-    qDebug()<<"~Fbo_renderer()";
   delete m_cube;
 }
 

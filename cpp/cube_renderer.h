@@ -30,7 +30,7 @@ private:
   QVector<QOpenGLTexture*> m_board_texture;
   QOpenGLShaderProgram *m_program;
 
-  QMatrix4x4 modelview;
+  QMatrix4x4 modelView;
   QOpenGLBuffer m_buffer;
 
   QString m_name;
@@ -42,7 +42,8 @@ private:
   GLfloat m_elem_size;
   QVector3D m_scale_vect;
 
-  const int m_VERTEX_ATTRIBUTE;
-  const int m_TEXCOORD_ATTRIBUTE;
+  int m_vertex_attribute;
+  int m_texCoord_attribute;
+  int m_matrix_uniform;
 };
 #endif
