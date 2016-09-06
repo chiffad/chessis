@@ -25,7 +25,7 @@ Cube_renderer::~Cube_renderer()
 
 void Cube_renderer::initialize()
 {
-    qDebug()<<"Cube_renderer::initialize()";
+  qDebug()<<"Cube_renderer::initialize()";
   initializeOpenGLFunctions();
 
   create_geometry();
@@ -58,8 +58,8 @@ void Cube_renderer::initialize()
 
   m_program->addShader(vshader);
   m_program->addShader(fshader);
-  m_program->bindAttributeLocation("vertex", m_VERTEX_ATTRIBUTE);
-  m_program->bindAttributeLocation("texCoord", m_TEXCOORD_ATTRIBUTE);
+//  m_program->bindAttributeLocation("vertex", m_VERTEX_ATTRIBUTE);
+//  m_program->bindAttributeLocation("texCoord", m_TEXCOORD_ATTRIBUTE);
   m_program->link();
 }
 
@@ -121,14 +121,22 @@ void Cube_renderer::update_modelview()
 void Cube_renderer::render()
 {
   glDepthMask(true);
-  m_buffer.destroy();
   create_geometry();
 
   //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+  glFrontFace(GL_CW);
+  glCullFace(GL_FRONT);
+  glEnable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
+
   m_program->bind();
+
   m_program->setUniformValue("texture", 0);
   m_program->setUniformValue("matrix", modelview);
   m_program->enableAttributeArray(m_VERTEX_ATTRIBUTE);
@@ -158,8 +166,9 @@ void Cube_renderer::create_geometry()
                                 -s, -s, -s,   1, 1,   -s, -s, +s,   0,1,   -s, +s, +s,   0,0,   -s, +s, -s,   1,0,
                                 +s, -s, +s,   1, 1,   -s, -s, +s,   0,1,   -s, -s, -s,   0,0,   +s, -s, -s,   1,0,
                                 -s, -s, +s,   1, 1,   +s, -s, +s,   0,1,   +s, +s, +s,   0,0,   -s, +s, +s,   1,0};
-
   m_buffer.create();
   m_buffer.bind();
   m_buffer.allocate(vert_data.constData(), vert_data.count() * sizeof(GLfloat));
+
+  qDebug()<<"!!m_buffer.size()"<<m_buffer.size();
 }
