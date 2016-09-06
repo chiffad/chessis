@@ -61,8 +61,6 @@ void Cube_renderer::initialize()
   m_program->bindAttributeLocation("vertex", m_VERTEX_ATTRIBUTE);
   m_program->bindAttributeLocation("texCoord", m_TEXCOORD_ATTRIBUTE);
   m_program->link();
-  m_program->bind();
-  m_program->setUniformValue("texture", 0);
 }
 
 void Cube_renderer::set_cube_updates(const QString &fig_name, const int tilt_angle, const float scale)
@@ -85,29 +83,30 @@ void Cube_renderer::load_correct_texture()
 {
   qDebug()<<"Cube_renderer::load_correct_textur: "<<m_name;
 
-  m_board_texture.clear();
   const QString PATH_TO_IMG = "chessis/res/img/";
+
+  QImage fase_im(PATH_TO_IMG + m_name + ".png");
+  QImage side_im(PATH_TO_IMG + *m_name.begin() + ".png");
+  float z_scale = 2;
 
   if(m_name == "board")
   {
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board.png").mirrored()));
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + "board_side.png")));
-    m_scale_vect = QVector3D(1, 1, 0.1);
+    fase_im.load(PATH_TO_IMG + "board.png");
+    side_im.load(PATH_TO_IMG + "board_side.png");
+    z_scale = 0.1;
   }
+
   else if(m_name == "hilight")
   {
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + m_name + ".png")));
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + m_name + ".png")));
-    m_scale_vect = QVector3D(1, 1, 0);
+    side_im = fase_im;
+    z_scale = 0;
   }
-  else if(!m_name.isEmpty())
-  {
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + m_name + ".png").mirrored()));
-    m_board_texture.append(new QOpenGLTexture(QImage(PATH_TO_IMG + *m_name.begin() + ".png")));
-    m_scale_vect = QVector3D(1, 1, 2);
-  }
-}
 
+  m_board_texture.clear();
+  m_board_texture.append(new QOpenGLTexture(fase_im.mirrored()));
+  m_board_texture.append(new QOpenGLTexture(side_im));
+  m_scale_vect = QVector3D(1, 1, z_scale);
+}
 
 void Cube_renderer::update_modelview()
 {
@@ -122,14 +121,15 @@ void Cube_renderer::update_modelview()
 void Cube_renderer::render()
 {
   glDepthMask(true);
-m_buffer.destroy();
+  m_buffer.destroy();
   create_geometry();
 
   //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+  m_program->bind();
+  m_program->setUniformValue("texture", 0);
   m_program->setUniformValue("matrix", modelview);
   m_program->enableAttributeArray(m_VERTEX_ATTRIBUTE);
   m_program->enableAttributeArray(m_TEXCOORD_ATTRIBUTE);
@@ -143,6 +143,10 @@ m_buffer.destroy();
     if(i == 1) m_board_texture.last()->bind();
     glDrawArrays(GL_TRIANGLE_FAN, i * VERTEX, VERTEX);
   }
+
+  m_program->disableAttributeArray(m_TEXCOORD_ATTRIBUTE);
+  m_program->disableAttributeArray(m_VERTEX_ATTRIBUTE);
+  m_program->release();
 }
 
 void Cube_renderer::create_geometry()
