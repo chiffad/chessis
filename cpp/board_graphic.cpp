@@ -14,8 +14,7 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
                                                 _udp_connection_status("Disconnected"), _is_check_mate(false)
 {
   for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
-    addFigure(Figure("b_P", 0, 0, false));
- //   addFigure(Figure(HILIGHT_IM, 0, 0, false));
+    addFigure(Figure(HILIGHT_IM, 0, 0, false));
 
   timer_kill = new QTimer(this);
   connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
@@ -378,7 +377,7 @@ QStringList Board_graphic::get_commands_hist() const
   return _commands_history;
 }
 
-int Board_graphic::get_last_elem_ind() const
+int Board_graphic::get_last_command_hist_ind() const
 {
   return _commands_history.size() - 1;
 }

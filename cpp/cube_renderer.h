@@ -14,32 +14,31 @@ class Cube_renderer : protected QOpenGLFunctions
 public:
   explicit Cube_renderer();
   ~Cube_renderer();
+
   void render();
   void initialize();
   void set_cube_updates(const QString &fig_type, const int tilt_angle, const float scale);
 
 private:
   void create_geometry();
-  void update_modelview();
-  void load_correct_texture();
+  void update_model_view(const float scale);
+  void load_correct_texture(const QString &name);
 
 private:
-   enum CUBE_CHARACTERS{VERTEX = 4, SIDES = 6};
+   enum{VERTEX_ATTRIBUTE = 0, TEXCOORD_ATTRIBUTE = 1};
 
 private:
   QVector<QOpenGLTexture*> m_board_texture;
   QOpenGLShaderProgram *m_program;
 
-  QMatrix4x4 modelView;
+  QMatrix4x4 *m_model_view;
   QOpenGLBuffer m_buffer;
-
-  QString m_name;
 
   float m_x_angle;
   float m_y_angle;
   float m_z_angle;
 
-  GLfloat m_elem_size;
+  QString m_name;
   QVector3D m_scale_vect;
 
   int m_vertex_attribute;

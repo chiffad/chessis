@@ -61,8 +61,8 @@ public:
   Q_PROPERTY(QStringList get_commands_hist READ get_commands_hist NOTIFY commands_hist_changed)
   QStringList get_commands_hist() const;
 
-  Q_PROPERTY(int get_last_elem_ind READ get_last_elem_ind NOTIFY commands_hist_changed)
-  int get_last_elem_ind() const;
+  Q_PROPERTY(int get_last_command_hist_ind READ get_last_command_hist_ind NOTIFY commands_hist_changed)
+  int get_last_command_hist_ind() const;
 
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
   bool is_check_mate() const;

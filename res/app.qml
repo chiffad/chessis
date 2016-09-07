@@ -46,7 +46,7 @@ Window
     _move_output_model: FigureModel.get_moves_history
     _move_turn_im_source: FigureModel.get_move_turn_color
     _command_field_model: FigureModel.get_commands_hist
-    _command_field_current_ind: FigureModel.get_last_elem_ind
+    _command_field_current_ind: FigureModel.get_last_command_hist_ind
     _connection_status_text: FigureModel.get_udp_connection_status
 
     onRun_command: FigureModel.run_command(command, num)

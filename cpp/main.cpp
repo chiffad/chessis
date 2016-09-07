@@ -8,8 +8,7 @@
 #include "udp_socket.h"
 #include "fb_obj.h"
 
-bool is_gui_quit = false;
-void gui_is_quit();
+bool quit(const QGuiApplication &app);
 
 int main(int argc, char *argv[])
 {
@@ -22,14 +21,13 @@ int main(int argc, char *argv[])
   engine->rootContext()->setContextProperty("FigureModel", board_graphic);
   engine->load(QUrl(QStringLiteral("chessis/res/app.qml")));
 
-  QObject::connect(engine, &QQmlApplicationEngine::quit, &gui_is_quit);
-
   UDP_socket *udp_socet = new UDP_socket;
   Exporter *exporter = new Exporter(board_graphic, udp_socet);
 
   const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();
-  while(!is_gui_quit)
+
+  while(!quit(*app))
   {
     app->processEvents();
 
@@ -43,9 +41,6 @@ int main(int argc, char *argv[])
       while(udp_socet->is_new_message_received())
         exporter->push_to_graphic(exporter->pull_from_socet());
     }
-
-    if(app->allWindows().isEmpty() || !app->allWindows().last()->visibility())
-      gui_is_quit();
   }
 
   delete exporter;
@@ -57,7 +52,7 @@ int main(int argc, char *argv[])
   return 0;
 }
 
-void gui_is_quit()
+bool quit(const QGuiApplication &app)
 {
-  is_gui_quit = true;
+  return (app.allWindows().isEmpty() || !app.allWindows().last()->visibility());
 }
