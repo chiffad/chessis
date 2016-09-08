@@ -8,7 +8,7 @@
 #include <algorithm>
 #include "cube_renderer.h"
 
-Cube_renderer::Cube_renderer() : m_program(new QOpenGLShaderProgram), m_model_view(new QMatrix4x4), 
+Cube_renderer::Cube_renderer() : m_program(new QOpenGLShaderProgram), m_model_view(new QMatrix4x4),
                                  m_x_angle(0), m_y_angle(0), m_z_angle(0), m_scale_vect(1,1,1)
 {
 }

@@ -8,7 +8,7 @@
 #include"chess.h"
 
 Board::Board() : m_is_go_to_history_in_progress(false)
-{  
+{
   m_field.resize(BOARD_SIZE);
   m_field = {B_ROOK,B_HORSE,B_ELEPHANT,B_QUEEN,B_KING,B_ELEPHANT,B_HORSE,B_ROOK};
   m_field.insert(m_field.end(), BOARD_SIDE, B_PAWN);
@@ -128,17 +128,16 @@ bool Board::is_castling(const Coord &fr, const Coord &to) const
 
 bool Board::is_check(const COLOR color) const
 {
-  if(get_actual_move() < 2 || color == NONE)
+  if(color == NONE)
     return false;
 
-  Coord f,t;
-  for(t.x = 0; t.x < BOARD_SIDE; ++t.x)
-    for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
+  for(Coord t; t.x < BOARD_SIDE; ++t.x)
+    for(; t.y < BOARD_SIDE; ++t.y)
       if(get_colorless_figure(t) == KING && get_color(t) == color)
       {
-        for(f.x = 0; f.x < BOARD_SIDE; ++f.x)
+        for(Coord f; f.x < BOARD_SIDE; ++f.x)
         {
-          for(f.y = 0; f.y < BOARD_SIDE; ++f.y)
+          for(; f.y < BOARD_SIDE; ++f.y)
             if(get_color(f) != color && is_can_move(f, t))
               return true;
         }
@@ -149,17 +148,13 @@ bool Board::is_check(const COLOR color) const
 
 bool Board::is_mate()
 {
-  if(get_actual_move() < 2)
-    return false;
-
-  Coord f,t;
-  for(f.x = 0; f.x < BOARD_SIDE; ++f.x)
+  for(Coord f; f.x < BOARD_SIDE; ++f.x)
   {
-    for(f.y = 0; f.y < BOARD_SIDE; ++f.y)
+    for(; f.y < BOARD_SIDE; ++f.y)
       if(get_figure(f) != FREE_FIELD && get_color(f) == get_move_color())
       {
-        for(t.x = 0; t.x < BOARD_SIDE; ++t.x)
-          for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
+        for(Coord t; t.x < BOARD_SIDE; ++t.x)
+          for(; t.y < BOARD_SIDE; ++t.y)
             if(is_can_move(f, t))
             {
               const FIGURE FIG_TO = get_figure(t);
