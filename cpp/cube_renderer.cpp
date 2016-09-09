@@ -81,11 +81,11 @@ void Cube_renderer::load_correct_texture(const QString &name)
 {
   qDebug()<<"Cube_renderer::load_correct_textur: "<<name;
 
-  const QString PATH_TO_IMG = "chessis/res/img/";
+  const QString PATH_TO_IMG = "../chessis/res/img/";
 
   QImage fase_im(PATH_TO_IMG + name + ".png");
   QImage side_im(PATH_TO_IMG + *name.begin() + ".png");
-  float z_scale = 2;
+  float z_scale = 4;
 
   if(name == "board")
   {

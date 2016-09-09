@@ -226,18 +226,6 @@ void Board_graphic::set_moves_history(const QString& history)
     }
   }
 
-  if(!history.isEmpty())
-  {
-    auto r_simb = history.rbegin();
-    Coord coord;
-    for(int i = 0; i < 2; ++i)
-    {
-      coord.y = CELL_NUM - (*(r_simb++)).digitValue();
-      coord.x = (*(r_simb++)).unicode() - a_LETTER;
-      update_hilight(coord, ((i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT));
-    }
-  }
-
   emit moves_history_changed();
 }
 
@@ -246,6 +234,19 @@ void Board_graphic::set_move_color(const int move_num)
   qDebug()<<"Board_graphic::set_move_color";
   _move_color = (move_num % 2 == 0) ? MOVE_COLOR_W : MOVE_COLOR_B;
   emit move_turn_color_changed();
+
+  if(move_num && _str_moves_history.length() >= move_num)
+  {
+    auto simb = _str_moves_history[move_num].begin();
+    Coord c;
+    for(int i = 0; i < 2; ++i)
+    {
+      c.x = (*(simb++)).unicode() - a_LETTER;
+      c.y = CELL_NUM - (*(simb++)).digitValue();
+      simb += 3;
+      update_hilight(c, ((i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT));
+    }
+  }
 }
 
 const QString Board_graphic::coord_to_str(const Coord &from, const Coord &to) const
