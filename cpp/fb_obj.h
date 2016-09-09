@@ -39,7 +39,6 @@ private:
 
 class Fbo_renderer : public QQuickFramebufferObject::Renderer
 {
-
 public:
   Fbo_renderer();
   ~Fbo_renderer();

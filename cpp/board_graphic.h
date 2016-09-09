@@ -106,7 +106,7 @@ private:
 
 private:
   Board_graphic(const Board_graphic&) = delete;
-  void operator=(const Board_graphic&) = delete;
+  Board_graphic& operator=(const Board_graphic&) = delete;
 
   void update_coordinates();
   Coord get_field_coord(const int i) const;

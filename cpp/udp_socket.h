@@ -32,7 +32,7 @@ private:
 
 private:
   UDP_socket(const UDP_socket&) = delete;
-  void operator=(const UDP_socket&) = delete;
+  UDP_socket& operator=(const UDP_socket&) = delete;
 
   QByteArray add_serial_num(const QByteArray &data, bool is_prev_serial_need = false);
   QByteArray cut_serial_num(QByteArray &data) const;

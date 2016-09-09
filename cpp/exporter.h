@@ -19,7 +19,7 @@ public:
 
 private:
   Exporter(const Exporter&) = delete;
-  void operator=(const Exporter&) = delete;
+  Exporter& operator=(const Exporter&) = delete;
 
 private:
   Board_graphic *const _board_graphic;
