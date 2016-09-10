@@ -23,7 +23,7 @@ Cube_renderer::~Cube_renderer()
 
 void Cube_renderer::initialize()
 {
-  qDebug()<<"Cube_renderer::initialize()";
+ // qDebug()<<"Cube_renderer::initialize()";
   initializeOpenGLFunctions();
 
   create_geometry();
@@ -79,7 +79,7 @@ void Cube_renderer::set_cube_updates(const QString &fig_name, const int tilt_ang
 
 void Cube_renderer::load_correct_texture(const QString &name)
 {
-  qDebug()<<"Cube_renderer::load_correct_textur: "<<name;
+//  qDebug()<<"Cube_renderer::load_correct_textur: "<<name;
 
   const QString PATH_TO_IMG = "../chessis/res/img/";
 
@@ -112,7 +112,7 @@ void Cube_renderer::load_correct_texture(const QString &name)
 
 void Cube_renderer::update_model_view(const float scale)
 {
-  qDebug()<<"Cube_renderer::update_modelview()";
+  //qDebug()<<"Cube_renderer::update_modelview()";
   m_scale_vect *= scale;
   delete m_model_view;
 

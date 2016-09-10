@@ -231,22 +231,9 @@ void Board_graphic::set_moves_history(const QString& history)
 
 void Board_graphic::set_move_color(const int move_num)
 {
-  qDebug()<<"Board_graphic::set_move_color";
+  qDebug()<<"!!!!Board_graphic::set_move_color";
   _move_color = (move_num % 2 == 0) ? MOVE_COLOR_W : MOVE_COLOR_B;
   emit move_turn_color_changed();
-
-  if(move_num && _str_moves_history.length() >= move_num)
-  {
-    auto simb = _str_moves_history[move_num].begin();
-    Coord c;
-    for(int i = 0; i < 2; ++i)
-    {
-      c.x = (*(simb++)).unicode() - a_LETTER;
-      c.y = CELL_NUM - (*(simb++)).digitValue();
-      simb += 3;
-      update_hilight(c, ((i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT));
-    }
-  }
 }
 
 const QString Board_graphic::coord_to_str(const Coord &from, const Coord &to) const
@@ -264,13 +251,27 @@ void Board_graphic::add_to_messages_for_server_stack(const Messages::MESSAGE mes
   qDebug()<<"!!!!!_messages_for_server_stack.last"<<_messages_for_server_stack.last();
 }
 
-void Board_graphic::update_hilight(const Coord &coord, const enum HILIGHT hilight_index)
+void Board_graphic::update_hilight(const int move_num, const QString& history)
 {
-  qDebug()<<"Board_graphic::update_hilight; "<<coord.x<<" "<<coord.y;
+  qDebug()<<"Board_graphic::update_hilight; move_num: "<<move_num<<" ;histry: "<<history;
 
-  _figures_model[hilight_index].set_visible(true);
-  _figures_model[hilight_index].set_coord(coord);
-  emit_figure_changed(hilight_index);
+  const int CHAR_IN_MOVE = 4;
+
+  if(move_num && history.size() >= move_num * CHAR_IN_MOVE)
+  {
+    auto simb = history.begin();
+    simb += (move_num-1) * CHAR_IN_MOVE;
+    Coord c;
+    for(int i = 0; i < 2; ++i)
+    {
+      c.x = (*(simb++)).unicode() - a_LETTER;
+      c.y = CELL_NUM - (*(simb++)).digitValue();
+      HILIGHT ind = (i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT;
+      _figures_model[ind].set_visible(true);
+      _figures_model[ind].set_coord(c);
+      emit_figure_changed(ind);
+    }
+  }
 }
 
 void Board_graphic::emit_figure_changed(const unsigned INDEX)
