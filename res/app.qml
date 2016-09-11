@@ -102,7 +102,7 @@ Window
 
       fig_type: figure_name
       tilt_angle: _root.fIG_ANGLE
-      cube_scale: 0.8
+      cube_scale: figure_name == "hilight"? 1 : 0.8
 
       x: sTART_X + (x_coord * cELL_SIZE_X)
       y: sTART_Y + (y_coord * cELL_SIZE_Y)

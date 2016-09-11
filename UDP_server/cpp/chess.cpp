@@ -74,10 +74,12 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
   {
     coord.x += X_UNIT_VECTOR;
     coord.y += Y_UNIT_VECTOR;
-    if(get_figure(coord) != FREE_FIELD && get_color(to) != get_color(fr) && !(coord == to))
-      return false;
+    if(get_figure(coord) == FREE_FIELD || (get_color(to) != get_color(fr) && coord == to))
+      continue;
+
+    return false;
   }
-  return true;
+  return !(fr == to);
 }
 
 void Board::if_castling(const Coord &fr, const Coord &to)
@@ -131,13 +133,14 @@ bool Board::is_check(const COLOR color) const
   if(color == NONE)
     return false;
 
-  for(Coord t; t.x < BOARD_SIDE; ++t.x)
-    for(; t.y < BOARD_SIDE; ++t.y)
+  Coord f,t;
+  for(t.x = 0; t.x < BOARD_SIDE; ++t.x)
+    for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
       if(get_colorless_figure(t) == KING && get_color(t) == color)
       {
-        for(Coord f; f.x < BOARD_SIDE; ++f.x)
+        for(f.x = 0; f.x < BOARD_SIDE; ++f.x)
         {
-          for(; f.y < BOARD_SIDE; ++f.y)
+          for(f.y = 0; f.y < BOARD_SIDE; ++f.y)
             if(get_color(f) != color && is_can_move(f, t))
               return true;
         }
@@ -148,20 +151,20 @@ bool Board::is_check(const COLOR color) const
 
 bool Board::is_mate()
 {
-  for(Coord f; f.x < BOARD_SIDE; ++f.x)
+  Coord f,t;
+  for(f.x = 0; f.x < BOARD_SIDE; ++f.x)
   {
-    for(; f.y < BOARD_SIDE; ++f.y)
+    for(f.y = 0; f.y < BOARD_SIDE; ++f.y)
       if(get_figure(f) != FREE_FIELD && get_color(f) == get_move_color())
       {
-        for(Coord t; t.x < BOARD_SIDE; ++t.x)
-          for(; t.y < BOARD_SIDE; ++t.y)
+        for(t.x = 0; t.x < BOARD_SIDE; ++t.x)
+          for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
             if(is_can_move(f, t))
             {
               const FIGURE FIG_TO = get_figure(t);
               set_field(t, f, FREE_FIELD);
 
               const bool is_mate = is_check(get_move_color());
-
               set_field(f, t, FIG_TO);
 
               if(!is_mate)

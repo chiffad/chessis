@@ -256,7 +256,6 @@ void Board_graphic::update_hilight(const int move_num, const QString& history)
   qDebug()<<"Board_graphic::update_hilight; move_num: "<<move_num<<" ;histry: "<<history;
 
   const int CHAR_IN_MOVE = 4;
-
   if(move_num && history.size() >= move_num * CHAR_IN_MOVE)
   {
     auto simb = history.begin();
