@@ -128,7 +128,7 @@ void Board_graphic::run_command(const QString& message, const int x1, const int 
   else if(message == HISTORY)
   {
     qDebug()<<"history";
-    add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(x1));
+    add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(x1 + 1));
   }
   else
   {

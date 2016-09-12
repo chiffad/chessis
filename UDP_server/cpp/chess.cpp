@@ -179,14 +179,14 @@ void Board::go_to_history_index(const unsigned index)
 {
   m_is_go_to_history_in_progress = true;
 
-  std::cout<<"Board::go_to_history_index: "<<index<<" "<<get_actual_move()<<std::endl;
+  std::cout<<"Board::go_to_history_index: "<<index<<" "<<get_move_num()<<std::endl;
 
-  while(index < get_last_made_move())
+  while(index < get_move_num())
     back_move();
 
-  if(index < m_history_copy.size())
-    for(unsigned i = get_actual_move(); i <= index; ++i)
-      move(m_history_copy[i].from, m_history_copy[i].to);
+  if(index <= m_moves_copy.size())
+    for(unsigned i = get_move_num(); i < index; ++i)
+      move(m_moves_copy[i].from, m_moves_copy[i].to);
 
   m_is_go_to_history_in_progress = false;
 }
@@ -226,7 +226,7 @@ const std::string Board::get_moves_history() const
   std::cout<<"Board::get_moves_history: "<<std::endl;
 
   std::string history;
-  for(auto hist_elem : m_history_copy)
+  for(auto hist_elem : m_moves_copy)
   {
     history.push_back(hist_elem.from.x + a_LETTER);
     history.push_back(EIGHT_ch - hist_elem.from.y);
@@ -258,19 +258,19 @@ void Board::read_moves_from_file(const std::string &path)
 void Board::start_new_game()
 {
   while(back_move());
-  m_history_copy.clear();
+  m_moves_copy.clear();
 }
 
 bool Board::back_move()
 {
   std::cout<<"Board::back_move"<<std::endl;
-  if(!get_actual_move())
+  if(!get_move_num())
     return false;
 
-  Moves *const move  = &m_moves[get_last_made_move()];
-  set_field(move->from, move->to, move->fig_on_captured_field);
+  const Moves &m = m_moves.back();
+  set_field(m.from, m.to, m.fig_on_captured_field);
 
-  if_castling(move->to, move->from);
+  if_castling(m.to, m.from);
   m_moves.pop_back();
   return true;
 }
@@ -281,23 +281,23 @@ void Board::next_move(const Coord &from, const Coord &to)
   m_actual_move.to = to;
   m_moves.push_back(m_actual_move);
 
-  if(get_actual_move() && !m_is_go_to_history_in_progress)
+  if(!m_is_go_to_history_in_progress)
   {
-    if(get_actual_move() < m_history_copy.size())
-      m_history_copy.erase(m_history_copy.begin() + get_last_made_move(), m_history_copy.end());
+    if(get_move_num() < m_moves_copy.size())
+      m_moves_copy.erase(m_moves_copy.begin() + get_move_num_from_0(), m_moves_copy.end());
 
-    m_history_copy.push_back(m_moves[get_last_made_move()]);
+    m_moves_copy.push_back(m_moves.back());
   }
 }
 
-unsigned Board::get_actual_move() const
+unsigned Board::get_move_num() const
 {
   return m_moves.size();
 }
 
-unsigned Board::get_last_made_move() const
+unsigned Board::get_move_num_from_0() const
 {
-  return get_actual_move() ? get_actual_move() - 1 : 0;
+  return get_move_num() ? get_move_num() - 1 : 0;
 }
 
 Board::FIGURE Board::get_figure(const Coord &c) const
@@ -317,7 +317,7 @@ Board::COLORLESS_FIG Board::get_colorless_figure(const Coord &c) const
 
 Board::COLOR Board::get_move_color() const
 {
-  return get_actual_move() % 2 ? B_FIG : W_FIG;
+  return get_move_num() % 2 ? B_FIG : W_FIG;
 }
 
 void Board::set_field(const Coord &lhs, const Coord &rhs, const FIGURE & fig)

@@ -39,8 +39,8 @@ public:
    void read_moves_from_file(const std::string &path);
    void write_moves_to_file(const std::string &path) const;
 
-   unsigned get_actual_move() const;
-   unsigned get_last_made_move() const;
+   unsigned get_move_num() const;
+   unsigned get_move_num_from_0() const;
    const std::string get_board_mask() const;
    COLOR get_move_color() const;
    COLOR get_color(const Coord &c) const;
@@ -72,7 +72,7 @@ private:
      FIGURE fig_on_captured_field;
    }m_actual_move;
    std::vector<Moves> m_moves;
-   std::vector<Moves> m_history_copy;
+   std::vector<Moves> m_moves_copy;
    std::vector<FIGURE> m_field;
    bool m_is_go_to_history_in_progress;
 };

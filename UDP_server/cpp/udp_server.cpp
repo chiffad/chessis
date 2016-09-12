@@ -203,7 +203,7 @@ void UDP_server::send_board_state(User &u)
     message.append("#");
   message.append(";");
 
-  message.append(QByteArray::number(board->get_actual_move()));
+  message.append(QByteArray::number(board->get_move_num()));
 
   send_data(message, *_user[u._opponent_index]);
   send_data(message, u);
