@@ -112,7 +112,7 @@ bool Board::is_castling(const Coord &fr, const Coord &to) const
   const int dy = abs(diff(to.y, fr.y));
   const int X_UNIT_VECTOR = dx == 0 ? 0 : diff(to.x, fr.x)/dx;
 
-  std::vector<FIGURE>::const_iterator field = m_field.begin() + get_field_index(fr) + X_UNIT_VECTOR;
+  const auto &field = m_field.begin() + get_field_index(fr) + X_UNIT_VECTOR;
   if(get_colorless_figure(fr) == KING && !is_check(get_color(fr)) && dy == 0 && dx == 2 && *field == FREE_FIELD 
      && *(field + X_UNIT_VECTOR) == FREE_FIELD && (X_UNIT_VECTOR > 0 || *(field + 2 * X_UNIT_VECTOR) == FREE_FIELD))
   {
@@ -187,6 +187,9 @@ void Board::go_to_history_index(const unsigned index)
   if(index <= m_moves_copy.size())
     for(unsigned i = get_move_num(); i < index; ++i)
       move(m_moves_copy[i].from, m_moves_copy[i].to);
+
+//  std::for_each(m_moves_copy.begin() + get_move_num(), m_moves_copy.begin() + index,
+//                [this](const auto &a){this->move(a.from, a.to);});
 
   m_is_go_to_history_in_progress = false;
 }
