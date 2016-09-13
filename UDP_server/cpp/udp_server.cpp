@@ -291,10 +291,8 @@ UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16 
 int UDP_server::User::get_board_ind()
 {
   auto it = std::find_if(_parent_class->_board.begin(), _parent_class->_board.end(),
-                        [this](auto const &i){return((i->_first_player_ind == _my_index
-                                                      || i->_first_player_ind == _opponent_index)
-                                                      &&(i->_second_player_ind == _my_index
-                                                         || i->_second_player_ind == _opponent_index));});
+                        [this](auto const &i){return(i->contain_player(_my_index) && i->contain_player(_opponent_index));});
+
   return _parent_class->_board.indexOf(*it);
 }
 
