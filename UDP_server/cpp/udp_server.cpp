@@ -29,14 +29,12 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_IP(QHostAddre
 
 UDP_server::~UDP_server()
 {
-
   delete _socket;
   for(auto &i : _user)
     delete i;
 
   for(auto &i : _board)
     delete i;
-
 }
 
 void UDP_server::send_data(const QByteArray &message, User &u)

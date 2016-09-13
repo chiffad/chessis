@@ -69,12 +69,12 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
   else if((FIG == ELEPHANT || FIG == QUEEN) && (dx == dy));
   else return false;
 
-  Coord coord(fr);
-  while(!(coord == to))
+  Coord c(fr);
+  while(!(c == to))
   {
-    coord.x += X_UNIT_VECTOR;
-    coord.y += Y_UNIT_VECTOR;
-    if(get_figure(coord) == FREE_FIELD || (get_color(to) != get_color(fr) && coord == to))
+    c.x += X_UNIT_VECTOR;
+    c.y += Y_UNIT_VECTOR;
+    if(get_figure(c) == FREE_FIELD || (get_color(to) != get_color(fr) && c == to))
       continue;
 
     return false;
@@ -113,12 +113,12 @@ bool Board::is_castling(const Coord &fr, const Coord &to) const
   const int X_UNIT_VECTOR = dx == 0 ? 0 : diff(to.x, fr.x)/dx;
 
   const auto &field = m_field.begin() + get_field_index(fr) + X_UNIT_VECTOR;
-  if(get_colorless_figure(fr) == KING && !is_check(get_color(fr)) && dy == 0 && dx == 2 && *field == FREE_FIELD 
+  if(get_colorless_figure(fr) == KING && !is_check(get_color(fr)) && dy == 0 && dx == 2 && *field == FREE_FIELD
      && *(field + X_UNIT_VECTOR) == FREE_FIELD && (X_UNIT_VECTOR > 0 || *(field + 2 * X_UNIT_VECTOR) == FREE_FIELD))
   {
-    Coord coord((to.x > 4 ? 7 : 0), (get_color(fr) == W_FIG ? 7 : 0));
+    Coord c((to.x > 4 ? 7 : 0), (get_color(fr) == W_FIG ? 7 : 0));
     const bool is_rook_not_moved = (std::find_if(m_moves.begin(), m_moves.end(),
-                                   [coord](auto const &i) {return (coord == i.from || coord == i.to);}) == m_moves.end());
+                                   [c](auto const &i) {return (c == i.from || c == i.to);}) == m_moves.end());
 
     const bool is_king_not_moved = (std::find_if(m_moves.begin(), m_moves.end(),
                                    [fr](auto const &i) {return (fr == i.from || fr == i.to);}) == m_moves.end());
@@ -188,8 +188,11 @@ void Board::go_to_history_index(const unsigned index)
     for(unsigned i = get_move_num(); i < index; ++i)
       move(m_moves_copy[i].from, m_moves_copy[i].to);
 
-//  std::for_each(m_moves_copy.begin() + get_move_num(), m_moves_copy.begin() + index,
-//                [this](const auto &a){this->move(a.from, a.to);});
+//  if(get_move_num() < index)
+//    std::for_each(m_moves_copy.begin() + get_move_num(), m_moves_copy.begin() + index,
+//                  [this](const auto &a){this->move(a.from, a.to);});
+//  for(auto &i: index)
+//    move(m_moves_copy[i].from, m_moves_copy[i].to);
 
   m_is_go_to_history_in_progress = false;
 }
