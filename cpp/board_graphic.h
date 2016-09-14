@@ -73,6 +73,7 @@ public:
   Q_INVOKABLE void run_command(const QString &message,  const int x1 = 0, const int y1 = 0,
                                const int x2 = 0, const int y2 = 0);
   Q_INVOKABLE void path_to_file(QString &path, bool is_moves_from_file);
+  Q_INVOKABLE void set_login(const QString &login);
 
 public:
   void set_check_mate();

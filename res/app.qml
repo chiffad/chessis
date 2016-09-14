@@ -37,6 +37,19 @@ Window
   readonly property int aCTIVE_FIGURE_Z: 3
   readonly property int cHECK_MATE_IMG_Z: 4
 
+  Enter_login
+  {
+    anchor.centerIn: parent
+    z: _root.eNTER_LOGIN_Z
+
+    onLogin_entered:
+    {
+      FigureModel.run_command(login_inp.text,0)
+      login_inp.clear()
+      parent.visible: false
+    }
+  }
+
   MenuLayout
   {
     height: parent.height

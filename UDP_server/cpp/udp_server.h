@@ -40,8 +40,8 @@ private:
   int cut_serial_num(QByteArray &message) const;
   void run_message(const QByteArray &message, User &u);
   bool is_message_reach(const QByteArray &message, User &u);
-  void push_message_to_logic(const QByteArray &message, User &u);
   QByteArray get_usr_info(const User &u, bool is_opponent = true) const;
+  void push_message_to_logic(const QByteArray &type, const QByteArray &content, User &u);
   QByteArray add_serial_num(const QByteArray &message, User &u, bool is_prev_serial_need = false);
 
 private:
@@ -82,7 +82,7 @@ public:
   QByteArray _last_sent_message;
   QVector<QByteArray> _message_stack;
 
-  const QString _login;
+  QString _login;
   int _rating_ELO;
 
 private:

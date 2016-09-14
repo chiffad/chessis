@@ -115,13 +115,16 @@ void UDP_server::run_message(const QByteArray &message, User &u)
 {
   qDebug()<<"UDP_server::run_message";
 
-  if(message.toInt() != Messages::MESSAGE_RECEIVED)
+  const QByteArray type(message.mid(0, message.indexOf(FREE_SPASE)));
+  const QByteArray content(message.mid(message.indexOf(FREE_SPASE) + 1));
+
+  if(type.toInt() != Messages::MESSAGE_RECEIVED)
     send_data(Messages::MESSAGE_RECEIVED, u);
 
-  switch(message.toInt())
+  switch(type.toInt())
   {
     case Messages::MESSAGE_RECEIVED:
-      qDebug()<<"message_type == MESSAGE_RECEIVED";
+      qDebug()<<"type == MESSAGE_RECEIVED";
       u._is_message_reach = true;
       if(!u._message_stack.isEmpty())
       {
@@ -138,28 +141,29 @@ void UDP_server::run_message(const QByteArray &message, User &u)
     case Messages::MY_INF:
       send_data(get_usr_info(u, false), u);
       break;
+    case Messages::LOGIN:
+      qDebug()<<"login!"
+      u._login = content;
+      break;
     default:
-      push_message_to_logic(message, u);
+      push_message_to_logic(type, content, u);
   }
   u._timer_last_received_message->start(CHECK_CONNECT_TIME);
 }
 
-void UDP_server::push_message_to_logic(const QByteArray &message, User& u)
+void UDP_server::push_message_to_logic(const QByteArray &type, const QByteArray &content, User& u)
 {
   qDebug()<<"UDP_server::push_message_to_logic";
   if(u.get_board_ind() == NO_OPPONENT)
     return;
 
-  const QByteArray message_type(message.mid(0, message.indexOf(FREE_SPASE)));
-  const QByteArray message_content(message.mid(message.indexOf(FREE_SPASE) + 1));
-
   Desk *const board = _board[u.get_board_ind()];
-  switch(message_type.toInt())
+  switch(type.toInt())
   {
     case Messages::MOVE:
     {
       qDebug()<<"MOVE";
-      board->make_moves_from_str(message_content.toStdString());
+      board->make_moves_from_str(content.toStdString());
       break;
     }
     case Messages::BACK_MOVE:
@@ -171,13 +175,13 @@ void UDP_server::push_message_to_logic(const QByteArray &message, User& u)
       board->start_new_game();
       break;
     case Messages::GO_TO_HISTORY:
-      qDebug()<<"GO_TO_HISTORY"<<message_content.toInt();
-      board->go_to_history_index(message_content.toInt());
+      qDebug()<<"GO_TO_HISTORY"<<content.toInt();
+      board->go_to_history_index(content.toInt());
       break;
     case Messages::FROM_FILE:
-      qDebug()<<"FROM_FILE: "<<message_content.toInt();
+      qDebug()<<"FROM_FILE: "<<content.toInt();
       board->start_new_game();
-      board->make_moves_from_str(message_content.toStdString());
+      board->make_moves_from_str(content.toStdString());
       break;
     default:
       qDebug()<<"sheet message!";
@@ -281,7 +285,7 @@ UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16 
                      : QObject(parent), _timer(new QTimer), _timer_last_received_message(new QTimer),
                        _parent_class(parent_class), _port(port), _ip(ip), _my_index(index),
                        _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true),
-                       _login("login"), _rating_ELO(1200)
+                       _login("guest"), _rating_ELO(1200)
 {
   connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
   connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
