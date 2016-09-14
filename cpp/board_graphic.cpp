@@ -108,11 +108,11 @@ void Board_graphic::run_command(const QString& message, const int x1, const int 
   else if(message == SHOW_OPPONENT)
   {
     qDebug()<<"show opponent";
-    add_to_messages_for_server_stack(Messages::OPPONENT_INF_REQUEST);
+    add_to_messages_for_server_stack(Messages::OPPONENT_INF);
   }
   else if(message == SHOW_ME)
   {
-    add_to_messages_for_server_stack(Messages::MY_INF_REQUEST);
+    add_to_messages_for_server_stack(Messages::MY_INF);
     qDebug()<<"show me";
   }
   else if(message == NEW_GAME)

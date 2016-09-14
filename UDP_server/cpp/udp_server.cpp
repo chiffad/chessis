@@ -142,7 +142,7 @@ void UDP_server::run_message(const QByteArray &message, User &u)
       send_data(get_usr_info(u, false), u);
       break;
     case Messages::LOGIN:
-      qDebug()<<"login!"
+      qDebug()<<"login!: "<<content;
       u._login = content;
       break;
     default:
@@ -214,6 +214,9 @@ void UDP_server::send_board_state(User &u)
 QByteArray UDP_server::get_usr_info(const User &u, bool is_opponent) const
 {
   QByteArray inf;
+  inf.append(QString::number(Messages::INF_REQUEST));
+  inf.append(FREE_SPASE);
+
   if(is_opponent && u._opponent_index == NO_OPPONENT)
      inf.append("No opponent!");
   else

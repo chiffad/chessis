@@ -8,7 +8,7 @@ Rectangle
   property alias currentIndex: _list_view.currentIndex
   property alias model: _list_view.model
   property alias text_inp: _text_input
-  signal text_inp_accepted
+  signal text_inp_accepted(string text)
 
   border.color: "white"
   color: "blue"
@@ -47,13 +47,17 @@ Rectangle
     anchors.leftMargin: 2
     anchors.rightMargin: 2
     anchors.bottomMargin: 2
+
     visible: parent.visible
     clip: true
-    focus: true
     wrapMode: TextInput.Wrap
     color: "white"
 
-    onAccepted: _root.text_inp_accepted()
+    onAccepted:
+    {
+      _root.text_inp_accepted(_text_input.text)
+      _text_input.clear()
+    }
   }
 
   Keys.onPressed:

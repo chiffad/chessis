@@ -36,22 +36,30 @@ Window
   readonly property int pASSIVE_FIGURE_Z: 2
   readonly property int aCTIVE_FIGURE_Z: 3
   readonly property int cHECK_MATE_IMG_Z: 4
+  readonly property int eNTER_LOGIN_Z: 5
 
   Enter_login
   {
-    anchor.centerIn: parent
+    id: _login
+
+    anchors.centerIn: parent
     z: _root.eNTER_LOGIN_Z
 
     onLogin_entered:
     {
-      FigureModel.run_command(login_inp.text,0)
-      login_inp.clear()
-      parent.visible: false
+      if(login.length)
+      {
+        FigureModel.set_login(login)
+        _login.visible = false
+        _menu_layout._text_inp.focus = true
+      }
     }
   }
 
   MenuLayout
   {
+    id: _menu_layout
+
     height: parent.height
     anchors.left: _board.right
     anchors.right: parent.right

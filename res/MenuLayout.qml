@@ -11,6 +11,7 @@ Rectangle
   property alias _connection_status_text: _connection_status.text
   property alias _command_field_current_ind: _command_field.currentIndex
   property alias _command_field_model: _command_field.model
+  property alias _text_inp: _command_field.text_inp
 
   signal run_command(string command, int num)
   signal work_with_file(string path_to_file, bool is_from_file)
@@ -199,8 +200,8 @@ Rectangle
 
     onText_inp_accepted:
     {
-      _root.run_command(text_inp.text,0)
-      text_inp.clear()
+      if(text.length)
+        _root.run_command(text,0)
     }
   }
 }

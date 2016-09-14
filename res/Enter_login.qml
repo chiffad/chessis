@@ -5,17 +5,16 @@ Rectangle
 {
   id: _root
 
-  property alias login_inp: _text_input
   signal login_entered(string login)
 
   height: parent.height/5
-  width: parent.width/5
+  width: parent.width/2
 
   color: "light grey"
 
   border.color: "black"
-  border.width: 5
-  radius: 10
+  border.width: 2
+  radius: 5
 
   Rectangle
   {
@@ -24,19 +23,30 @@ Rectangle
     width: parent.width - (parent.width / 10)
 
     border.color: "black"
-    border.width: 2
-    radius: 10
+    border.width: 1
+    radius: 2
     color: "white"
 
     TextInput
     {
       id: _text_input
 
-      anchors.centerIn: parent
-      clip: true
-      focus: _root.visible
+      visible: parent.visible
+      focus: visible
       wrapMode: TextInput.Wrap
-      color: "white"
+      color: "black"
+
+      font.pixelSize: parent.height - parent.height/3
+
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
+      anchors.leftMargin: 2
+      anchors.rightMargin: 2
+      anchors.bottomMargin: 2
+      maximumLength: 20
+
+      clip: true
 
       onAccepted:
       {
