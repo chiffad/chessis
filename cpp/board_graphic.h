@@ -73,7 +73,7 @@ public:
   Q_INVOKABLE void run_command(const QString &message,  const int x1 = 0, const int y1 = 0,
                                const int x2 = 0, const int y2 = 0);
   Q_INVOKABLE void path_to_file(QString &path, bool is_moves_from_file);
-  Q_INVOKABLE void set_login(const QString &login);
+  Q_INVOKABLE bool set_login(const QString &login);
 
 public:
   void set_check_mate();
@@ -83,6 +83,7 @@ public:
   bool is_new_message_for_server_appear() const;
   const QString pull_first_messages_for_server();
   void set_moves_history(const QString &history);
+  void add_to_command_history(const QString& str);
   void update_hilight(const int move_num, const QString& history);
 
 signals:
@@ -115,7 +116,6 @@ private:
   void write_moves_to_file(const QString& path);
   void emit_figure_changed(const unsigned index);
   void read_moves_from_file(const QString& path);
-  void add_to_command_history(const QString& str);
   const QString coord_to_str(const Coord& from, const Coord& to) const;
   bool set_correct_coord(Coord& coord, const int x, const int y);
   void add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content = QString());

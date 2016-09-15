@@ -354,10 +354,15 @@ void Board_graphic::set_connect_status(const int status)
   emit udp_connection_status_changed();
 }
 
-void Board_graphic::set_login(const QString &login)
+bool Board_graphic::set_login(const QString &login)
 {
   qDebug()<<"Board_graphic::set_login: "<<login;
+  for(auto i : login)
+    if(!i.isLetterOrNumber())
+      return false;
+
   add_to_messages_for_server_stack(Messages::LOGIN, login);
+  return true;
 }
 
 bool Board_graphic::is_new_message_for_server_appear() const
