@@ -13,7 +13,20 @@ void Exporter::push_to_graphic(const QString& message)
 {
   qDebug()<<"Exporter::push_message"<<message;
 
-  if(message.indexOf(";") > 0)
+  const QString type = message.mid(0, message.indexOf(" "));
+  qDebug()<<"type: "<<type;
+
+  if(type.toInt() == Messages::INF_REQUEST)
+    _board_graphic->add_to_command_history(message.mid(message.indexOf(" ")));
+
+  else if(type.toInt() == Messages::SERVER_LOST
+       || type.toInt() == Messages::SERVER_HERE
+       || type.toInt() == Messages:: OPPONENT_LOST)
+  {
+    _board_graphic->set_connect_status(message.toInt());
+  }
+
+  else if(message.indexOf(";") > 0)
   {
     const int INDEX = message.indexOf(";");
     const int NEXT_IND = INDEX + 1;
@@ -34,7 +47,6 @@ void Exporter::push_to_graphic(const QString& message)
     if(moves_history.endsWith("#"))
       _board_graphic->set_check_mate();
   }
-  else _board_graphic->set_connect_status(message.toInt());
 }
 
 void Exporter::push_to_socet(const QString& message)

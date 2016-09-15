@@ -5,6 +5,8 @@ Rectangle
 {
   id: _root
 
+  property alias _error : error_text.visible
+
   signal login_entered(string login)
 
   height: parent.height/5
@@ -18,6 +20,8 @@ Rectangle
 
   Rectangle
   {
+    id: input_rect
+
     anchors.centerIn: parent
     height: parent.height / 5
     width: parent.width - (parent.width / 10)
@@ -54,5 +58,21 @@ Rectangle
         _text_input.clear()
       }
     }
+  }
+
+  Text
+  {
+    id: error_text
+
+    anhors.top: input_rect.bottom
+    anhors.bottom: parent.bottom
+    anhors.left: parent.left
+    anhors.right: parent.right
+
+    text: "Wrong login!"
+
+    font.pointSize: (parent.height - input_rect.height) / 2
+    color: "red"
+    visible: false
   }
 }

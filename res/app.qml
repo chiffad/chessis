@@ -47,12 +47,13 @@ Window
 
     onLogin_entered:
     {
-      if(login.length)
+      if(login.length && FigureModel.set_login(login))
       {
-        FigureModel.set_login(login)
+        _error = false
         _login.visible = false
         _menu_layout._text_inp.focus = true
       }
+      else _error = true
     }
   }
 
