@@ -361,7 +361,8 @@ bool Board_graphic::set_login(const QString &login)
     if(!i.isLetterOrNumber())
       return false;
 
-  add_to_messages_for_server_stack(Messages::LOGIN, login);
+  //add_to_messages_for_server_stack(Messages::LOGIN, login);
+  add_to_messages_for_server_stack(Messages::HELLO_SERVER, login);
   return true;
 }
 

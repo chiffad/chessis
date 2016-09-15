@@ -26,7 +26,7 @@ UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocke
   connect(_timer, SIGNAL(timeout()), this, SLOT(is_message_received()));
   connect(_timer_from_last_received_message, SIGNAL(timeout()), this, SLOT(timer_from_last_received_message_timeout()));
 
-  send_data(Messages::HELLO_SERVER);
+//  send_data(Messages::HELLO_SERVER);
 }
 
 UDP_socket::~UDP_socket()
@@ -114,7 +114,9 @@ void UDP_socket::read_data()
   }
   else
   {
-    if(_last_send_message.toInt() == Messages::HELLO_SERVER)
+    const QString t = _last_send_message.mid(0, _last_send_message.indexOf(FREE_SPASE));
+    qDebug()<<"t: "<<t;
+    if(t.toInt() == Messages::HELLO_SERVER)
        _server_port = sender_port;
 
     _is_message_received = true;
@@ -166,7 +168,9 @@ bool UDP_socket::is_message_received()
     qDebug()<<"timer restart";
     _timer->start(RESPONSE_WAIT_TIME);
 
-    if(_last_send_message.toInt() == Messages::HELLO_SERVER)
+    const QString t = _last_send_message.mid(0, _last_send_message.indexOf(FREE_SPASE));
+    qDebug()<<"!!!t: "<<t;
+    if(t.toInt() == Messages::HELLO_SERVER)
     {
       ++_server_port;
 

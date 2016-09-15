@@ -81,8 +81,8 @@ public:
   QTimer *_timer_last_received_message;
 
   UDP_server *const _parent_class;
-  const quint16 _port;
-  const QHostAddress _ip;
+  quint16 _port;
+  QHostAddress _ip;
   const int _my_index;
   int _received_serial_num;
   int _send_serial_num;
