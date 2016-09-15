@@ -71,6 +71,7 @@ public:
 public:
   int get_board_ind();
   QJsonObject get_inf_json() const;
+  void start_timer();
 
 public slots:
   void timer_timeout();
