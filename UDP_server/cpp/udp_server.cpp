@@ -89,10 +89,10 @@ void UDP_server::read_data()
 
   const int serial_num = cut_serial_num(message);
 
-  const QString t = _last_send_message.mid(0, _last_send_message.indexOf(FREE_SPASE));
+  const QString t = message.mid(0, message.indexOf(FREE_SPASE));
   if(t.toInt() == Messages::HELLO_SERVER)
   {
-    const QString log = _last_send_message.mid(_last_send_message.indexOf(FREE_SPASE) + 1);
+    const QString log = message.mid(message.indexOf(FREE_SPASE) + 1);
     qDebug()<<"HELLO_SERVER"<<log;
 
     if(sender != _user.end())
@@ -100,13 +100,13 @@ void UDP_server::read_data()
       qDebug()<<"this client already have";
       return;
     }
-    auto &u = std::find_if(_user.begin(), _user.end(), [log](auto const &i){return(i->_login == log);}) != _user.end();
+    auto u = std::find_if(_user.begin(), _user.end(), [log](auto const &i){return(i->_login == log);});
     if(u != _user.end())
     {
-      u->_port = sender_port;
-      u->_ip = sender_IP;
-      u->_received_serial_num = serial_num;
-      u->_send_serial_num = 0;
+      (*u)->_port = sender_port;
+      (*u)->_ip = sender_IP;
+      (*u)->_received_serial_num = serial_num;
+      (*u)->_send_serial_num = 0;
     }
     else
     {
