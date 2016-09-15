@@ -246,6 +246,10 @@ void Board::write_moves_to_file(const std::string &path) const
 {
   std::cout<<"Board::write_moves_to_file "<<std::endl;
   std::ofstream in_file(path);
+
+  if(!in_file.is_open())
+    return;
+
   std::string history = get_moves_history();
   std::copy(history.begin(), history.end(), std::ostreambuf_iterator<char>(in_file));
 }
@@ -254,6 +258,10 @@ void Board::read_moves_from_file(const std::string &path)
 {
   std::cout<<"Board::read_moves_from_file "<<std::endl;
   std::ifstream from_file(path);
+
+  if(!from_file.is_open())
+    return;
+
   std::string data_from_file(std::istreambuf_iterator<char>(from_file), (std::istreambuf_iterator<char>()));
 
   std::cout<<"data_from_file: "<<data_from_file<<std::endl;
