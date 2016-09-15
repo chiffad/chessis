@@ -1,5 +1,6 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
+import QtGraphicalEffects 1.0
 
 Rectangle
 {
@@ -28,7 +29,7 @@ Rectangle
 
     border.color: "black"
     border.width: 1
-    radius: 2
+    radius: 3
     color: "white"
 
     TextInput
@@ -58,6 +59,18 @@ Rectangle
         _text_input.clear()
       }
     }
+  }
+
+  DropShadow
+  {
+    anchors.fill: input_rect
+    horizontalOffset: 7
+    verticalOffset: 7
+    radius: input_rect.radius
+    samples: 17
+    spread: 0.5
+    color: "#80000000"
+    source: input_rect
   }
 
   Text
