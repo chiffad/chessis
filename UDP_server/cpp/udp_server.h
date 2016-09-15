@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QString>
 #include <QTimer>
+#include <QJsonObject>
 #include "desk.h"
 #include "enums.h"
 
@@ -44,6 +45,11 @@ private:
   void push_message_to_logic(const QByteArray &type, const QByteArray &content, User &u);
   QByteArray add_serial_num(const QByteArray &message, User &u, bool is_prev_serial_need = false);
 
+  bool load_users_inf();
+  bool save_users_inf() const;
+  void write_inf(QJsonObject &json) const;
+  void read_inf(QJsonObject &json);
+
 private:
   const QHostAddress _SERVER_IP;
 
@@ -59,9 +65,12 @@ class UDP_server::User : public QObject
 public:
   explicit User(QObject *parent = nullptr, UDP_server *parent_class = nullptr, const quint16 &port = 0,
                 const QHostAddress &ip = QHostAddress::LocalHost, const int received_serial_num = 0,
-                const int index = 0);
+                const int index = 0, const QString &login = "guest", const int ELO = 1200);
   ~User() {delete _timer; delete _timer_last_received_message;}
+
+public:
   int get_board_ind();
+  QJsonObject get_inf_json() const;
 
 public slots:
   void timer_timeout();

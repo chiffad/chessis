@@ -4,6 +4,12 @@
 #include <QTimer>
 #include <algorithm>
 #include <cmath>
+#include <QIODevice>
+#include <QFile>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include "udp_server.h"
 #include "chess.h"
 #include "enums.h"
@@ -24,11 +30,14 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_IP(QHostAddre
 
   connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
+  load_users_inf();
   qDebug()<<"Server start!";
 }
 
 UDP_server::~UDP_server()
 {
+  save_users_inf();
+
   delete _socket;
   for(auto &i : _user)
     delete i;
@@ -283,12 +292,74 @@ bool UDP_server::is_message_reach(const QByteArray &message, User &u)
   return true;
 }
 
+//================================================
+
+
+
+bool UDP_server::save_users_inf() const//!!!!
+{
+  QFile save_file(QStringLiteral("save.json"));
+
+  if (!save_file.open(QIODevice::WriteOnly)) {
+    qWarning("Couldn't open file.");
+    return false;
+  }
+
+  QJsonObject users_inf;
+  write_inf(users_inf);
+
+  QJsonDocument save_doc(users_inf);
+  save_file.write(save_doc.toJson());
+
+  return true;
+}
+
+void UDP_server::write_inf(QJsonObject &json) const
+{
+  QJsonArray users;
+  for(auto &i : _user)
+    users.append(i->get_inf_json());
+
+  json["users"] = users;
+}
+
+bool UDP_server::load_users_inf()//!!!
+{
+  QFile load_file("save.json");
+
+  if (!load_file.open(QIODevice::ReadOnly)) {
+    qWarning("Couldn't open file.");
+    return false;
+  }
+
+  QJsonDocument load_doc(QJsonDocument::fromJson(load_file.readAll()));
+
+//  read_inf(load_doc.object());
+
+  return true;
+}
+
+void UDP_server::read_inf(QJsonObject &json)
+{
+  QJsonArray users_array = json["users"].toArray();
+  for(auto i : users_array)
+  {
+    QJsonObject inf = i.toObject();
+    _user.append(new User(this, this, 0, QHostAddress::LocalHost, 0, _user.size(), inf["name"].toString(), inf["ELO"].toInt()));
+  }
+}
+
+//=====================================================
+
+
+
+
 UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16 &port, const QHostAddress &ip,
-                       const int received_serial_num, const int index)
-                     : QObject(parent), _timer(new QTimer), _timer_last_received_message(new QTimer),
-                       _parent_class(parent_class), _port(port), _ip(ip), _my_index(index),
-                       _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true),
-                       _login("guest"), _rating_ELO(1200)
+                       const int received_serial_num, const int index, const QString &login, const int ELO)
+                       : QObject(parent), _timer(new QTimer), _timer_last_received_message(new QTimer),
+                         _parent_class(parent_class), _port(port), _ip(ip), _my_index(index),
+                         _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true),
+                         _login(login), _rating_ELO(ELO)
 {
   connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
   connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
@@ -333,4 +404,13 @@ void UDP_server::User::timer_last_received_message_timeout()
 {
   qDebug()<<"User::timer_from_last_received_message_timeout "<<_my_index;
   _parent_class->send_data(Messages::CLIENT_LOST, *this);
+}
+
+QJsonObject UDP_server::User::get_inf_json() const //!!!
+{
+  QJsonObject json;
+  json["name"] = _login;
+  json["ELO"] = _rating_ELO;
+
+  return json;
 }
