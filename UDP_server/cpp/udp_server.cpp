@@ -111,7 +111,7 @@ void UDP_server::read_data()
     else
     {
       _user.append(new User(this, this, sender_port, sender_IP, serial_num, _user.size(), log));
-      _user.last()->start_timer();
+      _user.last()->start_check_connect_timer();
 
       send_data(Messages::MESSAGE_RECEIVED, *_user.last());
       set_opponent(*_user.last());
@@ -125,7 +125,7 @@ void UDP_server::read_data()
 
     if(serial_num == (*sender)->_received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
     {
-      (*sender)->_timer_last_received_message->start(CHECK_CONNECT_TIME);
+      (*sender)->start_check_connect_timer();
       send_data(Messages::MESSAGE_RECEIVED, *_user[_user.indexOf(*sender)], true);
       qDebug()<<"prev serial num. Resent message";
     }
@@ -170,7 +170,7 @@ void UDP_server::run_message(const QByteArray &message, User &u)
     default:
       push_message_to_logic(type, content, u);
   }
-  u._timer_last_received_message->start(CHECK_CONNECT_TIME);
+  u.start_check_connect_timer();
 }
 
 void UDP_server::push_message_to_logic(const QByteArray &type, const QByteArray &content, User& u)
@@ -269,7 +269,7 @@ void UDP_server::begin_wait_receive(User &u)
 {
   qDebug()<<"UDP_server::begin_wait_receive";
   u._is_message_reach = false;
-  u._timer->start(RESPONSE_WAIT_TIME);
+  u.start_response_timer();
 }
 
 QByteArray UDP_server::add_serial_num(const QByteArray &message, User &u, bool is_prev_serial_need)
@@ -367,18 +367,23 @@ void UDP_server::read_inf(QJsonObject &json)
 
 UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16 &port, const QHostAddress &ip,
                        const int received_serial_num, const int index, const QString &login, const int ELO)
-                       : QObject(parent), _timer(new QTimer), _timer_last_received_message(new QTimer),
-                         _parent_class(parent_class), _port(port), _ip(ip), _my_index(index),
+                       : QObject(parent), _parent_class(parent_class), _port(port), _ip(ip), _my_index(index),
                          _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true),
-                         _login(login), _rating_ELO(ELO)
+                         _login(login), _rating_ELO(ELO),
+                         _response_timer(new QTimer), _check_connect_timer(new QTimer)
 {
-  connect(_timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
-  connect(_timer_last_received_message, SIGNAL(timeout()), this, SLOT(timer_last_received_message_timeout()));
+  connect(_response_timer, SIGNAL(timeout()), this, SLOT(response_timer_timeout()));
+  connect(_check_connect_timer, SIGNAL(timeout()), this, SLOT(check_connect_timer_timeout()));
 }
 
-void UDP_server::User::start_timer()
+void UDP_server::User::start_check_connect_timer()
 {
-  _timer_last_received_message->start(CHECK_CONNECT_TIME);
+  _check_connect_timer->start(CHECK_CONNECT_TIME);
+}
+
+void UDP_server::User::start_response_timer()
+{
+  _response_timer->start(RESPONSE_WAIT_TIME);
 }
 
 int UDP_server::User::get_board_ind()
@@ -389,7 +394,7 @@ int UDP_server::User::get_board_ind()
   return _parent_class->_board.indexOf(*it);
 }
 
-void UDP_server::User::timer_timeout()
+void UDP_server::User::response_timer_timeout()
 {
   qDebug()<<"User::time out";
 
@@ -402,7 +407,7 @@ void UDP_server::User::timer_timeout()
       qDebug()<<"last message was client lost";
       _parent_class->send_data(Messages::OPPONENT_LOST, *_parent_class->_user[_opponent_index]);
     }
-    _timer->start(RESPONSE_WAIT_TIME);
+    start_response_timer();
 
     _parent_class->_socket->writeDatagram(_parent_class->add_serial_num(_last_sent_message, *this, true),
                                           _ip, _port);
@@ -410,12 +415,12 @@ void UDP_server::User::timer_timeout()
   else
   {
     qDebug()<<"timer stop";
-    _timer->stop();
+    _response_timer->stop();
     count = 0;
   }
 }
 
-void UDP_server::User::timer_last_received_message_timeout()
+void UDP_server::User::check_connect_timer_timeout()
 {
   qDebug()<<"User::timer_from_last_received_message_timeout "<<_my_index;
   _parent_class->send_data(Messages::CLIENT_LOST, *this);

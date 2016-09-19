@@ -28,7 +28,7 @@ public:
   void send_data(const Messages::MESSAGE r_mes, User &u, bool is_prev_serial_need = false);
 
 private:
-  enum {NO_OPPONENT = -1, RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 10000, FIRST_PORT = 49152, LAST_PORT = 49500};
+  enum {NO_OPPONENT = -1, FIRST_PORT = 49152, LAST_PORT = 49500};
   const QChar FREE_SPASE = ' ';
 
 private:
@@ -66,21 +66,19 @@ public:
   explicit User(QObject *parent = nullptr, UDP_server *parent_class = nullptr, const quint16 &port = 0,
                 const QHostAddress &ip = QHostAddress::LocalHost, const int received_serial_num = 0,
                 const int index = 0, const QString &login = "guest", const int ELO = 1200);
-  ~User() {delete _timer; delete _timer_last_received_message;}
+  ~User() {delete _response_timer; delete _check_connect_timer;}
 
 public:
   int get_board_ind();
   QJsonObject get_inf_json() const;
-  void start_timer();
+  void start_response_timer();
+  void start_check_connect_timer();
 
 public slots:
-  void timer_timeout();
-  void timer_last_received_message_timeout();
+  void response_timer_timeout();
+  void check_connect_timer_timeout();
 
 public:
-  QTimer *_timer;
-  QTimer *_timer_last_received_message;
-
   UDP_server *const _parent_class;
   quint16 _port;
   QHostAddress _ip;
@@ -96,7 +94,13 @@ public:
   int _rating_ELO;
 
 private:
+   enum {RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 10000};
+
+private:
    User(const User&) = delete;
    User& operator=(const User&) = delete;
+
+   QTimer *_response_timer;
+   QTimer *_check_connect_timer;
 };
 #endif // UDP_SERVER_H
