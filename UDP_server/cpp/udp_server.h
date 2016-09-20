@@ -63,9 +63,9 @@ class UDP_server::User : public QObject
   Q_OBJECT
 
 public:
-  explicit User(QObject *parent = nullptr, UDP_server *parent_class = nullptr, const quint16 &port = 0,
-                const QHostAddress &ip = QHostAddress::LocalHost, const int received_serial_num = 0,
-                const int index = 0, const QString &login = "guest", const int ELO = 1200);
+  User(QObject *parent = nullptr, UDP_server *parent_class = nullptr, const quint16 &port = 0,
+       const QHostAddress &ip = QHostAddress::LocalHost, const int index = 0,
+       const QString &login = "guest", const int ELO = 1200);
   ~User() {delete _response_timer; delete _check_connect_timer;}
 
 public:
@@ -73,6 +73,7 @@ public:
   QJsonObject get_inf_json() const;
   void start_response_timer();
   void start_check_connect_timer();
+  void reconnect(const quint16 port, const QHostAddress &ip);
 
 public slots:
   void response_timer_timeout();

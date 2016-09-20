@@ -102,15 +102,10 @@ void UDP_server::read_data()
     qDebug()<<"HELLO_SERVER"<<log;
     auto u = std::find_if(_user.begin(), _user.end(), [log](auto const &i){return(i->_login == log);});
     if(u != _user.end())
-    {
-      (*u)->_port = sender_port;
-      (*u)->_ip = sender_IP;
-      (*u)->_received_serial_num = serial_num;
-      (*u)->_send_serial_num = 0;
-    }
+      (*u)->reconnect(sender_port, sender_IP);
     else
     {
-      _user.append(new User(this, this, sender_port, sender_IP, serial_num, _user.size(), log));
+      _user.append(new User(this, this, sender_port, sender_IP, _user.size(), log));
       _user.last()->start_check_connect_timer();
 
       send_data(Messages::MESSAGE_RECEIVED, *_user.last());
@@ -360,15 +355,15 @@ void UDP_server::read_inf(QJsonObject &json)
   for(auto i : users_array)
   {
     QJsonObject inf = i.toObject();
-    _user.append(new User(this, this, 0, QHostAddress::LocalHost, 0, _user.size(), inf["name"].toString(), inf["ELO"].toInt()));
+    _user.append(new User(this, this, 0, QHostAddress::LocalHost, _user.size(), inf["name"].toString(), inf["ELO"].toInt()));
   }
 }
 
 
 UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16 &port, const QHostAddress &ip,
-                       const int received_serial_num, const int index, const QString &login, const int ELO)
+                       const int index, const QString &login, const int ELO)
                        : QObject(parent), _parent_class(parent_class), _port(port), _ip(ip), _my_index(index),
-                         _received_serial_num(received_serial_num), _send_serial_num(0), _is_message_reach(true),
+                         _received_serial_num(0), _send_serial_num(0), _is_message_reach(true),
                          _login(login), _rating_ELO(ELO),
                          _response_timer(new QTimer), _check_connect_timer(new QTimer)
 {
@@ -433,4 +428,12 @@ QJsonObject UDP_server::User::get_inf_json() const //!!!
   json["ELO"] = _rating_ELO;
 
   return json;
+}
+
+void UDP_server::User::reconnect(const quint16 port, const QHostAddress &ip)
+{
+  _port = port;
+  _ip = ip;
+  _received_serial_num = 0;
+  _send_serial_num = 0;
 }
