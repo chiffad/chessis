@@ -142,7 +142,7 @@ bool UDP_socket::is_new_message_received() const
 
 void UDP_socket::begin_wait_receive(const QByteArray& message)
 {
-  qDebug()<<"UDP_socket::begin waight";
+  qDebug()<<"UDP_socket::begin wait";
   _is_message_received = false;
   _last_send_message = message;
   _timer->start(RESPONSE_WAIT_TIME);
