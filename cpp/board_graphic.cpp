@@ -19,6 +19,7 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
   timer_kill = new QTimer(this);
   connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
   //timer_kill->start(10000);
+  set_login("asdasd");
 }
 
 Board_graphic::~Board_graphic()

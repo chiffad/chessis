@@ -39,10 +39,10 @@ private:
   void send_board_state(User &u);
   void begin_wait_receive(User &u);
   int cut_serial_num(QByteArray &message) const;
-  void run_message(const QByteArray &message, User &u);
   bool is_message_reach(const QByteArray &message, User &u);
   QByteArray get_usr_info(const User &u, bool is_opponent = true) const;
-  void push_message_to_logic(const QByteArray &type, const QByteArray &content, User &u);
+  void run_message(QByteArray &message, const QHostAddress &ip, const quint16 port);
+  void push_message_to_logic(const Messages::MESSAGE type, const QByteArray &content, User &u);
   void create_new_user(const QHostAddress &ip, const quint16 port, const QByteArray &login);
   QByteArray add_serial_num(const QByteArray &message, User &u, bool is_prev_serial_need = false);
 

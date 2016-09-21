@@ -84,35 +84,80 @@ void UDP_server::read_data()
 
   qDebug()<<"UDP_server::reading"<<message;
 
-  auto sender = std::find_if(_user.begin(), _user.end(),
-                             [&sender_port, &sender_IP](auto const &i){return(i->_port == sender_port && i->_ip == sender_IP);});
+  run_message(message, sender_IP, sender_port);
+}
+
+void UDP_server::run_message(QByteArray &message, const QHostAddress &ip, const quint16 port)
+{
+  qDebug()<<"UDP_server::run_message";
 
   const int serial_num = cut_serial_num(message);
+  const Messages::MESSAGE type = Messages::MESSAGE(message.mid(0, message.indexOf(FREE_SPASE)).toInt());
+  const QByteArray content(message.mid(message.indexOf(FREE_SPASE) + 1));
 
-  const int type = message.mid(0, message.indexOf(FREE_SPASE)).toInt();
+  auto u = std::find_if(_user.begin(), _user.end(),
+                             [&port, &ip](auto const &i){return(i->_port == port && i->_ip == ip);});
+
   if(type == Messages::HELLO_SERVER)
-    create_new_user(sender_IP, sender_port, message.mid(message.indexOf(FREE_SPASE) + 1));
-  else if(serial_num != ++(*sender)->_received_serial_num)
+  {
+    create_new_user(ip, port, content);
+    return;
+  }
+
+  if(u ==_user.end())
+  {
+    qDebug()<<"u ==_user.end()";
+    return;
+  }
+
+  if(serial_num != ++(*u)->_received_serial_num)
   {
     qDebug()<<"wrong serial num";
 
-    --(*sender)->_received_serial_num;
+    --(*u)->_received_serial_num;
 
-    if(serial_num == (*sender)->_received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
+    if(serial_num == (*u)->_received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
     {
-      (*sender)->start_check_connect_timer();
-      send_data(Messages::MESSAGE_RECEIVED, *(*sender), true);
+      (*u)->start_check_connect_timer();
+      send_data(Messages::MESSAGE_RECEIVED, *(*u), true);
       qDebug()<<"prev serial num. Resent message";
     }
+    return;
   }
-  else run_message(message, *(*sender));
+
+  if(type != Messages::MESSAGE_RECEIVED)
+    send_data(Messages::MESSAGE_RECEIVED, *(*u));
+
+  switch(type)
+  {
+    case Messages::MESSAGE_RECEIVED:
+      qDebug()<<"type == MESSAGE_RECEIVED";
+      (*u)->_is_message_reach = true;
+      if(!(*u)->_message_stack.isEmpty())
+      {
+        qDebug()<<"message stack not empty: "<<(*u)->_message_stack[0];
+        send_data((*u)->_message_stack[0], *(*u));
+        (*u)->_message_stack.remove(0);
+      }
+      break;
+    case Messages::IS_SERVER_LOST:
+      break;
+    case Messages::OPPONENT_INF:
+      send_data(get_usr_info(*(*u)), *(*u));
+      break;
+    case Messages::MY_INF:
+      send_data(get_usr_info(*(*u), false), *(*u));
+      break;
+    default:
+      push_message_to_logic(type, content, *(*u));
+  }
+  (*u)->start_check_connect_timer();
 }
 
 void UDP_server::create_new_user(const QHostAddress &ip, const quint16 port, const QByteArray &login)
 {
   auto sender = std::find_if(_user.begin(), _user.end(),
                              [&port, &ip](auto const &i){return(i->_port == port && i->_ip == ip);});
-
   if(sender != _user.end())
   {
     qDebug()<<"this client already have";
@@ -133,50 +178,14 @@ void UDP_server::create_new_user(const QHostAddress &ip, const quint16 port, con
   }
 }
 
-void UDP_server::run_message(const QByteArray &message, User &u)
-{
-  qDebug()<<"UDP_server::run_message";
-
-  const QByteArray type(message.mid(0, message.indexOf(FREE_SPASE)));
-  const QByteArray content(message.mid(message.indexOf(FREE_SPASE) + 1));
-
-  if(type.toInt() != Messages::MESSAGE_RECEIVED)
-    send_data(Messages::MESSAGE_RECEIVED, u);
-
-  switch(type.toInt())
-  {
-    case Messages::MESSAGE_RECEIVED:
-      qDebug()<<"type == MESSAGE_RECEIVED";
-      u._is_message_reach = true;
-      if(!u._message_stack.isEmpty())
-      {
-        qDebug()<<"message stack not empty: "<<u._message_stack[0];
-        send_data(u._message_stack[0], u);
-        u._message_stack.remove(0);
-      }
-      break;
-    case Messages::IS_SERVER_LOST:
-      break;
-    case Messages::OPPONENT_INF:
-      send_data(get_usr_info(u), u);
-      break;
-    case Messages::MY_INF:
-      send_data(get_usr_info(u, false), u);
-      break;
-    default:
-      push_message_to_logic(type, content, u);
-  }
-  u.start_check_connect_timer();
-}
-
-void UDP_server::push_message_to_logic(const QByteArray &type, const QByteArray &content, User& u)
+void UDP_server::push_message_to_logic(const Messages::MESSAGE type, const QByteArray &content, User& u)
 {
   qDebug()<<"UDP_server::push_message_to_logic";
   if(u.get_board_ind() == NO_OPPONENT)
     return;
 
   Desk *const board = _board[u.get_board_ind()];
-  switch(type.toInt())
+  switch(type)
   {
     case Messages::MOVE:
     {
@@ -364,7 +373,7 @@ void UDP_server::read_inf(QJsonObject &json)
 UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16 &port, const QHostAddress &ip,
                        const int index, const QString &login, const int ELO)
                        : QObject(parent), _parent_class(parent_class), _port(port), _ip(ip), _my_index(index),
-                         _received_serial_num(0), _send_serial_num(0), _is_message_reach(true),
+                         _received_serial_num(1), _send_serial_num(0), _is_message_reach(true),
                          _login(login), _rating_ELO(ELO),
                          _response_timer(new QTimer), _check_connect_timer(new QTimer)
 {
@@ -435,6 +444,6 @@ void UDP_server::User::reconnect(const quint16 port, const QHostAddress &ip)
 {
   _port = port;
   _ip = ip;
-  _received_serial_num = 0;
+  _received_serial_num = 1;
   _send_serial_num = 0;
 }
