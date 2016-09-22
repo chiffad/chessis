@@ -110,18 +110,9 @@ void UDP_server::run_message(QByteArray &message, const QHostAddress &ip, const 
     return;
   }
 
-  if(serial_num != ++(*u)->_received_serial_num)
+  if(!check_serial_num(serial_num, type, *(*u)))
   {
-    qDebug()<<"wrong serial num";
-
-    --(*u)->_received_serial_num;
-
-    if(serial_num == (*u)->_received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
-    {
-      (*u)->start_check_connect_timer();
-      send_data(Messages::MESSAGE_RECEIVED, *(*u), true);
-      qDebug()<<"prev serial num. Resent message";
-    }
+    qDebug()<<"serial num wrong!";
     return;
   }
 
@@ -152,6 +143,26 @@ void UDP_server::run_message(QByteArray &message, const QHostAddress &ip, const 
       push_message_to_logic(type, content, *(*u));
   }
   (*u)->start_check_connect_timer();
+}
+
+bool UDP_server::check_serial_num(const int num, const Messages::MESSAGE type, User &u)
+{
+  if(num != ++u._received_serial_num)
+  {
+    qDebug()<<"wrong serial num";
+
+    --u._received_serial_num;
+
+    if(num == u._received_serial_num && type != Messages::MESSAGE_RECEIVED)
+    {
+      u.start_check_connect_timer();
+      send_data(Messages::MESSAGE_RECEIVED, u, true);
+      qDebug()<<"prev serial num. Resent message";
+    }
+    return false;
+  }
+
+  return true;
 }
 
 void UDP_server::create_new_user(const QHostAddress &ip, const quint16 port, const QByteArray &login)
