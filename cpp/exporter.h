@@ -2,13 +2,14 @@
 #define UDP_CLIENT_H
 
 #include <QString>
+#include <memory>
 #include "board_graphic.h"
 #include "udp_socket.h"
 
 class Exporter
 {
 public:
-  explicit Exporter(Board_graphic *const board_graphic, UDP_socket *const udp_socet);
+  explicit Exporter(Board_graphic& board_graphic, UDP_socket& udp_socet);
   ~Exporter(){}
 
 public:
@@ -22,7 +23,7 @@ private:
   Exporter& operator=(const Exporter&) = delete;
 
 private:
-  Board_graphic *const _board_graphic;
-  UDP_socket *const _udp_socet;
+  std::shared_ptr<Board_graphic> _board_graphic;
+  std::shared_ptr<UDP_socket> _udp_socet;
 };
 #endif // UDP_CLIENT_H

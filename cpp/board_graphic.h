@@ -8,8 +8,8 @@
 #include <QStringList>
 #include <vector>
 #include <fstream>
-#include <cpp/enums.h>
 #include <QTimer>
+#include "enums.h"
 
 class Board_graphic : public QAbstractListModel
 {

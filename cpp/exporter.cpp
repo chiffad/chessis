@@ -1,13 +1,11 @@
 #include <QByteArray>
-#include <QString>
 #include "exporter.h"
-#include "board_graphic.h"
-#include "udp_socket.h"
 #include "enums.h"
 
-Exporter::Exporter(Board_graphic *const board_graphic, UDP_socket *const udp_socet)
-                  : _board_graphic(board_graphic), _udp_socet(udp_socet)
-{}
+Exporter::Exporter(Board_graphic& board_graphic, UDP_socket& udp_socet)
+                  : _board_graphic(&board_graphic), _udp_socet(&udp_socet)
+{
+}
 
 void Exporter::push_to_graphic(const QString& message)
 {

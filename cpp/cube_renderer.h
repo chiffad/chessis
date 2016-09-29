@@ -8,6 +8,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLBuffer>
 #include <QVector>
+#include <memory>
 
 class Cube_renderer : protected QOpenGLFunctions
 {
@@ -28,10 +29,10 @@ private:
    enum{VERTEX_ATTRIBUTE = 0, TEXCOORD_ATTRIBUTE = 1};
 
 private:
-  QVector<QOpenGLTexture*> m_board_texture;
-  QOpenGLShaderProgram *m_program;
+  QVector<std::shared_ptr<QOpenGLTexture>> m_board_texture;
+  std::shared_ptr<QOpenGLShaderProgram> m_program;
 
-  QMatrix4x4 *m_model_view;
+  std::shared_ptr<QMatrix4x4> m_model_view;
   QOpenGLBuffer m_buffer;
 
   float m_x_angle;

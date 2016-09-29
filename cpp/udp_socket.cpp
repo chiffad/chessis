@@ -115,7 +115,6 @@ void UDP_socket::read_data()
   else
   {
     const QString t = _last_send_message.mid(0, _last_send_message.indexOf(FREE_SPASE));
-    qDebug()<<"t: "<<t;
     if(t.toInt() == Messages::HELLO_SERVER)
        _server_port = sender_port;
 

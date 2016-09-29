@@ -2,23 +2,18 @@
 #include <QPaintEngine>
 #include <cmath>
 #include <QGLWidget>
-#include <QOpenGLTexture>
 #include <QImage>
 #include <QString>
 #include <algorithm>
 #include "cube_renderer.h"
 
-Cube_renderer::Cube_renderer() : m_program(new QOpenGLShaderProgram), m_model_view(new QMatrix4x4),
+Cube_renderer::Cube_renderer() : m_program(std::make_shared<QOpenGLShaderProgram>()), m_model_view(std::make_shared<QMatrix4x4>()),
                                  m_x_angle(0), m_y_angle(0), m_z_angle(0), m_scale_vect(1,1,1)
 {
 }
 
 Cube_renderer::~Cube_renderer()
 {
-  for(auto &i : m_board_texture)
-    delete i;
-  delete m_program;
-  delete m_model_view;
 }
 
 void Cube_renderer::initialize()
@@ -34,7 +29,7 @@ void Cube_renderer::initialize()
   //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-  QOpenGLShader *vshader = new QOpenGLShader(QOpenGLShader::Vertex, m_program);
+  QOpenGLShader *vshader = new QOpenGLShader(QOpenGLShader::Vertex, m_program.get());
   const char *vsrc =
       "attribute highp vec4 vertex;\n"
       "attribute mediump vec4 texCoord;\n"
@@ -47,7 +42,7 @@ void Cube_renderer::initialize()
       "}\n";
   vshader->compileSourceCode(vsrc);
 
-  QOpenGLShader *fshader = new QOpenGLShader(QOpenGLShader::Fragment, m_program);
+  QOpenGLShader *fshader = new QOpenGLShader(QOpenGLShader::Fragment, m_program.get());
   const char *fsrc =
       "uniform sampler2D texture;\n"
       "varying mediump vec4 texc;\n"
@@ -100,12 +95,12 @@ void Cube_renderer::load_correct_texture(const QString &name)
     z_scale = 0;
   }
 
-  for(auto &i : m_board_texture)
-    delete i;
+//  for(auto &i : m_board_texture)
+//    delete i.reset();
 
   m_board_texture.clear();
-  m_board_texture.append(new QOpenGLTexture(fase_im.mirrored()));
-  m_board_texture.append(new QOpenGLTexture(side_im));
+  m_board_texture.append(std::make_shared<QOpenGLTexture>(fase_im.mirrored()));
+  m_board_texture.append(std::make_shared<QOpenGLTexture>(side_im));
   m_scale_vect = QVector3D(1, 1, z_scale);
   m_name = name;
 }
@@ -114,9 +109,8 @@ void Cube_renderer::update_model_view(const float scale)
 {
   //qDebug()<<"Cube_renderer::update_modelview()";
   m_scale_vect *= scale;
-  delete m_model_view;
 
-  m_model_view = new QMatrix4x4();
+  m_model_view = std::make_shared<QMatrix4x4>();
   m_model_view->rotate(m_x_angle, 1.0f, 0.0f, 0.0f);
   m_model_view->rotate(m_y_angle, 0.0f, 1.0f, 0.0f);
   m_model_view->rotate(m_z_angle, 0.0f, 0.0f, 1.0f);

@@ -1,14 +1,10 @@
 #include <QPainter>
-#include <QString>
-#include <QChar>
 #include <ctype.h>
 #include <QModelIndex>
 #include <iostream>
-#include <fstream>
 #include <sstream>
 #include <algorithm>
 #include "board_graphic.h"
-#include "enums.h"
 
 Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
                                                 _udp_connection_status("Disconnected"), _is_check_mate(false)
@@ -19,6 +15,7 @@ Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _mov
   timer_kill = new QTimer(this);
   connect(timer_kill, SIGNAL(timeout()), this, SLOT(timer_timeout()));
   //timer_kill->start(10000);
+  set_login("asdasd");
 }
 
 Board_graphic::~Board_graphic()

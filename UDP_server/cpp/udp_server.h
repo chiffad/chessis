@@ -4,8 +4,10 @@
 #include <QUdpSocket>
 #include <QVector>
 #include <QString>
+#include <QChar>
 #include <QTimer>
 #include <QJsonObject>
+#include <memory>
 #include "desk.h"
 #include "enums.h"
 
@@ -55,9 +57,9 @@ private:
 private:
   const QHostAddress _SERVER_IP;
 
-  QUdpSocket *_socket;
-  QVector<User*> _user;
-  QVector<Desk*> _board;
+  std::shared_ptr<QUdpSocket> _socket;
+  QVector<std::shared_ptr<User>> _user;
+  QVector<std::shared_ptr<Desk>> _board;
 };
 
 class UDP_server::User : public QObject
@@ -68,7 +70,7 @@ public:
   User(QObject *parent = nullptr, UDP_server *parent_class = nullptr, const quint16 &port = 0,
        const QHostAddress &ip = QHostAddress::LocalHost, const int index = 0,
        const QString &login = "guest", const int ELO = 1200);
-  ~User() {delete _response_timer; delete _check_connect_timer;}
+  ~User();
 
 public:
   int get_board_ind();
@@ -82,7 +84,7 @@ public slots:
   void check_connect_timer_timeout();
 
 public:
-  UDP_server *const _parent_class;
+  UDP_server *_parent_class;
   quint16 _port;
   QHostAddress _ip;
   const int _my_index;
@@ -103,7 +105,7 @@ private:
    User(const User&) = delete;
    User& operator=(const User&) = delete;
 
-   QTimer *_response_timer;
-   QTimer *_check_connect_timer;
+   std::shared_ptr<QTimer> _response_timer;
+   std::shared_ptr<QTimer> _check_connect_timer;
 };
 #endif // UDP_SERVER_H

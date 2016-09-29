@@ -1,12 +1,7 @@
-#include <QString>
-#include <QChar>
-#include <QUdpSocket>
-#include <QTimer>
 #include <algorithm>
 #include <cmath>
 #include <QIODevice>
 #include <QFile>
-#include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -15,7 +10,7 @@
 #include "enums.h"
 
 UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_IP(QHostAddress::LocalHost),
-                                          _socket(new QUdpSocket(this))
+                                          _socket(std::make_shared<QUdpSocket>(this))
 {
   for(int i = 0; i + FIRST_PORT < LAST_PORT; ++i)
   {
@@ -28,7 +23,7 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_IP(QHostAddre
      i = -1;
   }
 
-  connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
+  connect(_socket.get(), SIGNAL(readyRead()), this, SLOT(read_data()));
 
   load_users_inf();
   qDebug()<<"Server start!";
@@ -37,13 +32,6 @@ UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_IP(QHostAddre
 UDP_server::~UDP_server()
 {
   save_users_inf();
-
-  delete _socket;
-  for(auto &i : _user)
-    delete i;
-
-  for(auto &i : _board)
-    delete i;
 }
 
 void UDP_server::send_data(const QByteArray &message, User &u)
@@ -181,7 +169,7 @@ void UDP_server::create_new_user(const QHostAddress &ip, const quint16 port, con
     (*u)->reconnect(port, ip);
   else
   {
-    _user.append(new User(this, this, port, ip, _user.size(), login));
+    _user.append(std::make_shared<User>(this, this, port, ip, _user.size(), login));
     _user.last()->start_check_connect_timer();
 
     send_data(Messages::MESSAGE_RECEIVED, *_user.last());
@@ -195,7 +183,7 @@ void UDP_server::push_message_to_logic(const Messages::MESSAGE type, const QByte
   if(u.get_board_ind() == NO_OPPONENT)
     return;
 
-  Desk *const board = _board[u.get_board_ind()];
+  std::shared_ptr<Desk> board = _board[u.get_board_ind()];
   switch(type)
   {
     case Messages::MOVE:
@@ -233,7 +221,7 @@ void UDP_server::send_board_state(User &u)
   qDebug()<<"UDP_server::send_board_state";
 
   QByteArray message;
-  Desk *const board = _board[u.get_board_ind()];
+  std::shared_ptr<Desk> board = _board[u.get_board_ind()];
 
   message.append(QString::fromStdString(board->get_board_mask()));
   message.append(";");
@@ -276,7 +264,7 @@ void UDP_server::set_opponent(User &u)
   if(u._opponent_index != NO_OPPONENT)
   {
     _user[u._opponent_index]->_opponent_index = u._my_index;
-    _board.append(new Desk(u._my_index, u._opponent_index));
+    _board.append(std::make_shared<Desk>(u._my_index, u._opponent_index));
      send_board_state(u);
   }
 }
@@ -350,7 +338,7 @@ void UDP_server::write_inf(QJsonObject &json) const
   json["users"] = users;
 }
 
-bool UDP_server::load_users_inf()//!!!
+bool UDP_server::load_users_inf()
 {
   qDebug()<<"UDP_server::load_users_inf()";
   QFile load_file("save.json");
@@ -376,7 +364,8 @@ void UDP_server::read_inf(QJsonObject &json)
   for(auto i : users_array)
   {
     QJsonObject inf = i.toObject();
-    _user.append(new User(this, this, 0, QHostAddress::LocalHost, _user.size(), inf["name"].toString(), inf["ELO"].toInt()));
+    _user.append(std::make_shared<User>(this, this, 0, QHostAddress::LocalHost, _user.size(),
+                                        inf["name"].toString(), inf["ELO"].toInt()));
   }
 }
 
@@ -386,10 +375,14 @@ UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16 
                        : QObject(parent), _parent_class(parent_class), _port(port), _ip(ip), _my_index(index),
                          _received_serial_num(1), _send_serial_num(0), _is_message_reach(true),
                          _login(login), _rating_ELO(ELO),
-                         _response_timer(new QTimer), _check_connect_timer(new QTimer)
+                         _response_timer(std::make_shared<QTimer>()), _check_connect_timer(std::make_shared<QTimer>())
 {
-  connect(_response_timer, SIGNAL(timeout()), this, SLOT(response_timer_timeout()));
-  connect(_check_connect_timer, SIGNAL(timeout()), this, SLOT(check_connect_timer_timeout()));
+  connect(_response_timer.get(), SIGNAL(timeout()), this, SLOT(response_timer_timeout()));
+  connect(_check_connect_timer.get(), SIGNAL(timeout()), this, SLOT(check_connect_timer_timeout()));
+}
+
+UDP_server::User::~User()
+{
 }
 
 void UDP_server::User::start_check_connect_timer()
@@ -442,7 +435,7 @@ void UDP_server::User::check_connect_timer_timeout()
   _parent_class->send_data(Messages::CLIENT_LOST, *this);
 }
 
-QJsonObject UDP_server::User::get_inf_json() const //!!!
+QJsonObject UDP_server::User::get_inf_json() const
 {
   QJsonObject json;
   json["name"] = _login;
