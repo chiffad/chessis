@@ -2,11 +2,13 @@
 #include <QUdpSocket>
 #include <QByteArray>
 #include <QTimer>
+#include <exception>
 #include "udp_socket.h"
 #include "enums.h"
 
-UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocket(this)), _timer(new QTimer(this)),
-                                          _timer_from_last_received_message(new QTimer(this)),
+UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(std::make_shared<QUdpSocket>(this)),
+                                          _timer(std::make_shared<QTimer>(this)),
+                                          _timer_from_last_received_message(std::make_shared<QTimer>(this)),
                                           _received_serial_num(0), _send_serial_num(0), _is_message_received(true),
                                           _server_port(FIRST_PORT), SERVER_IP(QHostAddress::LocalHost)
 {
@@ -21,19 +23,13 @@ UDP_socket::UDP_socket(QObject *parent) : QObject(parent), _socket(new QUdpSocke
     if(i + FIRST_PORT == LAST_PORT - 1)
      i = 0;
   }
-
-  connect(_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
-  connect(_timer, SIGNAL(timeout()), this, SLOT(is_message_received()));
-  connect(_timer_from_last_received_message, SIGNAL(timeout()), this, SLOT(timer_from_last_received_message_timeout()));
-
-//  send_data(Messages::HELLO_SERVER);
+  connect(_socket.get(), SIGNAL(readyRead()), this, SLOT(read_data()));
+  connect(_timer.get(), SIGNAL(timeout()), this, SLOT(is_message_received()));
+  connect(_timer_from_last_received_message.get(), SIGNAL(timeout()), this, SLOT(timer_from_last_received_message_timeout()));
 }
 
 UDP_socket::~UDP_socket()
 {
-  delete _socket;
-  delete _timer;
-  delete _timer_from_last_received_message;
 }
 
 void UDP_socket::send_data(const QByteArray &message, bool is_prev_serial_need)
@@ -83,46 +79,47 @@ void UDP_socket::read_data()
 
   qDebug()<<"UDP_socket::socket read"<<message;
 
-  const QByteArray serial_num = cut_serial_num(message);
+  const int serial_num = cut_serial_num(message);
 
-  if(sender_IP != SERVER_IP || sender_port != _server_port || sender_port == _my_port)
+  try
   {
-    qDebug()<<"wrong sender!";
-    return;
-  }
+    if(sender_IP != SERVER_IP || sender_port != _server_port || sender_port == _my_port)
+      throw "wrong sender!";
 
- // qDebug()<<"!serial_num"<<serial_num;
-
-  if(serial_num.toInt() != ++_received_serial_num)
-  {
-    --_received_serial_num;
-    if(serial_num.toInt() == _received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
+    if(serial_num != ++_received_serial_num)
     {
-      _timer_from_last_received_message->start(CHECK_CONNECT_TIME);
-      send_data(Messages::MESSAGE_RECEIVED, true);
-      qDebug()<<"prev serial num. Resent message";
+      --_received_serial_num;
+      if(serial_num == _received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
+      {
+        _timer_from_last_received_message->start(CHECK_CONNECT_TIME);
+        send_data(Messages::MESSAGE_RECEIVED, true);
+        throw "Prev serial num. Resent message";
+      }
+      else throw "Serial_num is wrong";
     }
-    else qDebug()<<"serial_num is wrong";
-    return;
-  }
 
-  if(message.toInt() != Messages::MESSAGE_RECEIVED)
+    if(message.toInt() != Messages::MESSAGE_RECEIVED)
+    {
+      send_data(Messages::MESSAGE_RECEIVED);
+      if(message.toInt() != Messages::CLIENT_LOST)
+        _received_message_stack.push_back(message);
+    }
+    else
+    {
+      const QString t = _last_send_message.mid(0, _last_send_message.indexOf(FREE_SPASE));
+      if(t.toInt() == Messages::HELLO_SERVER)
+         _server_port = sender_port;
+
+      _is_message_received = true;
+      _received_message_stack.push_back(QByteArray::number(Messages::SERVER_HERE));
+    }
+
+    _timer_from_last_received_message->start(CHECK_CONNECT_TIME);
+  }
+  catch(const char *ex)
   {
-    send_data(Messages::MESSAGE_RECEIVED);
-    if(message.toInt() != Messages::CLIENT_LOST)
-      _received_message_stack.push_back(message);
+    qDebug()<<"!Exeption! UDP_socket::read_data "<<ex;
   }
-  else
-  {
-    const QString t = _last_send_message.mid(0, _last_send_message.indexOf(FREE_SPASE));
-    if(t.toInt() == Messages::HELLO_SERVER)
-       _server_port = sender_port;
-
-    _is_message_received = true;
-    _received_message_stack.push_back(QByteArray::number(Messages::SERVER_HERE));
-  }
-
-  _timer_from_last_received_message->start(CHECK_CONNECT_TIME);
 }
 
 QByteArray UDP_socket::pull_received_message()
@@ -168,7 +165,6 @@ bool UDP_socket::is_message_received()
     _timer->start(RESPONSE_WAIT_TIME);
 
     const QString t = _last_send_message.mid(0, _last_send_message.indexOf(FREE_SPASE));
-    qDebug()<<"!!!t: "<<t;
     if(t.toInt() == Messages::HELLO_SERVER)
     {
       ++_server_port;
@@ -181,7 +177,7 @@ bool UDP_socket::is_message_received()
 
     _socket->writeDatagram(add_serial_num(_last_send_message, true), SERVER_IP, _server_port);
 
-    if(_last_send_message.toInt() == Messages::IS_SERVER_LOST || num_of_restarts > 5)
+    if(_last_send_message.toInt() == Messages::IS_SERVER_LOST || num_of_restarts == 5)
       _received_message_stack.push_back(QByteArray::number(Messages::SERVER_LOST));
 
     ++num_of_restarts;
@@ -202,9 +198,9 @@ QByteArray UDP_socket::add_serial_num(const QByteArray &data, bool is_prev_seria
   return message;
 }
 
-QByteArray UDP_socket::cut_serial_num(QByteArray &data) const
+int UDP_socket::cut_serial_num(QByteArray &data) const
 {
   QByteArray serial_num(data.mid(0, data.indexOf(FREE_SPASE)));
   data.remove(0, data.indexOf(FREE_SPASE) + 1);
-  return serial_num;
+  return serial_num.toInt();
 }

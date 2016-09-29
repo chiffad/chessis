@@ -5,6 +5,7 @@
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <exception>
 #include "udp_server.h"
 #include "chess.h"
 #include "enums.h"
@@ -77,60 +78,58 @@ void UDP_server::read_data()
 
 void UDP_server::run_message(QByteArray &message, const QHostAddress &ip, const quint16 port)
 {
-  qDebug()<<"UDP_server::run_message";
-
   const int serial_num = cut_serial_num(message);
-  const Messages::MESSAGE type = Messages::MESSAGE(message.mid(0, message.indexOf(FREE_SPASE)).toInt());
-  const QByteArray content(message.mid(message.indexOf(FREE_SPASE) + 1));
+  const auto type = Messages::MESSAGE(message.mid(0, message.indexOf(FREE_SPASE)).toInt());
+  const QByteArray content = message.mid(message.indexOf(FREE_SPASE) + 1);
 
   auto u = std::find_if(_user.begin(), _user.end(),
                              [&port, &ip](auto const &i){return(i->_port == port && i->_ip == ip);});
-
-  if(type == Messages::HELLO_SERVER)
+  try
   {
-    create_new_user(ip, port, content);
-    return;
-  }
+   /* if(type == Messages::HELLO_SERVER)
+    {
+      create_new_user(ip, port, content);
+      return;
+    }*/
 
-  if(u ==_user.end())
+    if(u ==_user.end())
+      throw "Unknown user";
+
+    if(!check_serial_num(serial_num, type, *(*u)))
+      throw "Wrong Serial num!";
+
+    if(type != Messages::MESSAGE_RECEIVED)
+      send_data(Messages::MESSAGE_RECEIVED, *(*u));
+
+    switch(type)
+    {
+      case Messages::MESSAGE_RECEIVED:
+        qDebug()<<"type == MESSAGE_RECEIVED";
+        (*u)->_is_message_reach = true;
+        if(!(*u)->_message_stack.isEmpty())
+        {
+          qDebug()<<"message stack not empty: "<<(*u)->_message_stack[0];
+          send_data((*u)->_message_stack[0], *(*u));
+          (*u)->_message_stack.removeFirst();
+        }
+        break;
+      case Messages::IS_SERVER_LOST:
+        break;
+      case Messages::OPPONENT_INF:
+        send_data(get_usr_info(*(*u)), *(*u));
+        break;
+      case Messages::MY_INF:
+        send_data(get_usr_info(*(*u), false), *(*u));
+        break;
+      default:
+        push_message_to_logic(type, content, *(*u));
+    }
+    (*u)->start_check_connect_timer();
+  }
+  catch(const char* ex)
   {
-    qDebug()<<"u ==_user.end()";
-    return;
+    qDebug()<<"!Exeption! UDP_server::run_message "<<ex;
   }
-
-  if(!check_serial_num(serial_num, type, *(*u)))
-  {
-    qDebug()<<"serial num wrong!";
-    return;
-  }
-
-  if(type != Messages::MESSAGE_RECEIVED)
-    send_data(Messages::MESSAGE_RECEIVED, *(*u));
-
-  switch(type)
-  {
-    case Messages::MESSAGE_RECEIVED:
-      qDebug()<<"type == MESSAGE_RECEIVED";
-      (*u)->_is_message_reach = true;
-      if(!(*u)->_message_stack.isEmpty())
-      {
-        qDebug()<<"message stack not empty: "<<(*u)->_message_stack[0];
-        send_data((*u)->_message_stack[0], *(*u));
-        (*u)->_message_stack.remove(0);
-      }
-      break;
-    case Messages::IS_SERVER_LOST:
-      break;
-    case Messages::OPPONENT_INF:
-      send_data(get_usr_info(*(*u)), *(*u));
-      break;
-    case Messages::MY_INF:
-      send_data(get_usr_info(*(*u), false), *(*u));
-      break;
-    default:
-      push_message_to_logic(type, content, *(*u));
-  }
-  (*u)->start_check_connect_timer();
 }
 
 bool UDP_server::check_serial_num(const int num, const Messages::MESSAGE type, User &u)
@@ -149,7 +148,6 @@ bool UDP_server::check_serial_num(const int num, const Messages::MESSAGE type, U
     }
     return false;
   }
-
   return true;
 }
 
@@ -159,7 +157,7 @@ void UDP_server::create_new_user(const QHostAddress &ip, const quint16 port, con
                              [&port, &ip](auto const &i){return(i->_port == port && i->_ip == ip);});
   if(sender != _user.end())
   {
-    qDebug()<<"this client already have";
+    qDebug()<<"this client already exist";
     return;
   }
 
@@ -183,46 +181,51 @@ void UDP_server::push_message_to_logic(const Messages::MESSAGE type, const QByte
   if(u.get_board_ind() == NO_OPPONENT)
     return;
 
-  std::shared_ptr<Desk> board = _board[u.get_board_ind()];
-  switch(type)
+  auto& board = _board[u.get_board_ind()];
+
+  try
   {
-    case Messages::MOVE:
+    switch(type)
     {
-      qDebug()<<"MOVE";
-      board->make_moves_from_str(content.toStdString());
-      break;
+      case Messages::MOVE:
+        qDebug()<<"MOVE";
+        board->make_moves_from_str(content.toStdString());
+        break;
+      case Messages::BACK_MOVE:
+        qDebug()<<"BACK_MOVE";
+        board->back_move();
+        break;
+      case Messages::NEW_GAME:
+        qDebug()<<"NEW_GAME";
+        board->start_new_game();
+        break;
+      case Messages::GO_TO_HISTORY:
+        qDebug()<<"GO_TO_HISTORY"<<content.toInt();
+        board->go_to_history_index(content.toInt());
+        break;
+      case Messages::FROM_FILE:
+        qDebug()<<"FROM_FILE: "<<content.toInt();
+        board->start_new_game();
+        board->make_moves_from_str(content.toStdString());
+        break;
+      default: throw "Unknown message type";
     }
-    case Messages::BACK_MOVE:
-      qDebug()<<"BACK_MOVE";
-      board->back_move();
-      break;
-    case Messages::NEW_GAME:
-      qDebug()<<"NEW_GAME";
-      board->start_new_game();
-      break;
-    case Messages::GO_TO_HISTORY:
-      qDebug()<<"GO_TO_HISTORY"<<content.toInt();
-      board->go_to_history_index(content.toInt());
-      break;
-    case Messages::FROM_FILE:
-      qDebug()<<"FROM_FILE: "<<content.toInt();
-      board->start_new_game();
-      board->make_moves_from_str(content.toStdString());
-      break;
-    default:
-      qDebug()<<"sheet message!";
-      return;
+    send_board_state(u);
   }
-  send_board_state(u);
+  catch (const char *ex)
+  {
+    qDebug()<<"!Exeption! UDP_server::push_message_to_logic "<<ex;
+  }
 }
 
 void UDP_server::send_board_state(User &u)
 {
   qDebug()<<"UDP_server::send_board_state";
 
-  QByteArray message;
-  std::shared_ptr<Desk> board = _board[u.get_board_ind()];
+  auto& board = _board[u.get_board_ind()];
 
+  QByteArray message;
+  message.setNum(Messages::GAME_INF);
   message.append(QString::fromStdString(board->get_board_mask()));
   message.append(";");
 
@@ -290,7 +293,7 @@ QByteArray UDP_server::add_serial_num(const QByteArray &message, User &u, bool i
 
 int UDP_server::cut_serial_num(QByteArray &data) const
 {
-  QByteArray serial_num(data.mid(0, data.indexOf(FREE_SPASE)));
+  QByteArray serial_num = data.mid(0, data.indexOf(FREE_SPASE));
   data.remove(0, data.indexOf(FREE_SPASE) + 1);
 
   return serial_num.toInt();

@@ -6,6 +6,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QTimer>
+#include <memory>
 #include "enums.h"
 
 class UDP_socket : public QObject
@@ -35,13 +36,13 @@ private:
   UDP_socket& operator=(const UDP_socket&) = delete;
 
   QByteArray add_serial_num(const QByteArray &data, bool is_prev_serial_need = false);
-  QByteArray cut_serial_num(QByteArray &data) const;
+  int cut_serial_num(QByteArray &data) const;
   void begin_wait_receive(const QByteArray &message);
 
 private:
-  QUdpSocket *_socket;
-  QTimer *_timer;
-  QTimer *_timer_from_last_received_message;
+  std::shared_ptr<QUdpSocket> _socket;
+  std::shared_ptr<QTimer> _timer;
+  std::shared_ptr<QTimer> _timer_from_last_received_message;
 
   QByteArray _last_send_message;
   QVector<QByteArray> _send_message_stack;
