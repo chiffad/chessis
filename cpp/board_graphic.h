@@ -93,6 +93,10 @@ signals:
   void move_turn_color_changed();
   void udp_connection_status_changed();
 
+public:
+  Board_graphic(const Board_graphic&) = delete;
+  Board_graphic& operator=(const Board_graphic&) = delete;
+
 private:
   enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4, CELL_SIZE_X = 56, CELL_SIZE_Y = 36, a_LETTER = 'a', FREE_FIELD = '.'};
   const QString MOVE_COLOR_W = "img/w_k.png";
@@ -108,9 +112,6 @@ private:
   };
 
 private:
-  Board_graphic(const Board_graphic&) = delete;
-  Board_graphic& operator=(const Board_graphic&) = delete;
-
   void update_coordinates();
   Coord get_field_coord(const int i) const;
   void write_moves_to_file(const QString& path);

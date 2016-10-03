@@ -27,11 +27,12 @@ void Exporter::push_to_graphic(const QString& message)
 
     else if(type == Messages::GAME_INF)
     {
-      const int INDEX = message.indexOf(";");
+      QString m = message.mid(message.indexOf(" ") + 1);
+      const int INDEX = m.indexOf(";");
       const int NEXT_IND = INDEX + 1;
-      const QString board_mask = message.mid(0, INDEX);
-      const QString moves_history = message.mid(NEXT_IND, message.indexOf(";", NEXT_IND) - NEXT_IND);
-      const QString move_num = message.mid(message.indexOf(";", NEXT_IND) + 1);
+      const QString board_mask = m.mid(0, INDEX);
+      const QString moves_history = m.mid(NEXT_IND, m.indexOf(";", NEXT_IND) - NEXT_IND);
+      const QString move_num = m.mid(m.indexOf(";", NEXT_IND) + 1);
 
       qDebug()<<"board_mask: "<<board_mask;
       qDebug()<<"moves_history: "<<moves_history;
@@ -46,12 +47,11 @@ void Exporter::push_to_graphic(const QString& message)
       if(moves_history.endsWith("#"))
         _board_graphic->set_check_mate();
     }
-
     else throw "Unknown message type";
   }
   catch (const char* ex)
   {
-    qDebug()<<"!Exeption! Exporter::push_to_graphic "<<ex;
+    qDebug()<<"!Exception! Exporter::push_to_graphic "<<ex;
   }
 }
 

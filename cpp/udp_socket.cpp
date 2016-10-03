@@ -93,9 +93,7 @@ void UDP_socket::read_data()
       {
         _timer_from_last_received_message->start(CHECK_CONNECT_TIME);
         send_data(Messages::MESSAGE_RECEIVED, true);
-        throw "Prev serial num. Resent message";
       }
-      else throw "Serial_num is wrong";
     }
 
     if(message.toInt() != Messages::MESSAGE_RECEIVED)
@@ -118,7 +116,7 @@ void UDP_socket::read_data()
   }
   catch(const char *ex)
   {
-    qDebug()<<"!Exeption! UDP_socket::read_data "<<ex;
+    qDebug()<<"!Exception! UDP_socket::read_data "<<ex;
   }
 }
 

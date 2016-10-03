@@ -86,11 +86,11 @@ void UDP_server::run_message(QByteArray &message, const QHostAddress &ip, const 
                              [&port, &ip](auto const &i){return(i->_port == port && i->_ip == ip);});
   try
   {
-   /* if(type == Messages::HELLO_SERVER)
+    if(type == Messages::HELLO_SERVER)
     {
       create_new_user(ip, port, content);
       return;
-    }*/
+    }
 
     if(u ==_user.end())
       throw "Unknown user";
@@ -128,7 +128,7 @@ void UDP_server::run_message(QByteArray &message, const QHostAddress &ip, const 
   }
   catch(const char* ex)
   {
-    qDebug()<<"!Exeption! UDP_server::run_message "<<ex;
+    qDebug()<<"!Exception! UDP_server::run_message "<<ex;
   }
 }
 
@@ -214,7 +214,7 @@ void UDP_server::push_message_to_logic(const Messages::MESSAGE type, const QByte
   }
   catch (const char *ex)
   {
-    qDebug()<<"!Exeption! UDP_server::push_message_to_logic "<<ex;
+    qDebug()<<"!Exception! UDP_server::push_message_to_logic "<<ex;
   }
 }
 
@@ -317,18 +317,24 @@ bool UDP_server::save_users_inf() const
   qDebug()<<"UDP_server::save_users_inf()";
   QFile save_file(QStringLiteral("save.json"));
 
-  if (!save_file.open(QIODevice::WriteOnly)) {
-    qWarning("Couldn't open file.");
+  try
+  {
+    if (!save_file.open(QIODevice::WriteOnly))
+      throw "Couldn't open file.";
+
+    QJsonObject users_inf;
+    write_inf(users_inf);
+
+    QJsonDocument save_doc(users_inf);
+    save_file.write(save_doc.toJson());
+
+    return true;
+  }
+  catch(const char *ex)
+  {
+    qDebug()<<"!Exception! UDP_server::save_users_inf "<<ex;
     return false;
   }
-
-  QJsonObject users_inf;
-  write_inf(users_inf);
-
-  QJsonDocument save_doc(users_inf);
-  save_file.write(save_doc.toJson());
-
-  return true;
 }
 
 void UDP_server::write_inf(QJsonObject &json) const
@@ -346,18 +352,24 @@ bool UDP_server::load_users_inf()
   qDebug()<<"UDP_server::load_users_inf()";
   QFile load_file("save.json");
 
-  if (!load_file.open(QIODevice::ReadOnly)) {
-    qWarning("Couldn't open file.");
+  try
+  {
+    if (!load_file.open(QIODevice::ReadOnly))
+      throw "Couldn't open file.";
+
+    QJsonDocument load_doc(QJsonDocument::fromJson(load_file.readAll()));
+
+    QJsonObject _1 = load_doc.object();
+
+    read_inf(_1);
+
+    return true;
+  }
+  catch(const char *ex)
+  {
+    qDebug()<<"!Exception! UDP_server::load_users_inf"<<ex;
     return false;
   }
-
-  QJsonDocument load_doc(QJsonDocument::fromJson(load_file.readAll()));
-
-  QJsonObject _1 = load_doc.object();
-
-  read_inf(_1);
-
-  return true;
 }
 
 void UDP_server::read_inf(QJsonObject &json)
@@ -371,7 +383,6 @@ void UDP_server::read_inf(QJsonObject &json)
                                         inf["name"].toString(), inf["ELO"].toInt()));
   }
 }
-
 
 UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16 &port, const QHostAddress &ip,
                        const int index, const QString &login, const int ELO)

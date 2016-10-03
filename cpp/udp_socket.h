@@ -27,14 +27,15 @@ public slots:
   bool is_message_received();
   void timer_from_last_received_message_timeout();
 
+public:
+  UDP_socket(const UDP_socket&) = delete;
+  UDP_socket& operator=(const UDP_socket&) = delete;
+
 private:
   enum {RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 5000, FIRST_PORT = 49152, LAST_PORT = 49500};
   const QChar FREE_SPASE = ' ';
 
 private:
-  UDP_socket(const UDP_socket&) = delete;
-  UDP_socket& operator=(const UDP_socket&) = delete;
-
   QByteArray add_serial_num(const QByteArray &data, bool is_prev_serial_need = false);
   int cut_serial_num(QByteArray &data) const;
   void begin_wait_receive(const QByteArray &message);

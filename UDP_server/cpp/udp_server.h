@@ -29,14 +29,15 @@ public:
   void send_data(const QByteArray &message, User &u);
   void send_data(const Messages::MESSAGE r_mes, User &u, bool is_prev_serial_need = false);
 
+public:
+  UDP_server(const UDP_server&) = delete;
+  UDP_server& operator=(const UDP_server&) = delete;
+
 private:
   enum {NO_OPPONENT = -1, FIRST_PORT = 49152, LAST_PORT = 49500};
   const QChar FREE_SPASE = ' ';
 
 private:
-  UDP_server(const UDP_server&) = delete;
-  UDP_server& operator=(const UDP_server&) = delete;
-
   void set_opponent(User &u);
   void send_board_state(User &u);
   void begin_wait_receive(User &u);
@@ -98,14 +99,15 @@ public:
   QString _login;
   int _rating_ELO;
 
-private:
-   enum {RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 10000};
+public:
+  User(const User&) = delete;
+  User& operator=(const User&) = delete;
 
 private:
-   User(const User&) = delete;
-   User& operator=(const User&) = delete;
+  enum {RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 10000};
 
-   std::shared_ptr<QTimer> _response_timer;
-   std::shared_ptr<QTimer> _check_connect_timer;
+private:
+  std::shared_ptr<QTimer> _response_timer;
+  std::shared_ptr<QTimer> _check_connect_timer;
 };
 #endif // UDP_SERVER_H

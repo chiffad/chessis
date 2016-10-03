@@ -18,7 +18,7 @@ public:
   const QString pull_from_graphic();
   const QString pull_from_socet();
 
-private:
+public:
   Exporter(const Exporter&) = delete;
   Exporter& operator=(const Exporter&) = delete;
 
