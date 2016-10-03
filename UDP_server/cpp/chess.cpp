@@ -25,6 +25,7 @@ bool Board::move(const Coord &from, const Coord &to)
   std::cout<<"Board::move CHESS "<<std::endl;
   if((get_color(from) == get_move_color()) && (is_can_move(from, to) || is_castling(from, to)))
   {
+    m_actual_move.fig_on_captured_field = get_figure(to);
     set_field(to, from);
     if(!is_check(get_color(to)))
     {
@@ -38,10 +39,30 @@ bool Board::move(const Coord &from, const Coord &to)
 
 void Board::finish_move(const Coord &from, const Coord &to)
 {
-  if(get_colorless_fig(to) == PAWN && is_pawn_cross_beat(from, to))
-    if_pawn_cross_beat();
+  if(get_colorless_fig(to) == PAWN)
+  {
+    if(is_pawn_cross_beat(from, to))
+      pawn_cross_beat();
+    if(is_pawn_reach_other_side(to))
+      pawn_reach_other_side(to);
+  }
   if_castling(from,to);
   next_move(from, to);
+}
+
+bool Board::is_pawn_reach_other_side(const Coord &c) const
+{
+  enum {FIRST_LINE = 0, LAST_LINE = 7};
+  return ((c.y == LAST_LINE && get_figure(c) == W_PAWN) || (c.y == FIRST_LINE && get_figure(c) == B_PAWN));
+}
+
+void Board::pawn_reach_other_side(const Coord &c)
+{
+  m_actual_move.fig_on_captured_field = get_figure(c);
+  if(get_figure(c) == W_PAWN)
+    m_field[get_field_index(c)] = W_QUEEN;
+  else if(get_figure(c) == B_PAWN)
+    m_field[get_field_index(c)] = B_QUEEN;
 }
 
 bool Board::is_can_move(const Coord &fr, const Coord &to) const
@@ -93,7 +114,7 @@ bool Board::is_pawn_cross_beat(const Coord &fr, const Coord &to) const
   return false;
 }
 
-void Board::if_pawn_cross_beat()
+void Board::pawn_cross_beat()
 {
   auto ind = get_field_index(m_moves[m_moves.size() - 2].to);
   m_field[ind] = FREE_FIELD;
@@ -312,12 +333,15 @@ bool Board::back_move()
   if(get_colorless_fig(m.to) == PAWN && is_pawn_cross_beat(m.from, m.to))
   {
     auto ind = get_field_index(m_moves[m_moves.size() - 2].to);
-    m_field[ind] = FREE_FIELD;
     if(get_color(m.to) == BLACK)
       m_field[ind] = W_PAWN;
     else m_field[ind] = B_PAWN;
   }
-  if_castling(m.to, m.from);
+  else if((get_color(m.from) == WHITE && m.fig_on_captured_field == W_PAWN)
+          ||(get_color(m.from) == BLACK && m.fig_on_captured_field == B_PAWN))
+    m_field[get_field_index(m.from)] = m.fig_on_captured_field;
+
+  else if_castling(m.to, m.from);
   m_moves.pop_back();
   return true;
 }
@@ -326,7 +350,6 @@ void Board::next_move(const Coord &from, const Coord &to)
 {
   m_actual_move.to = to;
   m_actual_move.from = from;
-  m_actual_move.fig_on_captured_field = get_figure(to);
   m_moves.push_back(m_actual_move);
 
   if(!m_is_go_to_history_in_progress)

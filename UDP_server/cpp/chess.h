@@ -53,7 +53,8 @@ public:
    Board& operator=(const Board&) = delete;
 
 private:
-   void if_pawn_cross_beat();
+   void pawn_cross_beat();
+   void pawn_reach_other_side(const Coord &c);
    unsigned get_field_index(const Coord &c) const;
    void if_castling(const Coord &fr, const Coord &to);
    void finish_move(const Coord &from, const Coord &to);
@@ -61,6 +62,7 @@ private:
    void set_field(const Coord &lhs, const Coord &rhs, const FIGURE &fig = FREE_FIELD);
 
    bool is_check(const COLOR color) const;
+   bool is_pawn_reach_other_side(const Coord &c) const;
    bool is_castling(const Coord &from, const Coord &to) const;
    bool is_can_move(const Coord &from, const Coord &to) const;
    bool is_pawn_cross_beat(const Coord &fr, const Coord &to) const;
