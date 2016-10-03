@@ -22,7 +22,10 @@ Board::Board() : m_is_go_to_history_in_progress(false)
 
 bool Board::move(const Coord &from, const Coord &to)
 {
-  std::cout<<"Board::move CHESS "<<std::endl;
+  std::cout<<"Board::move CHESS "<<std::endl;  
+  if(from == to)
+     return false;
+
   if((get_color(from) == get_move_color()) && (is_can_move(from, to) || is_castling(from, to)))
   {
     m_actual_move.fig_on_captured_field = get_figure(to);
@@ -43,26 +46,11 @@ void Board::finish_move(const Coord &from, const Coord &to)
   {
     if(is_pawn_cross_beat(from, to))
       pawn_cross_beat();
-    if(is_pawn_reach_other_side(to))
+    else if(is_pawn_reach_other_side(to))
       pawn_reach_other_side(to);
   }
   if_castling(from,to);
   next_move(from, to);
-}
-
-bool Board::is_pawn_reach_other_side(const Coord &c) const
-{
-  enum {FIRST_LINE = 0, LAST_LINE = 7};
-  return ((c.y == LAST_LINE && get_figure(c) == W_PAWN) || (c.y == FIRST_LINE && get_figure(c) == B_PAWN));
-}
-
-void Board::pawn_reach_other_side(const Coord &c)
-{
-  m_actual_move.fig_on_captured_field = get_figure(c);
-  if(get_figure(c) == W_PAWN)
-    m_field[get_field_index(c)] = W_QUEEN;
-  else if(get_figure(c) == B_PAWN)
-    m_field[get_field_index(c)] = B_QUEEN;
 }
 
 bool Board::is_can_move(const Coord &fr, const Coord &to) const
@@ -105,19 +93,40 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
   return !(fr == to);
 }
 
-bool Board::is_pawn_cross_beat(const Coord &fr, const Coord &to) const
+bool Board::is_pawn_cross_beat(const Coord &fr, const Coord &to, bool is_back_move) const
 {
-  const auto &m = m_moves[m_moves.size() - 2];
-  if(abs(diff(to.x, fr.x) * diff(to.y, fr.y)) == 1 && get_colorless_fig(m.to) == PAWN)
-    return (diff(m.to.y, fr.y) + diff(m.to.x, to.x) == 0 && abs(diff(m.to.y, m.from.y)) == 2);
+    std::cout<<"is_pawn_cross_beat!"<<std::endl;
+  const auto &m = m_moves.back();
+  if(abs(diff(to.x, fr.x) * diff(to.y, fr.y)) == 1)
+  {
+    if(is_back_move)
+     return true;
+    else if(get_colorless_fig(m.to) == PAWN)
+      return (m.to.y == fr.y && m.to.x == to.x && abs(diff(m.to.y, m.from.y)) == 2);
+  }
 
   return false;
 }
 
 void Board::pawn_cross_beat()
 {
-  auto ind = get_field_index(m_moves[m_moves.size() - 2].to);
+  auto ind = get_field_index(m_moves.back().to);
   m_field[ind] = FREE_FIELD;
+}
+
+bool Board::is_pawn_reach_other_side(const Coord &c) const
+{
+  enum {FIRST_LINE = 0, LAST_LINE = 7};
+  return ((c.y == LAST_LINE && get_figure(c) == W_PAWN) || (c.y == FIRST_LINE && get_figure(c) == B_PAWN));
+}
+
+void Board::pawn_reach_other_side(const Coord &c)
+{
+  m_actual_move.fig_on_captured_field = get_figure(c);
+  if(get_figure(c) == W_PAWN)
+    m_field[get_field_index(c)] = W_QUEEN;
+  else if(get_figure(c) == B_PAWN)
+    m_field[get_field_index(c)] = B_QUEEN;
 }
 
 void Board::if_castling(const Coord &fr, const Coord &to)
@@ -330,10 +339,13 @@ bool Board::back_move()
   const Moves &m = m_moves.back();
   set_field(m.from, m.to, m.fig_on_captured_field);
 
-  if(get_colorless_fig(m.to) == PAWN && is_pawn_cross_beat(m.from, m.to))
+  if(get_colorless_fig(m.from) == PAWN
+     && is_pawn_cross_beat(m.from, m.to, true)
+     && m.fig_on_captured_field == FREE_FIELD)
   {
+    std::cout<<"back_move _1"<<std::endl;
     auto ind = get_field_index(m_moves[m_moves.size() - 2].to);
-    if(get_color(m.to) == BLACK)
+    if(get_color(m.from) == BLACK)
       m_field[ind] = W_PAWN;
     else m_field[ind] = B_PAWN;
   }

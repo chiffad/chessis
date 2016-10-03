@@ -226,6 +226,7 @@ void UDP_server::send_board_state(User &u)
 
   QByteArray message;
   message.setNum(Messages::GAME_INF);
+  message.append(FREE_SPASE);
   message.append(QString::fromStdString(board->get_board_mask()));
   message.append(";");
 

@@ -65,7 +65,7 @@ private:
    bool is_pawn_reach_other_side(const Coord &c) const;
    bool is_castling(const Coord &from, const Coord &to) const;
    bool is_can_move(const Coord &from, const Coord &to) const;
-   bool is_pawn_cross_beat(const Coord &fr, const Coord &to) const;
+   bool is_pawn_cross_beat(const Coord &fr, const Coord &to, bool is_back_move = false) const;
 
    int diff(const int _1, const int _2) const;
 
