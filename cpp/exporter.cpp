@@ -8,6 +8,12 @@ Exporter::Exporter(Board_graphic& board_graphic, UDP_socket& udp_socet)
 {
 }
 
+Exporter::~Exporter()
+{
+  _board_graphic.reset();
+  _udp_socet.reset();
+}
+
 void Exporter::push_to_graphic(const QString& message)
 {
   qDebug()<<"Exporter::push_message"<<message;

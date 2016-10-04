@@ -32,7 +32,7 @@ private:
   QVector<std::shared_ptr<QOpenGLTexture>> m_board_texture;
   std::shared_ptr<QOpenGLShaderProgram> m_program;
 
-  std::shared_ptr<QMatrix4x4> m_model_view;
+  QMatrix4x4 m_model_view;
   QOpenGLBuffer m_buffer;
 
   float m_x_angle;

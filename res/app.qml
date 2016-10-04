@@ -82,6 +82,7 @@ Window
     width: _board.width
     height: _board.height / 2
     anchors.centerIn: _board
+    opacity: 0.3
     z: cHECK_MATE_IMG_Z
 
     source: "img/checkMate.png"

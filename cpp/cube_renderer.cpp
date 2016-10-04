@@ -7,7 +7,7 @@
 #include <algorithm>
 #include "cube_renderer.h"
 
-Cube_renderer::Cube_renderer() : m_program(std::make_shared<QOpenGLShaderProgram>()), m_model_view(std::make_shared<QMatrix4x4>()),
+Cube_renderer::Cube_renderer() : m_program(std::make_shared<QOpenGLShaderProgram>()), m_model_view(QMatrix4x4()),
                                  m_x_angle(0), m_y_angle(0), m_z_angle(0), m_scale_vect(1,1,1)
 {
 }
@@ -110,11 +110,11 @@ void Cube_renderer::update_model_view(const float scale)
   //qDebug()<<"Cube_renderer::update_modelview()";
   m_scale_vect *= scale;
 
-  m_model_view = std::make_shared<QMatrix4x4>();
-  m_model_view->rotate(m_x_angle, 1.0f, 0.0f, 0.0f);
-  m_model_view->rotate(m_y_angle, 0.0f, 1.0f, 0.0f);
-  m_model_view->rotate(m_z_angle, 0.0f, 0.0f, 1.0f);
-  m_model_view->scale(m_scale_vect);
+  m_model_view = QMatrix4x4();
+  m_model_view.rotate(m_x_angle, 1.0f, 0.0f, 0.0f);
+  m_model_view.rotate(m_y_angle, 0.0f, 1.0f, 0.0f);
+  m_model_view.rotate(m_z_angle, 0.0f, 0.0f, 1.0f);
+  m_model_view.scale(m_scale_vect);
 }
 
 void Cube_renderer::render()
@@ -128,7 +128,7 @@ void Cube_renderer::render()
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-  m_program->setUniformValue("matrix", *m_model_view);
+  m_program->setUniformValue("matrix", m_model_view);
   m_program->enableAttributeArray(VERTEX_ATTRIBUTE);
   m_program->enableAttributeArray(TEXCOORD_ATTRIBUTE);
   m_program->setAttributeBuffer(VERTEX_ATTRIBUTE, GL_FLOAT,   0                  , 3, 5 * sizeof(GLfloat));

@@ -35,8 +35,8 @@ bool Board::move(const Coord &from, const Coord &to)
       finish_move(from,to);
       return true;
     }
+    else set_field(from, to);
   }
-  set_field(from, to);
   return false;
 }
 

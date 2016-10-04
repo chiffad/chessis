@@ -9,8 +9,8 @@
 class Exporter
 {
 public:
-  explicit Exporter(Board_graphic& board_graphic, UDP_socket& udp_socet);
-  ~Exporter(){}
+  Exporter(Board_graphic& board_graphic, UDP_socket& udp_socet);
+  ~Exporter();
 
 public:
   void push_to_graphic(const QString& message);
@@ -23,7 +23,9 @@ public:
   Exporter& operator=(const Exporter&) = delete;
 
 private:
-  std::shared_ptr<Board_graphic> _board_graphic;
-  std::shared_ptr<UDP_socket> _udp_socet;
+  //std::shared_ptr<Board_graphic> _board_graphic;
+  //std::shared_ptr<UDP_socket> _udp_socet;
+  Board_graphic* _board_graphic;
+  UDP_socket* _udp_socet;
 };
 #endif // UDP_CLIENT_H
