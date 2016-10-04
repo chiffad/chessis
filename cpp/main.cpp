@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
   Board_graphic board_graphic;
 
   engine.rootContext()->setContextProperty("FigureModel", &board_graphic);
-  engine.load(QUrl(QStringLiteral("../chessis/res/app.qml")));
+//  engine.load(QUrl(QStringLiteral("../chessis/res/app.qml")));
 
   UDP_socket udp_socet;
   Exporter exporter(board_graphic, udp_socet);
@@ -49,6 +49,6 @@ int main(int argc, char *argv[])
 
 bool quit(const QGuiApplication &app)
 {
-//  return false;
-  return (app.allWindows().isEmpty() || !app.allWindows().last()->visibility());
+  return false;
+//  return (app.allWindows().isEmpty() || !app.allWindows().last()->visibility());
 }

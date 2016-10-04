@@ -53,8 +53,9 @@ public:
    Board& operator=(const Board&) = delete;
 
 private:
-   void pawn_cross_beat();
-   void pawn_reach_other_side(const Coord &c);
+   void pawn_back_move();//1
+   void pawn_beat_on_pass();//2
+   void pawn_reach_other_side(const Coord &c);//3
    unsigned get_field_index(const Coord &c) const;
    void if_castling(const Coord &fr, const Coord &to);
    void finish_move(const Coord &from, const Coord &to);
@@ -62,10 +63,10 @@ private:
    void set_field(const Coord &lhs, const Coord &rhs, const FIGURE &fig = FREE_FIELD);
 
    bool is_check(const COLOR color) const;
-   bool is_pawn_reach_other_side(const Coord &c) const;
+   bool is_pawn_reach_other_side(const Coord &c) const;//4
    bool is_castling(const Coord &from, const Coord &to) const;
    bool is_can_move(const Coord &from, const Coord &to) const;
-   bool is_pawn_cross_beat(const Coord &fr, const Coord &to, bool is_back_move = false) const;
+   bool is_pawn_beat_on_pass(const Coord &fr, const Coord &to) const;//5
 
    int diff(const int _1, const int _2) const;
 
@@ -79,7 +80,7 @@ private:
    std::vector<Moves> m_moves;
    std::vector<Moves> m_moves_copy;
    std::vector<FIGURE> m_field;
-   bool m_is_go_to_history_in_progress;
+   bool m_is_go_to_history_running;
 
 private:
  enum{a_LETTER = 'a', EIGHT_ch = '8'};
