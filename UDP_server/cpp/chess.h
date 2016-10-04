@@ -53,9 +53,10 @@ public:
    Board& operator=(const Board&) = delete;
 
 private:
-   void pawn_back_move();//1
-   void pawn_beat_on_pass();//2
-   void pawn_reach_other_side(const Coord &c);//3
+   void en_passant();//1
+   void re_en_passant();//2
+   void pawn_re_transform();//3
+   void pawn_transform(const Coord &c);//4
    unsigned get_field_index(const Coord &c) const;
    void if_castling(const Coord &fr, const Coord &to);
    void finish_move(const Coord &from, const Coord &to);
@@ -63,12 +64,16 @@ private:
    void set_field(const Coord &lhs, const Coord &rhs, const FIGURE &fig = FREE_FIELD);
 
    bool is_check(const COLOR color) const;
-   bool is_pawn_reach_other_side(const Coord &c) const;//4
+   bool is_pawn_reach_other_side(const Coord &c) const;//5
    bool is_castling(const Coord &from, const Coord &to) const;
    bool is_can_move(const Coord &from, const Coord &to) const;
-   bool is_pawn_beat_on_pass(const Coord &fr, const Coord &to) const;//5
+   bool is_en_passant(const Coord &fr, const Coord &to) const;//6
 
    int diff(const int _1, const int _2) const;
+
+private:
+ enum MOVE_TYPE{USUAL, CASTLING, EN_PASSANT, PAWN_TRANSFORM};
+ enum{a_LETTER = 'a', EIGHT_ch = '8'};
 
 private:
    struct Moves
@@ -76,13 +81,11 @@ private:
      Coord from;
      Coord to;
      FIGURE fig_on_captured_field;
+     MOVE_TYPE type;
    }m_actual_move;
    std::vector<Moves> m_moves;
    std::vector<Moves> m_moves_copy;
    std::vector<FIGURE> m_field;
    bool m_is_go_to_history_running;
-
-private:
- enum{a_LETTER = 'a', EIGHT_ch = '8'};
 };
 #endif //_VILVIVYVKCKYVLVUYFDKYUFYTF
