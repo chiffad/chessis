@@ -9,7 +9,7 @@
 class Exporter
 {
 public:
-  Exporter(Board_graphic& board_graphic, UDP_socket& udp_socet);
+  Exporter(Board_graphic& board_graphic, UDP_socket& udp_socket);
   ~Exporter();
 
 public:
@@ -23,9 +23,7 @@ public:
   Exporter& operator=(const Exporter&) = delete;
 
 private:
-  //std::shared_ptr<Board_graphic> _board_graphic;
-  //std::shared_ptr<UDP_socket> _udp_socet;
-  Board_graphic* _board_graphic;
-  UDP_socket* _udp_socet;
+  Board_graphic& _board_graphic;
+  UDP_socket& _udp_socket;
 };
 #endif // UDP_CLIENT_H

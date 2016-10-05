@@ -3,15 +3,13 @@
 #include "exporter.h"
 #include "enums.h"
 
-Exporter::Exporter(Board_graphic& board_graphic, UDP_socket& udp_socet)
-                  : _board_graphic(&board_graphic), _udp_socet(&udp_socet)
+Exporter::Exporter(Board_graphic& board_graphic, UDP_socket& udp_socket)
+                  : _board_graphic(board_graphic), _udp_socket(udp_socet)
 {
 }
 
 Exporter::~Exporter()
 {
-  _board_graphic.reset();
-  _udp_socet.reset();
 }
 
 void Exporter::push_to_graphic(const QString& message)
@@ -22,13 +20,13 @@ void Exporter::push_to_graphic(const QString& message)
   {
     const int type = message.mid(0, message.indexOf(" ")).toInt();
     if(type == Messages::INF_REQUEST)
-      _board_graphic->add_to_command_history(message.mid(message.indexOf(" ")));
+      _board_graphic.add_to_command_history(message.mid(message.indexOf(" ")));
 
     else if(type == Messages::SERVER_LOST
          || type == Messages::SERVER_HERE
          || type == Messages::OPPONENT_LOST)
     {
-      _board_graphic->set_connect_status(message.toInt());
+      _board_graphic.set_connect_status(message.toInt());
     }
 
     else if(type == Messages::GAME_INF)
@@ -44,14 +42,14 @@ void Exporter::push_to_graphic(const QString& message)
       qDebug()<<"moves_history: "<<moves_history;
       qDebug()<<"move_num: "<<move_num;
 
-      _board_graphic->set_board_mask(board_mask);
-      _board_graphic->set_move_color(move_num.toInt());
-      _board_graphic->set_connect_status(Messages::SERVER_HERE);
-      _board_graphic->set_moves_history(moves_history);
-      _board_graphic->update_hilight(move_num.toInt(),moves_history);
+      _board_graphic.set_board_mask(board_mask);
+      _board_graphic.set_move_color(move_num.toInt());
+      _board_graphic.set_connect_status(Messages::SERVER_HERE);
+      _board_graphic.set_moves_history(moves_history);
+      _board_graphic.update_hilight(move_num.toInt(),moves_history);
 
       if(moves_history.endsWith("#"))
-        _board_graphic->set_check_mate();
+        _board_graphic.set_check_mate();
     }
     else throw "Unknown message type";
   }
@@ -66,17 +64,17 @@ void Exporter::push_to_socet(const QString& message)
   //qDebug()<<"Exporter::push_message_to_socet";
   QByteArray m;
   m.append(message);
-  _udp_socet->send_data(m);
+  _udp_socket.send_data(m);
 }
 
 const QString Exporter::pull_from_graphic()
 {
   //qDebug()<<"Exporter::pull_message_from_graphic";
-  return _board_graphic->pull_first_messages_for_server();
+  return _board_graphic.pull_first_messages_for_server();
 }
 
 const QString Exporter::pull_from_socet()
 {
   //qDebug()<<"Exporter::pull_message_from_socet";
-  return _udp_socet->pull_received_message();
+  return _udp_socket.pull_received_message();
 }
