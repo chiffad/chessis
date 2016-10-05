@@ -18,7 +18,6 @@ Cube_renderer::~Cube_renderer()
 
 void Cube_renderer::initialize()
 {
- // qDebug()<<"Cube_renderer::initialize()";
   initializeOpenGLFunctions();
 
   create_geometry();
@@ -74,8 +73,6 @@ void Cube_renderer::set_cube_updates(const QString &fig_name, const int tilt_ang
 
 void Cube_renderer::load_correct_texture(const QString &name)
 {
-//  qDebug()<<"Cube_renderer::load_correct_textur: "<<name;
-
   const QString PATH_TO_IMG = "../chessis/res/img/";
 
   QImage fase_im(PATH_TO_IMG + name + ".png");
@@ -95,9 +92,6 @@ void Cube_renderer::load_correct_texture(const QString &name)
     z_scale = 0;
   }
 
-//  for(auto &i : m_board_texture)
-//    delete i.reset();
-
   m_board_texture.clear();
   m_board_texture.append(std::make_shared<QOpenGLTexture>(fase_im.mirrored()));
   m_board_texture.append(std::make_shared<QOpenGLTexture>(side_im));
@@ -107,7 +101,6 @@ void Cube_renderer::load_correct_texture(const QString &name)
 
 void Cube_renderer::update_model_view(const float scale)
 {
-  //qDebug()<<"Cube_renderer::update_modelview()";
   m_scale_vect *= scale;
 
   m_model_view = QMatrix4x4();
@@ -121,7 +114,6 @@ void Cube_renderer::render()
 {
   create_geometry();
 
-  //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

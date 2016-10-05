@@ -35,13 +35,12 @@ public:
    void go_to_history_index(const unsigned index);
    bool is_mate();
 
-   const std::string get_moves_history() const;
+   std::string get_moves_history() const;
    void load_moves_from_file(const std::string &path);
    void write_moves_to_file(const std::string &path) const;
 
    unsigned get_move_num() const;
-   unsigned get_move_num_from_0() const;
-   const std::string get_board_mask() const;
+   std::string get_board_mask() const;
    COLOR get_move_color() const;
    COLOR get_color(const Coord &c) const;
    FIGURE get_figure(const Coord &c) const;
@@ -53,10 +52,11 @@ public:
    Board& operator=(const Board&) = delete;
 
 private:
-   void en_passant();//1
-   void re_en_passant();//2
-   void pawn_re_transform();//3
-   void pawn_transform(const Coord &c);//4
+   void en_passant();
+   void re_en_passant();
+   void pawn_re_transform();
+   void pawn_transform(const Coord &c);
+   unsigned get_move_num_from_0() const;
    unsigned get_field_index(const Coord &c) const;
    void if_castling(const Coord &fr, const Coord &to);
    void finish_move(const Coord &from, const Coord &to);

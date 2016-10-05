@@ -4,7 +4,7 @@
 #include "enums.h"
 
 Exporter::Exporter(Board_graphic& board_graphic, UDP_socket& udp_socket)
-                  : _board_graphic(board_graphic), _udp_socket(udp_socet)
+                  : _board_graphic(board_graphic), _udp_socket(udp_socket)
 {
 }
 
@@ -14,8 +14,6 @@ Exporter::~Exporter()
 
 void Exporter::push_to_graphic(const QString& message)
 {
-  qDebug()<<"Exporter::push_message"<<message;
-
   try
   {
     const int type = message.mid(0, message.indexOf(" ")).toInt();
@@ -61,7 +59,6 @@ void Exporter::push_to_graphic(const QString& message)
 
 void Exporter::push_to_socet(const QString& message)
 {
-  //qDebug()<<"Exporter::push_message_to_socet";
   QByteArray m;
   m.append(message);
   _udp_socket.send_data(m);
@@ -69,12 +66,10 @@ void Exporter::push_to_socet(const QString& message)
 
 const QString Exporter::pull_from_graphic()
 {
-  //qDebug()<<"Exporter::pull_message_from_graphic";
   return _board_graphic.pull_first_messages_for_server();
 }
 
 const QString Exporter::pull_from_socet()
 {
-  //qDebug()<<"Exporter::pull_message_from_socet";
   return _udp_socket.pull_received_message();
 }

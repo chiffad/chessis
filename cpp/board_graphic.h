@@ -8,7 +8,6 @@
 #include <QStringList>
 #include <vector>
 #include <fstream>
-#include <QTimer>
 #include "enums.h"
 
 class Board_graphic : public QAbstractListModel
@@ -24,9 +23,6 @@ public:
   const QString NEW_GAME = "new game";
   const QString HISTORY = "to history";
   const QString SHOW_OPPONENT = "show opponent";
-
-public slots:
-  void timer_timeout();
 
 private:
   class Figure;
@@ -122,7 +118,6 @@ private:
   void add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content = QString());
 
 private:
-  QTimer *timer_kill;
   QString _move_color;
   QString _udp_connection_status;
   bool _is_check_mate;

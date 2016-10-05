@@ -22,7 +22,6 @@ Board::Board() : m_is_go_to_history_running(false)
 
 bool Board::move(const Coord &from, const Coord &to)
 {
-  std::cout<<"Board::move CHESS "<<std::endl;
   if(from == to)
      return false;
 
@@ -60,7 +59,7 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
   const int dy = abs(diff(to.y, fr.y));
   const int X_UNIT_VECTOR = (dx == 0) ? 0 : diff(to.x, fr.x)/dx;
   const int Y_UNIT_VECTOR = (dy == 0) ? 0 : diff(to.y, fr.y)/dy;
-  const COLORLESS_FIG FIG = get_colorless_fig(fr);
+  const auto FIG = get_colorless_fig(fr);
 
   if(FIG == HORSE)
     return (dx*dy == 2 && get_color(fr) != get_color(to));
@@ -182,10 +181,11 @@ bool Board::is_check(const COLOR color) const
     for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
       if(get_figure(t) == king)
       {
+        const auto opp_color = (color == WHITE) ? BLACK : WHITE;
         for(f.x = 0; f.x < BOARD_SIDE; ++f.x)
         {
           for(f.y = 0; f.y < BOARD_SIDE; ++f.y)
-            if(get_color(f) != color && is_can_move(f, t))
+            if(get_color(f) == opp_color && is_can_move(f, t))
               return true;
         }
         return false;
@@ -199,7 +199,7 @@ bool Board::is_mate()
   for(f.x = 0; f.x < BOARD_SIDE; ++f.x)
   {
     for(f.y = 0; f.y < BOARD_SIDE; ++f.y)
-      if(get_figure(f) != FREE_FIELD && get_color(f) == get_move_color())
+      if(get_color(f) == get_move_color())
       {
         for(t.x = 0; t.x < BOARD_SIDE; ++t.x)
           for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
@@ -227,7 +227,6 @@ void Board::start_new_game()
 
 bool Board::back_move()
 {
-  std::cout<<"Board::back_move"<<std::endl;
   if(!get_move_num())
     return false;
 
@@ -262,8 +261,6 @@ void Board::go_to_history_index(const unsigned index)
 {
   m_is_go_to_history_running = true;
 
-  std::cout<<"Board::go_to_history_index: "<<index<<" "<<get_move_num()<<std::endl;
-
   while(index < get_move_num())
     back_move();
 
@@ -276,7 +273,6 @@ void Board::go_to_history_index(const unsigned index)
 
 void Board::make_moves_from_str(const std::string &str)
 {
-  std::cout<<"Board::make_move_from_str CHESS: "<<str<<std::endl;
   enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4, h_LETTER = 'h', ONE_ch = '1'};
 
   std::vector<int> coord_str;
@@ -298,16 +294,13 @@ void Board::make_moves_from_str(const std::string &str)
   }
 }
 
-const std::string Board::get_board_mask() const
+std::string Board::get_board_mask() const
 {
-  std::cout<<"Board::get_board_mask()"<<std::endl;
   return std::string(m_field.begin(), m_field.end());
 }
 
-const std::string Board::get_moves_history() const
+std::string Board::get_moves_history() const
 {
-  std::cout<<"Board::get_moves_history: "<<std::endl;
-
   std::string history;
   for(auto hist_elem : m_moves_copy)
   {
@@ -321,9 +314,7 @@ const std::string Board::get_moves_history() const
 
 void Board::write_moves_to_file(const std::string &path) const
 {
-  std::cout<<"Board::write_moves_to_file "<<std::endl;
   std::ofstream in_file(path);
-
   try
   {
     if(!in_file.is_open())
@@ -340,9 +331,7 @@ void Board::write_moves_to_file(const std::string &path) const
 
 void Board::load_moves_from_file(const std::string &path)
 {
-  std::cout<<"Board::read_moves_from_file "<<std::endl;
   std::ifstream from_file(path);
-
   try
   {
     if(!from_file.is_open())
@@ -350,7 +339,6 @@ void Board::load_moves_from_file(const std::string &path)
 
     std::string data_from_file(std::istreambuf_iterator<char>(from_file), (std::istreambuf_iterator<char>()));
 
-    std::cout<<"data_from_file: "<<data_from_file<<std::endl;
     start_new_game();
     make_moves_from_str(data_from_file);
   }
@@ -437,4 +425,3 @@ bool Board::Coord::operator==(const Coord &rhs) const
 {
   return(x == rhs.x && y == rhs.y);
 }
-
