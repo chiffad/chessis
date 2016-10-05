@@ -380,12 +380,24 @@ Board::FIGURE Board::get_figure(const Coord &c) const
 
 Board::FIGURE Board::get_figure(const unsigned x, const unsigned y) const
 {
-  return m_field[y * BOARD_SIDE + x];
+  const auto i = y * BOARD_SIDE + x;
+  try
+  {
+    if(i >= m_field.size())
+     throw "Index out of range!";
+  }
+  catch(const char *ex)
+  {
+    std::cout<<"!Exception! in Board::get_figure "<<ex<<std::endl;
+    i = 0;
+  }
+  return m_field[i];
 }
 
 Board::COLORLESS_FIG Board::get_colorless_fig(const Coord &c) const
 {
-  return COLORLESS_FIG(tolower(m_field[get_field_index(c)]) + toupper(m_field[get_field_index(c)]));
+  const auto &f = m_field[get_field_index(c)];
+  return COLORLESS_FIG(tolower(f) + toupper(f));
 }
 
 Board::COLOR Board::get_move_color() const
@@ -395,16 +407,18 @@ Board::COLOR Board::get_move_color() const
 
 void Board::set_field(const Coord &lhs, const Coord &rhs, const FIGURE & fig)
 {
-  m_field[get_field_index(lhs)] = m_field[get_field_index(rhs)];
-  m_field[get_field_index(rhs)] = fig;
+  auto &f = m_field[get_field_index(rhs)];
+  m_field[get_field_index(lhs)] = f;
+  f = fig;
 }
 
 Board::COLOR Board::get_color(const Coord &c) const
 {
-  if(m_field[get_field_index(c)] == FREE_FIELD)
+  const auto &f = m_field[get_field_index(c)];
+  if(f == FREE_FIELD)
     return NONE;
 
-  return islower(m_field[get_field_index(c)]) ? WHITE : BLACK;
+  return islower(f) ? WHITE : BLACK;
 }
 
 int Board::diff(const int _1, const int _2) const
@@ -414,7 +428,18 @@ int Board::diff(const int _1, const int _2) const
 
 unsigned Board::get_field_index(const Coord &c) const
 {
-  return c.y * BOARD_SIDE + c.x;
+  const auto i = c.y * BOARD_SIDE + c.x;
+  try
+  {
+    if(i >= m_field.size())
+     throw "Index out of range!";
+  }
+  catch(const char *ex)
+  {
+    std::cout<<"!Exception! in Board::get_field_index "<<ex<<std::endl;
+    i = 0;
+  }
+  return i;
 }
 
 Board::Coord::Coord(const unsigned X, const unsigned Y) : x(X), y(Y)
