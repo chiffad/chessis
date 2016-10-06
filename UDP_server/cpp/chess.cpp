@@ -6,6 +6,7 @@
 #include <iterator>
 #include <cmath>
 #include <exception>
+#include <stdlib.h>
 #include "chess.h"
 
 Board::Board() : m_is_go_to_history_running(false)
@@ -90,7 +91,7 @@ bool Board::is_can_move(const Coord &fr, const Coord &to) const
 
     return false;
   }
-  return !(fr == to);
+  return true;
 }
 
 bool Board::is_en_passant(const Coord &fr, const Coord &to) const
@@ -302,14 +303,29 @@ std::string Board::get_board_mask() const
 std::string Board::get_moves_history() const
 {
   std::string history;
-  for(auto hist_elem : m_moves_copy)
+  for(auto hirst_elem : m_moves_copy)
   {
-    history.push_back(hist_elem.from.x + a_LETTER);
-    history.push_back(EIGHT_ch - hist_elem.from.y);
-    history.push_back(hist_elem.to.x + a_LETTER);
-    history.push_back(EIGHT_ch - hist_elem.to.y);
+    history.push_back(hirst_elem.from.x + a_LETTER);
+    history.push_back(EIGHT_ch - hirst_elem.from.y);
+    history.push_back(hirst_elem.to.x + a_LETTER);
+    history.push_back(EIGHT_ch - hirst_elem.to.y);
   }
   return history;
+}
+
+void Board::next_move(const Coord &from, const Coord &to)
+{
+  m_actual_move.to = to;
+  m_actual_move.from = from;
+  m_moves.push_back(m_actual_move);
+
+  if(!m_is_go_to_history_running)
+  {
+    if(get_move_num() < m_moves_copy.size())
+      m_moves_copy.erase(m_moves_copy.begin() + get_move_num_from_0(), m_moves_copy.end());
+
+    m_moves_copy.push_back(m_moves.back());
+  }
 }
 
 void Board::write_moves_to_file(const std::string &path) const
@@ -348,20 +364,6 @@ void Board::load_moves_from_file(const std::string &path)
   }
 }
 
-void Board::next_move(const Coord &from, const Coord &to)
-{
-  m_actual_move.to = to;
-  m_actual_move.from = from;
-  m_moves.push_back(m_actual_move);
-
-  if(!m_is_go_to_history_running)
-  {
-    if(get_move_num() < m_moves_copy.size())
-      m_moves_copy.erase(m_moves_copy.begin() + get_move_num_from_0(), m_moves_copy.end());
-
-    m_moves_copy.push_back(m_moves.back());
-  }
-}
 
 unsigned Board::get_move_num() const
 {
@@ -380,18 +382,8 @@ Board::FIGURE Board::get_figure(const Coord &c) const
 
 Board::FIGURE Board::get_figure(const unsigned x, const unsigned y) const
 {
-  const auto i = y * BOARD_SIDE + x;
-  try
-  {
-    if(i >= m_field.size())
-     throw "Index out of range!";
-  }
-  catch(const char *ex)
-  {
-    std::cout<<"!Exception! in Board::get_figure "<<ex<<std::endl;
-    i = 0;
-  }
-  return m_field[i];
+  Coord c(x,y);
+  return m_field[get_field_index(c)];
 }
 
 Board::COLORLESS_FIG Board::get_colorless_fig(const Coord &c) const
@@ -437,7 +429,7 @@ unsigned Board::get_field_index(const Coord &c) const
   catch(const char *ex)
   {
     std::cout<<"!Exception! in Board::get_field_index "<<ex<<std::endl;
-    i = 0;
+    exit(EXIT_FAILURE);
   }
   return i;
 }
