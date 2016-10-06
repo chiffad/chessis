@@ -106,7 +106,7 @@ bool Board::is_en_passant(const Coord &fr, const Coord &to) const
 void Board::en_passant()
 {
   m_actual_move.type = EN_PASSANT;
-  auto ind = get_field_index(m_moves.back().to);
+  const auto ind = get_field_index(m_moves.back().to);
   m_field[ind] = FREE_FIELD;
 }
 
@@ -119,9 +119,10 @@ bool Board::is_pawn_reach_other_side(const Coord &c) const
 void Board::pawn_transform(const Coord &c)
 {
   m_actual_move.type = PAWN_TRANSFORM;
+  auto &f = m_field[get_field_index(c)];
   if(get_figure(c) == W_PAWN)
-    m_field[get_field_index(c)] = W_QUEEN;
-  else m_field[get_field_index(c)] = B_QUEEN;
+    f = W_QUEEN;
+  else f = B_QUEEN;
 }
 
 void Board::if_castling(const Coord &fr, const Coord &to)
@@ -177,7 +178,7 @@ bool Board::is_check(const COLOR color) const
     return false;
 
   Coord f,t;
-  auto king = (color == WHITE) ? W_KING : B_KING;
+  const auto king = (color == WHITE) ? W_KING : B_KING;
   for(t.x = 0; t.x < BOARD_SIDE; ++t.x)
     for(t.y = 0; t.y < BOARD_SIDE; ++t.y)
       if(get_figure(t) == king)
@@ -247,7 +248,7 @@ bool Board::back_move()
 
 void Board::re_en_passant()
 {
-  auto ind = get_field_index(m_moves[m_moves.size() - 2].to);
+  const auto ind = get_field_index(m_moves[m_moves.size() - 2].to);
   if(get_color(m_moves.back().from) == BLACK)
     m_field[ind] = W_PAWN;
   else m_field[ind] = B_PAWN;
@@ -361,7 +362,6 @@ void Board::load_moves_from_file(const std::string &path)
     std::cout<<"!Exception! Board::load_moves_from_file "<<ex<<std::endl;
   }
 }
-
 
 unsigned Board::get_move_num() const
 {

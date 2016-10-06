@@ -36,10 +36,6 @@ void Exporter::push_to_graphic(const QString& message)
       const QString moves_history = m.mid(NEXT_IND, m.indexOf(";", NEXT_IND) - NEXT_IND);
       const QString move_num = m.mid(m.indexOf(";", NEXT_IND) + 1);
 
-      qDebug()<<"board_mask: "<<board_mask;
-      qDebug()<<"moves_history: "<<moves_history;
-      qDebug()<<"move_num: "<<move_num;
-
       _board_graphic.set_board_mask(board_mask);
       _board_graphic.set_move_color(move_num.toInt());
       _board_graphic.set_connect_status(Messages::SERVER_HERE);
