@@ -277,14 +277,12 @@ void Board::make_moves_from_str(const std::string &str)
   enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4, h_LETTER = 'h', ONE_ch = '1'};
 
   std::vector<int> coord_str;
-  auto res = str.begin();
-  while(res != str.end())
+  for(auto res : str)
   {
-    res = std::find_if(res, str.end(),
-                 [](auto const& i) {return ((i >= a_LETTER && i <= h_LETTER) || (i >= ONE_ch && i <= EIGHT_ch));});
+    if(!((res >= a_LETTER && res <= h_LETTER) || (res >= ONE_ch && res <= EIGHT_ch)))
+      continue;
 
-    coord_str.push_back(isalpha(*res) ? *res - a_LETTER : EIGHT_ch - *res);
-    ++res;
+    coord_str.push_back(isalpha(res) ? res - a_LETTER : EIGHT_ch - res);
 
     if(coord_str.size() == COORD_NEED_TO_MOVE)
     {
