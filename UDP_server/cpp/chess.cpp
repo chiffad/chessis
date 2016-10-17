@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <iterator>
 #include <cmath>
-#include <exception>
 #include <stdlib.h>
 #include "chess.h"
 
@@ -330,37 +329,31 @@ void Board::next_move(const Coord &from, const Coord &to)
 void Board::write_moves_to_file(const std::string &path) const
 {
   std::ofstream in_file(path);
-  try
-  {
-    if(!in_file.is_open())
-      throw "Couldn't open file.";
 
-    std::string history = get_moves_history();
-    std::copy(history.begin(), history.end(), std::ostreambuf_iterator<char>(in_file));
-  }
-  catch(const char *ex)
+  if(!in_file.is_open())
   {
-    std::cout<<"!Exception! Board::write_moves_from_file "<<ex<<std::endl;
+    std::cout<<"Warning! in Board::write_moves_to_file: Couldn't open file."<<std::endl;
+    return;
   }
+
+  std::string history = get_moves_history();
+  std::copy(history.begin(), history.end(), std::ostreambuf_iterator<char>(in_file));
 }
 
 void Board::load_moves_from_file(const std::string &path)
 {
   std::ifstream from_file(path);
-  try
-  {
-    if(!from_file.is_open())
-      throw "Couldn't open file.";
 
-    std::string data_from_file(std::istreambuf_iterator<char>(from_file), (std::istreambuf_iterator<char>()));
-
-    start_new_game();
-    make_moves_from_str(data_from_file);
-  }
-  catch(const char *ex)
+  if(!from_file.is_open())
   {
-    std::cout<<"!Exception! Board::load_moves_from_file "<<ex<<std::endl;
+    std::cout<<"Warning! in Board::write_moves_to_file: Couldn't open file."<<std::endl;
+    return;
   }
+
+  std::string data_from_file(std::istreambuf_iterator<char>(from_file), (std::istreambuf_iterator<char>()));
+
+  start_new_game();
+  make_moves_from_str(data_from_file);
 }
 
 unsigned Board::get_move_num() const
@@ -419,15 +412,11 @@ int Board::diff(const int _1, const int _2) const
 unsigned Board::get_field_index(const Coord &c) const
 {
   const auto i = c.y * BOARD_SIDE + c.x;
-  try
+
+  if(i >= m_field.size())
   {
-    if(i >= m_field.size())
-     throw "Index out of range!";
-  }
-  catch(const char *ex)
-  {
-    std::cout<<"!Exception! in Board::get_field_index "<<ex<<std::endl;
-    exit(EXIT_FAILURE);
+    std::cout<<"Warning! in Board::get_field_index: Index out of range!"<<std::endl;
+    return 0;
   }
   return i;
 }

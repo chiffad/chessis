@@ -5,7 +5,6 @@
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <exception>
 #include "udp_server.h"
 #include "chess.h"
 #include "enums.h"
@@ -79,20 +78,21 @@ void UDP_server::run_message(QByteArray &message, const QHostAddress &ip, const 
 
   auto u = std::find_if(_user.begin(), _user.end(),
                              [&port, &ip](auto const &i){return(i->_port == port && i->_ip == ip);});
-  try
+
+  if(type == Messages::HELLO_SERVER)
   {
-    if(type == Messages::HELLO_SERVER)
-    {
-      create_new_user(ip, port, content);
-      return;
-    }
+    create_new_user(ip, port, content);
+    return;
+  }
 
-    if(u ==_user.end())
-      throw "Unknown user";
+  if(u ==_user.end())
+    qDebug()<<"UDP_server::run_message: Unknown user";
 
-    if(!check_serial_num(serial_num, type, *(*u)))
-      throw "Wrong Serial num!";
+  else if(!check_serial_num(serial_num, type, *(*u)))
+    qDebug()<<"UDP_server::run_message: Wrong Serial num!";
 
+  else
+  {
     if(type != Messages::MESSAGE_RECEIVED)
       send_data(Messages::MESSAGE_RECEIVED, *(*u));
 
@@ -118,10 +118,6 @@ void UDP_server::run_message(QByteArray &message, const QHostAddress &ip, const 
         push_message_to_logic(type, content, *(*u));
     }
     (*u)->start_check_connect_timer();
-  }
-  catch(const char* ex)
-  {
-    qDebug()<<"!Exception! UDP_server::run_message "<<ex;
   }
 }
 
@@ -168,34 +164,27 @@ void UDP_server::push_message_to_logic(const Messages::MESSAGE type, const QByte
 
   auto& board = _board[u.get_board_ind()];
 
-  try
+  switch(type)
   {
-    switch(type)
-    {
-      case Messages::MOVE:
-        board->make_moves_from_str(content.toStdString());
-        break;
-      case Messages::BACK_MOVE:
-        board->back_move();
-        break;
-      case Messages::NEW_GAME:
-        board->start_new_game();
-        break;
-      case Messages::GO_TO_HISTORY:
-        board->go_to_history_index(content.toInt());
-        break;
-      case Messages::FROM_FILE:
-        board->start_new_game();
-        board->make_moves_from_str(content.toStdString());
-        break;
-      default: throw "Unknown message type";
-    }
-    send_board_state(u);
+    case Messages::MOVE:
+      board->make_moves_from_str(content.toStdString());
+      break;
+    case Messages::BACK_MOVE:
+      board->back_move();
+      break;
+    case Messages::NEW_GAME:
+      board->start_new_game();
+      break;
+    case Messages::GO_TO_HISTORY:
+      board->go_to_history_index(content.toInt());
+      break;
+    case Messages::FROM_FILE:
+      board->start_new_game();
+      board->make_moves_from_str(content.toStdString());
+      break;
+    default: qDebug()<<"UDP_server::push_message_to_logic: Unknown message type";
   }
-  catch (const char *ex)
-  {
-    qDebug()<<"!Exception! UDP_server::push_message_to_logic "<<ex;
-  }
+  send_board_state(u);
 }
 
 void UDP_server::send_board_state(User &u)
@@ -287,28 +276,21 @@ bool UDP_server::is_message_reach(const QByteArray &message, User &u)
   return true;
 }
 
-bool UDP_server::save_users_inf() const
+void UDP_server::save_users_inf() const
 {
   QFile save_file(QStringLiteral("save.json"));
 
-  try
+  if (!save_file.open(QIODevice::WriteOnly))
   {
-    if (!save_file.open(QIODevice::WriteOnly))
-      throw "Couldn't open file.";
-
-    QJsonObject users_inf;
-    write_inf(users_inf);
-
-    QJsonDocument save_doc(users_inf);
-    save_file.write(save_doc.toJson());
-
-    return true;
+    qDebug()<<"Warning! in UDP_server::save_users_inf: Couldn't open file.";
+    return;
   }
-  catch(const char *ex)
-  {
-    qDebug()<<"!Exception! UDP_server::save_users_inf "<<ex;
-    return false;
-  }
+
+  QJsonObject users_inf;
+  write_inf(users_inf);
+
+  QJsonDocument save_doc(users_inf);
+  save_file.write(save_doc.toJson());
 }
 
 void UDP_server::write_inf(QJsonObject &json) const
@@ -320,26 +302,19 @@ void UDP_server::write_inf(QJsonObject &json) const
   json["users"] = users;
 }
 
-bool UDP_server::load_users_inf()
+void UDP_server::load_users_inf()
 {
   QFile load_file("save.json");
 
-  try
+  if (!load_file.open(QIODevice::ReadOnly))
   {
-    if (!load_file.open(QIODevice::ReadOnly))
-      throw "Couldn't open file.";
-
-    QJsonDocument load_doc(QJsonDocument::fromJson(load_file.readAll()));
-    QJsonObject _1 = load_doc.object();
-    read_inf(_1);
-
-    return true;
+    qDebug()<<"UDP_server::load_users_inf: Couldn't open file.";
+    return;
   }
-  catch(const char *ex)
-  {
-    qDebug()<<"!Exception! UDP_server::load_users_inf"<<ex;
-    return false;
-  }
+
+  QJsonDocument load_doc(QJsonDocument::fromJson(load_file.readAll()));
+  QJsonObject _1 = load_doc.object();
+  read_inf(_1);
 }
 
 void UDP_server::read_inf(QJsonObject &json)

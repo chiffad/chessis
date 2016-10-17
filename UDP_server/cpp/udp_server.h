@@ -50,8 +50,8 @@ private:
   void push_message_to_logic(const Messages::MESSAGE type, const QByteArray &content, User &u);
   void create_new_user(const QHostAddress &ip, const quint16 port, const QByteArray &login);
 
-  bool load_users_inf();
-  bool save_users_inf() const;
+  void load_users_inf();
+  void save_users_inf() const;
   void write_inf(QJsonObject &json) const;
   void read_inf(QJsonObject &json);
 

@@ -76,21 +76,16 @@ void Board_graphic::run_command(const QString& message, const int x1, const int 
 
 bool Board_graphic::set_correct_coord(Coord& c, const int x, const int y)
 {
-  try
+  if(x < 0 || y < 0 || x > (CELL_SIZE_X * CELL_NUM) || y > (CELL_SIZE_Y * CELL_NUM))
   {
-    if(x < 0 || y < 0 || x > (CELL_SIZE_X * CELL_NUM) || y > (CELL_SIZE_Y * CELL_NUM))
-      throw "Incorrect coord";
-
-    c.x = (x + (CELL_SIZE_X / 2)) / CELL_SIZE_X;
-    c.y = (y + (CELL_SIZE_Y / 2)) / CELL_SIZE_Y;
-
-    return true;
-  }
-  catch(const char *ex)
-  {
-    qDebug()<<"!Exception! in Board_graphic::set_correct_coord"<<ex;
+    qDebug()<<"Warning! in Board_graphic::set_correct_coord: Incorrect coord";
     return false;
   }
+
+  c.x = (x + (CELL_SIZE_X / 2)) / CELL_SIZE_X;
+  c.y = (y + (CELL_SIZE_Y / 2)) / CELL_SIZE_Y;
+
+  return true;
 }
 
 void Board_graphic::update_coordinates()
@@ -122,20 +117,16 @@ Board_graphic::Coord Board_graphic::get_field_coord(const int i) const
 
 void Board_graphic::set_board_mask(const QString& mask)
 {
-  try
+  if(mask.size() != CELL_NUM * CELL_NUM)
   {
-    if(mask.size() != CELL_NUM * CELL_NUM)
-      throw "Wrong board mask size";
-
-    _field.clear();
-    _field = mask;
-
-    update_coordinates();
+    qDebug()<<"Warning! in Board_graphic::set_board_mask: Wrong board mask size";
+    return;
   }
-  catch(const char *ex)
-  {
-    qDebug()<<"!Exception! in Board_graphic::set_board_mask"<<ex;
-  }
+
+  _field.clear();
+  _field = mask;
+
+  update_coordinates();
 }
 
 void Board_graphic::set_moves_history(const QString& history)
@@ -236,66 +227,52 @@ void Board_graphic::path_to_file(QString &path, bool is_moves_from_file)
 void Board_graphic::write_moves_to_file(const QString& path)
 {
   std::ofstream in_file(path.toStdString());
-  try
+  if(!in_file.is_open())
   {
-    if(!in_file.is_open())
-      throw "Couldn't open file.";
-    for(auto &s : _str_moves_history)
-    {
-      in_file<<s.toStdString();
-      in_file<<FREE_SPACE;
-    }
-    in_file.close();
+    qDebug()<<"Warning! in Board_graphic::write_moves_to_file: Couldn't open file.";
+    return;
   }
-  catch(const char *ex )
+  for(auto &s : _str_moves_history)
   {
-    qDebug()<<"!Exception! in Board_graphic::write_moves_to_file"<<ex;
+    in_file<<s.toStdString();
+    in_file<<FREE_SPACE;
   }
+  in_file.close();
 }
 
 void Board_graphic::read_moves_from_file(const QString& path)
 {
   std::ifstream from_file(path.toStdString());
-  try
+  if(!from_file.is_open())
   {
-    if(!from_file.is_open())
-      throw "Couldn't open file.";
-
-    std::string data_from_file(std::istream_iterator<char>(from_file), (std::istream_iterator<char>()));
-
-    add_to_messages_for_server_stack(Messages::FROM_FILE, QString::fromStdString(data_from_file));
+    qDebug()<<"Warning! Board_graphic::write_moves_to_file: Couldn't open file.";
+    return;
   }
-  catch (const char *ex)
-  {
-    qDebug()<<"!Exception! in Board_graphic::write_moves_to_file"<<ex;
-  }
+
+  std::string data_from_file(std::istream_iterator<char>(from_file), (std::istream_iterator<char>()));
+
+  add_to_messages_for_server_stack(Messages::FROM_FILE, QString::fromStdString(data_from_file));
 }
 
 void Board_graphic::set_connect_status(const int status)
 {
-  try
+  switch(status)
   {
-    switch(status)
-    {
-      case Messages::SERVER_HERE:
-        if(_udp_connection_status == "Disconnected")
-          _udp_connection_status = "Connect";
-        break;
-      case Messages::SERVER_LOST:
-        _udp_connection_status = "Disconnected";
-        break;
-      case Messages::OPPONENT_LOST:
-        _udp_connection_status = "Opponent disconnected";
-        break;
-      default:
-        throw "Unknown status";
-    }
-    emit udp_connection_status_changed();
+    case Messages::SERVER_HERE:
+      if(_udp_connection_status == "Disconnected")
+        _udp_connection_status = "Connect";
+      break;
+    case Messages::SERVER_LOST:
+      _udp_connection_status = "Disconnected";
+      break;
+    case Messages::OPPONENT_LOST:
+      _udp_connection_status = "Opponent disconnected";
+      break;
+    default:
+      qDebug()<<"Warning! in Board_graphic::set_connect_status: Unknown status";
+      return;
   }
-  catch (const char *ex)
-  {
-    qDebug()<<"!Exception! in Board_graphic::set_connect_status"<<ex;
-  }
+  emit udp_connection_status_changed();
 }
 
 bool Board_graphic::set_login(const QString &login)

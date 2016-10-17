@@ -3,7 +3,7 @@
 #include <QApplication>
 #include <QWindow>
 #include <ctime>
-#include <memory>
+#include <exception>
 #include "board_graphic.h"
 #include "exporter.h"
 #include "udp_socket.h"
