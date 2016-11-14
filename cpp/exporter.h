@@ -10,7 +10,6 @@ class Exporter
 {
 public:
   Exporter(Board_graphic& board_graphic, UDP_socket& udp_socket);
-  ~Exporter();
 
 public:
   void push_to_graphic(const QString& message);

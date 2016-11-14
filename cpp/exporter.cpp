@@ -7,10 +7,6 @@ Exporter::Exporter(Board_graphic& board_graphic, UDP_socket& udp_socket)
 {
 }
 
-Exporter::~Exporter()
-{
-}
-
 void Exporter::push_to_graphic(const QString& message)
 {
   const int type = message.mid(0, message.indexOf(" ")).toInt();
