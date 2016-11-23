@@ -1,5 +1,5 @@
-#ifndef ENUM_H
-#define ENUM_H
+#ifndef __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD
+#define __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD
 
 namespace Messages
 {
@@ -8,4 +8,4 @@ namespace Messages
                 SERVER_LOST, SERVER_HERE, OPPONENT_LOST, GAME_INF};
 }
 
-#endif // ENUM_H
+#endif // __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD

@@ -61,8 +61,8 @@ Item
 
         onAccepted:
         {
-          _root.login_entered(_text_input.text)
-          _text_input.clear()
+          _root.login_entered(_text_input.text);
+          text = ""
         }
       }
     }

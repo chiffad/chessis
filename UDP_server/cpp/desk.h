@@ -1,7 +1,11 @@
-#ifndef DESK
-#define DESK
+#ifndef __MY_DESK_H__BVGTYVFYTKUBLIUBHIYFRTDVGFABDJUIWOMJ
+#define __MY_DESK_H__BVGTYVFYTKUBLIUBHIYFRTDVGFABDJUIWOMJ
+
 
 #include "chess.h"
+
+namespace logic
+{
 
 class Desk : public Board
 {
@@ -21,5 +25,9 @@ private:
    const int _first_player_ind;
    const int _second_player_ind;
 };
-#endif // DESK
+
+} // namespace logic
+
+
+#endif // __MY_DESK_H__BVGTYVFYTKUBLIUBHIYFRTDVGFABDJUIWOMJ
 

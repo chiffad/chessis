@@ -1,14 +1,55 @@
+#include "cube_renderer.h"
+
+
 #include <QPainter>
 #include <QPaintEngine>
 #include <cmath>
 #include <QGLWidget>
 #include <QImage>
-#include <QString>
 #include <algorithm>
-#include "cube_renderer.h"
+#include <QtGui/qvector3d.h>
+#include <QtGui/qmatrix4x4.h>
+#include <QtGui/qopenglshaderprogram.h>
+#include <QtGui/qopenglfunctions.h>
+#include <QOpenGLTexture>
+#include <QOpenGLBuffer>
+#include <QVector>
 
-Cube_renderer::Cube_renderer() : m_program(std::make_shared<QOpenGLShaderProgram>()), m_model_view(QMatrix4x4()),
-                                 m_x_angle(0), m_y_angle(0), m_z_angle(0), m_scale_vect(1,1,1)
+
+using namespace graphic;
+
+struct Cube_renderer::impl_t : public QOpenGLFunctions
+{
+  impl_t();
+  void render();
+  void initialize();
+  void set_cube_updates(const QString &fig_type, const int tilt_angle, const float scale);
+  void create_geometry();
+  void update_model_view(const float scale);
+  void load_correct_texture(const QString &name);
+
+  enum{VERTEX_ATTRIBUTE = 0, TEXCOORD_ATTRIBUTE = 1};
+
+  QVector<std::shared_ptr<QOpenGLTexture>> board_texture;
+  std::shared_ptr<QOpenGLShaderProgram> program;
+
+  QMatrix4x4 model_view;
+  QOpenGLBuffer buffer;
+
+  float x_angle;
+  float y_angle;
+  float z_angle;
+
+  QString fig_name;
+  QVector3D scale_vect;
+
+  int vertex_attribute;
+  int texCoord_attribute;
+  int matrix_uniform;
+};
+
+Cube_renderer::Cube_renderer()
+    : impl(new impl_t)
 {
 }
 
@@ -16,7 +57,28 @@ Cube_renderer::~Cube_renderer()
 {
 }
 
+void Cube_renderer::render()
+{
+  impl->render();
+}
+
 void Cube_renderer::initialize()
+{
+  impl->initialize();
+}
+
+void Cube_renderer::set_cube_updates(const QString &fig_type, const int tilt_angle, const float scale)
+{
+  impl->set_cube_updates(fig_type, tilt_angle, scale);
+}
+
+Cube_renderer::impl_t::impl_t()
+    : program(std::make_shared<QOpenGLShaderProgram>()), model_view(QMatrix4x4()),
+      x_angle(0), y_angle(0), z_angle(0), scale_vect(1,1,1)
+{
+}
+
+void Cube_renderer::impl_t::initialize()
 {
   initializeOpenGLFunctions();
 
@@ -28,7 +90,7 @@ void Cube_renderer::initialize()
   //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-  QOpenGLShader *vshader = new QOpenGLShader(QOpenGLShader::Vertex, m_program.get());
+  QOpenGLShader *vshader = new QOpenGLShader(QOpenGLShader::Vertex, program.get());
   const char *vsrc =
       "attribute highp vec4 vertex;\n"
       "attribute mediump vec4 texCoord;\n"
@@ -41,7 +103,7 @@ void Cube_renderer::initialize()
       "}\n";
   vshader->compileSourceCode(vsrc);
 
-  QOpenGLShader *fshader = new QOpenGLShader(QOpenGLShader::Fragment, m_program.get());
+  QOpenGLShader *fshader = new QOpenGLShader(QOpenGLShader::Fragment, program.get());
   const char *fsrc =
       "uniform sampler2D texture;\n"
       "varying mediump vec4 texc;\n"
@@ -51,29 +113,29 @@ void Cube_renderer::initialize()
       "}\n";
   fshader->compileSourceCode(fsrc);
 
-  m_program->addShader(vshader);
-  m_program->addShader(fshader);
-  m_program->bindAttributeLocation("vertex", VERTEX_ATTRIBUTE);
-  m_program->bindAttributeLocation("texCoord", TEXCOORD_ATTRIBUTE);
-  m_program->link();
+  program->addShader(vshader);
+  program->addShader(fshader);
+  program->bindAttributeLocation("vertex", VERTEX_ATTRIBUTE);
+  program->bindAttributeLocation("texCoord", TEXCOORD_ATTRIBUTE);
+  program->link();
 
-  m_program->bind();
-  m_program->setUniformValue("texture", 0);
+  program->bind();
+  program->setUniformValue("texture", 0);
 }
 
-void Cube_renderer::set_cube_updates(const QString &fig_name, const int tilt_angle, const float scale)
+void Cube_renderer::impl_t::set_cube_updates(const QString &name, const int tilt_angle, const float scale)
 {
-  if(m_name != fig_name)
-  {
-    m_x_angle = tilt_angle;
-    load_correct_texture(fig_name);
-    update_model_view(scale);
-  }
+  if(fig_name == name)
+    { return; }
+
+  x_angle = tilt_angle;
+  load_correct_texture(name);
+  update_model_view(scale);
 }
 
-void Cube_renderer::load_correct_texture(const QString &name)
+void Cube_renderer::impl_t::load_correct_texture(const QString &name)
 {
-  const QString PATH_TO_IMG = "../chessis/res/img/";
+  const QString PATH_TO_IMG = "../c/res/img/";
 
   QImage fase_im(PATH_TO_IMG + name + ".png");
   QImage side_im(PATH_TO_IMG + *name.begin() + ".png");
@@ -92,25 +154,25 @@ void Cube_renderer::load_correct_texture(const QString &name)
     z_scale = 0;
   }
 
-  m_board_texture.clear();
-  m_board_texture.append(std::make_shared<QOpenGLTexture>(fase_im.mirrored()));
-  m_board_texture.append(std::make_shared<QOpenGLTexture>(side_im));
-  m_scale_vect = QVector3D(1, 1, z_scale);
-  m_name = name;
+  board_texture.clear();
+  board_texture.append(std::make_shared<QOpenGLTexture>(fase_im.mirrored()));
+  board_texture.append(std::make_shared<QOpenGLTexture>(side_im));
+  scale_vect = QVector3D(1, 1, z_scale);
+  fig_name = name;
 }
 
-void Cube_renderer::update_model_view(const float scale)
+void Cube_renderer::impl_t::update_model_view(const float scale)
 {
-  m_scale_vect *= scale;
+  scale_vect *= scale;
 
-  m_model_view = QMatrix4x4();
-  m_model_view.rotate(m_x_angle, 1.0f, 0.0f, 0.0f);
-  m_model_view.rotate(m_y_angle, 0.0f, 1.0f, 0.0f);
-  m_model_view.rotate(m_z_angle, 0.0f, 0.0f, 1.0f);
-  m_model_view.scale(m_scale_vect);
+  model_view = QMatrix4x4();
+  model_view.rotate(x_angle, 1.0f, 0.0f, 0.0f);
+  model_view.rotate(y_angle, 0.0f, 1.0f, 0.0f);
+  model_view.rotate(z_angle, 0.0f, 0.0f, 1.0f);
+  model_view.scale(scale_vect);
 }
 
-void Cube_renderer::render()
+void Cube_renderer::impl_t::render()
 {
   create_geometry();
 
@@ -120,24 +182,26 @@ void Cube_renderer::render()
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-  m_program->setUniformValue("matrix", m_model_view);
-  m_program->enableAttributeArray(VERTEX_ATTRIBUTE);
-  m_program->enableAttributeArray(TEXCOORD_ATTRIBUTE);
-  m_program->setAttributeBuffer(VERTEX_ATTRIBUTE, GL_FLOAT,   0                  , 3, 5 * sizeof(GLfloat));
-  m_program->setAttributeBuffer(TEXCOORD_ATTRIBUTE, GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
+  program->setUniformValue("matrix", model_view);
+  program->enableAttributeArray(VERTEX_ATTRIBUTE);
+  program->enableAttributeArray(TEXCOORD_ATTRIBUTE);
+  program->setAttributeBuffer(VERTEX_ATTRIBUTE, GL_FLOAT,   0                  , 3, 5 * sizeof(GLfloat));
+  program->setAttributeBuffer(TEXCOORD_ATTRIBUTE, GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
 
-  m_board_texture.first()->bind();
+  board_texture.first()->bind();
 
   const int SIDES = 6;
   const int VERTEX = 4;
   for(int i = 0; i < SIDES; ++i)
   {
-    if(i == 1) m_board_texture.last()->bind();
+    if(i == 1)
+      {board_texture.last()->bind(); }
+
     glDrawArrays(GL_TRIANGLE_FAN, i * VERTEX, VERTEX);
   }
 }
 
-void Cube_renderer::create_geometry()
+void Cube_renderer::impl_t::create_geometry()
 {
   QVector<GLfloat> vert_data = {+1, -1, -1,   1, 1,   -1, -1, -1,   0,1,   -1, +1, -1,   0,0,   +1, +1, -1,   1,0,
                                 +1, +1, -1,   1, 1,   -1, +1, -1,   0,1,   -1, +1, +1,   0,0,   +1, +1, +1,   1,0,
@@ -145,7 +209,7 @@ void Cube_renderer::create_geometry()
                                 -1, -1, -1,   1, 1,   -1, -1, +1,   0,1,   -1, +1, +1,   0,0,   -1, +1, -1,   1,0,
                                 +1, -1, +1,   1, 1,   -1, -1, +1,   0,1,   -1, -1, -1,   0,0,   +1, -1, -1,   1,0,
                                 -1, -1, +1,   1, 1,   +1, -1, +1,   0,1,   +1, +1, +1,   0,0,   -1, +1, +1,   1,0};
-  m_buffer.create();
-  m_buffer.bind();
-  m_buffer.allocate(vert_data.constData(), vert_data.count() * sizeof(GLfloat));
+  buffer.create();
+  buffer.bind();
+  buffer.allocate(vert_data.constData(), vert_data.count() * sizeof(GLfloat));
 }

@@ -1,3 +1,5 @@
+#include "udp_server.h"
+
 #include <algorithm>
 #include <cmath>
 #include <QIODevice>
@@ -5,12 +7,14 @@
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include "udp_server.h"
+
 #include "chess.h"
 #include "enums.h"
 
-UDP_server::UDP_server(QObject *parent) : QObject(parent), _SERVER_IP(QHostAddress::LocalHost),
-                                          _socket(std::make_shared<QUdpSocket>(this))
+
+UDP_server::UDP_server(QObject *parent) 
+    : QObject(parent), _SERVER_IP(QHostAddress::LocalHost),
+      _socket(std::make_shared<QUdpSocket>(this))
 {
   for(int i = 0; i + FIRST_PORT < LAST_PORT; ++i)
   {
@@ -233,7 +237,7 @@ void UDP_server::set_opponent(User &u)
   if(u._opponent_index != NO_OPPONENT)
   {
     _user[u._opponent_index]->_opponent_index = u._my_index;
-    _board.append(std::make_shared<Desk>(u._my_index, u._opponent_index));
+    _board.append(std::make_shared<logic::Desk>(u._my_index, u._opponent_index));
      send_board_state(u);
   }
 }

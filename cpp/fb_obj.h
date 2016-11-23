@@ -1,8 +1,13 @@
-#ifndef FBOGRENDERER_H
-#define FBORENDERER_H
+#ifndef __MY_FBO_RENDERER_H__VGYUKYFIUYVULBVUYFKLBYUFUYBYUKF
+#define __MY_FBO_RENDERER_H__VGYUKYFIUYVULBVUYFKLBYUFUYBYUKF
 
 #include <QtQuick/QQuickFramebufferObject>
+
 #include "cube_renderer.h"
+
+
+namespace graphic
+{
 
 class Fb_obj : public QQuickFramebufferObject
 {
@@ -31,22 +36,12 @@ signals:
   void cube_scale_changed();
 
 private:
-  QString m_fig_type;
-  int m_tilt_angle;
-  float m_cube_scale;
+  QString fig_type;
+  int tilt_angle;
+  float cube_scale;
 };
 
+} //namespace graphic
 
-class Fbo_renderer : public QQuickFramebufferObject::Renderer
-{
-public:
-  Fbo_renderer();
-  ~Fbo_renderer();
-  QOpenGLFramebufferObject* createFramebufferObject(const QSize &size) Q_DECL_OVERRIDE;
-  void synchronize(QQuickFramebufferObject *item) Q_DECL_OVERRIDE;
-  void render() Q_DECL_OVERRIDE;
 
-private:
-  Cube_renderer *m_cube;
-};
-#endif
+#endif // __MY_FBO_RENDERER_H__VGYUKYFIUYVULBVUYFKLBYUFUYBYUKF

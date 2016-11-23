@@ -1,9 +1,12 @@
-#include <QByteArray>
 #include "exporter.h"
+
+#include <QByteArray>
 #include "enums.h"
 
-Exporter::Exporter(Board_graphic& board_graphic, UDP_socket& udp_socket)
-                  : _board_graphic(board_graphic), _udp_socket(udp_socket)
+
+
+Exporter::Exporter(graphic::Board_graphic& board_graphic, inet::my_socket& udp_socket)
+                  : _board_graphic(board_graphic), socket(udp_socket)
 {
 }
 
@@ -45,15 +48,5 @@ void Exporter::push_to_socet(const QString& message)
 {
   QByteArray m;
   m.append(message);
-  _udp_socket.send_data(m);
-}
-
-const QString Exporter::pull_from_graphic()
-{
-  return _board_graphic.pull_first_messages_for_server();
-}
-
-const QString Exporter::pull_from_socet()
-{
-  return _udp_socket.pull_received_message();
+  socket.send(m);
 }

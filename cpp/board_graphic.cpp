@@ -1,17 +1,24 @@
+#include "board_graphic.h"
+
 #include <QPainter>
 #include <ctype.h>
 #include <QModelIndex>
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include <exception>
-#include "board_graphic.h"
 
-Board_graphic::Board_graphic(QObject *parent) : QAbstractListModel(parent), _move_color(MOVE_COLOR_W),
-                                                _udp_connection_status("Disconnected"), _is_check_mate(false)
+
+using namespace graphic;
+
+Board_graphic::Board_graphic() 
+    : QAbstractListModel(nullptr), _move_color(MOVE_COLOR_W),
+      _udp_connection_status("Disconnected"), _is_check_mate(false)
 {
+  enum {HILIGHT_CELLS = 2, FIGURES_NUMBER = 32};
+  const QString HILIGHT_IM = "hilight";
+
   for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
-    addFigure(Figure(HILIGHT_IM, 0, 0, false));
+    { addFigure(Figure(HILIGHT_IM, 0, 0, false)); }
 
   //set_login("asdasd");
 }
@@ -20,17 +27,16 @@ Board_graphic::~Board_graphic()
 {
 }
 
-Board_graphic::Figure::Figure(const QString& name, const int x, const int y, const bool visible)
-    : _name(name), _x(x), _y(y), _visible(visible)
-{
-}
-
-Board_graphic::Figure::~Figure()
-{
-}
-
 void Board_graphic::run_command(const QString& message, const int x1, const int y1, const int x2, const int y2)
 {
+  const QString HELP_WORD = "help";
+  const QString MOVE_WORD = "move";
+  const QString BACK_MOVE = "back";
+  const QString SHOW_ME = "show me";
+  const QString NEW_GAME = "new game";
+  const QString HISTORY = "to history";
+  const QString SHOW_OPPONENT = "show opponent";
+
   qDebug()<<"Board_graphic::run_command: "<<message<<" x1: "<<x1<< "y1"<< y1<<" x2: "<<x2<< "y2"<< y2;
   add_to_command_history("command: " + message);
 
@@ -45,15 +51,15 @@ void Board_graphic::run_command(const QString& message, const int x1, const int 
     "6.To view your information, print '" + SHOW_ME + "'");
   }
   else if(message == SHOW_OPPONENT)
-    add_to_messages_for_server_stack(Messages::OPPONENT_INF);
+    { add_to_messages_for_server_stack(Messages::OPPONENT_INF); }
   else if(message == SHOW_ME)
-    add_to_messages_for_server_stack(Messages::MY_INF);
+    { add_to_messages_for_server_stack(Messages::MY_INF); }
   else if(message == NEW_GAME)
-    add_to_messages_for_server_stack(Messages::NEW_GAME);
+    { add_to_messages_for_server_stack(Messages::NEW_GAME); }
   else if(message == BACK_MOVE)
-    add_to_messages_for_server_stack(Messages::BACK_MOVE);
+    { add_to_messages_for_server_stack(Messages::BACK_MOVE); }
   else if(message == HISTORY)
-    add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(x1 + 1));
+    { add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(x1 + 1)); }
   else
   {
     const QString command(message.mid(0,message.indexOf(FREE_SPACE)));
@@ -62,12 +68,12 @@ void Board_graphic::run_command(const QString& message, const int x1, const int 
     if(command == MOVE_WORD)
     {
       if(!command_content.isEmpty())
-        add_to_messages_for_server_stack(Messages::MOVE, command_content);
+        { add_to_messages_for_server_stack(Messages::MOVE, command_content); }
       else
       {
-        Coord from,to;
+        Coord from, to;
         if(set_correct_coord(from, x1, y1) && set_correct_coord(to, x2, y2))
-          add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(from, to));
+          { add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(from, to)); }
       }
     }
     else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
@@ -90,10 +96,12 @@ bool Board_graphic::set_correct_coord(Coord& c, const int x, const int y)
 
 void Board_graphic::update_coordinates()
 {
+  const auto FREE_FIELD = '.';
+
   auto f_it = _field.begin();
   for(auto &fig_mod : _figures_model)
   {
-    f_it = std::find_if(f_it, _field.end(), [](auto const &i) {return i != FREE_FIELD;});
+    f_it = std::find_if(f_it, _field.end(), [&FREE_FIELD](auto const &i) {return i != FREE_FIELD;});
     if(f_it != _field.end())
     {
       fig_mod.set_coord(get_field_coord(_field.indexOf(*f_it, (f_it - _field.begin()))));
@@ -107,12 +115,9 @@ void Board_graphic::update_coordinates()
   }
 }
 
-Board_graphic::Coord Board_graphic::get_field_coord(const int i) const
+Coord Board_graphic::get_field_coord(const int i) const
 {
-  Coord c;
-  c.x = i % CELL_NUM;
-  c.y = i / CELL_NUM;
-  return c;
+  return Coord (i % CELL_NUM, i / CELL_NUM);
 }
 
 void Board_graphic::set_board_mask(const QString& mask)
@@ -132,6 +137,8 @@ void Board_graphic::set_board_mask(const QString& mask)
 void Board_graphic::set_moves_history(const QString& history)
 {
   _str_moves_history.clear();
+
+  const int NEED_SIMB_TO_MOVE = 4;
 
   QString move;
   for(const auto &simb : history)
@@ -168,6 +175,8 @@ void Board_graphic::add_to_messages_for_server_stack(const Messages::MESSAGE mes
 
 void Board_graphic::update_hilight(const int move_num, const QString& history)
 {
+  enum HILIGHT {FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
+
   const int CHAR_IN_MOVE = 4;
   if(move_num && history.size() >= move_num * CHAR_IN_MOVE)
   {
@@ -213,10 +222,10 @@ void Board_graphic::add_to_command_history(const QString& str)
 void Board_graphic::path_to_file(QString &path, bool is_moves_from_file)
 {
   for(int i = path.indexOf("/"); !path[path.indexOf("/", i) + 1].isLetter(); ++i)
-    path.remove(0,i);
+    { path.remove(0,i); }
 
   if(is_moves_from_file)
-    read_moves_from_file(path);
+    { read_moves_from_file(path); }
   else
   {
     path += "/chess_hist.txt";
@@ -260,7 +269,7 @@ void Board_graphic::set_connect_status(const int status)
   {
     case Messages::SERVER_HERE:
       if(_udp_connection_status == "Disconnected")
-        _udp_connection_status = "Connect";
+        { _udp_connection_status = "Connect"; }
       break;
     case Messages::SERVER_LOST:
       _udp_connection_status = "Disconnected";
@@ -278,8 +287,10 @@ void Board_graphic::set_connect_status(const int status)
 bool Board_graphic::set_login(const QString &login)
 {
   for(auto i : login)
+  {
     if(!i.isLetterOrNumber())
-      return false;
+      { return false; }
+  }
 
   add_to_messages_for_server_stack(Messages::HELLO_SERVER, login);
   return true;
@@ -338,23 +349,23 @@ int Board_graphic::rowCount(const QModelIndex & parent) const
 QVariant Board_graphic::data(const QModelIndex & index, int role) const
 {
   if (index.row() < 0 || index.row() >= _figures_model.count())
-    return QVariant();
+    { return QVariant(); }
 
   const Figure &figure = _figures_model[index.row()];
   if (role == NameRole)
-    return figure.name();
+    { return figure.name(); }
   else if (role == XRole)
-    return figure.x();
+    { return figure.x(); }
   else if (role == YRole)
-    return figure.y();
+    { return figure.y(); }
   else if (role == VisibleRole)
-    return figure.visible();
+    { return figure.visible(); }
   return QVariant();
 }
 
 QHash<int, QByteArray> Board_graphic::roleNames() const
 {
-  QHash<int, QByteArray> roles;
+ QHash<int, QByteArray> roles;
   roles[NameRole] = "figure_name";
   roles[XRole] = "x_coord";
   roles[YRole] = "y_coord";

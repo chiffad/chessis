@@ -1,28 +1,30 @@
-#ifndef UDP_CLIENT_H
-#define UDP_CLIENT_H
+#ifndef __MY_EXPORTER__HUIOGYUGFULBHOHUYFRTYDRT
+#define __MY_EXPORTER__HUIOGYUGFULBHOHUYFRTYDRT
 
 #include <QString>
 #include <memory>
+
 #include "board_graphic.h"
-#include "udp_socket.h"
+#include "my_socket.h"
+
 
 class Exporter
 {
 public:
-  Exporter(Board_graphic& board_graphic, UDP_socket& udp_socket);
+  Exporter(graphic::Board_graphic& board_graphic, inet::my_socket& socket);
 
 public:
   void push_to_graphic(const QString& message);
   void push_to_socet(const QString& message);
-  const QString pull_from_graphic();
-  const QString pull_from_socet();
 
 public:
   Exporter(const Exporter&) = delete;
   Exporter& operator=(const Exporter&) = delete;
 
 private:
-  Board_graphic& _board_graphic;
-  UDP_socket& _udp_socket;
+  graphic::Board_graphic& _board_graphic;
+  inet::my_socket& socket;
 };
-#endif // UDP_CLIENT_H
+
+
+#endif // __MY_EXPORTER__HUIOGYUGFULBHOHUYFRTYDRT

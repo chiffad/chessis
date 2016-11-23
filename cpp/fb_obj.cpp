@@ -1,10 +1,31 @@
-#include <QtGui/QOpenGLFramebufferObject>
-#include <QtQuick/QQuickWindow>
-#include <qsgsimpletexturenode.h>
-#include "fb_obj.h"
 #include "cube_renderer.h"
 
-Fb_obj::Fb_obj() : m_fig_type("board"), m_tilt_angle(0), m_cube_scale(1)
+
+#include <QtGui/QOpenGLFramebufferObject>
+#include <QtQuick/QQuickWindow>
+
+#include <qsgsimpletexturenode.h>
+#include "fb_obj.h"
+
+
+using namespace graphic;
+
+class Fbo_renderer : public QQuickFramebufferObject::Renderer
+{
+public:
+  Fbo_renderer();
+  ~Fbo_renderer();
+  QOpenGLFramebufferObject* createFramebufferObject(const QSize &size) Q_DECL_OVERRIDE;
+  void synchronize(QQuickFramebufferObject *item) Q_DECL_OVERRIDE;
+  void render() Q_DECL_OVERRIDE;
+
+private:
+  Cube_renderer *cube;
+};
+
+
+Fb_obj::Fb_obj()
+    : fig_type("board"), tilt_angle(0), cube_scale(1)
 {
 }
 
@@ -19,51 +40,51 @@ QQuickFramebufferObject::Renderer* Fb_obj::createRenderer() const
 
 QString Fb_obj::get_fig_type() const
 {
-  return m_fig_type;
+  return fig_type;
 }
 
 void Fb_obj::set_fig_type(const QString &name)
 {
-  m_fig_type = name;
+  fig_type = name;
   update();
   emit fig_type_changed();
 }
 
 int Fb_obj::get_tilt_angle() const
 {
-  return m_tilt_angle;
+  return tilt_angle;
 }
 
 void Fb_obj::set_tilt_angle(const int angl)
 {
-  m_tilt_angle = angl;
+  tilt_angle = angl;
   update();
   emit tilt_angle_changed();
 }
 
 float Fb_obj::get_cube_scale() const
 {
-  return m_cube_scale;
+  return cube_scale;
 }
 
 void Fb_obj::set_cube_scale(const float scale)
 {
-  m_cube_scale = scale;
+  cube_scale = scale;
   update();
   emit cube_scale_changed();
 }
 
 //======================================================
 
-Fbo_renderer::Fbo_renderer() : m_cube(new Cube_renderer())
+Fbo_renderer::Fbo_renderer() : cube(new Cube_renderer())
 {
-  m_cube->initialize();
+  cube->initialize();
   update();
 }
 
 Fbo_renderer::~Fbo_renderer()
 {
-  delete m_cube;
+  delete cube;
 }
 
 QOpenGLFramebufferObject* Fbo_renderer::createFramebufferObject(const QSize &size)
@@ -76,12 +97,12 @@ QOpenGLFramebufferObject* Fbo_renderer::createFramebufferObject(const QSize &siz
 
 void Fbo_renderer::render()
 {
-  m_cube->render();
+  cube->render();
   update();
 }
 
 void Fbo_renderer::synchronize(QQuickFramebufferObject *item)
 {
   Fb_obj *fb_item = static_cast<Fb_obj *>(item);
-  m_cube->set_cube_updates(fb_item->get_fig_type(), fb_item->get_tilt_angle(), fb_item->get_cube_scale());
+  cube->set_cube_updates(fb_item->get_fig_type(), fb_item->get_tilt_angle(), fb_item->get_cube_scale());
 }

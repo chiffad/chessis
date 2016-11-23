@@ -1,46 +1,31 @@
-#ifndef PIECHART_H
-#define PIECHART_H
+#ifndef __MY_BOARD_GRAPHIC_H__SDAWBNUIBMGYUIVGFKEYUVFYUFAPIECHARTH
+#define __MY_BOARD_GRAPHIC_H__SDAWBNUIBMGYUIVGFKEYUVFYUFAPIECHARTH
+
 
 #include <QtQuick/QQuickPaintedItem>
 #include <QString>
+#include <QVector>
 #include <QChar>
 #include <QAbstractListModel>
 #include <QStringList>
-#include <vector>
 #include <fstream>
+
+#include "figure.h"
+#include "coord.h"
 #include "enums.h"
+
+
+namespace graphic
+{
 
 class Board_graphic : public QAbstractListModel
 {
   Q_OBJECT
 
 public:
-  enum HILIGHT {HILIGHT_CELLS = 2 , FIRST_HILIGHT = 32, SECOND_HILIGHT = 33};
-  const QString HELP_WORD = "help";
-  const QString MOVE_WORD = "move";
-  const QString BACK_MOVE = "back";
-  const QString SHOW_ME = "show me";
-  const QString NEW_GAME = "new game";
-  const QString HISTORY = "to history";
-  const QString SHOW_OPPONENT = "show opponent";
-
-private:
-  class Figure;
-
-public:
-  enum FigureRoles {
-      NameRole = Qt::UserRole + 3,
-      XRole = Qt::UserRole + 2,
-      YRole = Qt::UserRole + 1,
-      VisibleRole = Qt::UserRole
-  };
-  enum {CELL_NUM = 8, FIGURES_NUMBER = 32};
-
-public:
-  explicit Board_graphic(QObject *parent = 0);
+  Board_graphic();
   ~Board_graphic();
 
-  void addFigure(const Figure &figure);
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
@@ -94,20 +79,19 @@ public:
   Board_graphic& operator=(const Board_graphic&) = delete;
 
 private:
-  enum{ZERO_AND_ACTUAL_MOVES = 2, NEED_SIMB_TO_MOVE = 4, CELL_SIZE_X = 56, CELL_SIZE_Y = 36, a_LETTER = 'a', FREE_FIELD = '.'};
+  enum FigureRoles {
+      NameRole = Qt::UserRole + 3,
+      XRole = Qt::UserRole + 2,
+      YRole = Qt::UserRole + 1,
+      VisibleRole = Qt::UserRole
+  };
+  enum { CELL_NUM = 8, CELL_SIZE_X = 56, CELL_SIZE_Y = 36, a_LETTER = 'a'};
   const QString MOVE_COLOR_W = "img/w_k.png";
   const QString MOVE_COLOR_B = "img/b_K.png";
-  const QString HILIGHT_IM = "hilight";
   const char FREE_SPACE = ' ';
 
 private:
-  struct Coord
-  {
-    int x;
-    int y;
-  };
-
-private:
+  void addFigure(const Figure &figure);
   void update_coordinates();
   Coord get_field_coord(const int i) const;
   void write_moves_to_file(const QString& path);
@@ -128,29 +112,6 @@ private:
   QString _field;
 };
 
-class Board_graphic::Figure
-{
-public:
-  Figure(const QString& name, const int x, const int y, const bool visible);
-  ~Figure();
+} // namespace graphic
 
-  inline int x() const {return _x;}
-  inline int y() const {return _y;}
-  inline QString name() const {return _name;}
-  inline bool visible() const {return _visible;}
-
-  inline void set_name(const QString& new_name) {_name = new_name;}
-  inline void set_visible(const bool new_visible) {_visible = new_visible;}
-  inline void set_coord(const Coord& new_coord) {_x = new_coord.x; _y = new_coord.y;}
-
-  bool operator==(const Figure &rhs)
-  {return(name() == rhs.name() && x() == rhs.x() && y() == rhs.y() && visible() == rhs.visible());}
-
-private:
-  QString _name;
-  int _x;
-  int _y;
-  bool _visible;
-};
-
-#endif
+#endif // __MY_BOARD_GRAPHIC_H__SDAWBNUIBMGYUIVGFKEYUVFYUFAPIECHARTH

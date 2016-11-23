@@ -1,5 +1,7 @@
-#ifndef UDP_SERVER_H
-#define UDP_SERVER_H
+#ifndef __MY_UDP_SERVER_H__AUIWBHDIBONAIWMJIGADTYWADVFYAWBDA
+#define __MY_UDP_SERVER_H__AUIWBHDIBONAIWMJIGADTYWADVFYAWBDA
+
+
 #include <QObject>
 #include <QUdpSocket>
 #include <QVector>
@@ -10,6 +12,7 @@
 #include <memory>
 #include "desk.h"
 #include "enums.h"
+
 
 class UDP_server : public QObject
 {
@@ -60,7 +63,7 @@ private:
 
   std::shared_ptr<QUdpSocket> _socket;
   QVector<std::shared_ptr<User>> _user;
-  QVector<std::shared_ptr<Desk>> _board;
+  QVector<std::shared_ptr<logic::Desk>> _board;
 };
 
 class UDP_server::User : public QObject
@@ -110,4 +113,6 @@ private:
   std::shared_ptr<QTimer> _response_timer;
   std::shared_ptr<QTimer> _check_connect_timer;
 };
-#endif // UDP_SERVER_H
+
+
+#endif // __MY_UDP_SERVER_H__AUIWBHDIBONAIWMJIGADTYWADVFYAWBDA
