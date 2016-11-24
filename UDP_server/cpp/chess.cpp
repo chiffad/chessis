@@ -130,7 +130,6 @@ Board::impl_t::impl_t() : m_is_go_to_history_running(false)
   m_field.insert(m_field.end(), eight_row.begin(), eight_row.end());
 }
 
-
 bool Board::impl_t::move(const Coord &from, const Coord &to)
 {
   if(from == to)
