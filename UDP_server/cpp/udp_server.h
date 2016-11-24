@@ -49,8 +49,7 @@ private:
   QByteArray add_serial_num(const QByteArray &message, User &u, bool is_prev_serial_need = false);
   bool check_serial_num(const int num, const Messages::MESSAGE type, User &u);
 
-  bool is_message_reach(const QByteArray &message, User &u);
-  QByteArray get_usr_info(const User &u, bool is_opponent = true) const;
+  QByteArray get_user_info(const User &u, bool is_opponent = true) const;
   void run_message(QByteArray &message, const QHostAddress &ip, const quint16 port);
   void push_message_to_logic(const Messages::MESSAGE type, const QByteArray &content, User &u);
 
@@ -85,6 +84,9 @@ public:
   void start_response_timer();
   void start_check_connect_timer();
   void reconnect(const quint16 port, const QHostAddress &ip);
+
+public:
+  bool is_message_reach(const QByteArray &message);
 
 public slots:
   void response_timer_timeout();

@@ -39,7 +39,7 @@ UDP_server::~UDP_server()
 
 void UDP_server::send_data(const QByteArray &message, User &u)
 {
-  if(!is_message_reach(message, u))
+  if(!u.is_message_reach(message))
     return;
 
   _socket->writeDatagram(add_serial_num(message,u), u._ip, u._port);
@@ -53,7 +53,7 @@ void UDP_server::send_data(const Messages::MESSAGE r_mes, User &u, bool is_prev_
 
   if(r_mes != Messages::MESSAGE_RECEIVED)
   {
-    if(!is_message_reach(message, u))
+    if(!u.is_message_reach(message))
       return;
 
     begin_wait_receive(u);
@@ -113,10 +113,10 @@ void UDP_server::run_message(QByteArray &message, const QHostAddress &ip, const 
       case Messages::IS_SERVER_LOST:
         break;
       case Messages::OPPONENT_INF:
-        send_data(get_usr_info(*(*u)), *(*u));
+        send_data(get_user_info(*(*u)), *(*u));
         break;
       case Messages::MY_INF:
-        send_data(get_usr_info(*(*u), false), *(*u));
+        send_data(get_user_info(*(*u), false), *(*u));
         break;
       default:
         push_message_to_logic(type, content, *(*u));
@@ -212,7 +212,7 @@ void UDP_server::send_board_state(User &u)
   send_data(m, u);
 }
 
-QByteArray UDP_server::get_usr_info(const User &u, bool is_opponent) const
+QByteArray UDP_server::get_user_info(const User &u, bool is_opponent) const
 {
   QByteArray inf;
   inf.append(QString::number(Messages::INF_REQUEST));
@@ -266,18 +266,6 @@ int UDP_server::cut_serial_num(QByteArray &data) const
   data.remove(0, data.indexOf(FREE_SPASE) + 1);
 
   return serial_num.toInt();
-}
-
-bool UDP_server::is_message_reach(const QByteArray &message, User &u)
-{
-  if(!u._is_message_reach)
-  {
-    u._message_stack.push_back(message);
-    return false;
-  }
-
-  u._last_sent_message = message;
-  return true;
 }
 
 void UDP_server::save_users_inf() const
@@ -389,6 +377,18 @@ void UDP_server::User::response_timer_timeout()
 void UDP_server::User::check_connect_timer_timeout()
 {
   _parent_class->send_data(Messages::CLIENT_LOST, *this);
+}
+
+bool UDP_server::User::is_message_reach(const QByteArray &message)
+{
+  if(!_is_message_reach)
+  {
+    _message_stack.push_back(message);
+    return false;
+  }
+
+  _last_sent_message = message;
+  return true;
 }
 
 QJsonObject UDP_server::User::get_inf_json() const
