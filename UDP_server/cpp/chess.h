@@ -25,7 +25,6 @@ public:
   bool is_mate();
 
   std::string get_moves_history() const;
-
   unsigned get_move_num() const;
   std::string get_board_mask() const;
 

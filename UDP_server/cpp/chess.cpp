@@ -55,6 +55,7 @@ struct Board::impl_t
   bool is_en_passant(const Coord &fr, const Coord &to) const;
 
   int diff(const int _1, const int _2) const;
+
   struct Moves
   {
    Coord from;
@@ -116,7 +117,6 @@ std::string Board::get_board_mask() const
 {
   return impl->get_board_mask();
 }
-
 
 Board::impl_t::impl_t() : m_is_go_to_history_running(false)
 {
