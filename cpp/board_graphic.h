@@ -61,8 +61,8 @@ public:
   void set_move_color(const int move_num);
   void set_board_mask(const QString &mask);
   void set_connect_status(const int status);
-  bool is_new_message_for_server_appear() const;
-  const QString pull_first_messages_for_server();
+  bool is_message_appear() const;
+  const QString pull();
   void set_moves_history(const QString &history);
   void add_to_command_history(const QString& str);
   void update_hilight(const int move_num, const QString& history);
@@ -99,7 +99,7 @@ private:
   void read_moves_from_file(const QString& path);
   const QString coord_to_str(const Coord& from, const Coord& to) const;
   bool set_correct_coord(Coord& coord, const int x, const int y);
-  void add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content = QString());
+  void add_to_messages_for_server(const Messages::MESSAGE mes_type, const QString& content = QString());
 
 private:
   QString _move_color;
@@ -108,7 +108,7 @@ private:
   QStringList _str_moves_history;
   QStringList _commands_history;
   QList<Figure> _figures_model;
-  QVector<QString> _messages_for_server_stack;
+  QVector<QString> _messages_for_server;
   QString _field;
 };
 

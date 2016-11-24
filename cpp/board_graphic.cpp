@@ -51,15 +51,15 @@ void Board_graphic::run_command(const QString& message, const int x1, const int 
     "6.To view your information, print '" + SHOW_ME + "'");
   }
   else if(message == SHOW_OPPONENT)
-    { add_to_messages_for_server_stack(Messages::OPPONENT_INF); }
+    { add_to_messages_for_server(Messages::OPPONENT_INF); }
   else if(message == SHOW_ME)
-    { add_to_messages_for_server_stack(Messages::MY_INF); }
+    { add_to_messages_for_server(Messages::MY_INF); }
   else if(message == NEW_GAME)
-    { add_to_messages_for_server_stack(Messages::NEW_GAME); }
+    { add_to_messages_for_server(Messages::NEW_GAME); }
   else if(message == BACK_MOVE)
-    { add_to_messages_for_server_stack(Messages::BACK_MOVE); }
+    { add_to_messages_for_server(Messages::BACK_MOVE); }
   else if(message == HISTORY)
-    { add_to_messages_for_server_stack(Messages::GO_TO_HISTORY, QString::number(x1 + 1)); }
+    { add_to_messages_for_server(Messages::GO_TO_HISTORY, QString::number(x1 + 1)); }
   else
   {
     const QString command(message.mid(0,message.indexOf(FREE_SPACE)));
@@ -68,12 +68,12 @@ void Board_graphic::run_command(const QString& message, const int x1, const int 
     if(command == MOVE_WORD)
     {
       if(!command_content.isEmpty())
-        { add_to_messages_for_server_stack(Messages::MOVE, command_content); }
+        { add_to_messages_for_server(Messages::MOVE, command_content); }
       else
       {
         Coord from, to;
         if(set_correct_coord(from, x1, y1) && set_correct_coord(to, x2, y2))
-          { add_to_messages_for_server_stack(Messages::MOVE, coord_to_str(from, to)); }
+          { add_to_messages_for_server(Messages::MOVE, coord_to_str(from, to)); }
       }
     }
     else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
@@ -168,9 +168,9 @@ const QString Board_graphic::coord_to_str(const Coord &from, const Coord &to) co
           + " - " + QChar(a_LETTER + to.x) + QString::number(CELL_NUM - to.y));
 }
 
-void Board_graphic::add_to_messages_for_server_stack(const Messages::MESSAGE mes_type, const QString& content)
+void Board_graphic::add_to_messages_for_server(const Messages::MESSAGE mes_type, const QString& content)
 {
-  _messages_for_server_stack.append(QString::number(mes_type) + FREE_SPACE + content);
+  _messages_for_server.append(QString::number(mes_type) + FREE_SPACE + content);
 }
 
 void Board_graphic::update_hilight(const int move_num, const QString& history)
@@ -260,7 +260,7 @@ void Board_graphic::read_moves_from_file(const QString& path)
 
   std::string data_from_file(std::istream_iterator<char>(from_file), (std::istream_iterator<char>()));
 
-  add_to_messages_for_server_stack(Messages::FROM_FILE, QString::fromStdString(data_from_file));
+  add_to_messages_for_server(Messages::FROM_FILE, QString::fromStdString(data_from_file));
 }
 
 void Board_graphic::set_connect_status(const int status)
@@ -292,19 +292,19 @@ bool Board_graphic::set_login(const QString &login)
       { return false; }
   }
 
-  add_to_messages_for_server_stack(Messages::HELLO_SERVER, login);
+  add_to_messages_for_server(Messages::HELLO_SERVER, login);
   return true;
 }
 
-bool Board_graphic::is_new_message_for_server_appear() const
+bool Board_graphic::is_message_appear() const
 {
-  return !_messages_for_server_stack.isEmpty();
+  return !_messages_for_server.isEmpty();
 }
 
-const QString Board_graphic::pull_first_messages_for_server()
+const QString Board_graphic::pull()
 {
-  QString command(_messages_for_server_stack.first());
-  _messages_for_server_stack.removeFirst();
+  QString command(_messages_for_server.first());
+  _messages_for_server.removeFirst();
   return command;
 }
 
