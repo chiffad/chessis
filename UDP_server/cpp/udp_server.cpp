@@ -63,24 +63,16 @@ void UDP_server::send_data(const Messages::MESSAGE r_mes, User &u, bool is_prev_
 
 void UDP_server::read_data()
 {
-  QHostAddress sender_IP;
-  quint16 sender_port;
+  QHostAddress ip;
+  quint16 port;
   QByteArray message;
 
   message.resize(_socket.pendingDatagramSize());
-  _socket.readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
+  _socket.readDatagram(message.data(), message.size(), &ip, &port);
 
-  run_message(message, sender_IP, sender_port);
-}
-
-void UDP_server::run_message(QByteArray &message, const QHostAddress &ip, const quint16 port)
-{
   const int serial_num = cut_serial_num(message);
   const auto type = Messages::MESSAGE(message.mid(0, message.indexOf(FREE_SPASE)).toInt());
   const QByteArray content = message.mid(message.indexOf(FREE_SPASE) + 1);
-
-  auto u = std::find_if(_user.begin(), _user.end(),
-                             [&port, &ip](auto const &i){return(i->_port == port && i->_ip == ip);});
 
   if(type == Messages::HELLO_SERVER)
   {
@@ -88,39 +80,22 @@ void UDP_server::run_message(QByteArray &message, const QHostAddress &ip, const 
     return;
   }
 
+  auto u = std::find_if(_user.begin(), _user.end(),
+                             [&port, &ip](auto const &i){return(i->_port == port && i->_ip == ip);});
+
   if(u ==_user.end())
-    qDebug()<<"UDP_server::run_message: Unknown user";
+    { qDebug()<<"UDP_server::run_message: Unknown user"; }
 
   else if(!check_serial_num(serial_num, type, *(*u)))
-    qDebug()<<"UDP_server::run_message: Wrong Serial num!";
+    { qDebug()<<"UDP_server::run_message: Wrong Serial num!"; }
 
   else
   {
-    if(type != Messages::MESSAGE_RECEIVED)
-      send_data(Messages::MESSAGE_RECEIVED, *(*u));
+    (*u)->run_message(type, content);
 
-    switch(type)
-    {
-      case Messages::MESSAGE_RECEIVED:
-        (*u)->_is_message_reach = true;
-        if(!(*u)->_message_stack.isEmpty())
-        {
-          send_data((*u)->_message_stack[0], *(*u));
-          (*u)->_message_stack.removeFirst();
-        }
-        break;
-      case Messages::IS_SERVER_LOST:
-        break;
-      case Messages::OPPONENT_INF:
-        send_data(get_user_info(*(*u)), *(*u));
-        break;
-      case Messages::MY_INF:
-        send_data(get_user_info(*(*u), false), *(*u));
-        break;
-      default:
-        push_message_to_logic(type, content, *(*u));
-    }
-    (*u)->start_check_connect_timer();
+/*    const auto m = (*u)->get_board_state();
+    send_data(m, *_user[(*u)->_opponent_index]);
+    send_data(m, *(*u));*/
   }
 }
 
@@ -160,57 +135,6 @@ void UDP_server::create_new_user(const QHostAddress &ip, const quint16 port, con
   }
 }
 
-void UDP_server::push_message_to_logic(const Messages::MESSAGE type, const QByteArray &content, User& u)
-{
-  if(u.get_board_ind() == NO_OPPONENT)
-    return;
-
-  auto& board = _board[u.get_board_ind()];
-
-  switch(type)
-  {
-    case Messages::MOVE:
-      board->make_moves_from_str(content.toStdString());
-      break;
-    case Messages::BACK_MOVE:
-      board->back_move();
-      break;
-    case Messages::NEW_GAME:
-      board->start_new_game();
-      break;
-    case Messages::GO_TO_HISTORY:
-      board->go_to_history_index(content.toInt());
-      break;
-    case Messages::FROM_FILE:
-      board->start_new_game();
-      board->make_moves_from_str(content.toStdString());
-      break;
-    default: qDebug()<<"UDP_server::push_message_to_logic: Unknown message type";
-  }
-  send_board_state(u);
-}
-
-void UDP_server::send_board_state(User &u)
-{
-  auto& board = _board[u.get_board_ind()];
-
-  QByteArray m;
-  m.setNum(Messages::GAME_INF);
-  m.append(FREE_SPASE);
-  m.append(QString::fromStdString(board->get_board_mask()));
-  m.append(";");
-
-  m.append(QString::fromStdString(board->get_moves_history()));
-  if(board->is_mate())
-    m.append("#");
-  m.append(";");
-
-  m.append(QByteArray::number(board->get_move_num()));
-
-  send_data(m, *_user[u._opponent_index]);
-  send_data(m, u);
-}
-
 QByteArray UDP_server::get_user_info(const User &u, bool is_opponent) const
 {
   QByteArray inf;
@@ -236,9 +160,20 @@ void UDP_server::set_opponent(User &u)
   if(u._opponent_index != NO_OPPONENT)
   {
     _user[u._opponent_index]->_opponent_index = u._my_index;
-    _board.append(std::make_shared<logic::Desk>(u._my_index, u._opponent_index));
-     send_board_state(u);
+
+    std::shared_ptr<logic::Desk> d(std::make_shared<logic::Desk>(u._my_index, u._opponent_index));
+    u.set_board(d);
+   _user[u._opponent_index]->set_board(d);
+
+    const auto m = u.get_board_state();
+    send_data(m, *_user[u._opponent_index]);
+    send_data(m, u);
   }
+}
+
+void UDP_server::User::set_board(std::shared_ptr<logic::Desk>& d)
+{
+  _board.reset(d.get());
 }
 
 void UDP_server::begin_wait_receive(User &u)
@@ -322,7 +257,7 @@ void UDP_server::read_inf(QJsonObject &json)
 UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16 &port, const QHostAddress &ip,
                        const int index, const QString &login, const int ELO)
                        : QObject(parent), _parent_class(parent_class), _port(port), _ip(ip), _my_index(index),
-                         _received_serial_num(1), _send_serial_num(0), _is_message_reach(true),
+                         _received_serial_num(1), _send_serial_num(0), _opponent_index(NO_OPPONENT), _is_message_reach(true),
                          _login(login), _rating_ELO(ELO)
 {
   connect(&_response_timer, SIGNAL(timeout()), this, SLOT(response_timer_timeout()));
@@ -341,14 +276,6 @@ void UDP_server::User::start_check_connect_timer()
 void UDP_server::User::start_response_timer()
 {
   _response_timer.start(RESPONSE_WAIT_TIME);
-}
-
-int UDP_server::User::get_board_ind()
-{
-  auto it = std::find_if(_parent_class->_board.begin(), _parent_class->_board.end(),
-                        [this](auto const &i){return(i->contain_player(_my_index) && i->contain_player(_opponent_index));});
-
-  return _parent_class->_board.indexOf(*it);
 }
 
 void UDP_server::User::response_timer_timeout()
@@ -375,6 +302,80 @@ void UDP_server::User::response_timer_timeout()
 void UDP_server::User::check_connect_timer_timeout()
 {
   _parent_class->send_data(Messages::CLIENT_LOST, *this);
+}
+
+QByteArray UDP_server::User::get_board_state()
+{
+  QByteArray m;
+  m.setNum(Messages::GAME_INF);
+  m.append(FREE_SPASE);
+  m.append(QString::fromStdString(_board->get_board_mask()));
+  m.append(";");
+
+  m.append(QString::fromStdString(_board->get_moves_history()));
+  if(_board->is_mate())
+    m.append("#");
+  m.append(";");
+
+  m.append(QByteArray::number(_board->get_move_num()));
+
+  return m;
+}
+
+void UDP_server::User::run_message(const Messages::MESSAGE type, const QByteArray &content)
+{
+//  if(type != Messages::MESSAGE_RECEIVED)
+//    { send_data(Messages::MESSAGE_RECEIVED, *(*u)); } //!!!
+
+  switch(type)
+  {
+/*    case Messages::MESSAGE_RECEIVED:
+      _is_message_reach = true;
+      if(!_message_stack.isEmpty())
+      {
+        send_data((*u)->_message_stack[0], *(*u)); //!!!
+        _message_stack.removeFirst();
+      }
+      break;
+    case Messages::IS_SERVER_LOST:
+      break;
+    case Messages::OPPONENT_INF:
+      send_data(get_user_info(*(*u)), *(*u)); //!!!
+      break;
+    case Messages::MY_INF:
+      send_data(get_user_info(*(*u), false), *(*u)) //!!!;
+      break;*/
+    default:
+      push_message_to_logic(type, content);
+  }
+  start_check_connect_timer();
+}
+
+void UDP_server::User::push_message_to_logic(const Messages::MESSAGE type, const QByteArray &content)
+{
+  if(_opponent_index == NO_OPPONENT)
+    { return; }
+
+  switch(type)
+  {
+    case Messages::MOVE:
+      _board->make_moves_from_str(content.toStdString());
+      break;
+    case Messages::BACK_MOVE:
+      _board->back_move();
+      break;
+    case Messages::NEW_GAME:
+      _board->start_new_game();
+      break;
+    case Messages::GO_TO_HISTORY:
+      _board->go_to_history_index(content.toInt());
+      break;
+    case Messages::FROM_FILE:
+      _board->start_new_game();
+      _board->make_moves_from_str(content.toStdString());
+      break;
+    default: qDebug()<<"UDP_server::push_message_to_logic: Unknown message type";
+  }
 }
 
 bool UDP_server::User::is_message_reach(const QByteArray &message)

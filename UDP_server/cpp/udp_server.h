@@ -42,7 +42,6 @@ private:
 
 private:
   void set_opponent(User &u);
-  void send_board_state(User &u);
   void begin_wait_receive(User &u);
 
   int cut_serial_num(QByteArray &message) const;
@@ -50,8 +49,6 @@ private:
   bool check_serial_num(const int num, const Messages::MESSAGE type, User &u);
 
   QByteArray get_user_info(const User &u, bool is_opponent = true) const;
-  void run_message(QByteArray &message, const QHostAddress &ip, const quint16 port);
-  void push_message_to_logic(const Messages::MESSAGE type, const QByteArray &content, User &u);
 
   void create_new_user(const QHostAddress &ip, const quint16 port, const QByteArray &login);
 
@@ -65,7 +62,6 @@ private:
 
   QUdpSocket _socket;
   QVector<std::shared_ptr<User>> _user;
-  QVector<std::shared_ptr<logic::Desk>> _board;
 };
 
 class UDP_server::User : public QObject
@@ -79,11 +75,15 @@ public:
   ~User();
 
 public:
-  int get_board_ind();
   QJsonObject get_inf_json() const;
   void start_response_timer();
   void start_check_connect_timer();
   void reconnect(const quint16 port, const QHostAddress &ip);
+
+  void run_message(const Messages::MESSAGE type, const QByteArray &content);
+  void push_message_to_logic(const Messages::MESSAGE type, const QByteArray &content);
+  QByteArray get_board_state();
+  void set_board(std::shared_ptr<logic::Desk>& d);
 
 public:
   bool is_message_reach(const QByteArray &message);
@@ -107,6 +107,9 @@ public:
   QString _login;
   int _rating_ELO;
 
+
+  std::shared_ptr<logic::Desk> _board;
+
 public:
   User(const User&) = delete;
   User& operator=(const User&) = delete;
@@ -117,6 +120,9 @@ private:
 private:
   QTimer _response_timer;
   QTimer _check_connect_timer;
+
+private:
+  const QChar FREE_SPASE = ' ';
 };
 
 
