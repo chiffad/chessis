@@ -13,12 +13,11 @@
 
 
 UDP_server::UDP_server(QObject *parent) 
-    : QObject(parent), _SERVER_IP(QHostAddress::LocalHost),
-      _socket(std::make_shared<QUdpSocket>(this))
+    : QObject(parent), _SERVER_IP(QHostAddress::LocalHost)
 {
   for(int i = 0; i + FIRST_PORT < LAST_PORT; ++i)
   {
-    if(_socket->bind(_SERVER_IP, FIRST_PORT + i))
+    if(_socket.bind(_SERVER_IP, FIRST_PORT + i))
     {
       qDebug()<<"UDP_server::bind: "<<FIRST_PORT + i;
       break;
@@ -27,7 +26,7 @@ UDP_server::UDP_server(QObject *parent)
      i = -1;
   }
 
-  connect(_socket.get(), SIGNAL(readyRead()), this, SLOT(read_data()));
+  connect(&_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 
   load_users_inf();
 }
@@ -42,7 +41,7 @@ void UDP_server::send_data(const QByteArray &message, User &u)
   if(!u.is_message_reach(message))
     return;
 
-  _socket->writeDatagram(add_serial_num(message,u), u._ip, u._port);
+  _socket.writeDatagram(add_serial_num(message,u), u._ip, u._port);
   begin_wait_receive(u);
 }
 
@@ -59,7 +58,7 @@ void UDP_server::send_data(const Messages::MESSAGE r_mes, User &u, bool is_prev_
     begin_wait_receive(u);
   }
 
-  _socket->writeDatagram(add_serial_num(message, u, is_prev_serial_need), u._ip, u._port);
+  _socket.writeDatagram(add_serial_num(message, u, is_prev_serial_need), u._ip, u._port);
 }
 
 void UDP_server::read_data()
@@ -68,8 +67,8 @@ void UDP_server::read_data()
   quint16 sender_port;
   QByteArray message;
 
-  message.resize(_socket->pendingDatagramSize());
-  _socket->readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
+  message.resize(_socket.pendingDatagramSize());
+  _socket.readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
 
   run_message(message, sender_IP, sender_port);
 }
@@ -324,11 +323,10 @@ UDP_server::User::User(QObject *parent, UDP_server *parent_class, const quint16 
                        const int index, const QString &login, const int ELO)
                        : QObject(parent), _parent_class(parent_class), _port(port), _ip(ip), _my_index(index),
                          _received_serial_num(1), _send_serial_num(0), _is_message_reach(true),
-                         _login(login), _rating_ELO(ELO),
-                         _response_timer(std::make_shared<QTimer>()), _check_connect_timer(std::make_shared<QTimer>())
+                         _login(login), _rating_ELO(ELO)
 {
-  connect(_response_timer.get(), SIGNAL(timeout()), this, SLOT(response_timer_timeout()));
-  connect(_check_connect_timer.get(), SIGNAL(timeout()), this, SLOT(check_connect_timer_timeout()));
+  connect(&_response_timer, SIGNAL(timeout()), this, SLOT(response_timer_timeout()));
+  connect(&_check_connect_timer, SIGNAL(timeout()), this, SLOT(check_connect_timer_timeout()));
 }
 
 UDP_server::User::~User()
@@ -337,12 +335,12 @@ UDP_server::User::~User()
 
 void UDP_server::User::start_check_connect_timer()
 {
-  _check_connect_timer->start(CHECK_CONNECT_TIME);
+  _check_connect_timer.start(CHECK_CONNECT_TIME);
 }
 
 void UDP_server::User::start_response_timer()
 {
-  _response_timer->start(RESPONSE_WAIT_TIME);
+  _response_timer.start(RESPONSE_WAIT_TIME);
 }
 
 int UDP_server::User::get_board_ind()
@@ -364,12 +362,12 @@ void UDP_server::User::response_timer_timeout()
 
     start_response_timer();
 
-    _parent_class->_socket->writeDatagram(_parent_class->add_serial_num(_last_sent_message, *this, true),
+    _parent_class->_socket.writeDatagram(_parent_class->add_serial_num(_last_sent_message, *this, true),
                                           _ip, _port);
   }
   else
   {
-    _response_timer->stop();
+    _response_timer.stop();
     count = 0;
   }
 }

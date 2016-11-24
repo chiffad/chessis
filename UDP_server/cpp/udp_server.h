@@ -63,7 +63,7 @@ private:
 private:
   const QHostAddress _SERVER_IP;
 
-  std::shared_ptr<QUdpSocket> _socket;
+  QUdpSocket _socket;
   QVector<std::shared_ptr<User>> _user;
   QVector<std::shared_ptr<logic::Desk>> _board;
 };
@@ -115,8 +115,8 @@ private:
   enum {RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 10000};
 
 private:
-  std::shared_ptr<QTimer> _response_timer;
-  std::shared_ptr<QTimer> _check_connect_timer;
+  QTimer _response_timer;
+  QTimer _check_connect_timer;
 };
 
 
