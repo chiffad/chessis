@@ -3,6 +3,8 @@
 
 
 #include "chess.h"
+#include <string>
+
 
 namespace logic
 {
@@ -10,12 +12,11 @@ namespace logic
 class Desk : public Board
 {
 public:
-  Desk(const unsigned first_p, const unsigned second_p)
-                        : Board(), _first_player_ind(first_p), _second_player_ind(second_p)
-  {}
-
-  bool contain_player(const int ind) const
-  { return (ind == _first_player_ind || ind == _second_player_ind); }
+  Desk(const unsigned first_p, const unsigned second_p);
+  bool contain_player(const int ind) const;
+  void make_moves_from_str(const std::string &str);
+  void load_moves_from_file(const std::string &path);
+  void write_moves_to_file(const std::string &path) const;
 
 public:
    Desk(const Desk&) = delete;

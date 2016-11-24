@@ -25,8 +25,6 @@ public:
   bool is_mate();
 
   std::string get_moves_history() const;
-  void load_moves_from_file(const std::string &path);
-  void write_moves_to_file(const std::string &path) const;
 
   unsigned get_move_num() const;
   std::string get_board_mask() const;
