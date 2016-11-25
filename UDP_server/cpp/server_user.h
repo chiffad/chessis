@@ -18,6 +18,10 @@ public:
   QByteArray pull();
   bool is_empty() const;
 
+  bool is_previous_serial_num(const int num) const;
+  bool is_current_serial_num(const int num) const;
+  void add_receive_serial_num();
+
 private:
   struct impl_t;
   std::unique_ptr<impl_t> impl;
