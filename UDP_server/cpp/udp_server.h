@@ -42,14 +42,15 @@ private:
 
 private:
   void set_opponent(User &u);
+  void send_board_state(User &u);
   void begin_wait_receive(User &u);
-
   int cut_serial_num(QByteArray &message) const;
   QByteArray add_serial_num(const QByteArray &message, User &u, bool is_prev_serial_need = false);
   bool check_serial_num(const int num, const Messages::MESSAGE type, User &u);
-
-  QByteArray get_user_info(const User &u, bool is_opponent = true) const;
-
+  bool is_message_reach(const QByteArray &message, User &u);
+  QByteArray get_usr_info(const User &u, bool is_opponent = true) const;
+  void run_message(QByteArray &message, const QHostAddress &ip, const quint16 port);
+  void push_message_to_logic(const Messages::MESSAGE type, const QByteArray &content, User &u);
   void create_new_user(const QHostAddress &ip, const quint16 port, const QByteArray &login);
 
   void load_users_inf();
@@ -60,8 +61,9 @@ private:
 private:
   const QHostAddress _SERVER_IP;
 
-  QUdpSocket _socket;
+  std::shared_ptr<QUdpSocket> _socket;
   QVector<std::shared_ptr<User>> _user;
+  QVector<std::shared_ptr<logic::Desk>> _board;
 };
 
 class UDP_server::User : public QObject
@@ -75,18 +77,11 @@ public:
   ~User();
 
 public:
+  int get_board_ind();
   QJsonObject get_inf_json() const;
   void start_response_timer();
   void start_check_connect_timer();
   void reconnect(const quint16 port, const QHostAddress &ip);
-
-  void run_message(const Messages::MESSAGE type, const QByteArray &content);
-  void push_message_to_logic(const Messages::MESSAGE type, const QByteArray &content);
-  QByteArray get_board_state();
-  void set_board(std::shared_ptr<logic::Desk>& d);
-
-public:
-  bool is_message_reach(const QByteArray &message);
 
 public slots:
   void response_timer_timeout();
@@ -107,9 +102,6 @@ public:
   QString _login;
   int _rating_ELO;
 
-
-  std::shared_ptr<logic::Desk> _board;
-
 public:
   User(const User&) = delete;
   User& operator=(const User&) = delete;
@@ -118,11 +110,8 @@ private:
   enum {RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 10000};
 
 private:
-  QTimer _response_timer;
-  QTimer _check_connect_timer;
-
-private:
-  const QChar FREE_SPASE = ' ';
+  std::shared_ptr<QTimer> _response_timer;
+  std::shared_ptr<QTimer> _check_connect_timer;
 };
 
 
