@@ -15,7 +15,6 @@ namespace sr
 
 class user_t
 {
-
 public:
   user_t(const QHostAddress &ip, const quint16 &port, const QString &login = "guest");
   ~user_t();
@@ -24,6 +23,9 @@ public:
   QByteArray pull();
   void set_board(std::shared_ptr<logic::desk_t> d);
 
+public:
+  user_t(const user_t&) = delete;
+  user_t& operator=(const user_t&) = delete;
 
 private:
   struct impl_t;

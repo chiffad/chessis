@@ -10,6 +10,9 @@ struct server_user_t::impl_t
 {
   impl_t(const int port, const QHostAddress& address);
   bool is_me(const int _port, const QHostAddress& _ip) const;
+  int get_port() const;
+  QHostAddress get_ip() const;
+
   void push_for_send(const QByteArray& m);
   QByteArray pull_message_for_send();
   bool is_no_message_for_send() const;
@@ -34,7 +37,7 @@ struct server_user_t::impl_t
   QByteArray last_sent_mess;
   QVector<QByteArray> received_mess;
 
-  bool is_last_message_received;
+  bool is_last_mess_reach;
 };
 
 server_user_t::server_user_t(const int port, const QHostAddress& ip)
@@ -49,6 +52,15 @@ server_user_t::~server_user_t()
 bool server_user_t::is_me(const int port, const QHostAddress& ip) const
 {
   return impl->is_me(port, ip);
+}
+int server_user_t::get_port() const
+{
+  return impl->get_port();
+}
+
+QHostAddress server_user_t::get_ip() const
+{
+  return impl->get_ip();
 }
 
 void server_user_t::push_for_send(const QByteArray& m)
@@ -111,6 +123,16 @@ bool server_user_t::impl_t::is_me(const int _port, const QHostAddress& _ip) cons
   return (port == _port && ip == _ip);
 }
 
+int server_user_t::impl_t::get_port() const
+{
+  return port;
+}
+
+QHostAddress server_user_t::impl_t::get_ip() const
+{
+  return ip;
+}
+
 void server_user_t::impl_t::push_for_send(const QByteArray& m)
 {
   mess_for_send.append(QByteArray::number(++send_serial_num) + " " + m);
@@ -147,7 +169,7 @@ QByteArray server_user_t::impl_t::pull_received_mess()
 
 bool server_user_t::impl_t::is_no_message_for_send() const
 {
-  return mess_for_send.isEmpty();
+  return mess_for_send.isEmpty() && is_last_mess_reach;
 }
 
 bool server_user_t::impl_t::is_previous_serial_num(const int num) const
@@ -167,7 +189,7 @@ void server_user_t::impl_t::increase_receive_serial_num()
 
 void server_user_t::impl_t::receiving_timeout()
 {
-  if(is_last_message_received)
+  if(is_last_mess_reach)
     { return; }
 
   mess_for_send.push_front(last_sent_mess);
@@ -175,5 +197,5 @@ void server_user_t::impl_t::receiving_timeout()
 
 void server_user_t::impl_t::last_message_received()
 {
-  is_last_message_received = true;
+  is_last_mess_reach = true;
 }

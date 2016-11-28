@@ -15,6 +15,8 @@ public:
   server_user_t(const int port, const QHostAddress& ip);
   ~server_user_t();
   bool is_me(const int port, const QHostAddress& ip) const;
+  int get_port() const;
+  QHostAddress get_ip() const;
 
   void push_for_send(const QByteArray& m);
   bool is_no_message_for_send() const;
@@ -29,6 +31,10 @@ public:
   void increase_receive_serial_num();
 
   void last_message_received();
+
+public:
+  server_user_t(const server_user_t&) = delete;
+  server_user_t& operator=(const server_user_t&) = delete;
 
 private:
   struct impl_t;
