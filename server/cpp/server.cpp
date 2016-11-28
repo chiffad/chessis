@@ -3,6 +3,9 @@
 #include <QVector>
 #include <QByteArray>
 #include <QObject>
+#include <algorithm>
+
+#include "server_user.h"
 
 
 using namespace sr;
@@ -10,10 +13,13 @@ using namespace sr;
 struct server_t::impl_t
 {
   impl_t();
-  void send(const QByteArray& message, const int port, const QHostAddress& ip);
-  bool is_message_append() const;
-  QByteArray pull();
+  void process_event();
+  void push(const QByteArray& message, const int port, const QHostAddress& ip);
+  bool is_message_append(const int port, const QHostAddress& ip) const;
+  QByteArray pull(const int port, const QHostAddress& ip);
   void read();
+  int cut_serial_num(QByteArray& m);
+  std::shared_ptr<server_user_t> get_user(const int port, const QHostAddress& ip) const;
 
   enum {FIRST_PORT = 49152, LAST_PORT = 49500};
   const QHostAddress _SERVER_IP = QHostAddress::LocalHost;
@@ -21,8 +27,7 @@ struct server_t::impl_t
   QUdpSocket socket;
   QVector<QByteArray> received_mes;
 
-
-
+  QVector<std::shared_ptr<server_user_t>> users;
 };
 
 server_t::server_t()
@@ -34,19 +39,24 @@ server_t::~server_t()
 {
 }
 
-void server_t::send(const QByteArray& message, const int port, const QHostAddress& ip)
+void server_t::process_event()
 {
-  impl->send(message, port, ip);
+  impl->process_event();
 }
 
-bool server_t::is_message_append() const
+void server_t::push(const QByteArray& message, const int port, const QHostAddress& ip)
 {
-  return impl->is_message_append();
+  impl->push(message, port, ip);
 }
 
-QByteArray server_t::pull()
+bool server_t::is_message_append(const int port, const QHostAddress& ip) const
 {
-  return impl->pull();
+  return impl->is_message_append(port, ip);
+}
+
+QByteArray server_t::pull(const int port, const QHostAddress& ip)
+{
+  return impl->pull(port, ip);
 }
 
 server_t::impl_t::impl_t()
@@ -65,22 +75,46 @@ server_t::impl_t::impl_t()
   }
 }
 
-void server_t::impl_t::send(const QByteArray& message, const int port, const QHostAddress& ip)
+void server_t::impl_t::process_event()
 {
-  socket.writeDatagram(message, ip, port);
+  for(auto& i: users)
+  {
+    if(!i->is_no_message_for_send())
+        { socket.writeDatagram(i->pull_message_for_send(), i->get_ip(), i->get_port()); }
+  }
 }
 
-bool server_t::impl_t::is_message_append() const
+void server_t::impl_t::push(const QByteArray& message, const int port, const QHostAddress& ip)
 {
-  return !received_mes.isEmpty();
+  get_user(port, ip)->push_for_send(message);
 }
 
-QByteArray server_t::impl_t::pull()
+bool server_t::impl_t::is_message_append(const int port, const QHostAddress& ip) const
 {
-  const auto m = received_mes.first();
-  received_mes.removeFirst();
+  return !(get_user(port, ip)->is_no_received_mess());
+}
 
-  return m;
+QByteArray server_t::impl_t::pull(const int port, const QHostAddress& ip)
+{
+  return get_user(port, ip)->pull_received_mess();
+}
+
+std::shared_ptr<server_user_t> server_t::impl_t::get_user(const int port, const QHostAddress& ip) const
+{
+  auto user = std::find_if(users.begin(), users.end(), [&](auto i){ return i->is_me(port, ip); });
+
+  if(user == users.end())
+   { qDebug()<<"server_t::impl_t::is_message_append: no such user!!!!"; }
+
+  return (*user);
+}
+
+int server_t::impl_t::cut_serial_num(QByteArray& m)
+{
+  auto serial_num = m.mid(0, m.indexOf(" "));
+  m.remove(0, m.indexOf(" ") + 1);
+
+  return serial_num.toInt();
 }
 
 void server_t::impl_t::read()
@@ -92,6 +126,36 @@ void server_t::impl_t::read()
   m.resize(socket.pendingDatagramSize());
   socket.readDatagram(m.data(), m.size(), &ip, &port);
 
-  received_mes.append(m);
+  auto user = std::find_if(users.begin(), users.end(), [&](auto i){ return i->is_me(port, ip); });
+  const int num = cut_serial_num(m);
+
+  if(user == users.end())
+  {
+    if(num != 1)
+    {
+      qDebug()<<"server_t::impl_t::read(): For new users ser num must be == 1!!";
+      return;
+    }
+
+    users.append(std::make_shared<server_user_t>(port, ip));
+    users.last()->push_received_mess(m);
+  }
+  else
+  {
+    if((*user)->is_current_serial_num(num))
+      { qDebug()<<"server_t::impl_t::read(): Wrong ser num!!"<<num; }
+
+    else if((*user)->is_previous_serial_num(num))
+    {
+      qDebug()<<"server_t::impl_t::read(): Wrong ser num!!"<<num;
+      ///sending Message_receive
+    }
+    else
+    {
+     // if message == message receive need to user->last_message_received();
+      (*user)->push_received_mess(m);
+      (*user)->increase_receive_serial_num();
+    }
+  }
 }
 

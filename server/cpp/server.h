@@ -16,11 +16,10 @@ class server_t
 public:
   server_t();
   ~server_t();
-
-public:
-  void send(const QByteArray& message, const int port, const QHostAddress& ip);
-  bool is_message_append() const;
-  QByteArray pull();
+  void process_event();
+  void push(const QByteArray& message, const int port, const QHostAddress& ip);
+  bool is_message_append(const int port, const QHostAddress& ip) const;
+  QByteArray pull(const int port, const QHostAddress& ip);
 
 public:
   server_t(const server_t&) = delete;
