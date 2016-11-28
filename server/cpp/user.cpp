@@ -3,8 +3,6 @@
 #include <QVector>
 #include <QObject>
 
-#include "desk.h"
-
 
 using namespace sr;
 
@@ -20,7 +18,6 @@ struct user_t::impl_t
   void add_to_messages(const messages::MESSAGE m);
   void add_to_messages(const QByteArray& m);
   QByteArray get_board_state() const;
-
 
   QTimer connect_timer;
   QHostAddress ip;
