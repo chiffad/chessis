@@ -9,11 +9,11 @@
 namespace sr
 {
 
-class server_user
+class server_user_t
 {
 public:
-  server_user(const int port, const QHostAddress& ip);
-  ~server_user();
+  server_user_t(const int port, const QHostAddress& ip);
+  ~server_user_t();
   void push(const QByteArray& m);
   QByteArray pull();
   bool is_empty() const;
