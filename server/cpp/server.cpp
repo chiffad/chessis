@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include "server_user.h"
+#include "messages.h"
 
 
 using namespace sr;
@@ -20,6 +21,7 @@ struct server_t::impl_t
   void read();
   int cut_serial_num(QByteArray& m);
   std::shared_ptr<server_user_t> get_user(const int port, const QHostAddress& ip) const;
+  void run_message(const QByteArray& m, const int port, const QHostAddress& ip);
 
   enum {FIRST_PORT = 49152, LAST_PORT = 49500};
   const QHostAddress _SERVER_IP = QHostAddress::LocalHost;
@@ -126,6 +128,11 @@ void server_t::impl_t::read()
   m.resize(socket.pendingDatagramSize());
   socket.readDatagram(m.data(), m.size(), &ip, &port);
 
+  run_message(m, port, ip);
+}
+
+void server_t::impl_t::run_message(const QByteArray& m, const int port, const QHostAddress& ip)
+{
   auto user = std::find_if(users.begin(), users.end(), [&](auto i){ return i->is_me(port, ip); });
   const int num = cut_serial_num(m);
 
@@ -142,20 +149,31 @@ void server_t::impl_t::read()
   }
   else
   {
-    if((*user)->is_current_serial_num(num))
+    if(!(*user)->is_current_serial_num(num))
       { qDebug()<<"server_t::impl_t::read(): Wrong ser num!!"<<num; }
 
     else if((*user)->is_previous_serial_num(num))
     {
+      if(m == QByteArray::number(messages::MESSAGE_RECEIVED))
+        { return; }
+
       qDebug()<<"server_t::impl_t::read(): Wrong ser num!!"<<num;
+      QByteArray m = QByteArray::number(num) + " " + QByteArray::number(messages::MESSAGE_RECEIVED);
+      socket.writeDatagram(m, ip, port);
       ///sending Message_receive
     }
     else
     {
      // if message == message receive need to user->last_message_received();
-      (*user)->push_received_mess(m);
-      (*user)->increase_receive_serial_num();
+      if(m == QByteArray::number(messages::MESSAGE_RECEIVED))
+        { (*user)->last_message_received(); }
+      else
+      {
+        (*user)->push_received_mess(m);
+        (*user)->increase_receive_serial_num();
+      }
     }
   }
 }
+
 
