@@ -11,13 +11,13 @@
 namespace sr
 {
 
-class server : public QObject
+class server_t : public QObject
 {
   Q_OBJECT
 
 public:
-  server();
-  ~server();
+  server_t();
+  ~server_t();
 
 public:
   void send(const QByteArray& message, const int port, const QHostAddress& ip);
@@ -28,8 +28,8 @@ private slots:
   void read();
 
 public:
-  server(const server&) = delete;
-  server& operator=(const server&) = delete;
+  server_t(const server_t&) = delete;
+  server_t& operator=(const server_t&) = delete;
 
 private:
   QUdpSocket socket;

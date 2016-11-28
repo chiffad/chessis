@@ -6,7 +6,7 @@
 
 using namespace sr;
 
-struct server::impl_t
+struct server_t::impl_t
 {
   impl_t(QUdpSocket& s);
   void send(const QByteArray& message, const int port, const QHostAddress& ip);
@@ -22,37 +22,37 @@ struct server::impl_t
 
 };
 
-server::server()
+server_t::server_t()
     : QObject(nullptr), impl(new impl_t(socket))
 {
   connect(&socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 }
 
-server::~server()
+server_t::~server_t()
 {
 }
 
-void server::send(const QByteArray& message, const int port, const QHostAddress& ip)
+void server_t::send(const QByteArray& message, const int port, const QHostAddress& ip)
 {
   impl->send(message, port, ip);
 }
 
-bool server::is_message_appear() const
+bool server_t::is_message_appear() const
 {
   return impl->is_message_appear();
 }
 
-QByteArray server::pull()
+QByteArray server_t::pull()
 {
   return impl->pull();
 }
 
-void server::read()
+void server_t::read()
 {
   impl->read();
 }
 
-server::impl_t::impl_t(QUdpSocket& s)
+server_t::impl_t::impl_t(QUdpSocket& s)
     : socket(s)
 {
   for(int i = 0; i + FIRST_PORT < LAST_PORT; ++i)
@@ -67,17 +67,17 @@ server::impl_t::impl_t(QUdpSocket& s)
   }
 }
 
-void server::impl_t::send(const QByteArray& message, const int port, const QHostAddress& ip)
+void server_t::impl_t::send(const QByteArray& message, const int port, const QHostAddress& ip)
 {
   socket.writeDatagram(message, ip, port);
 }
 
-bool server::impl_t::is_message_appear() const
+bool server_t::impl_t::is_message_appear() const
 {
   return !messages.isEmpty();
 }
 
-QByteArray server::impl_t::pull()
+QByteArray server_t::impl_t::pull()
 {
   const auto m = messages.first();
   messages.removeFirst();
@@ -85,7 +85,7 @@ QByteArray server::impl_t::pull()
   return m;
 }
 
-void server::impl_t::read()
+void server_t::impl_t::read()
 {
   QHostAddress ip;
   quint16 port;
