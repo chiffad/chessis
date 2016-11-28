@@ -2,13 +2,14 @@
 
 #include <QVector>
 #include <QByteArray>
+#include <QObject>
 
 
 using namespace sr;
 
 struct server_t::impl_t
 {
-  impl_t(QUdpSocket& s);
+  impl_t();
   void send(const QByteArray& message, const int port, const QHostAddress& ip);
   bool is_message_appear() const;
   QByteArray pull();
@@ -17,15 +18,14 @@ struct server_t::impl_t
   enum {FIRST_PORT = 49152, LAST_PORT = 49500};
   const QHostAddress _SERVER_IP = QHostAddress::LocalHost;
 
-  QUdpSocket& socket;
+  QUdpSocket socket;
   QVector<QByteArray> messages;
 
 };
 
 server_t::server_t()
-    : QObject(nullptr), impl(new impl_t(socket))
+    : impl(new impl_t())
 {
-  connect(&socket, SIGNAL(readyRead()), this, SLOT(read_data()));
 }
 
 server_t::~server_t()
@@ -47,14 +47,10 @@ QByteArray server_t::pull()
   return impl->pull();
 }
 
-void server_t::read()
+server_t::impl_t::impl_t()
 {
-  impl->read();
-}
+  QObject::connect(&socket, &QUdpSocket::readyRead, [&](){read();});
 
-server_t::impl_t::impl_t(QUdpSocket& s)
-    : socket(s)
-{
   for(int i = 0; i + FIRST_PORT < LAST_PORT; ++i)
   {
     if(socket.bind(_SERVER_IP, FIRST_PORT + i))

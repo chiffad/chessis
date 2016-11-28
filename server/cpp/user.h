@@ -1,7 +1,6 @@
 #ifndef __USER_H__BYUVGFTYADVWYUBBAWDTYCFWDTYAVWDUB
 #define __USER_H__BYUVGFTYADVWYUBBAWDTYCFWDTYAVWDUB
 
-#include <QObject>
 #include <QTimer>
 #include <QByteArray>
 #include <QHostAddress>
@@ -14,9 +13,8 @@
 namespace sr
 {
 
-class user_t : public QObject
+class user_t
 {
-  Q_OBJECT
 
 public:
   user_t(const QHostAddress &ip, const quint16 &port, const QString &login = "guest");
@@ -26,12 +24,8 @@ public:
   QByteArray pull();
   void set_board(std::shared_ptr<logic::desk_t> d);
 
-private slots:
-  void check_connection_timeout();
 
 private:
-  QTimer connect_timer;
-
   struct impl_t;
   std::unique_ptr<impl_t> impl;
 };

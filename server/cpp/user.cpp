@@ -1,6 +1,7 @@
 #include "user.h"
 
 #include <QVector>
+#include <QObject>
 
 #include "desk.h"
 
@@ -9,7 +10,7 @@ using namespace sr;
 
 struct user_t::impl_t
 {
-  impl_t(const QHostAddress &ip, const int &port, const QString &login, QTimer& connection);
+  impl_t(const QHostAddress &ip, const int &port, const QString &login);
   void push(const messages::MESSAGE type, const QByteArray& message);
   void push_to_logic(const messages::MESSAGE type, const QByteArray& content);
   bool is_message_appear() const;
@@ -21,7 +22,7 @@ struct user_t::impl_t
   QByteArray get_board_state() const;
 
 
-  QTimer& connect_t;
+  QTimer connect_timer;
   QHostAddress ip;
   int port;
   QString login;
@@ -34,9 +35,8 @@ struct user_t::impl_t
 };
 
 user_t::user_t(const QHostAddress &ip, const quint16 &port, const QString &login)
-    : QObject(nullptr), impl(new impl_t(ip, port, login, connect_timer))
+    : impl(new impl_t(ip, port, login))
 {
-  connect(&connect_timer, SIGNAL(timeout()), this, SLOT(check_connection_timeout()));
 }
 
 user_t::~user_t()
@@ -63,17 +63,14 @@ QByteArray user_t::pull()
   return impl->pull();
 }
 
-void user_t::check_connection_timeout()
-{
-  impl->check_connection_timeout();
-}
-
-user_t::impl_t::impl_t(const QHostAddress &_ip, const int &_port, const QString &log, QTimer& connection)
-    : connect_t(connection), ip(_ip), port(_port), login(log)
+user_t::impl_t::impl_t(const QHostAddress &_ip, const int &_port, const QString &log)
+    : ip(_ip), port(_port), login(log)
 {
   board = std::make_shared<logic::desk_t>(0,0);
+
+  QObject::connect(&connect_timer, &QTimer::timeout, [&](){check_connection_timeout();});
   const int CHECK_CONNECT_TIME = 10000;
-  connect_t.setInterval(CHECK_CONNECT_TIME);
+  connect_timer.setInterval(CHECK_CONNECT_TIME);
 }
 
 void user_t::impl_t::set_board(std::shared_ptr<logic::desk_t> d)
