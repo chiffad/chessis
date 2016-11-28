@@ -14,6 +14,8 @@ class server_user_t
 public:
   server_user_t(const int port, const QHostAddress& ip);
   ~server_user_t();
+  bool is_me(const int port, const QHostAddress& ip) const;
+
   void push_for_send(const QByteArray& m);
   bool is_no_message_for_send() const;
   QByteArray pull_message_for_send();

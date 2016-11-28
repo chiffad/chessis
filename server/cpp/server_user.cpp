@@ -9,6 +9,7 @@ using namespace sr;
 struct server_user_t::impl_t
 {
   impl_t(const int port, const QHostAddress& address);
+  bool is_me(const int _port, const QHostAddress& _ip) const;
   void push_for_send(const QByteArray& m);
   QByteArray pull_message_for_send();
   bool is_no_message_for_send() const;
@@ -25,7 +26,7 @@ struct server_user_t::impl_t
   void last_message_received();
 
   const int port;
-  const QHostAddress& ip;
+  const QHostAddress ip;
   int send_serial_num = 0;
   int receiv_serial_num = 1;
 
@@ -43,6 +44,11 @@ server_user_t::server_user_t(const int port, const QHostAddress& ip)
 
 server_user_t::~server_user_t()
 {
+}
+
+bool server_user_t::is_me(const int port, const QHostAddress& ip) const
+{
+  return impl->is_me(port, ip);
 }
 
 void server_user_t::push_for_send(const QByteArray& m)
@@ -98,6 +104,11 @@ void server_user_t::last_message_received()
 server_user_t::impl_t::impl_t(const int p, const QHostAddress& address)
     : port(p), ip(address)
 {
+}
+
+bool server_user_t::impl_t::is_me(const int _port, const QHostAddress& _ip) const
+{
+  return (port == _port && ip == _ip);
 }
 
 void server_user_t::impl_t::push_for_send(const QByteArray& m)
