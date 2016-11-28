@@ -1,0 +1,52 @@
+# Temporary files
+*~
+*.csv
+*.xml
+res/*
+
+# clangformat patch backups
+commit-backups
+*.swp
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.so.*
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# QtCreator User Files
+*.user
+*.user.*
+
+# Qt generated files
+*.moc
+moc_*
+
+# Executables
+server/bin/*
+user/bin/*
+
+#Makefiles
+Makefile*
+
+#Merge Files
+*.orig
+
+# Ignore installed qmlPlugins
+imports/*
+
+# build-generated submodule commit hashes
+manifest.json
+
+# build-generated qrc file for QML compiler
+qml_compiler_resources.qrc
+

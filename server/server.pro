@@ -17,7 +17,7 @@ SOURCES += cpp/main.cpp \
 HEADERS += cpp/udp_server.h \
            cpp/chess.h \
            cpp/desk.h \
-           cpp/enums.h \
+           cpp/messages.h \
            cpp/server.h \
            cpp/coord.h \
            cpp/server_user.h \
