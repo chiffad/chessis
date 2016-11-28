@@ -9,7 +9,7 @@
 namespace logic
 {
 
-class Desk : public Board
+class Desk : public board_t
 {
 public:
   Desk(const unsigned first_p, const unsigned second_p);

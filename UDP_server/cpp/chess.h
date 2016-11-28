@@ -12,12 +12,12 @@
 namespace logic
 {
 
-class Board
+class board_t
 {
 public:
-  Board();
-  ~Board();
-  bool move(const Coord &from, const Coord &to);
+  board_t();
+  ~board_t();
+  bool move(const coord_t &from, const coord_t &to);
   bool back_move();
   void start_new_game();
   void go_to_history_index(const unsigned index);
@@ -28,8 +28,8 @@ public:
   std::string get_board_mask() const;
 
 public:
-  Board(const Board&) = delete;
-  Board& operator=(const Board&) = delete;
+  board_t(const board_t&) = delete;
+  board_t& operator=(const board_t&) = delete;
 
 
 private:

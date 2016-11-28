@@ -5,14 +5,14 @@
 namespace logic
 {
 
-struct Coord
+struct coord_t
 {
-  Coord(const unsigned X = 0, const unsigned Y = 0)
+  coord_t(const unsigned X = 0, const unsigned Y = 0)
       : x(X), y(Y)
   {
   }
 
-  bool operator==(const Coord& rhs) const
+  bool operator==(const coord_t& rhs) const
   {
     return(x == rhs.x && y == rhs.y);
   }

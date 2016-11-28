@@ -9,7 +9,7 @@ using namespace logic;
 
 
 Desk::Desk(const unsigned first_p, const unsigned second_p)
-    : Board(), _first_player_ind(first_p), _second_player_ind(second_p)
+    : board_t(), _first_player_ind(first_p), _second_player_ind(second_p)
 {
 }
 
@@ -32,8 +32,8 @@ void Desk::make_moves_from_str(const std::string &str)
 
     if(coord_str.size() == COORD_NEED_TO_MOVE)
     {
-      move(Coord(coord_str[FROM_X], coord_str[FROM_Y]),
-           Coord(coord_str[TO_X], coord_str[TO_Y]));
+      move(coord_t(coord_str[FROM_X], coord_str[FROM_Y]),
+           coord_t(coord_str[TO_X], coord_str[TO_Y]));
       coord_str.clear();
     }
   }
