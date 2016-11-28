@@ -36,6 +36,6 @@ private:
   std::unique_ptr<impl_t> impl;
 };
 
-} //namespace serv
+} //namespace sr
 
 #endif //__USER_H__BYUVGFTYADVWYUBBAWDTYCFWDTYAVWDUB

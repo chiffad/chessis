@@ -1,12 +1,12 @@
 #ifndef __SERVER_H__BVGHVJHBDCWFDVAKYUVLWBALIGDVGSADW
 #define __SERVER_H__BVGHVJHBDCWFDVAKYUVLWBALIGDVGSADW
 
-
 #include <QObject>
 #include <QByteArray>
 #include <QHostAddress>
 #include <QUdpSocket>
 #include <memory>
+
 
 namespace sr
 {
@@ -38,6 +38,6 @@ private:
   std::unique_ptr<impl_t> impl;
 };
 
-} // namespace inet
+} // namespace sr
 
 #endif // __SERVER_H__BVGHVJHBDCWFDVAKYUVLWBALIGDVGSADW
