@@ -11,7 +11,7 @@ struct server_t::impl_t
 {
   impl_t();
   void send(const QByteArray& message, const int port, const QHostAddress& ip);
-  bool is_message_appear() const;
+  bool is_message_append() const;
   QByteArray pull();
   void read();
 
@@ -19,7 +19,9 @@ struct server_t::impl_t
   const QHostAddress _SERVER_IP = QHostAddress::LocalHost;
 
   QUdpSocket socket;
-  QVector<QByteArray> messages;
+  QVector<QByteArray> received_mes;
+
+
 
 };
 
@@ -37,9 +39,9 @@ void server_t::send(const QByteArray& message, const int port, const QHostAddres
   impl->send(message, port, ip);
 }
 
-bool server_t::is_message_appear() const
+bool server_t::is_message_append() const
 {
-  return impl->is_message_appear();
+  return impl->is_message_append();
 }
 
 QByteArray server_t::pull()
@@ -68,15 +70,15 @@ void server_t::impl_t::send(const QByteArray& message, const int port, const QHo
   socket.writeDatagram(message, ip, port);
 }
 
-bool server_t::impl_t::is_message_appear() const
+bool server_t::impl_t::is_message_append() const
 {
-  return !messages.isEmpty();
+  return !received_mes.isEmpty();
 }
 
 QByteArray server_t::impl_t::pull()
 {
-  const auto m = messages.first();
-  messages.removeFirst();
+  const auto m = received_mes.first();
+  received_mes.removeFirst();
 
   return m;
 }
@@ -90,8 +92,6 @@ void server_t::impl_t::read()
   m.resize(socket.pendingDatagramSize());
   socket.readDatagram(m.data(), m.size(), &ip, &port);
 
-  
-
-  messages.append(m);
+  received_mes.append(m);
 }
 

@@ -19,7 +19,7 @@ public:
 
 public:
   void send(const QByteArray& message, const int port, const QHostAddress& ip);
-  bool is_message_appear() const;
+  bool is_message_append() const;
   QByteArray pull();
 
 public:
