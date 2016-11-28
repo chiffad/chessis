@@ -4,9 +4,12 @@
 #include <QObject>
 #include <QTimer>
 #include <QByteArray>
+#include <QHostAddress>
 #include <memory>
 
 #include "desk.h"
+#include "messages.h"
+
 
 namespace sr
 {
@@ -21,14 +24,13 @@ public:
   void push(const messages::MESSAGE type, const QByteArray& message);
   bool is_message_appear() const;
   QByteArray pull();
-  void set_board(std::share_ptr<logic::Desk> d);
+  void set_board(std::shared_ptr<logic::Desk> d);
 
 private slots:
   void check_connection_timeout();
 
 private:
-  QTimer response_timer;
-  QTimer connec_timer;
+  QTimer connect_timer;
 
   struct impl_t;
   std::unique_ptr<impl_t> impl;

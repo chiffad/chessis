@@ -6,7 +6,7 @@
 
 using namespace sr;
 
-server::impl_t
+struct server::impl_t
 {
   impl_t(QUdpSocket& s);
   void send(const QByteArray& message, const int port, const QHostAddress& ip);
@@ -25,7 +25,11 @@ server::impl_t
 server::server()
     : QObject(nullptr), impl(new impl_t(socket))
 {
-  connect(&_socket, SIGNAL(readyRead()), this, SLOT(read_data()));
+  connect(&socket, SIGNAL(readyRead()), this, SLOT(read_data()));
+}
+
+server::~server()
+{
 }
 
 void server::send(const QByteArray& message, const int port, const QHostAddress& ip)
@@ -87,8 +91,8 @@ void server::impl_t::read()
   quint16 port;
   QByteArray m;
 
-  m.resize(_socket.pendingDatagramSize());
-  socket.readDatagram(m.data(), message.size(), &ip, &port);
+  m.resize(socket.pendingDatagramSize());
+  socket.readDatagram(m.data(), m.size(), &ip, &port);
 
   
 

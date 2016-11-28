@@ -64,7 +64,7 @@ void server_user::add_receive_serial_num()
 }
 
 server_user::impl_t::impl_t(const int p, const QHostAddress& address)
-    : port(), ip(address)
+    : port(p), ip(address)
 {
 }
 

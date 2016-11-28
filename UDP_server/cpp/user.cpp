@@ -2,29 +2,25 @@
 
 #include <QVector>
 
-#include "enums.h"
 #include "desk.h"
-#include "memory"
 
 
 using namespace sr;
 
 struct user::impl_t
 {
-  impl_t(const QHostAddress &ip, const int &port, const QString &login, QTimer& responce, QTimer& connection);
+  impl_t(const QHostAddress &ip, const int &port, const QString &login, QTimer& connection);
   void push(const messages::MESSAGE type, const QByteArray& message);
-  void push_to_logic(const Messages::MESSAGE type, const QByteArray& content);
+  void push_to_logic(const messages::MESSAGE type, const QByteArray& content);
   bool is_message_appear() const;
-  QByteArray pull()
-  void set_board(std::share_ptr<logic::Desk> d);
-  void response_timeout();
+  QByteArray pull();
+  void set_board(std::shared_ptr<logic::Desk> d);
   void check_connection_timeout();
   void add_to_messages(const messages::MESSAGE m);
   void add_to_messages(const QByteArray& m);
   QByteArray get_board_state() const;
 
 
-  QTimer& response_t;
   QTimer& connect_t;
   QHostAddress ip;
   int port;
@@ -37,10 +33,9 @@ struct user::impl_t
   QVector<QByteArray> messages;
 };
 
-user::user(const QHostAddress &ip, const int &port, const QString &login)
-    : QObject(nullptr), impl(new impl_t(ip, port, login, response_timer, connec_timer))
+user::user(const QHostAddress &ip, const quint16 &port, const QString &login)
+    : QObject(nullptr), impl(new impl_t(ip, port, login, connect_timer))
 {
-  connect(&response_timer, SIGNAL(timeout()), this, SLOT(response_timeout()));
   connect(&connect_timer, SIGNAL(timeout()), this, SLOT(check_connection_timeout()));
 }
 
@@ -53,7 +48,7 @@ void user::push(const messages::MESSAGE type, const QByteArray& message)
   impl->push(type, message);
 }
 
-void user::set_board(std::share_ptr<logic::Desk> d)
+void user::set_board(std::shared_ptr<logic::Desk> d)
 {
   impl->set_board(d);
 }
@@ -68,74 +63,67 @@ QByteArray user::pull()
   return impl->pull();
 }
 
-void user::response_timeout()
-{
-  impl->response_timeout();
-}
-
 void user::check_connection_timeout()
 {
   impl->check_connection_timeout();
 }
 
-user::impl_t::impl_t(const QHostAddress &_ip, const int &_port, const QString &log, QTimer& response, QTimer& connection)
-    : response_t(response), connect_t(connection), ip(_ip), port(_port), login(log), board(std::make_shared<logic::Desk>())
+user::impl_t::impl_t(const QHostAddress &_ip, const int &_port, const QString &log, QTimer& connection)
+    : connect_t(connection), ip(_ip), port(_port), login(log)
 {
-  const int RESPONSE_WAIT_TIME = 1000;
-  response_t.interval(RESPONSE_WAIT_TIME);
-
+  board = std::make_shared<logic::Desk>(0,0);
   const int CHECK_CONNECT_TIME = 10000;
-  connect_t.interval(CHECK_CONNECT_TIME);
+  connect_t.setInterval(CHECK_CONNECT_TIME);
 }
 
-void user::impl_t::set_board(std::share_ptr<logic::Desk> d)
+void user::impl_t::set_board(std::shared_ptr<logic::Desk> d)
 {
   board = d;
 }
 
 void user::impl_t::push(const messages::MESSAGE type, const QByteArray& message)
 {
-  if(type != Messages::MESSAGE_RECEIVED)
-    { add_to_messages(Messages::MESSAGE_RECEIVED); }
+  if(type != messages::MESSAGE_RECEIVED)
+    { add_to_messages(messages::MESSAGE_RECEIVED); }
 
   switch(type)
   {
-    case Messages::MESSAGE_RECEIVED:
+    case messages::MESSAGE_RECEIVED:
       is_message_reach = true;
       break;
-    case Messages::IS_SERVER_LOST:
+    case messages::IS_SERVER_LOST:
       break;
-    case Messages::OPPONENT_INF:
+    case messages::OPPONENT_INF:
       //send_data(get_user_info(*(*u)), *(*u)); //!!!
       break;
-    case Messages::MY_INF:
+    case messages::MY_INF:
 //      send_data(get_user_info(*(*u), false), *(*u)) //!!!;
       break;
     default:
-      push_message_to_logic(type, content);
+      push_to_logic(type, message);
   }
 }
 
-void user::impl_t::push_to_logic(const Messages::MESSAGE type, const QByteArray& content)
+void user::impl_t::push_to_logic(const messages::MESSAGE type, const QByteArray& content)
 {
-  if(_opponent_index == NO_OPPONENT)
-    { return; }
+//  if(_opponent_index == NO_OPPONENT)
+//    { return; }
 
   switch(type)
   {
-    case Messages::MOVE:
+    case messages::MOVE:
       board->make_moves_from_str(content.toStdString());
       break;
-    case Messages::BACK_MOVE:
+    case messages::BACK_MOVE:
       board->back_move();
       break;
-    case Messages::NEW_GAME:
+    case messages::NEW_GAME:
       board->start_new_game();
       break;
-    case Messages::GO_TO_HISTORY:
+    case messages::GO_TO_HISTORY:
       board->go_to_history_index(content.toInt());
       break;
-    case Messages::FROM_FILE:
+    case messages::FROM_FILE:
       board->start_new_game();
       board->make_moves_from_str(content.toStdString());
       break;
@@ -147,8 +135,8 @@ void user::impl_t::push_to_logic(const Messages::MESSAGE type, const QByteArray&
 QByteArray user::impl_t::get_board_state() const
 {
   QByteArray m;
-  m.setNum(Messages::GAME_INF);
-  m.append(FREE_SPASE);
+  m.setNum(messages::GAME_INF);
+  m.append(" ");
   m.append(QString::fromStdString(board->get_board_mask()));
   m.append(";");
 
@@ -169,7 +157,7 @@ void user::impl_t::add_to_messages(const messages::MESSAGE m)
 
 void user::impl_t::add_to_messages(const QByteArray& m)
 {
-  message.append(m);
+  messages.append(m);
 }
 
 bool user::impl_t::is_message_appear() const
@@ -180,13 +168,10 @@ bool user::impl_t::is_message_appear() const
 QByteArray user::impl_t::pull()
 {
   const auto m = messages.first();
-  messages.reoveFirst();
+  messages.removeFirst();
 
   return m;
 }
-
-void user::impl_t::response_timeout()
-{}
 
 void user::impl_t::check_connection_timeout()
 {}

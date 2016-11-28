@@ -11,7 +11,7 @@
 #include <QJsonObject>
 #include <memory>
 #include "desk.h"
-#include "enums.h"
+#include "messages.h"
 
 
 class UDP_server : public QObject
@@ -30,7 +30,7 @@ private:
 
 public:
   void send_data(const QByteArray &message, User &u);
-  void send_data(const Messages::MESSAGE r_mes, User &u, bool is_prev_serial_need = false);
+  void send_data(const messages::MESSAGE r_mes, User &u, bool is_prev_serial_need = false);
 
 public:
   UDP_server(const UDP_server&) = delete;
@@ -46,11 +46,11 @@ private:
   void begin_wait_receive(User &u);
   int cut_serial_num(QByteArray &message) const;
   QByteArray add_serial_num(const QByteArray &message, User &u, bool is_prev_serial_need = false);
-  bool check_serial_num(const int num, const Messages::MESSAGE type, User &u);
+  bool check_serial_num(const int num, const messages::MESSAGE type, User &u);
   bool is_message_reach(const QByteArray &message, User &u);
   QByteArray get_usr_info(const User &u, bool is_opponent = true) const;
   void run_message(QByteArray &message, const QHostAddress &ip, const quint16 port);
-  void push_message_to_logic(const Messages::MESSAGE type, const QByteArray &content, User &u);
+  void push_message_to_logic(const messages::MESSAGE type, const QByteArray &content, User &u);
   void create_new_user(const QHostAddress &ip, const quint16 port, const QByteArray &login);
 
   void load_users_inf();
