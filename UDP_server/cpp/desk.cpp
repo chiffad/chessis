@@ -8,17 +8,17 @@
 using namespace logic;
 
 
-Desk::Desk(const unsigned first_p, const unsigned second_p)
+desk_t::desk_t(const unsigned first_p, const unsigned second_p)
     : board_t(), _first_player_ind(first_p), _second_player_ind(second_p)
 {
 }
 
-bool Desk::contain_player(const int ind) const
+bool desk_t::contain_player(const int ind) const
 {
   return (ind == _first_player_ind || ind == _second_player_ind);
 }
 
-void Desk::make_moves_from_str(const std::string &str)
+void desk_t::make_moves_from_str(const std::string &str)
 {
   enum{FROM_X = 0, FROM_Y = 1, TO_X = 2, TO_Y = 3, COORD_NEED_TO_MOVE = 4, a_LETTER = 'a', h_LETTER = 'h', ONE_ch = '1', EIGHT_ch = '8'};
 
@@ -39,7 +39,7 @@ void Desk::make_moves_from_str(const std::string &str)
   }
 }
 
-void Desk::write_moves_to_file(const std::string &path) const
+void desk_t::write_moves_to_file(const std::string &path) const
 {
   std::ofstream in_file(path);
 
@@ -53,7 +53,7 @@ void Desk::write_moves_to_file(const std::string &path) const
   std::copy(history.begin(), history.end(), std::ostreambuf_iterator<char>(in_file));
 }
 
-void Desk::load_moves_from_file(const std::string &path)
+void desk_t::load_moves_from_file(const std::string &path)
 {
   std::ifstream from_file(path);
 

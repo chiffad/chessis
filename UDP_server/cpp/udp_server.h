@@ -63,7 +63,7 @@ private:
 
   std::shared_ptr<QUdpSocket> _socket;
   QVector<std::shared_ptr<User>> _user;
-  QVector<std::shared_ptr<logic::Desk>> _board;
+  QVector<std::shared_ptr<logic::desk_t>> _board;
 };
 
 class UDP_server::User : public QObject

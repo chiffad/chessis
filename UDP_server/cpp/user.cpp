@@ -14,7 +14,7 @@ struct user::impl_t
   void push_to_logic(const messages::MESSAGE type, const QByteArray& content);
   bool is_message_appear() const;
   QByteArray pull();
-  void set_board(std::shared_ptr<logic::Desk> d);
+  void set_board(std::shared_ptr<logic::desk_t> d);
   void check_connection_timeout();
   void add_to_messages(const messages::MESSAGE m);
   void add_to_messages(const QByteArray& m);
@@ -28,7 +28,7 @@ struct user::impl_t
   int received_serial_num = 1;
   int send_serial_num = 0;
   bool is_message_reach = true;
-  std::shared_ptr<logic::Desk> board;
+  std::shared_ptr<logic::desk_t> board;
 
   QVector<QByteArray> messages;
 };
@@ -48,7 +48,7 @@ void user::push(const messages::MESSAGE type, const QByteArray& message)
   impl->push(type, message);
 }
 
-void user::set_board(std::shared_ptr<logic::Desk> d)
+void user::set_board(std::shared_ptr<logic::desk_t> d)
 {
   impl->set_board(d);
 }
@@ -71,12 +71,12 @@ void user::check_connection_timeout()
 user::impl_t::impl_t(const QHostAddress &_ip, const int &_port, const QString &log, QTimer& connection)
     : connect_t(connection), ip(_ip), port(_port), login(log)
 {
-  board = std::make_shared<logic::Desk>(0,0);
+  board = std::make_shared<logic::desk_t>(0,0);
   const int CHECK_CONNECT_TIME = 10000;
   connect_t.setInterval(CHECK_CONNECT_TIME);
 }
 
-void user::impl_t::set_board(std::shared_ptr<logic::Desk> d)
+void user::impl_t::set_board(std::shared_ptr<logic::desk_t> d)
 {
   board = d;
 }

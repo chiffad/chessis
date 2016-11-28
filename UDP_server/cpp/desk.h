@@ -9,18 +9,18 @@
 namespace logic
 {
 
-class Desk : public board_t
+class desk_t : public board_t
 {
 public:
-  Desk(const unsigned first_p, const unsigned second_p);
+  desk_t(const unsigned first_p, const unsigned second_p);
   bool contain_player(const int ind) const;
   void make_moves_from_str(const std::string &str);
   void load_moves_from_file(const std::string &path);
   void write_moves_to_file(const std::string &path) const;
 
 public:
-   Desk(const Desk&) = delete;
-   Desk& operator=(const Desk&) = delete;
+   desk_t(const desk_t&) = delete;
+   desk_t& operator=(const desk_t&) = delete;
 
 private:
    const int _first_player_ind;

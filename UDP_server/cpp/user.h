@@ -24,7 +24,7 @@ public:
   void push(const messages::MESSAGE type, const QByteArray& message);
   bool is_message_appear() const;
   QByteArray pull();
-  void set_board(std::shared_ptr<logic::Desk> d);
+  void set_board(std::shared_ptr<logic::desk_t> d);
 
 private slots:
   void check_connection_timeout();

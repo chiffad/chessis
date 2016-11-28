@@ -236,7 +236,7 @@ void UDP_server::set_opponent(User &u)
   if(u._opponent_index != NO_OPPONENT)
   {
     _user[u._opponent_index]->_opponent_index = u._my_index;
-    _board.append(std::make_shared<logic::Desk>(u._my_index, u._opponent_index));
+    _board.append(std::make_shared<logic::desk_t>(u._my_index, u._opponent_index));
      send_board_state(u);
   }
 }
