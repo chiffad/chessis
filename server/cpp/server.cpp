@@ -21,6 +21,7 @@ struct server_t::impl_t
   int cut_serial_num(QByteArray& m);
   std::shared_ptr<server_user_t> get_user(const int port, const QHostAddress& ip) const;
   void run_message(const QByteArray& m, const int port, const QHostAddress& ip);
+  QVector<client_t> get_clients_list() const;
 
   enum {FIRST_PORT = 49152, LAST_PORT = 49500};
   const QHostAddress _SERVER_IP = QHostAddress::LocalHost;
@@ -58,6 +59,11 @@ bool server_t::is_message_append(const int port, const QHostAddress& ip) const
 QByteArray server_t::pull(const int port, const QHostAddress& ip)
 {
   return impl->pull(port, ip);
+}
+
+QVector<server_t::client_t> server_t::get_clients_list() const
+{
+  return impl->get_clients_list();
 }
 
 server_t::impl_t::impl_t()
@@ -138,4 +144,17 @@ void server_t::impl_t::run_message(const QByteArray& m, const int port, const QH
     { (*user)->push_received_mess(m); }
 }
 
+QVector<server_t::client_t> server_t::impl_t::get_clients_list() const
+{
+  QVector<client_t> clients;
 
+  for(const auto& u : users)
+  {
+    client_t c;
+    c.port = u->get_port();
+    c.ip = u->get_ip();
+    clients.append(c);
+  }
+
+  return clients;
+}

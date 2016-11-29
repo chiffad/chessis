@@ -13,12 +13,20 @@ namespace sr
 class server_t
 {
 public:
+  struct client_t
+  {
+    int port;
+    QHostAddress ip;
+  };
+
+public:
   server_t();
   ~server_t();
   void process_event();
   void push(const QByteArray& message, const int port, const QHostAddress& ip);
   bool is_message_append(const int port, const QHostAddress& ip) const;
   QByteArray pull(const int port, const QHostAddress& ip);
+  QVector<client_t> get_clients_list() const;
 
 public:
   server_t(const server_t&) = delete;
