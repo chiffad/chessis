@@ -26,12 +26,6 @@ public:
   bool is_no_received_mess() const;
   QByteArray pull_received_mess();
 
-  bool is_previous_serial_num(const int num) const;
-  bool is_current_serial_num(const int num) const;
-  void increase_receive_serial_num();
-
-  void last_message_received();
-
 public:
   server_user_t(const server_user_t&) = delete;
   server_user_t& operator=(const server_user_t&) = delete;
