@@ -12,7 +12,7 @@ namespace logic
 class desk_t : public board_t
 {
 public:
-  desk_t(const unsigned first_p, const unsigned second_p);
+  desk_t(const unsigned first_p = 0, const unsigned second_p = 0);
   bool contain_player(const int ind) const;
   void make_moves_from_str(const std::string &str);
   void load_moves_from_file(const std::string &path);
