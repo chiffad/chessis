@@ -12,7 +12,6 @@ namespace sr
 
 class server_t
 {
-
 public:
   server_t();
   ~server_t();

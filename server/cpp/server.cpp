@@ -6,7 +6,6 @@
 #include <algorithm>
 
 #include "server_user.h"
-#include "messages.h"
 
 
 using namespace sr;
@@ -82,7 +81,7 @@ void server_t::impl_t::process_event()
   for(auto& i: users)
   {
     if(!i->is_no_message_for_send())
-        { socket.writeDatagram(i->pull_message_for_send(), i->get_ip(), i->get_port()); }
+        { qDebug()<<"here2!"; socket.writeDatagram(i->pull_message_for_send(), i->get_ip(), i->get_port()); }
   }
 }
 
@@ -111,14 +110,6 @@ std::shared_ptr<server_user_t> server_t::impl_t::get_user(const int port, const 
   return (*user);
 }
 
-int server_t::impl_t::cut_serial_num(QByteArray& m)
-{
-  auto serial_num = m.mid(0, m.indexOf(" "));
-  m.remove(0, m.indexOf(" ") + 1);
-
-  return serial_num.toInt();
-}
-
 void server_t::impl_t::read()
 {
   QHostAddress ip;
@@ -128,52 +119,23 @@ void server_t::impl_t::read()
   m.resize(socket.pendingDatagramSize());
   socket.readDatagram(m.data(), m.size(), &ip, &port);
 
+qDebug()<<"read!:"<<m;
+
   run_message(m, port, ip);
 }
 
 void server_t::impl_t::run_message(const QByteArray& m, const int port, const QHostAddress& ip)
 {
   auto user = std::find_if(users.begin(), users.end(), [&](auto i){ return i->is_me(port, ip); });
-  const int num = cut_serial_num(m);
 
   if(user == users.end())
   {
-    if(num != 1)
-    {
-      qDebug()<<"server_t::impl_t::read(): For new users ser num must be == 1!!";
-      return;
-    }
-
+    qDebug()<<"server_t::impl_t::run_message New user!";
     users.append(std::make_shared<server_user_t>(port, ip));
     users.last()->push_received_mess(m);
   }
   else
-  {
-    if(!(*user)->is_current_serial_num(num))
-      { qDebug()<<"server_t::impl_t::read(): Wrong ser num!!"<<num; }
-
-    else if((*user)->is_previous_serial_num(num))
-    {
-      if(m == QByteArray::number(messages::MESSAGE_RECEIVED))
-        { return; }
-
-      qDebug()<<"server_t::impl_t::read(): Wrong ser num!!"<<num;
-      QByteArray m = QByteArray::number(num) + " " + QByteArray::number(messages::MESSAGE_RECEIVED);
-      socket.writeDatagram(m, ip, port);
-      ///sending Message_receive
-    }
-    else
-    {
-     // if message == message receive need to user->last_message_received();
-      if(m == QByteArray::number(messages::MESSAGE_RECEIVED))
-        { (*user)->last_message_received(); }
-      else
-      {
-        (*user)->push_received_mess(m);
-        (*user)->increase_receive_serial_num();
-      }
-    }
-  }
+    { (*user)->push_received_mess(m); }
 }
 
 
