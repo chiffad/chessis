@@ -1,6 +1,5 @@
 #include "user.h"
 
-#include <QVector>
 #include <QObject>
 
 
@@ -8,31 +7,28 @@ using namespace sr;
 
 struct user_t::impl_t
 {
-  impl_t(const QHostAddress &ip, const int &port, const QString &login);
+  impl_t(const QHostAddress& ip, const int& port);
   void push(const messages::MESSAGE type, const QByteArray& message);
-  void push_to_logic(const messages::MESSAGE type, const QByteArray& content);
-  bool is_message_appear() const;
-  QByteArray pull();
   void set_board(std::shared_ptr<logic::desk_t> d);
   void check_connection_timeout();
-  void add_to_messages(const messages::MESSAGE m);
-  void add_to_messages(const QByteArray& m);
   QByteArray get_board_state() const;
+  QByteArray get_info() const;
+  int get_port() const;
+  QHostAddress get_ip() const;
+  bool is_game_active() const;
+  const logic::desk_t* get_board() const;
+
 
   QTimer connect_timer;
   QHostAddress ip;
   int port;
-  QString login;
-  int received_serial_num = 1;
-  int send_serial_num = 0;
-  bool is_message_reach = true;
+  QByteArray login;
+  int rating = 1200;
   std::shared_ptr<logic::desk_t> board;
-
-  QVector<QByteArray> messages;
 };
 
-user_t::user_t(const QHostAddress &ip, const quint16 &port, const QString &login)
-    : impl(new impl_t(ip, port, login))
+user_t::user_t(const QHostAddress& ip, const int port)
+    : impl(new impl_t(ip, port))
 {
 }
 
@@ -50,21 +46,39 @@ void user_t::set_board(std::shared_ptr<logic::desk_t> d)
   impl->set_board(d);
 }
 
-bool user_t::is_message_appear() const
+QByteArray user_t::get_board_state() const
 {
-  return impl->is_message_appear();
+  return impl->get_board_state();
 }
 
-QByteArray user_t::pull()
+QByteArray user_t::get_info() const
 {
-  return impl->pull();
+  return impl->get_info();
 }
 
-user_t::impl_t::impl_t(const QHostAddress &_ip, const int &_port, const QString &log)
-    : ip(_ip), port(_port), login(log)
+int user_t::get_port() const
 {
-  board = std::make_shared<logic::desk_t>(0,0);
+  return impl->get_port();
+}
 
+QHostAddress user_t::get_ip() const
+{
+  return impl->get_ip();
+}
+
+bool user_t::is_game_active() const
+{
+  return impl->is_game_active();
+}
+
+const logic::desk_t* user_t::get_board() const
+{
+  return impl->get_board();
+}
+
+user_t::impl_t::impl_t(const QHostAddress& _ip, const int& _port)
+    : ip(_ip), port(_port)
+{
   QObject::connect(&connect_timer, &QTimer::timeout, [&](){check_connection_timeout();});
   const int CHECK_CONNECT_TIME = 10000;
   connect_timer.setInterval(CHECK_CONNECT_TIME);
@@ -75,33 +89,18 @@ void user_t::impl_t::set_board(std::shared_ptr<logic::desk_t> d)
   board = d;
 }
 
-void user_t::impl_t::push(const messages::MESSAGE type, const QByteArray& message)
+void user_t::impl_t::push(const messages::MESSAGE type, const QByteArray& content)
 {
-  if(type != messages::MESSAGE_RECEIVED)
-    { add_to_messages(messages::MESSAGE_RECEIVED); }
-
-  switch(type)
+  qDebug()<<"=======================";
+  qDebug()<<"user_t::impl_t::push: "<<type<<" "<<content;
+  if(type == messages::HELLO_SERVER)
   {
-    case messages::MESSAGE_RECEIVED:
-      is_message_reach = true;
-      break;
-    case messages::IS_SERVER_LOST:
-      break;
-    case messages::OPPONENT_INF:
-      //send_data(get_user_info(*(*u)), *(*u)); //!!!
-      break;
-    case messages::MY_INF:
-//      send_data(get_user_info(*(*u), false), *(*u)) //!!!;
-      break;
-    default:
-      push_to_logic(type, message);
+    login == content;
+    return;
   }
-}
 
-void user_t::impl_t::push_to_logic(const messages::MESSAGE type, const QByteArray& content)
-{
-//  if(_opponent_index == NO_OPPONENT)
-//    { return; }
+  if(!board)
+    { return; }
 
   switch(type)
   {
@@ -123,18 +122,15 @@ void user_t::impl_t::push_to_logic(const messages::MESSAGE type, const QByteArra
       break;
     default: qDebug()<<"UDP_server::push_message_to_logic: Unknown message type";
   }
-  add_to_messages(get_board_state());
 }
 
 QByteArray user_t::impl_t::get_board_state() const
 {
   QByteArray m;
   m.setNum(messages::GAME_INF);
-  m.append(" ");
-  m.append(QString::fromStdString(board->get_board_mask()));
-  m.append(";");
+  m.append(" " + QByteArray::fromStdString(board->get_board_mask()) + ";");
 
-  m.append(QString::fromStdString(board->get_moves_history()));
+  m.append(QByteArray::fromStdString(board->get_moves_history()));
   if(board->is_mate())
     { m.append("#"); }
   m.append(";");
@@ -144,28 +140,33 @@ QByteArray user_t::impl_t::get_board_state() const
   return m;
 }
 
-void user_t::impl_t::add_to_messages(const messages::MESSAGE m)
+QByteArray user_t::impl_t::get_info() const
 {
-  messages.append(QByteArray::number(m));
-}
-
-void user_t::impl_t::add_to_messages(const QByteArray& m)
-{
-  messages.append(m);
-}
-
-bool user_t::impl_t::is_message_appear() const
-{
-  return !messages.isEmpty();
-}
-
-QByteArray user_t::impl_t::pull()
-{
-  const auto m = messages.first();
-  messages.removeFirst();
-
-  return m;
+  return (QByteArray::number(messages::INF_REQUEST) + " Login: " + login
+          + "; Rating ELO: " + QByteArray::number(rating));
 }
 
 void user_t::impl_t::check_connection_timeout()
-{}
+{
+}
+
+int user_t::impl_t::get_port() const
+{
+  return port;
+}
+
+QHostAddress user_t::impl_t::get_ip() const
+{
+  return ip;
+}
+
+bool user_t::impl_t::is_game_active() const
+{
+  return board.operator bool();
+}
+
+const logic::desk_t* user_t::impl_t::get_board() const
+{
+  return board.get();
+}
+
