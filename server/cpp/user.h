@@ -26,6 +26,7 @@ public:
   QByteArray get_info() const;
   int get_port() const;
   QHostAddress get_ip() const;
+  bool is_need_check_connection() const;
   bool is_game_active() const;
   const logic::desk_t* get_board() const;
 

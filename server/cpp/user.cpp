@@ -18,6 +18,7 @@ struct user_t::impl_t
   QByteArray get_info() const;
   int get_port() const;
   QHostAddress get_ip() const;
+  bool is_need_check_connection() const;
   bool is_game_active() const;
   const logic::desk_t* get_board() const;
 
@@ -28,6 +29,8 @@ struct user_t::impl_t
   QByteArray login;
   int rating = 1200;
   std::shared_ptr<logic::desk_t> board;
+
+  bool need_check_connection = false;
 };
 
 user_t::user_t(const QHostAddress& ip, const int port)
@@ -69,6 +72,11 @@ QHostAddress user_t::get_ip() const
   return impl->get_ip();
 }
 
+bool user_t::is_need_check_connection() const
+{
+  return impl->is_need_check_connection();
+}
+
 bool user_t::is_game_active() const
 {
   return impl->is_game_active();
@@ -85,6 +93,7 @@ user_t::impl_t::impl_t(const QHostAddress& _ip, const int& _port)
   QObject::connect(&connect_timer, &QTimer::timeout, [&](){check_connection_timeout();});
   const int CHECK_CONNECT_TIME = 10000;
   connect_timer.setInterval(CHECK_CONNECT_TIME);
+  connect_timer.start();
 }
 
 void user_t::impl_t::set_board(std::shared_ptr<logic::desk_t> d)
@@ -96,6 +105,7 @@ void user_t::impl_t::push(const messages::MESSAGE type, const QByteArray& conten
 {
   qDebug()<<"===========";
   qDebug()<<"user_t::impl_t::push: "<<type<<" "<<content;
+
   if(type == messages::HELLO_SERVER)
   {
     login == content;
@@ -125,6 +135,9 @@ void user_t::impl_t::push(const messages::MESSAGE type, const QByteArray& conten
       break;
     default: qDebug()<<"UDP_server::push_message_to_logic: Unknown message type";
   }
+
+  connect_timer.restart();
+  need_check_connection = false;
 }
 
 QByteArray user_t::impl_t::get_board_state() const
@@ -154,6 +167,7 @@ QByteArray user_t::impl_t::get_info() const
 
 void user_t::impl_t::check_connection_timeout()
 {
+  need_check_connection = true;
 }
 
 int user_t::impl_t::get_port() const
@@ -169,6 +183,11 @@ QHostAddress user_t::impl_t::get_ip() const
 bool user_t::impl_t::is_game_active() const
 {
   return board.operator bool();
+}
+
+bool user_t::impl_t::is_need_check_connection() const
+{
+  return need_check_connection;
 }
 
 const logic::desk_t* user_t::impl_t::get_board() const
