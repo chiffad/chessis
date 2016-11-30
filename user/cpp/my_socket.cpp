@@ -111,6 +111,8 @@ void my_socket::impl_t::send(const QByteArray& message, bool is_prev_serial_need
     return;
   }
 
+  qDebug()<<"sending:"<<message;
+
   socket.writeDatagram(add_serial_num(message, is_prev_serial_need), SERVER_IP, server_port);
   begin_wait_receive(message);
 }
@@ -129,6 +131,8 @@ void my_socket::impl_t::send(const Messages::MESSAGE r_mes, bool is_prev_serial_
     }
     begin_wait_receive(message);
   }
+
+  qDebug()<<"sending:"<<message;
 
   socket.writeDatagram(add_serial_num(message, is_prev_serial_need), SERVER_IP, server_port);
 }

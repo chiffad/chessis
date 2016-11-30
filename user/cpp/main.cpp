@@ -37,7 +37,6 @@ int main(int argc, char *argv[])
       {
         QByteArray m;
         m.append(board_graphic.pull());
-        qDebug()<<"sending:"<<m;
         socket.send(m);
       }
 
