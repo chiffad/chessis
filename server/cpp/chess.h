@@ -16,7 +16,7 @@ class board_t
 {
 public:
   board_t();
-  ~board_t();
+  virtual ~board_t();
   bool move(const coord_t &from, const coord_t &to);
   bool back_move();
   void start_new_game();
