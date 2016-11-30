@@ -20,4 +20,5 @@ HEADERS += cpp/chess.h \
            cpp/coord.h \
            cpp/server_user.h \
            cpp/user.h \
+           cpp/log.h \
 
