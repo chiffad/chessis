@@ -17,17 +17,16 @@ struct server_user_t::impl_t
   bool is_me(const int _port, const QHostAddress& _ip) const;
   int get_port() const;
   QHostAddress get_ip() const;
-
   void push_for_send(const QByteArray& m);
   QByteArray pull_message_for_send();
   bool is_no_message_for_send() const;
-
   void push_received_mess(const QByteArray& m);
   bool is_no_received_mess() const;
   QByteArray pull_received_mess();
-
   void receiving_timeout();
   int cut_serial_num(QByteArray& m);
+  bool is_client_lost() const;
+
 
   const int port;
   const QHostAddress ip;
@@ -36,10 +35,11 @@ struct server_user_t::impl_t
 
   QVector<QByteArray> mess_for_send;
   QByteArray last_sent_mess;
-  QByteArray repeate_message_receive;
+  QVector<QByteArray> repeate_message;
   QVector<QByteArray> received_mess;
 
   bool is_last_mess_reach = true;
+  bool client_lost;
 };
 
 server_user_t::server_user_t(const int port, const QHostAddress& ip)
@@ -95,6 +95,11 @@ QByteArray server_user_t::pull_received_mess()
   return impl->pull_received_mess();
 }
 
+bool server_user_t::is_client_lost() const
+{
+  return impl->is_client_lost();
+}
+
 server_user_t::impl_t::impl_t(const int p, const QHostAddress& address)
     : port(p), ip(address)
 {
@@ -126,10 +131,10 @@ QByteArray server_user_t::impl_t::pull_message_for_send() //need correct
 {
   qDebug()<<"===========";
   qDebug()<<"server_user_t::impl_t::pull_message_for_send()";
-  if(!repeate_message_receive.isEmpty())
+  if(!repeate_message.isEmpty())
   {
-    const auto m = repeate_message_receive;
-    repeate_message_receive.clear();
+    const auto m = repeate_message.first();
+    repeate_message.removeFirst();
     return m;
   }
 
@@ -166,7 +171,7 @@ void server_user_t::impl_t::push_received_mess(const QByteArray& message)
     if(m.toInt() == messages::MESSAGE_RECEIVED)
       { return; }
 
-    repeate_message_receive = QByteArray::number(send_serial_num) + " " + QByteArray::number(messages::MESSAGE_RECEIVED);
+    repeate_message.push_front(QByteArray::number(send_serial_num) + " " + QByteArray::number(messages::MESSAGE_RECEIVED));
   }
   else
   {
@@ -219,14 +224,25 @@ QByteArray server_user_t::impl_t::pull_received_mess()
 
 bool server_user_t::impl_t::is_no_message_for_send() const
 {
-  return (mess_for_send.isEmpty() && is_last_mess_reach) && repeate_message_receive.isEmpty();
+  return (mess_for_send.isEmpty() && is_last_mess_reach) && repeate_message.isEmpty();
 }
 
 void server_user_t::impl_t::receiving_timeout()
 {
+  static int i = 0;
   if(is_last_mess_reach)
-    { return; }
+  {
+    i = 0;
+    return;
+  }
 
-  mess_for_send.push_front(last_sent_mess);
+  if(++i == 3) // 3 cause i want so
+    { mess_for_send.append(QByeArray::OPPONENT_LOST); }
+
+  repeate_message.push_front(last_sent_mess);
 }
 
+bool server_user_t::impl_t::::is_client_lost() const
+{
+  return client_lost;
+}

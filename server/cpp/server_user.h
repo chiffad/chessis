@@ -23,6 +23,8 @@ public:
   void push_received_mess(const QByteArray& m);
   bool is_no_received_mess() const;
   QByteArray pull_received_mess();
+  bool is_client_lost() const;
+
 
 public:
   server_user_t(const server_user_t&) = delete;
