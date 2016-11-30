@@ -19,13 +19,13 @@ int main(int argc, char *argv[])
   graphic::Board_graphic board_graphic;
 
   engine.rootContext()->setContextProperty("FigureModel", &board_graphic);
-  engine.load(QUrl(QStringLiteral("../c/res/app.qml")));
+//  engine.load(QUrl(QStringLiteral("../c/res/app.qml")));
 
   inet::my_socket socket;
   const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();
 
-  while(!app.allWindows().isEmpty() && app.allWindows().last()->visibility())
+  while(true)//!app.allWindows().isEmpty() && app.allWindows().last()->visibility())
   {
     app.processEvents();
 
@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
       {
         QByteArray m;
         m.append(board_graphic.pull());
+        qDebug()<<"sending:"<<m;
         socket.send(m);
       }
 

@@ -142,11 +142,13 @@ void my_socket::impl_t::read()
   message.resize(socket.pendingDatagramSize());
   socket.readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
 
+qDebug()<<"read!!"<<message;
+
   const int serial_num = cut_serial_num(message);
 
   if(sender_IP != SERVER_IP || sender_port != server_port || sender_port == my_port)
   {
-    qDebug()<<"Warning! in UDP_socket::read_data: Wrong sender!";
+    qDebug()<<"Warning! in UDP_socket::read_data: Wrong sender!"<<message;
     return;
   }
 

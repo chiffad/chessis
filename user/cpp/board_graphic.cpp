@@ -7,6 +7,9 @@
 #include <sstream>
 #include <algorithm>
 
+#include <stdlib.h>
+#include <time.h>
+
 
 using namespace graphic;
 
@@ -20,7 +23,9 @@ Board_graphic::Board_graphic()
   for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
     { addFigure(Figure(HILIGHT_IM, 0, 0, false)); }
 
-  //set_login("asdasd");
+  srand (time(NULL));
+
+  set_login("asdasd" + QString::number(rand()));
 }
 
 Board_graphic::~Board_graphic()

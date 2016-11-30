@@ -91,7 +91,7 @@ void user_t::impl_t::set_board(std::shared_ptr<logic::desk_t> d)
 
 void user_t::impl_t::push(const messages::MESSAGE type, const QByteArray& content)
 {
-  qDebug()<<"=======================";
+  qDebug()<<"===========";
   qDebug()<<"user_t::impl_t::push: "<<type<<" "<<content;
   if(type == messages::HELLO_SERVER)
   {
