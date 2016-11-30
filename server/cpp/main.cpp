@@ -34,6 +34,19 @@ int main(int argc, char *argv[]) try
       const auto ip = u->get_ip();
       const auto port = u->get_port();
 
+      if(u->is_need_check_connection())
+        { server.push(QByteArray::number(messages::CLIENT_LOST), port, ip); }
+
+      if(server.is_client_lost(port, ip))
+      {
+        qDebug()<<"main:: client lost!!!!!!";
+        if(u->is_game_active())
+        {
+          const auto _1 = std::find_if(users.begin(), users.end(), [&u](const auto& i){ return (i->get_board() == u->get_board() && i != u);});
+          server.push(QByteArray::number(messages::OPPONENT_LOST), (*_1)->get_port(), (*_1)->get_ip());
+        }
+      }
+
       if(!server.is_message_append(port, ip))
         { continue; }
 
@@ -44,13 +57,11 @@ int main(int argc, char *argv[]) try
       {
         case messages::OPPONENT_INF:
           if(!u->is_game_active())
-            { server.push("No opponent!!", port, ip); }
+            { server.push(QByteArray::number(messages::INF_REQUEST) + " No opponent!!", port, ip); }
           else
           {
             const auto _1 = std::find_if(users.begin(), users.end(), [&u](const auto& i){ return (i->get_board() == u->get_board() && i != u);});
-
-            if(_1 != users.end())
-              { server.push((*_1)->get_info(), port, ip); }
+            server.push((*_1)->get_info(), port, ip);
           }
           break;
         case messages::MY_INF:
