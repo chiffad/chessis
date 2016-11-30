@@ -136,7 +136,7 @@ void user_t::impl_t::push(const messages::MESSAGE type, const QByteArray& conten
     default: qDebug()<<"UDP_server::push_message_to_logic: Unknown message type";
   }
 
-  connect_timer.restart();
+  connect_timer.start();
   need_check_connection = false;
 }
 
