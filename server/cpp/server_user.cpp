@@ -237,12 +237,12 @@ void server_user_t::impl_t::receiving_timeout()
   }
 
   if(++i == 3) // 3 cause i want so
-    { mess_for_send.append(QByeArray::OPPONENT_LOST); }
+    { mess_for_send.append(QByteArray::number(messages::OPPONENT_LOST)); }
 
   repeate_message.push_front(last_sent_mess);
 }
 
-bool server_user_t::impl_t::::is_client_lost() const
+bool server_user_t::impl_t::is_client_lost() const
 {
   return client_lost;
 }
