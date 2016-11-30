@@ -219,7 +219,7 @@ QByteArray server_user_t::impl_t::pull_received_mess()
 
 bool server_user_t::impl_t::is_no_message_for_send() const
 {
-  return (mess_for_send.isEmpty() && is_last_mess_reach);// || repeate_message_receive.isEmpty();
+  return (mess_for_send.isEmpty() && is_last_mess_reach) && repeate_message_receive.isEmpty();
 }
 
 void server_user_t::impl_t::receiving_timeout()
