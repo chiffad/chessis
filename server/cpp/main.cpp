@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) try
     }
 
     auto u1 = std::find_if(users.begin(), users.end(), [](const auto& i){ return !i->is_game_active();});
-    auto u2 = std::find_if(u1, users.end(), [](const auto& i){ return !i->is_game_active();});
+    auto u2 = std::find_if(u1 + 1, users.end(), [](const auto& i){ return !i->is_game_active();});
 
     if(u1 != users.end() && u2 != users.end())
     {
