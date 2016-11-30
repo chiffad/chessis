@@ -1,6 +1,9 @@
 #include "user.h"
 
 #include <QObject>
+#include <exception>
+
+#include "log.h"
 
 
 using namespace sr;
@@ -126,6 +129,9 @@ void user_t::impl_t::push(const messages::MESSAGE type, const QByteArray& conten
 
 QByteArray user_t::impl_t::get_board_state() const
 {
+  if(!board)
+    { sr::throw_exception("board not exist!"); }
+
   QByteArray m;
   m.setNum(messages::GAME_INF);
   m.append(" " + QByteArray::fromStdString(board->get_board_mask()) + ";");

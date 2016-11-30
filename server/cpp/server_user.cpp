@@ -6,6 +6,7 @@
 #include <exception>
 
 #include "messages.h"
+#include "log.h"
 
 
 using namespace sr;
@@ -133,17 +134,18 @@ QByteArray server_user_t::impl_t::pull_message_for_send() //need correct
   }
 
   if(mess_for_send.isEmpty())
-    { throw std::logic_error("server_user_t::impl_t::pull_message_for_send() : mess_for_send empty!"); }
+    { sr::throw_exception("mess_for_send empty!"); }
 
-  last_sent_mess = QByteArray::number(++send_serial_num) + " " + mess_for_send.first();
+  const auto m = mess_for_send.first();
+  mess_for_send.removeFirst();
 
-  if(mess_for_send.first().toInt() != messages::MESSAGE_RECEIVED)
+  if(m.toInt() != messages::MESSAGE_RECEIVED)
   {
     const int RECEIV_CHECK_TIME = 5000;
     QTimer::singleShot(RECEIV_CHECK_TIME, [&](){receiving_timeout();});
   }
 
-  mess_for_send.removeFirst();
+  last_sent_mess = QByteArray::number(++send_serial_num) + " " + m;
 
   return last_sent_mess;
 }
@@ -207,7 +209,7 @@ bool server_user_t::impl_t::is_no_received_mess() const
 QByteArray server_user_t::impl_t::pull_received_mess()
 {
   if(received_mess.isEmpty())
-    { throw std::logic_error("server_user_t::impl_t::pull_received_mess : received_mess empty!"); }
+    { sr::throw_exception("received_mess empty!"); }
 
   const auto m = received_mess.first();
   received_mess.removeFirst();
