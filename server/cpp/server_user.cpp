@@ -233,11 +233,15 @@ void server_user_t::impl_t::receiving_timeout()
   if(is_last_mess_reach)
   {
     i = 0;
+    client_lost = false;
     return;
   }
 
   if(++i == 3) // 3 cause i want so
-    { mess_for_send.append(QByteArray::number(messages::OPPONENT_LOST)); }
+  {
+     mess_for_send.append(QByteArray::number(messages::OPPONENT_LOST));
+     client_lost = true;
+  }
 
   repeate_message.push_front(last_sent_mess);
 }
