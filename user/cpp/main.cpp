@@ -6,7 +6,7 @@
 #include <exception>
 
 #include "board_graphic.h"
-#include "my_socket.h"
+#include "client.h"
 #include "fb_obj.h"
 
 
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
   engine.rootContext()->setContextProperty("FigureModel", &board_graphic);
 //  engine.load(QUrl(QStringLiteral("../c/res/app.qml")));
 
-  inet::my_socket socket;
+  inet::client_t client;
   const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();
 
@@ -37,12 +37,12 @@ int main(int argc, char *argv[])
       {
         QByteArray m;
         m.append(board_graphic.pull());
-        socket.send(m);
+        client.send(m);
       }
 
-      while(socket.is_message_append())
+      while(client.is_message_append())
       {
-         const QString message = socket.pull();
+         const QString message = client.pull();
          const int type = message.mid(0, message.indexOf(" ")).toInt();
          if(type == Messages::INF_REQUEST)
            { board_graphic.add_to_command_history(message.mid(message.indexOf(" "))); }

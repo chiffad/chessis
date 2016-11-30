@@ -1,4 +1,4 @@
-#include "my_socket.h"
+#include "client.h"
 
 #include <QObject>
 #include <QUdpSocket>
@@ -10,9 +10,9 @@
 
 using namespace inet;
 
-struct my_socket::impl_t
+struct client_t::impl_t
 {
-  impl_t(QUdpSocket& s, QTimer& t, QTimer& connection_timer);
+  impl_t();
   void send(const QByteArray& message, bool is_prev_serial_need = false);
   void send(const Messages::MESSAGE r_mes, bool is_prev_serial_need = false);
   QByteArray pull();
@@ -24,9 +24,9 @@ struct my_socket::impl_t
   int cut_serial_num(QByteArray& data) const;
   void begin_wait_receive(const QByteArray& message);
 
-  QUdpSocket& socket;
-  QTimer& timer;
-  QTimer& connection_checker_timer;
+  QUdpSocket socket;
+  QTimer timer;
+  QTimer connection_checker_timer;
 
   QByteArray last_send_message;
   QVector<QByteArray> send_message_stack;
@@ -44,52 +44,38 @@ struct my_socket::impl_t
 };
 
 
-my_socket::my_socket()
-    : QObject(nullptr), impl(new impl_t(socket, timer, connection_checker_timer))
-{
-  connect(&socket, SIGNAL(readyRead()), this, SLOT(read()));
-  connect(&timer, SIGNAL(timeout()), this, SLOT(is_message_received()));
-  connect(&connection_checker_timer, SIGNAL(timeout()), this, SLOT(connection_checker_timer_timeout()));
-}
-
-my_socket::~my_socket()
+client_t::client_t()
+    : impl(new impl_t())
 {
 }
 
-void my_socket::send(const QByteArray &message, bool is_prev_serial_need)
+client_t::~client_t()
 {
-  impl->send(message, is_prev_serial_need);
 }
 
-QByteArray my_socket::pull()
+void client_t::send(const QByteArray& message)
+{
+  impl->send(message);
+}
+
+QByteArray client_t::pull()
 {
   return impl->pull();
 }
 
-bool my_socket::is_message_append() const
+bool client_t::is_message_append() const
 {
   return impl->is_message_append();
 }
 
-void my_socket::read()
+client_t::impl_t::impl_t()
+    : received_serial_num(0), send_serial_num(0), is_received(true),
+      server_port(FIRST_PORT), SERVER_IP(QHostAddress::LocalHost)
 {
-  impl->read();
-}
+  QObject::connect(&socket, &QUdpSocket::readyRead, [&](){ read(); });
+  QObject::connect(&timer, &QTimer::timeout, [&](){ is_message_received(); });
+  QObject::connect(&connection_checker_timer, &QTimer::timeout, [&](){ connection_checker_timer_timeout(); });
 
-bool my_socket::is_message_received()
-{
-  return impl->is_message_received();
-}
-
-void my_socket::connection_checker_timer_timeout()
-{
-  impl->connection_checker_timer_timeout();
-}
-
-my_socket::impl_t::impl_t(QUdpSocket& s, QTimer& t, QTimer& connection_timer)
-    : socket(s), timer(t), connection_checker_timer(connection_timer), received_serial_num(0),
-      send_serial_num(0), is_received(true), server_port(FIRST_PORT), SERVER_IP(QHostAddress::LocalHost)
-{
   for(unsigned i = 0; i + FIRST_PORT < LAST_PORT; ++i)
   {
     if(socket.bind(SERVER_IP, FIRST_PORT + i))
@@ -103,7 +89,7 @@ my_socket::impl_t::impl_t(QUdpSocket& s, QTimer& t, QTimer& connection_timer)
   }
 }
 
-void my_socket::impl_t::send(const QByteArray& message, bool is_prev_serial_need)
+void client_t::impl_t::send(const QByteArray& message, bool is_prev_serial_need)
 {
   if(!is_message_received())
   {
@@ -117,7 +103,7 @@ void my_socket::impl_t::send(const QByteArray& message, bool is_prev_serial_need
   begin_wait_receive(message);
 }
 
-void my_socket::impl_t::send(const Messages::MESSAGE r_mes, bool is_prev_serial_need)
+void client_t::impl_t::send(const Messages::MESSAGE r_mes, bool is_prev_serial_need)
 {
   QByteArray message;
   message.setNum(r_mes);
@@ -137,7 +123,7 @@ void my_socket::impl_t::send(const Messages::MESSAGE r_mes, bool is_prev_serial_
   socket.writeDatagram(add_serial_num(message, is_prev_serial_need), SERVER_IP, server_port);
 }
 
-void my_socket::impl_t::read()
+void client_t::impl_t::read()
 {
   QHostAddress sender_IP;
   quint16 sender_port;
@@ -186,7 +172,7 @@ qDebug()<<"read!!"<<message;
   connection_checker_timer.start(CHECK_CONNECT_TIME);
 }
 
-QByteArray my_socket::impl_t::pull()
+QByteArray client_t::impl_t::pull()
 {
   QByteArray m(received_message_stack.first());
   received_message_stack.removeFirst();
@@ -194,24 +180,24 @@ QByteArray my_socket::impl_t::pull()
   return m;
 }
 
-bool my_socket::impl_t::is_message_append() const
+bool client_t::impl_t::is_message_append() const
 {
   return !received_message_stack.isEmpty();
 }
 
-void my_socket::impl_t::begin_wait_receive(const QByteArray& message)
+void client_t::impl_t::begin_wait_receive(const QByteArray& message)
 {
   is_received = false;
   last_send_message = message;
   timer.start(RESPONSE_WAIT_TIME);
 }
 
-void my_socket::impl_t::connection_checker_timer_timeout()
+void client_t::impl_t::connection_checker_timer_timeout()
 {
   send(Messages::IS_SERVER_LOST);
 }
 
-bool my_socket::impl_t::is_message_received()
+bool client_t::impl_t::is_message_received()
 {
   static int num_of_restarts = 0;
   if(is_received)
@@ -243,7 +229,7 @@ bool my_socket::impl_t::is_message_received()
   return is_received;
 }
 
-QByteArray my_socket::impl_t::add_serial_num(const QByteArray &data, bool is_prev_serial_need)
+QByteArray client_t::impl_t::add_serial_num(const QByteArray &data, bool is_prev_serial_need)
 {
   if(!is_prev_serial_need)
     { ++send_serial_num; }
@@ -256,7 +242,7 @@ QByteArray my_socket::impl_t::add_serial_num(const QByteArray &data, bool is_pre
   return message;
 }
 
-int my_socket::impl_t::cut_serial_num(QByteArray &data) const
+int client_t::impl_t::cut_serial_num(QByteArray &data) const
 {
   QByteArray serial_num(data.mid(0, data.indexOf(FREE_SPASE)));
   data.remove(0, data.indexOf(FREE_SPASE) + 1);
