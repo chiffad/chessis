@@ -3,6 +3,7 @@
 #include <QVector>
 #include <QTimer>
 #include <QDebug>
+#include <exception>
 
 #include "messages.h"
 
@@ -115,11 +116,14 @@ QHostAddress server_user_t::impl_t::get_ip() const
 
 void server_user_t::impl_t::push_for_send(const QByteArray& m)
 {
+  qDebug()<<"============";
+  qDebug()<<"server_user_t::impl_t::push_for_send"<<m;
   mess_for_send.append(m);
 }
 
 QByteArray server_user_t::impl_t::pull_message_for_send() //need correct
 {
+  qDebug()<<"===========";
   qDebug()<<"server_user_t::impl_t::pull_message_for_send()";
   if(!repeate_message_receive.isEmpty())
   {
@@ -127,6 +131,9 @@ QByteArray server_user_t::impl_t::pull_message_for_send() //need correct
     repeate_message_receive.clear();
     return m;
   }
+
+  if(mess_for_send.isEmpty())
+    { throw std::logic_error("server_user_t::impl_t::pull_message_for_send() : mess_for_send empty!"); }
 
   last_sent_mess = QByteArray::number(++send_serial_num) + " " + mess_for_send.first();
 
@@ -143,23 +150,25 @@ QByteArray server_user_t::impl_t::pull_message_for_send() //need correct
 
 void server_user_t::impl_t::push_received_mess(const QByteArray& message)
 {
+  qDebug()<<"===========";
   qDebug()<<"server_user_t::impl_t::push_received_mess:"<<message;
   QByteArray m = message;
   const int ser_num = cut_serial_num(m);
 
   if(receiv_serial_num != ser_num)
-    { qDebug()<<"server_user_t::impl_t::push_received_mess Wrong ser num!!"<<ser_num<<"must be:"<<receiv_serial_num; }
+    { qDebug()<<"Wrong ser num!!"<<ser_num<<"must be:"<<receiv_serial_num; }
 
   else if(receiv_serial_num - 1 == ser_num)
   {
+    qDebug()<<"Previous ser num!!"<<ser_num;
     if(m.toInt() == messages::MESSAGE_RECEIVED)
       { return; }
 
-    qDebug()<<"server_t::impl_t::read(): Previous ser num!!"<<ser_num;
     repeate_message_receive = QByteArray::number(send_serial_num) + " " + QByteArray::number(messages::MESSAGE_RECEIVED);
   }
   else
   {
+    qDebug()<<"correct ser num!!!"<<m;
     ++receiv_serial_num;
 
     if(m.toInt() == messages::MESSAGE_RECEIVED)
@@ -169,7 +178,6 @@ void server_user_t::impl_t::push_received_mess(const QByteArray& message)
     }
     else
     {
-      qDebug()<<"correct!!!";
       mess_for_send.push_front(QByteArray::number(messages::MESSAGE_RECEIVED));
 
       if(m.toInt() == messages::IS_SERVER_LOST)
@@ -198,6 +206,9 @@ bool server_user_t::impl_t::is_no_received_mess() const
 
 QByteArray server_user_t::impl_t::pull_received_mess()
 {
+  if(received_mess.isEmpty())
+    { throw std::logic_error("server_user_t::impl_t::pull_received_mess : received_mess empty!"); }
+
   const auto m = received_mess.first();
   received_mess.removeFirst();
 

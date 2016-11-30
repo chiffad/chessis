@@ -17,11 +17,9 @@ public:
   bool is_me(const int port, const QHostAddress& ip) const;
   int get_port() const;
   QHostAddress get_ip() const;
-
   void push_for_send(const QByteArray& m);
   bool is_no_message_for_send() const;
   QByteArray pull_message_for_send();
-
   void push_received_mess(const QByteArray& m);
   bool is_no_received_mess() const;
   QByteArray pull_received_mess();
