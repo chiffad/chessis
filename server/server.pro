@@ -6,7 +6,6 @@ QT += qml quick\
 CONFIG += c++14
 
 SOURCES += cpp/main.cpp \
-           cpp/udp_server.cpp \
            cpp/chess.cpp \
            cpp/desk.cpp \
            cpp/server.cpp \
@@ -14,8 +13,7 @@ SOURCES += cpp/main.cpp \
            cpp/user.cpp \
 
 
-HEADERS += cpp/udp_server.h \
-           cpp/chess.h \
+HEADERS += cpp/chess.h \
            cpp/desk.h \
            cpp/messages.h \
            cpp/server.h \
