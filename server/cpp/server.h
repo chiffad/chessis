@@ -26,6 +26,7 @@ public:
   bool is_message_append(const int port, const QHostAddress& ip) const;
   QByteArray pull(const int port, const QHostAddress& ip);
   QVector<client_t> get_clients_list() const;
+  bool is_client_lost(const int port, const QHostAddress& ip) const;
 
 public:
   server_t(const server_t&) = delete;
