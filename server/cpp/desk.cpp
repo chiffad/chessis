@@ -8,14 +8,9 @@
 using namespace logic;
 
 
-desk_t::desk_t(const unsigned first_p, const unsigned second_p)
-    : board_t(), _first_player_ind(first_p), _second_player_ind(second_p)
+desk_t::desk_t()
+    : board_t()
 {
-}
-
-bool desk_t::contain_player(const int ind) const
-{
-  return (ind == _first_player_ind || ind == _second_player_ind);
 }
 
 void desk_t::make_moves_from_str(const std::string &str)
