@@ -1,9 +1,9 @@
 #include "server.h"
 
 #include <QVector>
-#include <QByteArray>
 #include <QObject>
 #include <algorithm>
+#include <QUdpSocket>
 
 #include "server_user.h"
 
@@ -87,7 +87,7 @@ void server_t::impl_t::process_event()
   for(auto& i: users)
   {
     if(!i->is_no_message_for_send())
-        { qDebug()<<"here2!"; socket.writeDatagram(i->pull_message_for_send(), i->get_ip(), i->get_port()); }
+        {qDebug()<<"==========="; qDebug()<<"server::socket.writeDatagram!"; socket.writeDatagram(i->pull_message_for_send(), i->get_ip(), i->get_port()); }
   }
 }
 
@@ -108,8 +108,7 @@ QByteArray server_t::impl_t::pull(const int port, const QHostAddress& ip)
 
 std::shared_ptr<server_user_t> server_t::impl_t::get_user(const int port, const QHostAddress& ip) const
 {
-  auto user = std::find_if(users.begin(), users.end(), [&](auto i){ return i->is_me(port, ip); });
-
+  auto user = std::find_if(users.begin(), users.end(), [&](const auto& i){ return i->is_me(port, ip); });
   if(user == users.end())
    { qDebug()<<"server_t::impl_t::is_message_append: no such user!!!!"; }
 
@@ -132,11 +131,13 @@ qDebug()<<"read!:"<<m;
 
 void server_t::impl_t::run_message(const QByteArray& m, const int port, const QHostAddress& ip)
 {
+  qDebug()<<"===========";
+  qDebug()<<"server_t::impl_t::run_message";
   auto user = std::find_if(users.begin(), users.end(), [&](auto i){ return i->is_me(port, ip); });
 
   if(user == users.end())
   {
-    qDebug()<<"server_t::impl_t::run_message New user!";
+    qDebug()<<"New user!";
     users.append(std::make_shared<server_user_t>(port, ip));
     users.last()->push_received_mess(m);
   }

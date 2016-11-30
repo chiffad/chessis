@@ -3,7 +3,6 @@
 
 #include <QByteArray>
 #include <QHostAddress>
-#include <QUdpSocket>
 #include <memory>
 
 
