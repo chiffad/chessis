@@ -2,6 +2,7 @@
 #define __SERVER_H__BVGHVJHBDCWFDVAKYUVLWBALIGDVGSADW
 
 #include <QByteArray>
+#include <QVector>
 #include <QHostAddress>
 #include <memory>
 
@@ -12,21 +13,18 @@ namespace sr
 class server_t
 {
 public:
-  struct client_t
+  struct datagram_t
   {
     int port;
     QHostAddress ip;
+    QByteArray message;
   };
 
 public:
   server_t();
   ~server_t();
-  void process_event();
-  void push(const QByteArray& message, const int port, const QHostAddress& ip);
-  bool is_message_append(const int port, const QHostAddress& ip) const;
-  QByteArray pull(const int port, const QHostAddress& ip);
-  QVector<client_t> get_clients_list() const;
-  bool is_client_lost(const int port, const QHostAddress& ip) const;
+  void send(const QByteArray& message, const int port, const QHostAddress& ip);
+  QVector<datagram_t> pull();
 
 public:
   server_t(const server_t&) = delete;

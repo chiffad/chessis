@@ -157,7 +157,7 @@ qDebug()<<"read!!"<<message;
   if(message.toInt() != Messages::MESSAGE_RECEIVED)
   {
     send(Messages::MESSAGE_RECEIVED);
-    if(message.toInt() != Messages::CLIENT_LOST)
+    if(message.toInt() != Messages::IS_CLIENT_LOST)
       { received_message_stack.push_back(message); }
   }
   else

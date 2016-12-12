@@ -1,11 +1,7 @@
 #include "server.h"
 
-#include <QVector>
 #include <QObject>
-#include <algorithm>
 #include <QUdpSocket>
-
-#include "server_user.h"
 
 
 using namespace sr;
@@ -13,24 +9,12 @@ using namespace sr;
 struct server_t::impl_t
 {
   impl_t();
-  void process_event();
-  void push(const QByteArray& message, const int port, const QHostAddress& ip);
-  bool is_message_append(const int port, const QHostAddress& ip) const;
-  QByteArray pull(const int port, const QHostAddress& ip);
-  void read();
-  int cut_serial_num(QByteArray& m);
-  std::shared_ptr<server_user_t> get_user(const int port, const QHostAddress& ip) const;
-  void run_message(const QByteArray& m, const int port, const QHostAddress& ip);
-  QVector<client_t> get_clients_list() const;
-  bool is_client_lost(const int port, const QHostAddress& ip) const;
-
-  enum {FIRST_PORT = 49152, LAST_PORT = 49500};
-  const QHostAddress _SERVER_IP = QHostAddress::LocalHost;
+  void send(const QByteArray& message, const int port, const QHostAddress& ip);
+  QVector<datagram_t> pull();
+  void read()
 
   QUdpSocket socket;
-  QVector<QByteArray> received_mes;
-
-  QVector<std::shared_ptr<server_user_t>> users;
+  QVector<datagram_t> messages;
 };
 
 server_t::server_t()
@@ -42,43 +26,26 @@ server_t::~server_t()
 {
 }
 
-void server_t::process_event()
+void server_t::send(const QByteArray& message, const int port, const QHostAddress& ip)
 {
-  impl->process_event();
+  impl->send(message, port, ip);
 }
 
-void server_t::push(const QByteArray& message, const int port, const QHostAddress& ip)
+QVector<server_t::datagram_t> server_t::pull()
 {
-  impl->push(message, port, ip);
-}
-
-bool server_t::is_message_append(const int port, const QHostAddress& ip) const
-{
-  return impl->is_message_append(port, ip);
-}
-
-QByteArray server_t::pull(const int port, const QHostAddress& ip)
-{
-  return impl->pull(port, ip);
-}
-
-QVector<server_t::client_t> server_t::get_clients_list() const
-{
-  return impl->get_clients_list();
-}
-
-bool server_t::is_client_lost(const int port, const QHostAddress& ip) const
-{
-  return impl->is_client_lost(port, ip);
+  return impl->pull();
 }
 
 server_t::impl_t::impl_t()
 {
   QObject::connect(&socket, &QUdpSocket::readyRead, [&](){read();});
 
+  enum(FIRST_PORT = 49152, LAST_PORT = 49500)
+  const QHostAddress SERVER_IP = QHostAddress::LocalHost;
+
   for(int i = 0; i + FIRST_PORT < LAST_PORT; ++i)
   {
-    if(socket.bind(_SERVER_IP, FIRST_PORT + i))
+    if(socket.bind(SERVER_IP, FIRST_PORT + i))
     {
       qDebug()<<"server::bind: "<<FIRST_PORT + i;
       break;
@@ -88,37 +55,17 @@ server_t::impl_t::impl_t()
   }
 }
 
-void server_t::impl_t::process_event()
+void server_t::impl_t::send(const QByteArray& message, const int port, const QHostAddress& ip)
 {
-  for(auto& i: users)
-  {
-    if(!i->is_no_message_for_send())
-        {qDebug()<<"==========="; qDebug()<<"server::socket.writeDatagram!"; socket.writeDatagram(i->pull_message_for_send(), i->get_ip(), i->get_port()); }
-  }
+  socket.writeDatagram(message, ip, port);
 }
 
-void server_t::impl_t::push(const QByteArray& message, const int port, const QHostAddress& ip)
+QVector<server_t::datagramm_t> server_t::impl_t::pull()
 {
-  get_user(port, ip)->push_for_send(message);
-}
+  auto _1 = messages;
+  messages.clear();
 
-bool server_t::impl_t::is_message_append(const int port, const QHostAddress& ip) const
-{
-  return !(get_user(port, ip)->is_no_received_mess());
-}
-
-QByteArray server_t::impl_t::pull(const int port, const QHostAddress& ip)
-{
-  return get_user(port, ip)->pull_received_mess();
-}
-
-std::shared_ptr<server_user_t> server_t::impl_t::get_user(const int port, const QHostAddress& ip) const
-{
-  auto user = std::find_if(users.begin(), users.end(), [&](const auto& i){ return i->is_me(port, ip); });
-  if(user == users.end())
-   { qDebug()<<"server_t::impl_t::is_message_append: no such user!!!!"; }
-
-  return (*user);
+  return _1;
 }
 
 void server_t::impl_t::read()
@@ -132,44 +79,11 @@ void server_t::impl_t::read()
 
 qDebug()<<"read!:"<<m;
 
-  run_message(m, port, ip);
-}
+  datagramm_t d;
+  d.ip = ip;
+  d.port = port;
+  d.message = m;
 
-void server_t::impl_t::run_message(const QByteArray& m, const int port, const QHostAddress& ip)
-{
-  qDebug()<<"===========";
-  qDebug()<<"server_t::impl_t::run_message";
-  auto user = std::find_if(users.begin(), users.end(), [&](auto i){ return i->is_me(port, ip); });
-
-  if(user == users.end())
-  {
-    qDebug()<<"New user!";
-    users.append(std::make_shared<server_user_t>(port, ip));
-    users.last()->push_received_mess(m);
-  }
-  else
-    { (*user)->push_received_mess(m); }
-}
-
-QVector<server_t::client_t> server_t::impl_t::get_clients_list() const
-{
-  QVector<client_t> clients;
-
-  for(const auto& u : users)
-  {
-    client_t c;
-    c.port = u->get_port();
-    c.ip = u->get_ip();
-    clients.append(c);
-  }
-
-  return clients;
-}
-
-bool server_t::impl_t::is_client_lost(const int port, const QHostAddress& ip) const
-{
-  const auto u = get_user(port, ip);
-
-  return u->is_client_lost();
+  messages.append(d);
 }
 
