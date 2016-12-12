@@ -11,7 +11,7 @@ struct server_t::impl_t
   impl_t();
   void send(const QByteArray& message, const int port, const QHostAddress& ip);
   QVector<datagram_t> pull();
-  void read()
+  void read();
 
   QUdpSocket socket;
   QVector<datagram_t> messages;
@@ -40,7 +40,8 @@ server_t::impl_t::impl_t()
 {
   QObject::connect(&socket, &QUdpSocket::readyRead, [&](){read();});
 
-  enum(FIRST_PORT = 49152, LAST_PORT = 49500)
+  enum { FIRST_PORT = 49152, LAST_PORT = 49500 };
+
   const QHostAddress SERVER_IP = QHostAddress::LocalHost;
 
   for(int i = 0; i + FIRST_PORT < LAST_PORT; ++i)
@@ -60,7 +61,7 @@ void server_t::impl_t::send(const QByteArray& message, const int port, const QHo
   socket.writeDatagram(message, ip, port);
 }
 
-QVector<server_t::datagramm_t> server_t::impl_t::pull()
+QVector<server_t::datagram_t> server_t::impl_t::pull()
 {
   auto _1 = messages;
   messages.clear();
@@ -79,7 +80,7 @@ void server_t::impl_t::read()
 
 qDebug()<<"read!:"<<m;
 
-  datagramm_t d;
+  datagram_t d;
   d.ip = ip;
   d.port = port;
   d.message = m;

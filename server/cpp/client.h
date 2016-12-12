@@ -15,7 +15,7 @@ class client_t
 public:
   client_t(const int port, const QHostAddress& ip);
   ~client_t();
-  void push(const QByteArray& message);
+  void push(QByteArray message);
   QVector<QByteArray> pull_for_server();
   QVector<QByteArray> pull_for_logic();
   int get_port() const;
