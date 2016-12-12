@@ -3,7 +3,6 @@
 
 #include <QByteArray>
 #include <QHostAddress>
-#include <QVector>
 #include <memory>
 
 
@@ -16,8 +15,8 @@ public:
   client_t(const int port, const QHostAddress& ip);
   ~client_t();
   void push(QByteArray message);
-  QVector<QByteArray> pull_for_server();
-  QVector<QByteArray> pull_for_logic();
+  QByteArray pull_for_server();
+  QByteArray pull_for_logic();
   int get_port() const;
   QHostAddress get_ip() const;
 

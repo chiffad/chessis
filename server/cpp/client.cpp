@@ -2,7 +2,7 @@
 
 #include <QObject>
 #include <QTimer>
-#include <typeinfo>
+#include <QVector>
 
 #include "messages.h"
 
@@ -13,8 +13,8 @@ struct client_t::impl_t
 {
   impl_t(const int _port, const QHostAddress& _ip);
   void push(QByteArray message);
-  QVector<QByteArray> pull_for_server();
-  QVector<QByteArray> pull_for_logic();
+  QByteArray pull_for_server();
+  QByteArray pull_for_logic();
   int get_port() const;
   QHostAddress get_ip() const;
 
@@ -29,9 +29,17 @@ struct client_t::impl_t
   QTimer response_timer;
   QTimer connection_timer;
 
-  QByteArray last_send_message;
-  QVector<QByteArray> messages_for_server;
+  struct server_mess_t
+  {
+    server_mess_t(const QByteArray& m, const bool is_extra);
+    server_mess_t() = default;
+    QByteArray message;
+    bool is_extra;
+  };
+
+  QVector<server_mess_t> messages_for_server;
   QVector<QByteArray> messages_for_logic;
+  QByteArray last_send_message;
 
   int received_serial_num;
   int send_serial_num;
@@ -59,12 +67,12 @@ void client_t::push(QByteArray message)
   impl->push(message);
 }
 
-QVector<QByteArray> client_t::pull_for_server()
+QByteArray client_t::pull_for_server()
 {
   return impl->pull_for_server();
 }
 
-QVector<QByteArray> client_t::pull_for_logic()
+QByteArray client_t::pull_for_logic()
 {
   return impl->pull_for_logic();
 }
@@ -112,6 +120,46 @@ void client_t::impl_t::push(QByteArray m)
   connection_timer.start();
 }
 
+QByteArray client_t::impl_t::pull_for_server()
+{
+  QByteArray m;
+
+  if(messages_for_server.isEmpty())
+    { qDebug()<<"client_t::impl_t::pull_for_server()::messages_for_server.isEmpty()"; return m; }
+
+  const auto& _1 = messages_for_server.first();
+
+  if((_1.is_extra && _1.message == last_send_message) || is_received)
+  {
+    m = add_serial_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
+
+    if(!_1.message.toInt() == messages::MESSAGE_RECEIVED)
+      { begin_wait_receive(_1.message); }
+
+    messages_for_server.removeFirst();
+
+    qDebug()<<"client_t::impl_t::pull_for_server()";
+  }
+  else qDebug()<<"client_t::impl_t::pull_for_server():: !((_1.is_extra && _1.message == last_send_message) || is_received)";
+  return m;
+}
+
+QByteArray client_t::impl_t::pull_for_logic()
+{
+  QByteArray m;
+  return m;
+}
+
+int client_t::impl_t::get_port() const
+{
+  return port;
+}
+
+QHostAddress client_t::impl_t::get_ip() const
+{
+  return ip;
+}
+
 bool client_t::impl_t::check_ser_num(QByteArray& m)
 {
   const int serial_num = cut_serial_num(m);
@@ -135,20 +183,17 @@ bool client_t::impl_t::check_ser_num(QByteArray& m)
 void client_t::impl_t::add_for_server(const QByteArray& m, bool is_extra_message)
 {
   qDebug()<<"add_for_server:"<<m;
-
-  is_extra_message ? messages_for_server.push_front(add_serial_num(m, send_serial_num))
-                   : messages_for_server.append(add_serial_num(m, ++send_serial_num));
+  auto _1 = server_mess_t(m, is_extra_message);
+  is_extra_message ? messages_for_server.push_front(_1)
+                   : messages_for_server.append(_1);
 }
 
 void client_t::impl_t::add_for_server(const messages::MESSAGE r_mes, bool is_extra_message)
 {
-  QByteArray m;
-  m.setNum(r_mes);
-
-  qDebug()<<"add_for_server:"<<m;
-
-  is_extra_message ? messages_for_server.push_front(add_serial_num(m, send_serial_num))
-                   : messages_for_server.append(add_serial_num(m, ++send_serial_num));
+  qDebug()<<"add_for_server messages::MESSAGE:"<<r_mes;
+  auto _1 = server_mess_t(QByteArray::number(r_mes), is_extra_message);
+  is_extra_message ? messages_for_server.push_front(_1)
+                   : messages_for_server.append(_1);
 }
 
 void client_t::impl_t::begin_wait_receive(const QByteArray& message)
@@ -198,24 +243,7 @@ int client_t::impl_t::cut_serial_num(QByteArray& data) const
   return serial_num.toInt();
 }
 
-QVector<QByteArray> client_t::impl_t::pull_for_server()
+client_t::impl_t::server_mess_t::server_mess_t(const QByteArray& m, const bool is_extra_message)
+    : message(m), is_extra(is_extra_message)
 {
-QVector<QByteArray> m;
-  return m;
-}
-
-QVector<QByteArray> client_t::impl_t::pull_for_logic()
-{
-  QVector<QByteArray> m;
-  return m;
-}
-
-int client_t::impl_t::get_port() const
-{
-  return port;
-}
-
-QHostAddress client_t::impl_t::get_ip() const
-{
-  return ip;
 }
