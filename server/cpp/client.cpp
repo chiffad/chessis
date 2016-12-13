@@ -13,7 +13,8 @@ using namespace sr;
 struct client_t::impl_t
 {
   impl_t(const int _port, const QHostAddress& _ip);
-  void push(QByteArray message);
+  void push_from_server(QByteArray message);
+  void push_for_send(const QByteArray& message);
   bool is_message_for_server_append() const;
   bool is_message_for_logic_append() const;
   QByteArray pull_for_server();
@@ -65,9 +66,14 @@ client_t::~client_t()
 {
 }
 
-void client_t::push(QByteArray message)
+void client_t::push_from_server(const QByteArray& message)
 {
-  impl->push(message);
+  impl->push_from_server(message);
+}
+
+void client_t::push_for_send(const QByteArray& message)
+{
+  impl->push_for_send(message);
 }
 
 bool client_t::is_message_for_server_append() const
@@ -111,7 +117,7 @@ client_t::impl_t::impl_t(const int _port, const QHostAddress& _ip)
   QObject::connect(&connection_timer, &QTimer::timeout, [&](){ add_for_server(messages::IS_CLIENT_LOST); });
 }
 
-void client_t::impl_t::push(QByteArray m)
+void client_t::impl_t::push_from_server(QByteArray m)
 {
   qDebug()<<"!client_t::impl_t::push"<<m;
 
@@ -131,6 +137,11 @@ void client_t::impl_t::push(QByteArray m)
 
   ++received_serial_num;
   connection_timer.start();
+}
+
+void client_t::impl_t::push_for_send(const QByteArray& m)
+{
+  messages_for_server.append(m);
 }
 
 bool client_t::impl_t::is_message_for_server_append() const
