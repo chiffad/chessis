@@ -141,7 +141,7 @@ void client_t::impl_t::push_from_server(QByteArray m)
 
 void client_t::impl_t::push_for_send(const QByteArray& m)
 {
-  messages_for_server.append(m);
+  messages_for_server.append(server_mess_t(m, false));
 }
 
 bool client_t::impl_t::is_message_for_server_append() const
