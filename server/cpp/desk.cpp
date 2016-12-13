@@ -8,7 +8,7 @@
 using namespace logic;
 
 
-desk_t::desk_t(std::weak_ptr<sr::client_t> _1, std::weak_ptr<sr::client_t> _2)
+desk_t::desk_t(const std::weak_ptr<const sr::client_t> _1, const std::weak_ptr<const sr::client_t> _2)
     : board_t(), first_player(_1), second_player(_2)
 {
 }
