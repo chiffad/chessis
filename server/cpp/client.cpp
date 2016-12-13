@@ -5,14 +5,17 @@
 #include <QVector>
 
 #include "messages.h"
+#include "log.h"
 
 
-using namespace inet;
+using namespace sr;
 
 struct client_t::impl_t
 {
   impl_t(const int _port, const QHostAddress& _ip);
   void push(QByteArray message);
+  bool is_message_for_server_append() const;
+  bool is_message_for_logic_append() const;
   QByteArray pull_for_server();
   QByteArray pull_for_logic();
   int get_port() const;
@@ -67,6 +70,16 @@ void client_t::push(QByteArray message)
   impl->push(message);
 }
 
+bool client_t::is_message_for_server_append() const
+{
+  return impl->is_message_for_server_append();
+}
+
+bool client_t::is_message_for_logic_append() const
+{
+  return impl->is_message_for_logic_append();
+}
+
 QByteArray client_t::pull_for_server()
 {
   return impl->pull_for_server();
@@ -95,12 +108,12 @@ client_t::impl_t::impl_t(const int _port, const QHostAddress& _ip)
   connection_timer.setInterval(CHECK_CONNECT_TIME);
 
   QObject::connect(&response_timer, &QTimer::timeout, [&](){ is_message_received(); });
-  QObject::connect(&connection_timer, &QTimer::timeout, [&](){ add_for_server(messages::IS_SERVER_LOST); });
+  QObject::connect(&connection_timer, &QTimer::timeout, [&](){ add_for_server(messages::IS_CLIENT_LOST); });
 }
 
 void client_t::impl_t::push(QByteArray m)
 {
-  qDebug()<<"read!!"<<m;
+  qDebug()<<"!client_t::impl_t::push"<<m;
 
   if(!check_ser_num(m))
     { return; }
@@ -120,33 +133,42 @@ void client_t::impl_t::push(QByteArray m)
   connection_timer.start();
 }
 
+bool client_t::impl_t::is_message_for_server_append() const
+{
+  return (!messages_for_server.isEmpty() && (is_received || (messages_for_server.first().is_extra && messages_for_server.first().message == last_send_message)));
+}
+
+bool client_t::impl_t::is_message_for_logic_append() const
+{
+  return !messages_for_logic.isEmpty();
+}
+
 QByteArray client_t::impl_t::pull_for_server()
 {
-  QByteArray m;
-
-  if(messages_for_server.isEmpty())
-    { qDebug()<<"client_t::impl_t::pull_for_server()::messages_for_server.isEmpty()"; return m; }
+  qDebug()<<"client_t::impl_t::pull_for_server()";
+//  if(!is_message_for_server_append())
+//    { throw_exception("messages_for_server.isEmpty()"); }
 
   const auto& _1 = messages_for_server.first();
+  const QByteArray m = add_serial_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
 
-  if((_1.is_extra && _1.message == last_send_message) || is_received)
-  {
-    m = add_serial_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
+  if(!_1.message.toInt() == messages::MESSAGE_RECEIVED)
+    { begin_wait_receive(_1.message); }
 
-    if(!_1.message.toInt() == messages::MESSAGE_RECEIVED)
-      { begin_wait_receive(_1.message); }
+  messages_for_server.removeFirst();
 
-    messages_for_server.removeFirst();
-
-    qDebug()<<"client_t::impl_t::pull_for_server()";
-  }
-  else qDebug()<<"client_t::impl_t::pull_for_server():: !((_1.is_extra && _1.message == last_send_message) || is_received)";
   return m;
 }
 
 QByteArray client_t::impl_t::pull_for_logic()
 {
-  QByteArray m;
+//  if(!is_message_for_logic_append())
+//    { throw_exception("messages_for_logic.isEmpty()"); }
+  qDebug()<<"client_t::impl_t::pull_for_logic()";
+
+  const QByteArray m = messages_for_logic.first();
+  messages_for_logic.removeFirst();
+
   return m;
 }
 
@@ -213,14 +235,13 @@ bool client_t::impl_t::is_message_received()
   }
   else
   {
-    response_timer.start();
-
     add_for_server(last_send_message, true);
 
     if(last_send_message.toInt() == messages::IS_CLIENT_LOST || num_of_restarts == 5)
       { messages_for_logic.push_back(QByteArray::number(messages::CLIENT_LOST)); }
 
     ++num_of_restarts;
+    response_timer.start();
   }
   return is_received;
 }

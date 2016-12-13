@@ -6,7 +6,7 @@
 #include <memory>
 
 
-namespace inet
+namespace sr
 {
 
 class client_t
@@ -15,6 +15,8 @@ public:
   client_t(const int port, const QHostAddress& ip);
   ~client_t();
   void push(QByteArray message);
+  bool is_message_for_server_append() const;
+  bool is_message_for_logic_append() const;
   QByteArray pull_for_server();
   QByteArray pull_for_logic();
   int get_port() const;
