@@ -36,7 +36,17 @@ void desk_t::make_moves_from_str(const std::string &str)
 
 bool desk_t::is_contain_player(const std::weak_ptr<sr::client_t>& _1) const
 {
- return (_1.lock() == first_player.lock() || _1.lock() == second_player.lock());
+  return (_1.lock() == first_player.lock() || _1.lock() == second_player.lock());
+}
+
+const std::weak_ptr<const sr::client_t> desk_t::get_first_player() const
+{
+  return first_player;
+}
+
+const std::weak_ptr<const sr::client_t> desk_t::get_second_player() const
+{
+  return second_player;
 }
 
 void desk_t::write_moves_to_file(const std::string &path) const
