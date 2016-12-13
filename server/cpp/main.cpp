@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) try
         { server.send(client->pull_for_server(), client->get_port(), client->get_ip()); }
 
       if(client->is_message_for_logic_append())
-        { server.send(client->pull_for_server(), client->get_port(), client->get_ip()); }
+        { //server.send(client->pull_for_server(), client->get_port(), client->get_ip()); }
     }
   }
 
