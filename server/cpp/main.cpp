@@ -7,6 +7,7 @@
 
 #include "server.h"
 #include "client.h"
+#include "desk.h"
 
 
 int main(int argc, char *argv[]) try
@@ -15,30 +16,44 @@ int main(int argc, char *argv[]) try
 
   sr::server_t server;
   QVector<std::shared_ptr<sr::client_t>> clients;
+  QVector<std::shared_ptr<logic::desk_t>> desks;
 
   while(true)
   {
     app.processEvents();
+
     for(auto data : server.pull())
     {
-      auto client = std::find_if(clients.begin(), clients.end(), [&data](const auto& i){ return (i->get_port() == data.port && i->get_ip() == data.ip); });
+      auto c = std::find_if(clients.cbegin(), clients.cend(), [&data](auto i){ return (i->get_port() == data.port && i->get_ip() == data.ip); });
 
-      if(client == clients.end())
+      if(c == clients.end())
       {
         clients.append(std::make_shared<sr::client_t>(data.port, data.ip));
-        client = &clients.last();
+        c = &clients.last();
+
+        for(const auto c2 : clients)
+        {
+          if(desks.end() == std::find_if(desks.cbegin(), desks.cend(), [&](auto d){ return (c2 != (*c) && d->is_contain_player(c2)); }))
+            { desks.append(std::make_shared<logic::desk_t>((*c), c2)); }
+        }
       }
 
-      (*client)->push(data.message);
+      (*c)->push(data.message);
     }
 
-    for(auto client : clients)
+    for(auto c : clients)
     {
-      if(client->is_message_for_server_append())
-        { server.send(client->pull_for_server(), client->get_port(), client->get_ip()); }
+      if(c->is_message_for_server_append())
+        { server.send(c->pull_for_server(), c->get_port(), c->get_ip()); }
 
-      if(client->is_message_for_logic_append())
-        { //server.send(client->pull_for_server(), client->get_port(), client->get_ip()); }
+      if(c->is_message_for_logic_append())
+      {
+        const auto message = c->pull_for_logic();
+        auto desk = std::find_if(desks.begin(), desks.end(), [&c](auto d){ return d->is_contain_player(c); });
+
+        if(desk == desks.end())
+          { qDebug()<<"main: desk == desk.end()"; continue; }
+      }
     }
   }
 
