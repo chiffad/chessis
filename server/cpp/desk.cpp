@@ -8,8 +8,8 @@
 using namespace logic;
 
 
-desk_t::desk_t()
-    : board_t()
+desk_t::desk_t(std::weak_ptr<sr::client_t> _1, std::weak_ptr<sr::client_t> _2)
+    : board_t(), first_player(_1), second_player(_2)
 {
 }
 
@@ -32,6 +32,11 @@ void desk_t::make_moves_from_str(const std::string &str)
       coord_str.clear();
     }
   }
+}
+
+bool desk_t::is_contain_player(const std::weak_ptr<sr::client_t>& _1) const
+{
+ return (_1.lock() == first_player.lock() || _1.lock() == second_player.lock());
 }
 
 void desk_t::write_moves_to_file(const std::string &path) const
