@@ -26,12 +26,10 @@ struct client_t::impl_t
   void add_for_server(const QByteArray& message, bool is_extra_message = false);
   void add_for_server(const messages::MESSAGE r_mes, bool is_extra_message = false);
   bool is_message_received();
+  void connection_timer_timeout();
   void begin_wait_receive(const QByteArray& message);
   QByteArray add_serial_num(const QByteArray& data, const int num) const;
   int cut_serial_num(QByteArray& data) const;
-
-  QTimer response_timer;
-  QTimer connection_timer;
 
   struct server_mess_t
   {
@@ -44,6 +42,9 @@ struct client_t::impl_t
   QVector<server_mess_t> messages_for_server;
   QVector<QByteArray> messages_for_logic;
   QByteArray last_send_message;
+
+  QTimer response_timer;
+  QTimer connection_timer;
 
   int received_serial_num;
   int send_serial_num;
@@ -114,7 +115,7 @@ client_t::impl_t::impl_t(const int _port, const QHostAddress& _ip)
   connection_timer.setInterval(CHECK_CONNECT_TIME);
 
   QObject::connect(&response_timer, &QTimer::timeout, [&](){ is_message_received(); });
-  QObject::connect(&connection_timer, &QTimer::timeout, [&](){ add_for_server(messages::IS_CLIENT_LOST); });
+  QObject::connect(&connection_timer, &QTimer::timeout, [&](){ connection_timer_timeout(); });
 }
 
 void client_t::impl_t::push_from_server(QByteArray m)
@@ -124,19 +125,23 @@ void client_t::impl_t::push_from_server(QByteArray m)
   if(!check_ser_num(m))
     { return; }
 
+  ++received_serial_num;
+  connection_timer.start();
+
   const auto type = m.mid(0, m.indexOf(FREE_SPASE)).toInt();
 
   switch(type)
   {
     case messages::MESSAGE_RECEIVED:
       is_received = true;
+      break;
+    case messages::IS_SERVER_LOST:
+      add_for_server(messages::MESSAGE_RECEIVED);
+      break;
     default:
       add_for_server(messages::MESSAGE_RECEIVED);
       messages_for_logic.append(m);
   }
-
-  ++received_serial_num;
-  connection_timer.start();
 }
 
 void client_t::impl_t::push_for_send(const QByteArray& m)
@@ -163,7 +168,7 @@ QByteArray client_t::impl_t::pull_for_server()
   const auto& _1 = messages_for_server.first();
   const QByteArray m = add_serial_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
 
-  if(!_1.message.toInt() == messages::MESSAGE_RECEIVED)
+  if(_1.message.toInt() != messages::MESSAGE_RECEIVED)
     { begin_wait_receive(_1.message); }
 
   messages_for_server.removeFirst();
@@ -248,13 +253,19 @@ bool client_t::impl_t::is_message_received()
   {
     add_for_server(last_send_message, true);
 
-    if(last_send_message.toInt() == messages::IS_CLIENT_LOST || num_of_restarts == 5)
+    if(last_send_message.toInt() == messages::IS_CLIENT_LOST || num_of_restarts == 3)
       { messages_for_logic.push_back(QByteArray::number(messages::CLIENT_LOST)); }
 
     ++num_of_restarts;
     response_timer.start();
   }
   return is_received;
+}
+
+void client_t::impl_t::connection_timer_timeout()
+{
+  add_for_server(messages::IS_CLIENT_LOST);
+  connection_timer.stop();
 }
 
 QByteArray client_t::impl_t::add_serial_num(const QByteArray& data, const int num) const

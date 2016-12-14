@@ -13,6 +13,8 @@
 #include "messages.h"
 
 
+QByteArray get_board_state(const std::shared_ptr<logic::desk_t>& d);
+
 int main(int argc, char *argv[]) try
 {
   QApplication app(argc, argv);
@@ -27,17 +29,27 @@ int main(int argc, char *argv[]) try
 
     for(auto data : server.pull())
     {
-      auto c = std::find_if(clients.cbegin(), clients.cend(), [&data](auto i){ return (i->get_port() == data.port && i->get_ip() == data.ip); });
+      auto c = std::find_if(clients.cbegin(), clients.cend(), [&data](const auto& i){ return (i->get_port() == data.port && i->get_ip() == data.ip); });
 
       if(c == clients.end())
       {
+        qDebug()<<"main: New client";
         clients.append(std::make_shared<sr::client_t>(data.port, data.ip));
         c = &clients.last();
 
         for(const auto c2 : clients)
         {
-          if(desks.end() == std::find_if(desks.cbegin(), desks.cend(), [&](auto d){ return (c2 != (*c) && d->is_contain_player(c2)); }))
-            { desks.append(std::make_shared<logic::desk_t>((*c), c2)); }
+          if(c2 == (*c))
+            { continue; }
+
+          if(desks.end() == std::find_if(desks.cbegin(), desks.cend(), [&](const auto& d){ return d->is_contain_player(c2); }))
+          {
+            desks.append(std::make_shared<logic::desk_t>((*c), c2));
+
+            const QByteArray m = get_board_state(desks.last());
+            (*c)->push_for_send(m);
+            (c2)->push_for_send(m);
+          }
         }
       }
 
@@ -52,9 +64,16 @@ int main(int argc, char *argv[]) try
       if(c->is_message_for_logic_append())
       {
         const auto message = c->pull_for_logic();
-        auto desk = std::find_if(desks.begin(), desks.end(), [&c](auto d){ return d->is_contain_player(c); });
+        qDebug()<<"main: message_from_logic:"<<message;
+        auto desk = std::find_if(desks.begin(), desks.end(), [&c](const auto& d){ return d->is_contain_player(c); });
 
         const int type = message.mid(0, message.indexOf(" ")).toInt();
+
+        if(type == messages::HELLO_SERVER)
+        {
+          //need update!
+          continue;
+        }
 
         if(desk == desks.end())
         {
@@ -67,44 +86,51 @@ int main(int argc, char *argv[]) try
         }
 
         const auto data = message.mid(message.indexOf(" ") + 1);
-        qDebug()<<"main: message!!: "<<data;
+        qDebug()<<"main: message: "<<data;
 
         switch(type)
         {
           //case messages::MESSAGE_RECEIVED: //in client
           //case messages::IS_SERVER_LOST: // no need cause on this message already was sended responce
-
           case messages::OPPONENT_INF:
             //need update!
             break;
           case messages::MY_INF:
             //need update!
             break;
-          case messages::MOVE:
-            (*desk)->make_moves_from_str(data.toStdString());
+          case messages::CLIENT_LOST:
+          {
+            qDebug()<<"asd";
+            auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
+            (*opp)->push_for_send(QByteArray::number(messages::OPPONENT_LOST));
             break;
-
+          }
           default:
             switch(type)
             {
               case messages::MOVE:
                 (*desk)->make_moves_from_str(data.toStdString());
                 break;
-//need more cases!!
+              case messages::BACK_MOVE:
+                (*desk)->back_move();
+                break;
+              case messages::GO_TO_HISTORY:
+                (*desk)->go_to_history_index(data.toInt());
+                break;
+              case messages::NEW_GAME:
+                (*desk)->start_new_game();
+                break;
               default:
-                sr::throw_exception("Uncnown message type!: ", type);
+                sr::throw_exception("Unknown message type!: ", type);
             }
-            const QByteArray m(QByteArray::number(messages::GAME_INF)
-                        + " "
-                        + QByteArray::fromStdString((*desk)->get_board_mask())
-                        + ";"
-                        + QByteArray::fromStdString((*desk)->get_moves_history())
-                        + ((*desk)->is_mate() ? "#;" : ";")
-                        + QByteArray::number((*desk)->get_move_num()));
-            c->push_for_send(m);
 
-            const auto const_c2 = (*desk)->get_first_player().lock() == c ? (*desk)->get_second_player().lock() : (*desk)->get_first_player().lock();
-            auto c2 = std::find(clients.begin(), clients.end(), const_c2);
+            auto c2 = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
+
+            if(c2 == clients.end())
+              { sr::throw_exception("c2 == client.end()"); }
+
+            const QByteArray m = get_board_state(*desk);
+            c->push_for_send(m);
             (*c2)->push_for_send(m);
         }
       }
@@ -118,3 +144,11 @@ catch(std::exception const& ex)
 {
   qDebug()<<"Exception!"<<ex.what();
 }
+
+QByteArray get_board_state(const std::shared_ptr<logic::desk_t>& d)
+{
+  return (QByteArray::number(messages::GAME_INF) + " " + QByteArray::fromStdString(d->get_board_mask()) + ";"
+          + QByteArray::fromStdString(d->get_moves_history()) + (d->is_mate() ? "#;" : ";")
+          + QByteArray::number(d->get_move_num()));
+}
+
