@@ -72,7 +72,12 @@ int main(int argc, char *argv[]) try
 
         if(type == messages::HELLO_SERVER)
         {
-          c->set_login(message.mid(message.indexOf(" ") + 1));
+          const auto log = message.mid(message.indexOf(" ") + 1);
+          if(clients.end() == std::find_if(clients.begin(), clients.end(),
+                                           [&log](const auto& i){ return i->get_login() == log; }))
+            { c->push_for_send(QByteArray::number(messages::INCORRECT_LOG)); }
+          else c->set_login(log);
+
           continue;
         }
 
