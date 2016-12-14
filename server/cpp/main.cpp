@@ -14,6 +14,7 @@
 
 
 QByteArray get_board_state(const std::shared_ptr<logic::desk_t>& d);
+QByteArray get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
 int main(int argc, char *argv[]) try
 {
@@ -71,7 +72,7 @@ int main(int argc, char *argv[]) try
 
         if(type == messages::HELLO_SERVER)
         {
-          //need update!
+          c->set_login(message.mid(message.indexOf(" ") + 1));
           continue;
         }
 
@@ -93,14 +94,16 @@ int main(int argc, char *argv[]) try
           //case messages::MESSAGE_RECEIVED: //in client
           //case messages::IS_SERVER_LOST: // no need cause on this message already was sended responce
           case messages::OPPONENT_INF:
-            //need update!
+          {
+            auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
+            c->push_for_send(get_person_inf(*opp));
             break;
+          }
           case messages::MY_INF:
-            //need update!
+            c->push_for_send(get_person_inf(c));
             break;
           case messages::CLIENT_LOST:
           {
-            qDebug()<<"asd";
             auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
             (*opp)->push_for_send(QByteArray::number(messages::OPPONENT_LOST));
             break;
@@ -150,5 +153,11 @@ QByteArray get_board_state(const std::shared_ptr<logic::desk_t>& d)
   return (QByteArray::number(messages::GAME_INF) + " " + QByteArray::fromStdString(d->get_board_mask()) + ";"
           + QByteArray::fromStdString(d->get_moves_history()) + (d->is_mate() ? "#;" : ";")
           + QByteArray::number(d->get_move_num()));
+}
+
+QByteArray get_person_inf(const std::shared_ptr<const sr::client_t>& c)
+{
+  return (QByteArray::number(messages::INF_REQUEST)
+          + " Login: " + c->get_login() + "; Elo rating: " + QByteArray::number(c->get_rating()));
 }
 
