@@ -39,14 +39,9 @@ bool desk_t::is_contain_player(const std::weak_ptr<sr::client_t>& _1) const
   return (_1.lock() == first_player.lock() || _1.lock() == second_player.lock());
 }
 
-const std::weak_ptr<const sr::client_t> desk_t::get_first_player() const
+const std::weak_ptr<const sr::client_t> desk_t::get_opponent(const std::shared_ptr<const sr::client_t>& _1) const
 {
-  return first_player;
-}
-
-const std::weak_ptr<const sr::client_t> desk_t::get_second_player() const
-{
-  return second_player;
+  return (_1 == first_player.lock() ? second_player : first_player);
 }
 
 void desk_t::write_moves_to_file(const std::string &path) const
