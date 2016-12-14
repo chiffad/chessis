@@ -21,6 +21,10 @@ struct client_t::impl_t
   QByteArray pull_for_logic();
   int get_port() const;
   QHostAddress get_ip() const;
+  void set_login(const QByteArray& log);
+  QByteArray get_login() const;
+  void set_rating(const int rating);
+  int get_rating() const;
 
   bool check_ser_num(QByteArray& m);
   void add_for_server(const QByteArray& message, bool is_extra_message = false);
@@ -43,6 +47,9 @@ struct client_t::impl_t
   QVector<QByteArray> messages_for_logic;
   QByteArray last_send_message;
 
+  QByteArray login;
+  int elo;
+
   QTimer response_timer;
   QTimer connection_timer;
 
@@ -52,7 +59,6 @@ struct client_t::impl_t
 
   int port;
   QHostAddress ip;
-  QByteArray login;
 
   const QChar FREE_SPASE = ' ';
 };
@@ -105,6 +111,26 @@ int client_t::get_port() const
 QHostAddress client_t::get_ip() const
 {
   return impl->get_ip();
+}
+
+void client_t::set_login(const QByteArray& log)
+{
+  impl->set_login(log);
+}
+
+QByteArray client_t::get_login() const
+{
+  return impl->get_login();
+}
+
+void client_t::set_rating(const int rating)
+{
+  impl->set_rating(rating);
+}
+
+int client_t::get_rating() const
+{
+  return impl->get_rating();
 }
 
 client_t::impl_t::impl_t(const int _port, const QHostAddress& _ip)
@@ -196,6 +222,26 @@ int client_t::impl_t::get_port() const
 QHostAddress client_t::impl_t::get_ip() const
 {
   return ip;
+}
+
+void client_t::impl_t::set_login(const QByteArray& log)
+{
+  login = log;
+}
+
+QByteArray client_t::impl_t::get_login() const
+{
+  return login;
+}
+
+void client_t::impl_t::set_rating(const int rating)
+{
+  elo = rating;
+}
+
+int client_t::impl_t::get_rating() const
+{
+  return elo;
 }
 
 bool client_t::impl_t::check_ser_num(QByteArray& m)

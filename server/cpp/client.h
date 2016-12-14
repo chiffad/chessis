@@ -23,6 +23,11 @@ public:
   int get_port() const;
   QHostAddress get_ip() const;
 
+  void set_login(const QByteArray& log);
+  QByteArray get_login() const;
+  void set_rating(const int rating);
+  int get_rating() const;
+
 public:
   client_t(const client_t&) = delete;
   client_t& operator=(const client_t&) = delete;
