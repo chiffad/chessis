@@ -23,9 +23,8 @@ Board_graphic::Board_graphic()
   for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
     { addFigure(Figure(HILIGHT_IM, 0, 0, false)); }
 
-  srand (time(NULL));
-
-  set_login("asdasd" + QString::number(rand()));
+//  srand (time(NULL));
+//  set_login("asdasd" + QString::number(rand()));
 }
 
 Board_graphic::~Board_graphic()
