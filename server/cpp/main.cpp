@@ -37,21 +37,6 @@ int main(int argc, char *argv[]) try
         qDebug()<<"main: New client";
         clients.append(std::make_shared<sr::client_t>(data.port, data.ip));
         c = &clients.last();
-
-        for(const auto c2 : clients)
-        {
-          if(c2 == (*c))
-            { continue; }
-
-          if(desks.end() == std::find_if(desks.cbegin(), desks.cend(), [&](const auto& d){ return d->is_contain_player(c2); }))
-          {
-            desks.append(std::make_shared<logic::desk_t>((*c), c2));
-
-            const QByteArray m = get_board_state(desks.last());
-            (*c)->push_for_send(m);
-            (c2)->push_for_send(m);
-          }
-        }
       }
 
       (*c)->push_from_server(data.message);
@@ -76,7 +61,24 @@ int main(int argc, char *argv[]) try
           if(clients.end() != std::find_if(clients.begin(), clients.end(),
                                            [&log](const auto& i){ return i->get_login() == log; }))
             { c->push_for_send(QByteArray::number(messages::INCORRECT_LOG)); }
-          else c->set_login(log);
+          else
+          {
+            c->set_login(log);
+            for(const auto c2 : clients)
+            {
+              if(c2 == c)
+                { continue; }
+
+              if(desks.end() == std::find_if(desks.cbegin(), desks.cend(), [&](const auto& d){ return d->is_contain_player(c2); }))
+              {
+                desks.append(std::make_shared<logic::desk_t>(c, c2));
+
+                const QByteArray m = get_board_state(desks.last());
+                c->push_for_send(m);
+                c2->push_for_send(m);
+              }
+            }
+          }
 
           continue;
         }
