@@ -469,6 +469,9 @@ board_t::impl_t::COLOR board_t::impl_t::get_move_color() const
 
 void board_t::impl_t::set_field(const coord_t &lhs, const coord_t &rhs, const FIGURE & fig)
 {
+  if(fig == FREE_FIELD && lhs == rhs)
+    { return; }
+
   auto &f = m_field[get_field_index(rhs)];
   m_field[get_field_index(lhs)] = f;
   f = fig;
