@@ -148,7 +148,7 @@ bool board_t::impl_t::move(const coord_t &from, const coord_t &to)
       test_on_mate();
       return true;
     }
-    else set_field(from, to);
+    else set_field(from, to, m_actual_move.fig_on_captured_field);
   }
   return false;
 }
@@ -326,11 +326,11 @@ void board_t::impl_t::test_on_mate()
               const FIGURE FIG_TO = get_figure(t);
               set_field(t, f);
 
-              const bool mate = is_check(get_move_color());
+              const bool is_mate_val = is_check(get_move_color());
               set_field(f, t, FIG_TO);
 
-              if(!mate)
-                { is_mate_val = false; }
+              if(!is_mate_val)
+                { return; }
             }
           }
       }
@@ -428,7 +428,7 @@ void board_t::impl_t::next_move(const coord_t &from, const coord_t &to)
 
   if(!m_is_go_to_history_running)
   {
-    if(get_move_num() < m_moves_copy.size())
+    if(get_move_num() <= m_moves_copy.size())
       { m_moves_copy.erase(m_moves_copy.begin() + get_move_num_from_0(), m_moves_copy.end()); }
 
     m_moves_copy.push_back(m_moves.back());
