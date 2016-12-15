@@ -13,7 +13,7 @@
 #include "messages.h"
 
 
-QByteArray get_board_state(const std::shared_ptr<logic::desk_t>& d);
+QByteArray get_board_state(const std::shared_ptr<const logic::desk_t>& d);
 QByteArray get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
 int main(int argc, char *argv[]) try
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) try
         if(type == messages::HELLO_SERVER)
         {
           const auto log = message.mid(message.indexOf(" ") + 1);
-          if(clients.end() == std::find_if(clients.begin(), clients.end(),
+          if(clients.end() != std::find_if(clients.begin(), clients.end(),
                                            [&log](const auto& i){ return i->get_login() == log; }))
             { c->push_for_send(QByteArray::number(messages::INCORRECT_LOG)); }
           else c->set_login(log);
@@ -153,7 +153,7 @@ catch(std::exception const& ex)
   qDebug()<<"Exception!"<<ex.what();
 }
 
-QByteArray get_board_state(const std::shared_ptr<logic::desk_t>& d)
+QByteArray get_board_state(const std::shared_ptr<const logic::desk_t>& d)
 {
   return (QByteArray::number(messages::GAME_INF) + " " + QByteArray::fromStdString(d->get_board_mask()) + ";"
           + QByteArray::fromStdString(d->get_moves_history()) + (d->is_mate() ? "#;" : ";")
