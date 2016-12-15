@@ -326,7 +326,7 @@ void board_t::impl_t::test_on_mate()
               const FIGURE FIG_TO = get_figure(t);
               set_field(t, f);
 
-              const bool is_mate_val = is_check(get_move_color());
+              is_mate_val = is_check(get_move_color());
               set_field(f, t, FIG_TO);
 
               if(!is_mate_val)
