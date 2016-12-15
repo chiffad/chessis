@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
       {
          const QString message = client.pull();
          const int type = message.mid(0, message.indexOf(" ")).toInt();
+
          if(type == Messages::INF_REQUEST)
            { board_graphic.add_to_command_history(message.mid(message.indexOf(" "))); }
 
@@ -70,7 +71,12 @@ int main(int argc, char *argv[])
            if(moves_history.endsWith("#"))
              { board_graphic.set_check_mate(); }
          }
-         else qDebug()<<"Warning! in Exporter::push_to_graphic: Unknown message type";
+         else if(type == Messages::INCORRECT_LOG)
+         {
+           qDebug()<<"main: Messages::INCORRECT_LOG";
+           //need update
+         }
+         else qDebug()<<"Warning! in main: Unknown message type"<<type;
       }
     }
   }
