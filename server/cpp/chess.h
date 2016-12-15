@@ -21,7 +21,7 @@ public:
   bool back_move();
   void start_new_game();
   void go_to_history_index(const unsigned index);
-  bool is_mate();
+  bool is_mate() const;
 
   std::string get_moves_history() const;
   unsigned get_move_num() const;

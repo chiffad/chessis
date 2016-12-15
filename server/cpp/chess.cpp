@@ -17,7 +17,7 @@ struct board_t::impl_t
   bool back_move();
   void start_new_game();
   void go_to_history_index(const unsigned index);
-  bool is_mate();
+  bool is_mate() const;
   std::string get_moves_history() const;
   unsigned get_move_num() const;
   std::string get_board_mask() const;
@@ -47,6 +47,7 @@ struct board_t::impl_t
   void finish_move(const coord_t &from, const coord_t &to);
   void next_move(const coord_t &from = coord_t(), const coord_t &to = coord_t());
   void set_field(const coord_t &lhs, const coord_t &rhs, const FIGURE &fig = FREE_FIELD);
+  void test_on_mate();
 
   bool is_check(const COLOR color) const;
   bool is_pawn_reach_other_side(const coord_t &c) const;
@@ -67,6 +68,7 @@ struct board_t::impl_t
   std::vector<Moves> m_moves_copy;
   std::vector<FIGURE> m_field;
   bool m_is_go_to_history_running;
+  bool is_mate_val;
 };
 
 board_t::board_t()
@@ -98,7 +100,7 @@ void board_t::go_to_history_index(const unsigned index)
   impl->go_to_history_index(index);
 }
 
-bool board_t::is_mate()
+bool board_t::is_mate() const
 {
   return impl->is_mate();
 }
@@ -118,7 +120,8 @@ std::string board_t::get_board_mask() const
   return impl->get_board_mask();
 }
 
-board_t::impl_t::impl_t() : m_is_go_to_history_running(false)
+board_t::impl_t::impl_t() 
+    : m_is_go_to_history_running(false), is_mate_val(false)
 {
   m_field.resize(BOARD_SIZE);
   m_field = {B_ROOK,B_HORSE,B_ELEPHANT,B_QUEEN,B_KING,B_ELEPHANT,B_HORSE,B_ROOK};
@@ -142,6 +145,7 @@ bool board_t::impl_t::move(const coord_t &from, const coord_t &to)
     if(!is_check(get_color(to)))
     {
       finish_move(from,to);
+      test_on_mate();
       return true;
     }
     else set_field(from, to);
@@ -306,7 +310,7 @@ bool board_t::impl_t::is_check(const COLOR color) const
   return false;
 }
 
-bool board_t::impl_t::is_mate()
+void board_t::impl_t::test_on_mate()
 {
   coord_t f,t;
   for(f.x = 0; f.x < BOARD_SIDE; ++f.x)
@@ -322,16 +326,21 @@ bool board_t::impl_t::is_mate()
               const FIGURE FIG_TO = get_figure(t);
               set_field(t, f);
 
-              const bool is_mate = is_check(get_move_color());
+              const bool mate = is_check(get_move_color());
               set_field(f, t, FIG_TO);
 
-              if(!is_mate)
-                { return false; }
+              if(!mate)
+                { is_mate_val = false; }
             }
           }
       }
   }
-  return true;
+  is_mate_val = true;
+}
+
+bool board_t::impl_t::is_mate() const
+{
+  return is_mate_val;
 }
 
 void board_t::impl_t::start_new_game()
@@ -356,6 +365,8 @@ bool board_t::impl_t::back_move()
     { if_castling(m.to, m.from); }
 
   m_moves.pop_back();
+
+  is_mate_val = false;
   return true;
 }
 
@@ -383,6 +394,8 @@ void board_t::impl_t::go_to_history_index(const unsigned index)
   {
     for(unsigned i = get_move_num(); i < index; ++i)
       { move(m_moves_copy[i].from, m_moves_copy[i].to); }
+
+    test_on_mate();
   }
 
   m_is_go_to_history_running = false;
