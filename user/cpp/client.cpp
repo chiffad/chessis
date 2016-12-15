@@ -132,10 +132,9 @@ void client_t::impl_t::read()
   message.resize(socket.pendingDatagramSize());
   socket.readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
 
-qDebug()<<"read!!"<<message;
-
   const int serial_num = cut_serial_num(message);
 
+  qDebug()<<"read:"<<message;
   if(sender_IP != SERVER_IP || sender_port != server_port || sender_port == my_port)
   {
     qDebug()<<"Warning! in UDP_socket::read_data: Wrong sender!"<<message;
@@ -162,8 +161,7 @@ qDebug()<<"read!!"<<message;
   }
   else
   {
-    const QString t = last_send_message.mid(0, last_send_message.indexOf(FREE_SPASE));
-    if(t.toInt() == Messages::HELLO_SERVER)
+    if(last_send_message.mid(0, last_send_message.indexOf(FREE_SPASE)).toInt() == Messages::HELLO_SERVER)
       { server_port = sender_port; }
 
     is_received = true;
