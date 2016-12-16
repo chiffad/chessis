@@ -92,7 +92,7 @@ private:
   const char FREE_SPACE = ' ';
 
 private:
-  void addFigure(const Figure &figure);
+  void addFigure(const figure_t &figure);
   void update_coordinates();
   Coord get_field_coord(const int i) const;
   void write_moves_to_file(const QString& path);
@@ -108,7 +108,7 @@ private:
   bool _is_check_mate;
   QStringList _str_moves_history;
   QStringList _commands_history;
-  QList<Figure> _figures_model;
+  QList<figure_t> _figures_model;
   QVector<QString> _messages_for_server;
   QString _field;
 };

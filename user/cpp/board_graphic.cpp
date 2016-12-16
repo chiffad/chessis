@@ -18,7 +18,7 @@ board_graphic_t::board_graphic_t()
   const QString HILIGHT_IM = "hilight";
 
   for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
-    { addFigure(Figure(HILIGHT_IM, 0, 0, false)); }
+    { addFigure(figure_t(HILIGHT_IM, 0, 0, false)); }
 }
 
 void board_graphic_t::run_command(const QString& message, const int x1, const int y1, const int x2, const int y2)
@@ -333,7 +333,7 @@ QString board_graphic_t::get_udp_connection_status() const
   return _udp_connection_status;
 }
 
-void board_graphic_t::addFigure(const Figure &figure)
+void board_graphic_t::addFigure(const figure_t &figure)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());
   _figures_model << figure;
@@ -351,7 +351,7 @@ QVariant board_graphic_t::data(const QModelIndex & index, int role) const
   if (index.row() < 0 || index.row() >= _figures_model.count())
     { return QVariant(); }
 
-  const Figure &figure = _figures_model[index.row()];
+  const figure_t &figure = _figures_model[index.row()];
   if (role == NameRole)
     { return figure.name(); }
   else if (role == XRole)

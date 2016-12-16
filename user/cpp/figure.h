@@ -9,10 +9,10 @@
 namespace graphic
 {
 
-class Figure
+class figure_t
 {
 public:
-  Figure(const QString& name, const int x, const int y, const bool visible)
+  figure_t(const QString& name, const int x, const int y, const bool visible)
       : _name(name), _x(x), _y(y), _visible(visible)
   {
   }
@@ -26,7 +26,7 @@ public:
   inline void set_visible(const bool new_visible) {_visible = new_visible;}
   inline void set_coord(const Coord& new_coord) {_x = new_coord.x; _y = new_coord.y;}
 
-  bool operator==(const Figure &rhs)
+  bool operator==(const figure_t &rhs)
   {return(name() == rhs.name() && x() == rhs.x() && y() == rhs.y() && visible() == rhs.visible());}
 
 private:
