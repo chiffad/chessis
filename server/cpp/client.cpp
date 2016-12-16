@@ -156,16 +156,22 @@ void client_t::impl_t::push_from_server(QByteArray m)
 
   const auto type = m.mid(0, m.indexOf(FREE_SPASE)).toInt();
 
+  if(type == messages::MESSAGE_RECEIVED)
+  {
+    is_received = true;
+    return;
+  }
+
+  add_for_server(messages::MESSAGE_RECEIVED);
+
   switch(type)
   {
-    case messages::MESSAGE_RECEIVED:
-      is_received = true;
-      break;
     case messages::IS_SERVER_LOST:
-      add_for_server(messages::MESSAGE_RECEIVED);
+      break;
+    case messages::HELLO_SERVER:
+      add_for_server(messages::GET_LOGIN);
       break;
     default:
-      add_for_server(messages::MESSAGE_RECEIVED);
       messages_for_logic.append(m);
   }
 }

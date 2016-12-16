@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) try
 
         const int type = message.mid(0, message.indexOf(" ")).toInt();
 
-        if(type == messages::HELLO_SERVER)
+        if(type == messages::LOGIN)
         {
           const auto log = message.mid(message.indexOf(" ") + 1);
           if(clients.end() != std::find_if(clients.begin(), clients.end(),
