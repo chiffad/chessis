@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QTextStream>
+#include <QDebug>
 #include <exception>
 
 
@@ -25,7 +26,7 @@ namespace sr
   } // namespace detail
 
   template<typename... Args>
-  void log_fn(Args... args)
+  void exception_fn(Args... args)
   {
     QString str;
     QTextStream stream(&str);
@@ -35,7 +36,19 @@ namespace sr
     throw std::logic_error(str.toStdString());
   }
 
-  #define throw_exception(...)  log_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
+  template<typename... Args>
+  void log_fn(Args... args)
+  {
+    QString str;
+    QTextStream stream(&str);
+
+    detail::log_fn1(stream, args...);
+
+    qDebug()<<str;
+  }
+
+  #define throw_exception(...)  exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
+  #define log(...)  log_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
 } //namespace sc
 
 #endif // __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__

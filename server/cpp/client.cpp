@@ -146,7 +146,7 @@ client_t::impl_t::impl_t(const int _port, const QHostAddress& _ip)
 
 void client_t::impl_t::push_from_server(QByteArray m)
 {
-  qDebug()<<"!client_t::impl_t::push"<<m;
+  log("push_from_server: ",m);
 
   if(!check_ser_num(m))
     { return; }
@@ -193,7 +193,7 @@ bool client_t::impl_t::is_message_for_logic_append() const
 
 QByteArray client_t::impl_t::pull_for_server()
 {
-  qDebug()<<"client_t::impl_t::pull_for_server()";
+  log("pull_for_server");
 
   const auto& _1 = messages_for_server.front();
   const QByteArray m = add_serial_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
@@ -208,7 +208,7 @@ QByteArray client_t::impl_t::pull_for_server()
 
 QByteArray client_t::impl_t::pull_for_logic()
 {
-  qDebug()<<"client_t::impl_t::pull_for_logic()";
+  log("pull_for_logic");
 
   const QByteArray m = messages_for_logic.front();
   messages_for_logic.erase(messages_for_logic.begin());
@@ -259,7 +259,7 @@ bool client_t::impl_t::check_ser_num(QByteArray& m)
 
   if(serial_num != received_serial_num)
   {
-    qDebug()<<"Warning! in UDP_socket::read_data: Wrong serial number!";
+    log("check_ser_num: Warning! Wrong serial number!");
     return false;
   }
 
@@ -268,7 +268,7 @@ bool client_t::impl_t::check_ser_num(QByteArray& m)
 
 void client_t::impl_t::add_for_server(const QByteArray& m, bool is_extra_message)
 {
-  qDebug()<<"add_for_server:"<<m;
+  log("add_for_server: ", m);
   auto _1 = server_mess_t(m, is_extra_message);
   if(is_extra_message)
     { messages_for_server.insert(messages_for_server.begin(), _1); }
@@ -278,7 +278,7 @@ void client_t::impl_t::add_for_server(const QByteArray& m, bool is_extra_message
 
 void client_t::impl_t::add_for_server(const messages::MESSAGE r_mes, bool is_extra_message)
 {
-  qDebug()<<"add_for_server messages::MESSAGE:"<<r_mes;
+  log("add_for_server messages::MESSAGE: ", r_mes);
   auto _1 = server_mess_t(QByteArray::number(r_mes), is_extra_message);
   if(is_extra_message)
     { messages_for_server.insert(messages_for_server.begin(), _1); }

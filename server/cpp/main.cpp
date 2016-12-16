@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) try
 
       if(c == clients.end())
       {
-        qDebug()<<"main: New client";
+        sr::log("New client");
         clients.push_back(std::make_shared<sr::client_t>(data.port, data.ip));
         c = --clients.end();
       }
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) try
       if(c->is_message_for_logic_append())
       {
         const auto message = c->pull_for_logic();
-        qDebug()<<"main: message_from_logic:"<<message;
+        sr::log("message_from_logic: ", message);
         auto desk = std::find_if(desks.begin(), desks.end(), [&c](const auto& d){ return d->is_contain_player(c); });
 
         const int type = message.mid(0, message.indexOf(" ")).toInt();
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) try
 
         if(desk == desks.end())
         {
-          qDebug()<<"main: desk == desk.end()";
+          sr::log("desk == desk.end()");
 
           if(type == messages::OPPONENT_INF)
             { c->push_for_send("No opponent: no game in progress!"); }
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) try
         }
 
         const auto data = message.mid(message.indexOf(" ") + 1);
-        qDebug()<<"main: message: "<<data;
+        sr::log("main: message: ", data);
 
         switch(type)
         {

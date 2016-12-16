@@ -3,6 +3,8 @@
 #include <QObject>
 #include <QUdpSocket>
 
+#include "log.h"
+
 
 using namespace sr;
 
@@ -48,7 +50,7 @@ server_t::impl_t::impl_t()
   {
     if(socket.bind(SERVER_IP, FIRST_PORT + i))
     {
-      qDebug()<<"server::bind: "<<FIRST_PORT + i;
+      log("server bind: ", FIRST_PORT + i);
       break;
     }
     if(i + FIRST_PORT == LAST_PORT - 1)
@@ -58,6 +60,7 @@ server_t::impl_t::impl_t()
 
 void server_t::impl_t::send(const QByteArray& message, const int port, const QHostAddress& ip)
 {
+  log("send: ", message);
   socket.writeDatagram(message, ip, port);
 }
 
@@ -78,7 +81,7 @@ void server_t::impl_t::read()
   m.resize(socket.pendingDatagramSize());
   socket.readDatagram(m.data(), m.size(), &ip, &port);
 
-qDebug()<<"read!:"<<m;
+  log("read:", m);
 
   datagram_t d;
   d.ip = ip;
