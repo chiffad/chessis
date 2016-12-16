@@ -9,11 +9,11 @@
 
 using namespace graphic;
 
-class Fbo_renderer : public QQuickFramebufferObject::Renderer
+class fbo_renderer_t : public QQuickFramebufferObject::Renderer
 {
 public:
-  Fbo_renderer();
-  ~Fbo_renderer();
+  fbo_renderer_t();
+  ~fbo_renderer_t();
   QOpenGLFramebufferObject* createFramebufferObject(const QSize &size) Q_DECL_OVERRIDE;
   void synchronize(QQuickFramebufferObject *item) Q_DECL_OVERRIDE;
   void render() Q_DECL_OVERRIDE;
@@ -23,50 +23,50 @@ private:
 };
 
 
-Fb_obj::Fb_obj()
+fb_obj_t::fb_obj_t()
     : fig_type("board"), tilt_angle(0), cube_scale(1)
 {
 }
 
-Fb_obj::~Fb_obj()
+fb_obj_t::~fb_obj_t()
 {
 }
 
-QQuickFramebufferObject::Renderer* Fb_obj::createRenderer() const
+QQuickFramebufferObject::Renderer* fb_obj_t::createRenderer() const
 {
-  return new Fbo_renderer();
+  return new fbo_renderer_t();
 }
 
-QString Fb_obj::get_fig_type() const
+QString fb_obj_t::get_fig_type() const
 {
   return fig_type;
 }
 
-void Fb_obj::set_fig_type(const QString &name)
+void fb_obj_t::set_fig_type(const QString &name)
 {
   fig_type = name;
   update();
   emit fig_type_changed();
 }
 
-int Fb_obj::get_tilt_angle() const
+int fb_obj_t::get_tilt_angle() const
 {
   return tilt_angle;
 }
 
-void Fb_obj::set_tilt_angle(const int angl)
+void fb_obj_t::set_tilt_angle(const int angl)
 {
   tilt_angle = angl;
   update();
   emit tilt_angle_changed();
 }
 
-float Fb_obj::get_cube_scale() const
+float fb_obj_t::get_cube_scale() const
 {
   return cube_scale;
 }
 
-void Fb_obj::set_cube_scale(const float scale)
+void fb_obj_t::set_cube_scale(const float scale)
 {
   cube_scale = scale;
   update();
@@ -75,18 +75,18 @@ void Fb_obj::set_cube_scale(const float scale)
 
 //======================================================
 
-Fbo_renderer::Fbo_renderer() : cube(new cube_renderer_t())
+fbo_renderer_t::fbo_renderer_t() : cube(new cube_renderer_t())
 {
   cube->initialize();
   update();
 }
 
-Fbo_renderer::~Fbo_renderer()
+fbo_renderer_t::~fbo_renderer_t()
 {
   delete cube;
 }
 
-QOpenGLFramebufferObject* Fbo_renderer::createFramebufferObject(const QSize &size)
+QOpenGLFramebufferObject* fbo_renderer_t::createFramebufferObject(const QSize &size)
 {
   QOpenGLFramebufferObjectFormat format;
   format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
@@ -94,14 +94,14 @@ QOpenGLFramebufferObject* Fbo_renderer::createFramebufferObject(const QSize &siz
   return new QOpenGLFramebufferObject(size, format);
 }
 
-void Fbo_renderer::render()
+void fbo_renderer_t::render()
 {
   cube->render();
   update();
 }
 
-void Fbo_renderer::synchronize(QQuickFramebufferObject *item)
+void fbo_renderer_t::synchronize(QQuickFramebufferObject *item)
 {
-  Fb_obj *fb_item = static_cast<Fb_obj *>(item);
+  fb_obj_t *fb_item = static_cast<fb_obj_t *>(item);
   cube->set_cube_updates(fb_item->get_fig_type(), fb_item->get_tilt_angle(), fb_item->get_cube_scale());
 }

@@ -13,7 +13,7 @@
 
 int main(int argc, char *argv[])
 {
-  qmlRegisterType<graphic::Fb_obj>("CubeRendering", 1, 0, "Cube");
+  qmlRegisterType<graphic::fb_obj_t>("CubeRendering", 1, 0, "Cube");
 
   QGuiApplication app(argc, argv);
   QQmlApplicationEngine engine;

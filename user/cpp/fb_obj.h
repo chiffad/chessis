@@ -7,13 +7,13 @@
 namespace graphic
 {
 
-class Fb_obj : public QQuickFramebufferObject
+class fb_obj_t : public QQuickFramebufferObject
 {
   Q_OBJECT
 
 public:
-  Fb_obj();
-  ~Fb_obj();
+  fb_obj_t();
+  ~fb_obj_t();
   Renderer* createRenderer() const Q_DECL_OVERRIDE;
 
   Q_PROPERTY(QString fig_type READ get_fig_type WRITE set_fig_type NOTIFY fig_type_changed)
