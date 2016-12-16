@@ -194,8 +194,6 @@ bool client_t::impl_t::is_message_for_logic_append() const
 QByteArray client_t::impl_t::pull_for_server()
 {
   qDebug()<<"client_t::impl_t::pull_for_server()";
-//  if(!is_message_for_server_append())
-//    { throw_exception("messages_for_server.isEmpty()"); }
 
   const auto& _1 = messages_for_server.first();
   const QByteArray m = add_serial_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
@@ -210,8 +208,6 @@ QByteArray client_t::impl_t::pull_for_server()
 
 QByteArray client_t::impl_t::pull_for_logic()
 {
-//  if(!is_message_for_logic_append())
-//    { throw_exception("messages_for_logic.isEmpty()"); }
   qDebug()<<"client_t::impl_t::pull_for_logic()";
 
   const QByteArray m = messages_for_logic.first();
