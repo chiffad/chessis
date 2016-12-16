@@ -15,6 +15,7 @@ class desk_t : public board_t
 {
 public:
   desk_t(const std::weak_ptr<const sr::client_t> _1, const std::weak_ptr<const sr::client_t> _2);
+  ~desk_t();
   void make_moves_from_str(const std::string &str);
   bool is_contain_player(const std::weak_ptr<sr::client_t>& _1) const;
   const std::weak_ptr<const sr::client_t> get_opponent(const std::shared_ptr<const sr::client_t>& _1) const;
@@ -27,8 +28,8 @@ public:
    desk_t& operator=(const desk_t&) = delete;
 
 private:
-  const std::weak_ptr<const sr::client_t> first_player;
-  const std::weak_ptr<const sr::client_t> second_player;
+  struct impl_t;
+  std::unique_ptr<impl_t> impl;
 };
 
 } // namespace logic
