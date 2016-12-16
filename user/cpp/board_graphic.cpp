@@ -7,9 +7,6 @@
 #include <sstream>
 #include <algorithm>
 
-#include <stdlib.h>
-#include <time.h>
-
 
 using namespace graphic;
 
@@ -22,13 +19,6 @@ Board_graphic::Board_graphic()
 
   for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
     { addFigure(Figure(HILIGHT_IM, 0, 0, false)); }
-
-//  srand (time(NULL));
-//  set_login("asdasd" + QString::number(rand()));
-}
-
-Board_graphic::~Board_graphic()
-{
 }
 
 void Board_graphic::run_command(const QString& message, const int x1, const int y1, const int x2, const int y2)
@@ -55,15 +45,15 @@ void Board_graphic::run_command(const QString& message, const int x1, const int 
     "6.To view your information, print '" + SHOW_ME + "'");
   }
   else if(message == SHOW_OPPONENT)
-    { add_to_messages_for_server(Messages::OPPONENT_INF); }
+    { add_to_messages_for_server(messages::OPPONENT_INF); }
   else if(message == SHOW_ME)
-    { add_to_messages_for_server(Messages::MY_INF); }
+    { add_to_messages_for_server(messages::MY_INF); }
   else if(message == NEW_GAME)
-    { add_to_messages_for_server(Messages::NEW_GAME); }
+    { add_to_messages_for_server(messages::NEW_GAME); }
   else if(message == BACK_MOVE)
-    { add_to_messages_for_server(Messages::BACK_MOVE); }
+    { add_to_messages_for_server(messages::BACK_MOVE); }
   else if(message == HISTORY)
-    { add_to_messages_for_server(Messages::GO_TO_HISTORY, QString::number(x1 + 1)); }
+    { add_to_messages_for_server(messages::GO_TO_HISTORY, QString::number(x1 + 1)); }
   else
   {
     const QString command(message.mid(0,message.indexOf(FREE_SPACE)));
@@ -72,12 +62,12 @@ void Board_graphic::run_command(const QString& message, const int x1, const int 
     if(command == MOVE_WORD)
     {
       if(!command_content.isEmpty())
-        { add_to_messages_for_server(Messages::MOVE, command_content); }
+        { add_to_messages_for_server(messages::MOVE, command_content); }
       else
       {
         Coord from, to;
         if(set_correct_coord(from, x1, y1) && set_correct_coord(to, x2, y2))
-          { add_to_messages_for_server(Messages::MOVE, coord_to_str(from, to)); }
+          { add_to_messages_for_server(messages::MOVE, coord_to_str(from, to)); }
       }
     }
     else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
@@ -172,7 +162,7 @@ const QString Board_graphic::coord_to_str(const Coord &from, const Coord &to) co
           + " - " + QChar(a_LETTER + to.x) + QString::number(CELL_NUM - to.y));
 }
 
-void Board_graphic::add_to_messages_for_server(const Messages::MESSAGE mes_type, const QString& content)
+void Board_graphic::add_to_messages_for_server(const messages::MESSAGE mes_type, const QString& content)
 {
   _messages_for_server.append(QString::number(mes_type) + FREE_SPACE + content);
 }
@@ -270,21 +260,21 @@ void Board_graphic::read_moves_from_file(const QString& path)
 
   std::string data_from_file(std::istream_iterator<char>(from_file), (std::istream_iterator<char>()));
 
-  add_to_messages_for_server(Messages::FROM_FILE, QString::fromStdString(data_from_file));
+  add_to_messages_for_server(messages::FROM_FILE, QString::fromStdString(data_from_file));
 }
 
 void Board_graphic::set_connect_status(const int status)
 {
   switch(status)
   {
-    case Messages::SERVER_HERE:
+    case messages::SERVER_HERE:
       if(_udp_connection_status == "Disconnected")
         { _udp_connection_status = "Connect"; }
       break;
-    case Messages::SERVER_LOST:
+    case messages::SERVER_LOST:
       _udp_connection_status = "Disconnected";
       break;
-    case Messages::OPPONENT_LOST:
+    case messages::OPPONENT_LOST:
       _udp_connection_status = "Opponent disconnected";
       break;
     default:
@@ -302,7 +292,7 @@ bool Board_graphic::set_login(const QString &login)
       { return false; }
   }
 
-  add_to_messages_for_server(Messages::LOGIN, login);
+  add_to_messages_for_server(messages::LOGIN, login);
   return true;
 }
 

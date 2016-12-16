@@ -3,10 +3,9 @@
 
 #include <QByteArray>
 #include <memory>
-#include "enums.h"
 
 
-namespace inet
+namespace cl
 {
 
 class client_t
@@ -21,6 +20,7 @@ public:
 public:
   client_t(const client_t&) = delete;
   client_t& operator=(const client_t&) = delete;
+
 
 private:
   struct impl_t;

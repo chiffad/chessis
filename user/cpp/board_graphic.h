@@ -1,7 +1,6 @@
 #ifndef __MY_BOARD_GRAPHIC_H__SDAWBNUIBMGYUIVGFKEYUVFYUFAPIECHARTH
 #define __MY_BOARD_GRAPHIC_H__SDAWBNUIBMGYUIVGFKEYUVFYUFAPIECHARTH
 
-
 #include <QtQuick/QQuickPaintedItem>
 #include <QString>
 #include <QVector>
@@ -12,7 +11,7 @@
 
 #include "figure.h"
 #include "coord.h"
-#include "enums.h"
+#include "messages.h"
 
 
 namespace graphic
@@ -24,7 +23,6 @@ class Board_graphic : public QAbstractListModel
 
 public:
   Board_graphic();
-  ~Board_graphic();
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
@@ -80,6 +78,7 @@ public:
   Board_graphic(const Board_graphic&) = delete;
   Board_graphic& operator=(const Board_graphic&) = delete;
 
+
 private:
   enum FigureRoles {
       NameRole = Qt::UserRole + 3,
@@ -101,7 +100,7 @@ private:
   void read_moves_from_file(const QString& path);
   const QString coord_to_str(const Coord& from, const Coord& to) const;
   bool set_correct_coord(Coord& coord, const int x, const int y);
-  void add_to_messages_for_server(const Messages::MESSAGE mes_type, const QString& content = QString());
+  void add_to_messages_for_server(const messages::MESSAGE mes_type, const QString& content = QString());
 
 private:
   QString _move_color;

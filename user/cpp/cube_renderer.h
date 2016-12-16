@@ -22,6 +22,7 @@ public:
   Cube_renderer(const Cube_renderer&) = delete;
   Cube_renderer& operator=(const Cube_renderer&) = delete;
 
+
 private:
   struct impl_t;
   std::unique_ptr<impl_t> impl;

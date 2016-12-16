@@ -8,6 +8,7 @@
 #include "board_graphic.h"
 #include "client.h"
 #include "fb_obj.h"
+#include "messages.h"
 
 
 int main(int argc, char *argv[])
@@ -21,7 +22,7 @@ int main(int argc, char *argv[])
   engine.rootContext()->setContextProperty("FigureModel", &board_graphic);
 //  engine.load(QUrl(QStringLiteral("../res/app.qml")));
 
-  inet::client_t client;
+  cl::client_t client;
   const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();
 
@@ -45,21 +46,24 @@ int main(int argc, char *argv[])
         const QString message = client.pull();
         const int type = message.mid(0, message.indexOf(" ")).toInt();
 
-        if(type == Messages::SERVER_LOST
-          || type == Messages::SERVER_HERE
-          || type == Messages::OPPONENT_LOST)
+        if(type == messages::SERVER_LOST
+          || type == messages::SERVER_HERE
+          || type == messages::OPPONENT_LOST)
         {
+          qDebug()<<"main: type == messages::SERVER_LOST || type == messages::SERVER_HERE || type == messages::OPPONENT_LOST)";
           board_graphic.set_connect_status(message.toInt());
           continue;
         }
 
         else switch(type)
         {
-          case Messages::INF_REQUEST:
+          case messages::INF_REQUEST:
+            qDebug()<<"main: messages::INF_REQUEST";
             board_graphic.add_to_command_history(message.mid(message.indexOf(" ")));
             break;
-          case Messages::GAME_INF:
+          case messages::GAME_INF:
           {
+            qDebug()<<"main: messages::GAME_INF";
             QString m = message.mid(message.indexOf(" ") + 1);
             const int INDEX = m.indexOf(";");
             const int NEXT_IND = INDEX + 1;
@@ -69,7 +73,7 @@ int main(int argc, char *argv[])
 
             board_graphic.set_board_mask(board_mask);
             board_graphic.set_move_color(move_num.toInt());
-            board_graphic.set_connect_status(Messages::SERVER_HERE);
+            board_graphic.set_connect_status(messages::SERVER_HERE);
             board_graphic.set_moves_history(moves_history);
             board_graphic.update_hilight(move_num.toInt(),moves_history);
 
@@ -78,10 +82,12 @@ int main(int argc, char *argv[])
 
             break;
           }
-          case Messages::GET_LOGIN:
+          case messages::GET_LOGIN:
+            qDebug()<<"main: messages::GET_LOGIN";
             board_graphic.get_login();
             break;
-          case Messages::INCORRECT_LOG:
+          case messages::INCORRECT_LOG:
+            qDebug()<<"main: messages::INCORRECT_LOG";
             board_graphic.get_login("This login already exist. Enter another login!");
             break;
           default:

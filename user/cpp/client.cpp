@@ -5,16 +5,16 @@
 #include <QByteArray>
 #include <QTimer>
 
-#include "enums.h"
+#include "messages.h"
 
 
-using namespace inet;
+using namespace cl;
 
 struct client_t::impl_t
 {
   impl_t();
   void send(const QByteArray& message, bool is_prev_serial_need = false);
-  void send(const Messages::MESSAGE r_mes, bool is_prev_serial_need = false);
+  void send(const messages::MESSAGE r_mes, bool is_prev_serial_need = false);
   QByteArray pull();
   void read();
   bool is_message_received();
@@ -88,7 +88,7 @@ client_t::impl_t::impl_t()
      { i = 0; }
   }
 
-  send(Messages::HELLO_SERVER);
+  send(messages::HELLO_SERVER);
 }
 
 void client_t::impl_t::send(const QByteArray& message, bool is_prev_serial_need)
@@ -105,12 +105,12 @@ void client_t::impl_t::send(const QByteArray& message, bool is_prev_serial_need)
   begin_wait_receive(message);
 }
 
-void client_t::impl_t::send(const Messages::MESSAGE r_mes, bool is_prev_serial_need)
+void client_t::impl_t::send(const messages::MESSAGE r_mes, bool is_prev_serial_need)
 {
   QByteArray message;
   message.setNum(r_mes);
 
-  if(r_mes != Messages::MESSAGE_RECEIVED)
+  if(r_mes != messages::MESSAGE_RECEIVED)
   {
     if(!is_message_received())
     {
@@ -146,28 +146,28 @@ void client_t::impl_t::read()
   if(serial_num != ++received_serial_num)
   {
     --received_serial_num;
-    if(serial_num == received_serial_num && message.toInt() != Messages::MESSAGE_RECEIVED)
+    if(serial_num == received_serial_num && message.toInt() != messages::MESSAGE_RECEIVED)
     {
       connection_checker_timer.start(CHECK_CONNECT_TIME);
-      send(Messages::MESSAGE_RECEIVED, true);
+      send(messages::MESSAGE_RECEIVED, true);
     }
     qDebug()<<"Warning! in UDP_socket::read_data: Wrong serial number!";
     return;
   }
 
-  if(message.toInt() != Messages::MESSAGE_RECEIVED)
+  if(message.toInt() != messages::MESSAGE_RECEIVED)
   {
-    send(Messages::MESSAGE_RECEIVED);
-    if(message.toInt() != Messages::IS_CLIENT_LOST)
+    send(messages::MESSAGE_RECEIVED);
+    if(message.toInt() != messages::IS_CLIENT_LOST)
       { received_message_stack.push_back(message); }
   }
   else
   {
-    if(last_send_message.mid(0, last_send_message.indexOf(FREE_SPASE)).toInt() == Messages::HELLO_SERVER)
+    if(last_send_message.mid(0, last_send_message.indexOf(FREE_SPASE)).toInt() == messages::HELLO_SERVER)
       { server_port = sender_port; }
 
     is_received = true;
-    received_message_stack.push_back(QByteArray::number(Messages::SERVER_HERE));
+    received_message_stack.push_back(QByteArray::number(messages::SERVER_HERE));
   }
   connection_checker_timer.start(CHECK_CONNECT_TIME);
 }
@@ -194,7 +194,7 @@ void client_t::impl_t::begin_wait_receive(const QByteArray& message)
 
 void client_t::impl_t::connection_checker_timer_timeout()
 {
-  send(Messages::IS_SERVER_LOST);
+  send(messages::IS_SERVER_LOST);
 }
 
 bool client_t::impl_t::is_message_received()
@@ -210,7 +210,7 @@ bool client_t::impl_t::is_message_received()
     timer.start(RESPONSE_WAIT_TIME);
 
     const QString t = last_send_message.mid(0, last_send_message.indexOf(FREE_SPASE));
-    if(t.toInt() == Messages::HELLO_SERVER)
+    if(t.toInt() == messages::HELLO_SERVER)
     {
       ++server_port;
       if(server_port == LAST_PORT)
@@ -221,8 +221,8 @@ bool client_t::impl_t::is_message_received()
 
     socket.writeDatagram(add_serial_num(last_send_message, true), SERVER_IP, server_port);
 
-    if(last_send_message.toInt() == Messages::IS_SERVER_LOST || num_of_restarts == 5)
-      { received_message_stack.push_back(QByteArray::number(Messages::SERVER_LOST)); }
+    if(last_send_message.toInt() == messages::IS_SERVER_LOST || num_of_restarts == 5)
+      { received_message_stack.push_back(QByteArray::number(messages::SERVER_LOST)); }
 
     ++num_of_restarts;
   }
