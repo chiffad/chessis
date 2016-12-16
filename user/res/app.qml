@@ -50,14 +50,14 @@ Window
     {
       if(login.length && FigureModel.set_login(login))
       {
-        _error = false
+        _error_visible = false
         _login_input.visible = false
         _menu_layout._text_inp.focus = true
       }
       else
       {
-        _error_text.visible = true
-        _error_text.text = "Wrong login!"
+        _error_visible = true
+        _error_text = "Wrong login!"
       }
     }
   }
@@ -69,8 +69,8 @@ Window
     onEnter_login:
     {
       _login_input.visible = true
-      _login_input._error_text.visible = true
-      _login_input._error_text.text = error_text
+      _login_input._error_visible = true
+      _login_input._error_text = error_text
     }
   }
 

@@ -6,7 +6,8 @@ Item
 {
   id: _root
 
-  property alias _error_text : error_text
+  property alias _error_text : error_text.text
+  property alias _error_visible : error_text.visible
   signal login_entered(string login)
 
   height: parent.height/5
