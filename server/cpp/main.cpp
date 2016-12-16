@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QByteArray>
 #include <QDebug>
-#include <QVector>
+#include <vector>
 #include <memory>
 #include <exception>
 #include <algorithm>
@@ -21,8 +21,8 @@ int main(int argc, char *argv[]) try
   QApplication app(argc, argv);
 
   sr::server_t server;
-  QVector<std::shared_ptr<sr::client_t>> clients;
-  QVector<std::shared_ptr<logic::desk_t>> desks;
+  std::vector<std::shared_ptr<sr::client_t>> clients;
+  std::vector<std::shared_ptr<logic::desk_t>> desks;
 
   while(true)
   {
@@ -35,8 +35,8 @@ int main(int argc, char *argv[]) try
       if(c == clients.end())
       {
         qDebug()<<"main: New client";
-        clients.append(std::make_shared<sr::client_t>(data.port, data.ip));
-        c = &clients.last();
+        clients.push_back(std::make_shared<sr::client_t>(data.port, data.ip));
+        c = --clients.end();
       }
 
       (*c)->push_from_server(data.message);
@@ -71,9 +71,9 @@ int main(int argc, char *argv[]) try
 
               if(desks.end() == std::find_if(desks.cbegin(), desks.cend(), [&](const auto& d){ return d->is_contain_player(c2); }))
               {
-                desks.append(std::make_shared<logic::desk_t>(c, c2));
+                desks.push_back(std::make_shared<logic::desk_t>(c, c2));
 
-                const QByteArray m = get_board_state(desks.last());
+                const QByteArray m = get_board_state(desks.back());
                 c->push_for_send(m);
                 c2->push_for_send(m);
               }

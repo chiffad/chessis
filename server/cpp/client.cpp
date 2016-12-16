@@ -2,7 +2,7 @@
 
 #include <QObject>
 #include <QTimer>
-#include <QVector>
+#include <vector>
 
 #include "messages.h"
 #include "log.h"
@@ -43,8 +43,8 @@ struct client_t::impl_t
     bool is_extra;
   };
 
-  QVector<server_mess_t> messages_for_server;
-  QVector<QByteArray> messages_for_logic;
+  std::vector<server_mess_t> messages_for_server;
+  std::vector<QByteArray> messages_for_logic;
   QByteArray last_send_message;
 
   QByteArray login;
@@ -172,36 +172,36 @@ void client_t::impl_t::push_from_server(QByteArray m)
       add_for_server(messages::GET_LOGIN);
       break;
     default:
-      messages_for_logic.append(m);
+      messages_for_logic.push_back(m);
   }
 }
 
 void client_t::impl_t::push_for_send(const QByteArray& m)
 {
-  messages_for_server.append(server_mess_t(m, false));
+  messages_for_server.push_back(server_mess_t(m, false));
 }
 
 bool client_t::impl_t::is_message_for_server_append() const
 {
-  return (!messages_for_server.isEmpty() && (is_received || (messages_for_server.first().is_extra && messages_for_server.first().message == last_send_message)));
+  return (!messages_for_server.empty() && (is_received || (messages_for_server.front().is_extra && messages_for_server.front().message == last_send_message)));
 }
 
 bool client_t::impl_t::is_message_for_logic_append() const
 {
-  return !messages_for_logic.isEmpty();
+  return !messages_for_logic.empty();
 }
 
 QByteArray client_t::impl_t::pull_for_server()
 {
   qDebug()<<"client_t::impl_t::pull_for_server()";
 
-  const auto& _1 = messages_for_server.first();
+  const auto& _1 = messages_for_server.front();
   const QByteArray m = add_serial_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
 
   if(_1.message.toInt() != messages::MESSAGE_RECEIVED)
     { begin_wait_receive(_1.message); }
 
-  messages_for_server.removeFirst();
+  messages_for_server.erase(messages_for_server.begin());
 
   return m;
 }
@@ -210,8 +210,8 @@ QByteArray client_t::impl_t::pull_for_logic()
 {
   qDebug()<<"client_t::impl_t::pull_for_logic()";
 
-  const QByteArray m = messages_for_logic.first();
-  messages_for_logic.removeFirst();
+  const QByteArray m = messages_for_logic.front();
+  messages_for_logic.erase(messages_for_logic.begin());
 
   return m;
 }
@@ -270,16 +270,20 @@ void client_t::impl_t::add_for_server(const QByteArray& m, bool is_extra_message
 {
   qDebug()<<"add_for_server:"<<m;
   auto _1 = server_mess_t(m, is_extra_message);
-  is_extra_message ? messages_for_server.push_front(_1)
-                   : messages_for_server.append(_1);
+  if(is_extra_message)
+    { messages_for_server.insert(messages_for_server.begin(), _1); }
+  else
+    { messages_for_server.push_back(_1); }
 }
 
 void client_t::impl_t::add_for_server(const messages::MESSAGE r_mes, bool is_extra_message)
 {
   qDebug()<<"add_for_server messages::MESSAGE:"<<r_mes;
   auto _1 = server_mess_t(QByteArray::number(r_mes), is_extra_message);
-  is_extra_message ? messages_for_server.push_front(_1)
-                   : messages_for_server.append(_1);
+  if(is_extra_message)
+    { messages_for_server.insert(messages_for_server.begin(), _1); }
+  else
+    { messages_for_server.push_back(_1); }
 }
 
 void client_t::impl_t::begin_wait_receive(const QByteArray& message)

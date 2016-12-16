@@ -2,8 +2,8 @@
 #define __SERVER_H__BVGHVJHBDCWFDVAKYUVLWBALIGDVGSADW
 
 #include <QByteArray>
-#include <QVector>
 #include <QHostAddress>
+#include <vector>
 #include <memory>
 
 
@@ -24,7 +24,7 @@ public:
   server_t();
   ~server_t();
   void send(const QByteArray& message, const int port, const QHostAddress& ip);
-  QVector<datagram_t> pull();
+  std::vector<datagram_t> pull();
 
 public:
   server_t(const server_t&) = delete;

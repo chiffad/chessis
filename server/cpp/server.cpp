@@ -10,11 +10,11 @@ struct server_t::impl_t
 {
   impl_t();
   void send(const QByteArray& message, const int port, const QHostAddress& ip);
-  QVector<datagram_t> pull();
+  std::vector<datagram_t> pull();
   void read();
 
   QUdpSocket socket;
-  QVector<datagram_t> messages;
+  std::vector<datagram_t> messages;
 };
 
 server_t::server_t()
@@ -31,7 +31,7 @@ void server_t::send(const QByteArray& message, const int port, const QHostAddres
   impl->send(message, port, ip);
 }
 
-QVector<server_t::datagram_t> server_t::pull()
+std::vector<server_t::datagram_t> server_t::pull()
 {
   return impl->pull();
 }
@@ -61,7 +61,7 @@ void server_t::impl_t::send(const QByteArray& message, const int port, const QHo
   socket.writeDatagram(message, ip, port);
 }
 
-QVector<server_t::datagram_t> server_t::impl_t::pull()
+std::vector<server_t::datagram_t> server_t::impl_t::pull()
 {
   auto _1 = messages;
   messages.clear();
@@ -85,6 +85,6 @@ qDebug()<<"read!:"<<m;
   d.port = port;
   d.message = m;
 
-  messages.append(d);
+  messages.push_back(d);
 }
 
