@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
   QGuiApplication app(argc, argv);
   QQmlApplicationEngine engine;
-  graphic::Board_graphic board_graphic;
+  graphic::board_graphic_t board_graphic;
 
   engine.rootContext()->setContextProperty("FigureModel", &board_graphic);
 //  engine.load(QUrl(QStringLiteral("../res/app.qml")));

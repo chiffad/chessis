@@ -17,12 +17,12 @@
 namespace graphic
 {
 
-class Board_graphic : public QAbstractListModel
+class board_graphic_t : public QAbstractListModel
 {
   Q_OBJECT
 
 public:
-  Board_graphic();
+  board_graphic_t();
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
@@ -75,8 +75,8 @@ signals:
   void enter_login(const QString& error_text);
 
 public:
-  Board_graphic(const Board_graphic&) = delete;
-  Board_graphic& operator=(const Board_graphic&) = delete;
+  board_graphic_t(const board_graphic_t&) = delete;
+  board_graphic_t& operator=(const board_graphic_t&) = delete;
 
 
 private:
