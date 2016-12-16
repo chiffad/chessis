@@ -27,6 +27,7 @@ public:
    desk_t(const desk_t&) = delete;
    desk_t& operator=(const desk_t&) = delete;
 
+
 private:
   struct impl_t;
   std::unique_ptr<impl_t> impl;

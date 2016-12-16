@@ -32,6 +32,7 @@ public:
   client_t(const client_t&) = delete;
   client_t& operator=(const client_t&) = delete;
 
+
 private:
   struct impl_t;
   std::unique_ptr<impl_t> impl;

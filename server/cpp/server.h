@@ -13,6 +13,7 @@ namespace sr
 class server_t
 {
 public:
+
   struct datagram_t
   {
     int port;
@@ -20,7 +21,6 @@ public:
     QByteArray message;
   };
 
-public:
   server_t();
   ~server_t();
   void send(const QByteArray& message, const int port, const QHostAddress& ip);
@@ -29,6 +29,7 @@ public:
 public:
   server_t(const server_t&) = delete;
   server_t& operator=(const server_t&) = delete;
+
 
 private:
   struct impl_t;
