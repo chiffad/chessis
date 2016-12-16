@@ -19,15 +19,15 @@ struct client_t::impl_t
   QByteArray pull();
   void read();
   bool is_message_received();
-  void connection_checker_timer_timeout();
+  void connection_checker_timeout();
   bool is_message_append() const;
   QByteArray add_serial_num(const QByteArray& data, bool is_prev_serial_need = false);
   int cut_serial_num(QByteArray& data) const;
   void begin_wait_receive(const QByteArray& message);
 
   QUdpSocket socket;
-  QTimer timer;
-  QTimer connection_checker_timer;
+  QTimer response_checker;
+  QTimer connection_checker;
 
   QByteArray last_send_message;
   QVector<QByteArray> send_message_stack;
@@ -41,7 +41,7 @@ struct client_t::impl_t
   const QHostAddress SERVER_IP;
 
   enum { RESPONSE_WAIT_TIME = 1000, CHECK_CONNECT_TIME = 5000, FIRST_PORT = 49152, LAST_PORT = 49500 };
-  const QChar FREE_SPASE = ' ';
+  const char FREE_SPASE = ' ';
 };
 
 
@@ -74,8 +74,8 @@ client_t::impl_t::impl_t()
       server_port(FIRST_PORT), SERVER_IP(QHostAddress::LocalHost)
 {
   QObject::connect(&socket, &QUdpSocket::readyRead, [&](){ read(); });
-  QObject::connect(&timer, &QTimer::timeout, [&](){ is_message_received(); });
-  QObject::connect(&connection_checker_timer, &QTimer::timeout, [&](){ connection_checker_timer_timeout(); });
+  QObject::connect(&response_checker, &QTimer::timeout, [&](){ is_message_received(); });
+  QObject::connect(&connection_checker, &QTimer::timeout, [&](){ connection_checker_timeout(); });
 
   for(unsigned i = 0; i + FIRST_PORT < LAST_PORT; ++i)
   {
@@ -149,7 +149,7 @@ void client_t::impl_t::read()
     --received_serial_num;
     if(serial_num == received_serial_num && message.toInt() != messages::MESSAGE_RECEIVED)
     {
-      connection_checker_timer.start(CHECK_CONNECT_TIME);
+      connection_checker.start(CHECK_CONNECT_TIME);
       send(messages::MESSAGE_RECEIVED, true);
     }
     log("Warning! in read_data: Wrong serial number!");
@@ -170,7 +170,7 @@ void client_t::impl_t::read()
     is_received = true;
     received_message_stack.push_back(QByteArray::number(messages::SERVER_HERE));
   }
-  connection_checker_timer.start(CHECK_CONNECT_TIME);
+  connection_checker.start(CHECK_CONNECT_TIME);
 }
 
 QByteArray client_t::impl_t::pull()
@@ -190,10 +190,10 @@ void client_t::impl_t::begin_wait_receive(const QByteArray& message)
 {
   is_received = false;
   last_send_message = message;
-  timer.start(RESPONSE_WAIT_TIME);
+  response_checker.start(RESPONSE_WAIT_TIME);
 }
 
-void client_t::impl_t::connection_checker_timer_timeout()
+void client_t::impl_t::connection_checker_timeout()
 {
   send(messages::IS_SERVER_LOST);
 }
@@ -203,12 +203,12 @@ bool client_t::impl_t::is_message_received()
   static int num_of_restarts = 0;
   if(is_received)
   {
-    timer.stop();
+    response_checker.stop();
     num_of_restarts = 0;
   }
   else
   {
-    timer.start(RESPONSE_WAIT_TIME);
+    response_checker.start(RESPONSE_WAIT_TIME);
 
     const QString t = last_send_message.mid(0, last_send_message.indexOf(FREE_SPASE));
     if(t.toInt() == messages::HELLO_SERVER)
@@ -217,7 +217,7 @@ bool client_t::impl_t::is_message_received()
       if(server_port == LAST_PORT)
         { server_port = FIRST_PORT; }
 
-      timer.start(RESPONSE_WAIT_TIME/10);
+      response_checker.start(RESPONSE_WAIT_TIME/10);
     }
 
     socket.writeDatagram(add_serial_num(last_send_message, true), SERVER_IP, server_port);
@@ -230,7 +230,7 @@ bool client_t::impl_t::is_message_received()
   return is_received;
 }
 
-QByteArray client_t::impl_t::add_serial_num(const QByteArray &data, bool is_prev_serial_need)
+QByteArray client_t::impl_t::add_serial_num(const QByteArray& data, bool is_prev_serial_need)
 {
   if(!is_prev_serial_need)
     { ++send_serial_num; }
@@ -243,7 +243,7 @@ QByteArray client_t::impl_t::add_serial_num(const QByteArray &data, bool is_prev
   return message;
 }
 
-int client_t::impl_t::cut_serial_num(QByteArray &data) const
+int client_t::impl_t::cut_serial_num(QByteArray& data) const
 {
   QByteArray serial_num(data.mid(0, data.indexOf(FREE_SPASE)));
   data.remove(0, data.indexOf(FREE_SPASE) + 1);

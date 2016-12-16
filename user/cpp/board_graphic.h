@@ -2,12 +2,13 @@
 #define __MY_BOARD_GRAPHIC_H__SDAWBNUIBMGYUIVGFKEYUVFYUFAPIECHARTH
 
 #include <QtQuick/QQuickPaintedItem>
+#include <QAbstractListModel>
 #include <QString>
 #include <QVector>
-#include <QChar>
-#include <QAbstractListModel>
+#include <QVariant>
+#include <QHash>
+#include <QModelIndex>
 #include <QStringList>
-#include <fstream>
 
 #include "figure.h"
 #include "coord.h"
@@ -57,11 +58,11 @@ public:
 public:
   void set_check_mate();
   void set_move_color(const int move_num);
-  void set_board_mask(const QString &mask);
+  void set_board_mask(const QString& mask);
   void set_connect_status(const int status);
   bool is_message_appear() const;
   const QString pull();
-  void set_moves_history(const QString &history);
+  void set_moves_history(const QString& history);
   void add_to_command_history(const QString& str);
   void update_hilight(const int move_num, const QString& history);
   void get_login(const QString& error_message = QString());

@@ -14,7 +14,7 @@ class fbo_renderer_t : public QQuickFramebufferObject::Renderer
 public:
   fbo_renderer_t();
   ~fbo_renderer_t();
-  QOpenGLFramebufferObject* createFramebufferObject(const QSize &size) Q_DECL_OVERRIDE;
+  QOpenGLFramebufferObject* createFramebufferObject(const QSize& size) Q_DECL_OVERRIDE;
   void synchronize(QQuickFramebufferObject *item) Q_DECL_OVERRIDE;
   void render() Q_DECL_OVERRIDE;
 
@@ -42,7 +42,7 @@ QString fb_obj_t::get_fig_type() const
   return fig_type;
 }
 
-void fb_obj_t::set_fig_type(const QString &name)
+void fb_obj_t::set_fig_type(const QString& name)
 {
   fig_type = name;
   update();
@@ -86,7 +86,7 @@ fbo_renderer_t::~fbo_renderer_t()
   delete cube;
 }
 
-QOpenGLFramebufferObject* fbo_renderer_t::createFramebufferObject(const QSize &size)
+QOpenGLFramebufferObject* fbo_renderer_t::createFramebufferObject(const QSize& size)
 {
   QOpenGLFramebufferObjectFormat format;
   format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);

@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <fstream>
+#include <QChar>
 
 #include "log.h"
 
@@ -158,7 +160,7 @@ void board_graphic_t::set_move_color(const int move_num)
   emit move_turn_color_changed();
 }
 
-const QString board_graphic_t::coord_to_str(const Coord &from, const Coord &to) const
+const QString board_graphic_t::coord_to_str(const Coord& from, const Coord& to) const
 {
   return (QChar(a_LETTER + from.x) + QString::number(CELL_NUM - from.y)
           + " - " + QChar(a_LETTER + to.x) + QString::number(CELL_NUM - to.y));
@@ -221,7 +223,7 @@ void board_graphic_t::add_to_command_history(const QString& str)
   emit commands_hist_changed();
 }
 
-void board_graphic_t::path_to_file(QString &path, bool is_moves_from_file)
+void board_graphic_t::path_to_file(QString& path, bool is_moves_from_file)
 {
   for(int i = path.indexOf("/"); !path[path.indexOf("/", i) + 1].isLetter(); ++i)
     { path.remove(0,i); }
@@ -286,7 +288,7 @@ void board_graphic_t::set_connect_status(const int status)
   emit udp_connection_status_changed();
 }
 
-bool board_graphic_t::set_login(const QString &login)
+bool board_graphic_t::set_login(const QString& login)
 {
   for(auto i : login)
   {
@@ -335,20 +337,20 @@ QString board_graphic_t::get_udp_connection_status() const
   return _udp_connection_status;
 }
 
-void board_graphic_t::addFigure(const figure_t &figure)
+void board_graphic_t::addFigure(const figure_t& figure)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());
   _figures_model << figure;
   endInsertRows();
 }
 
-int board_graphic_t::rowCount(const QModelIndex & parent) const
+int board_graphic_t::rowCount(const QModelIndex& parent) const
 {
   Q_UNUSED(parent);
   return _figures_model.count();
 }
 
-QVariant board_graphic_t::data(const QModelIndex & index, int role) const
+QVariant board_graphic_t::data(const QModelIndex& index, int role) const
 {
   if (index.row() < 0 || index.row() >= _figures_model.count())
     { return QVariant(); }

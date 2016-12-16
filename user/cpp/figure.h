@@ -26,7 +26,7 @@ public:
   inline void set_visible(const bool new_visible) {_visible = new_visible;}
   inline void set_coord(const Coord& new_coord) {_x = new_coord.x; _y = new_coord.y;}
 
-  bool operator==(const figure_t &rhs)
+  bool operator==(const figure_t& rhs)
   {return(name() == rhs.name() && x() == rhs.x() && y() == rhs.y() && visible() == rhs.visible());}
 
 private:

@@ -22,10 +22,10 @@ struct cube_renderer_t::impl_t : public QOpenGLFunctions
   impl_t();
   void render();
   void initialize();
-  void set_cube_updates(const QString &fig_type, const int tilt_angle, const float scale);
+  void set_cube_updates(const QString& fig_type, const int tilt_angle, const float scale);
   void create_geometry();
   void update_model_view(const float scale);
-  void load_correct_texture(const QString &name);
+  void load_correct_texture(const QString& name);
 
   enum{VERTEX_ATTRIBUTE = 0, TEXCOORD_ATTRIBUTE = 1};
 
@@ -66,7 +66,7 @@ void cube_renderer_t::initialize()
   impl->initialize();
 }
 
-void cube_renderer_t::set_cube_updates(const QString &fig_type, const int tilt_angle, const float scale)
+void cube_renderer_t::set_cube_updates(const QString& fig_type, const int tilt_angle, const float scale)
 {
   impl->set_cube_updates(fig_type, tilt_angle, scale);
 }
@@ -122,7 +122,7 @@ void cube_renderer_t::impl_t::initialize()
   program->setUniformValue("texture", 0);
 }
 
-void cube_renderer_t::impl_t::set_cube_updates(const QString &name, const int tilt_angle, const float scale)
+void cube_renderer_t::impl_t::set_cube_updates(const QString& name, const int tilt_angle, const float scale)
 {
   if(fig_name == name)
     { return; }
@@ -132,7 +132,7 @@ void cube_renderer_t::impl_t::set_cube_updates(const QString &name, const int ti
   update_model_view(scale);
 }
 
-void cube_renderer_t::impl_t::load_correct_texture(const QString &name)
+void cube_renderer_t::impl_t::load_correct_texture(const QString& name)
 {
   const QString PATH_TO_IMG = "../res/img/";
 

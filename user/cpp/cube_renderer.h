@@ -16,7 +16,7 @@ public:
 
   void render();
   void initialize();
-  void set_cube_updates(const QString &fig_type, const int tilt_angle, const float scale);
+  void set_cube_updates(const QString& fig_type, const int tilt_angle, const float scale);
 
 public:
   cube_renderer_t(const cube_renderer_t&) = delete;
