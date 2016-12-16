@@ -6,6 +6,7 @@
 #include <QTimer>
 
 #include "messages.h"
+#include "log.h"
 
 
 using namespace cl;
@@ -81,7 +82,7 @@ client_t::impl_t::impl_t()
     if(socket.bind(SERVER_IP, FIRST_PORT + i))
     {
       my_port = FIRST_PORT + i;
-      qDebug()<<"UDP_socket::bind: "<<FIRST_PORT + i;
+      log("bind: ", FIRST_PORT + i);
       break;
     }
     if(i + FIRST_PORT == LAST_PORT - 1)
@@ -99,7 +100,7 @@ void client_t::impl_t::send(const QByteArray& message, bool is_prev_serial_need)
     return;
   }
 
-  qDebug()<<"sending:"<<message;
+  log("send: ", message);
 
   socket.writeDatagram(add_serial_num(message, is_prev_serial_need), SERVER_IP, server_port);
   begin_wait_receive(message);
@@ -120,7 +121,7 @@ void client_t::impl_t::send(const messages::MESSAGE r_mes, bool is_prev_serial_n
     begin_wait_receive(message);
   }
 
-  qDebug()<<"sending:"<<message;
+  log("send: ", message);
 
   socket.writeDatagram(add_serial_num(message, is_prev_serial_need), SERVER_IP, server_port);
 }
@@ -136,10 +137,10 @@ void client_t::impl_t::read()
 
   const int serial_num = cut_serial_num(message);
 
-  qDebug()<<"read:"<<message;
+  log("read: ", message);
   if(sender_IP != SERVER_IP || sender_port != server_port || sender_port == my_port)
   {
-    qDebug()<<"Warning! in UDP_socket::read_data: Wrong sender!"<<message;
+    log("Warning! in read_data: Wrong sender!", message);
     return;
   }
 
@@ -151,7 +152,7 @@ void client_t::impl_t::read()
       connection_checker_timer.start(CHECK_CONNECT_TIME);
       send(messages::MESSAGE_RECEIVED, true);
     }
-    qDebug()<<"Warning! in UDP_socket::read_data: Wrong serial number!";
+    log("Warning! in read_data: Wrong serial number!");
     return;
   }
 

@@ -7,10 +7,12 @@
 #include <sstream>
 #include <algorithm>
 
+#include "log.h"
+
 
 using namespace graphic;
 
-board_graphic_t::board_graphic_t() 
+board_graphic_t::board_graphic_t()
     : QAbstractListModel(nullptr), _move_color(MOVE_COLOR_W),
       _udp_connection_status("Disconnected"), _is_check_mate(false)
 {
@@ -31,12 +33,12 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
   const QString HISTORY = "to history";
   const QString SHOW_OPPONENT = "show opponent";
 
-  qDebug()<<"board_graphic_t::run_command: "<<message<<" x1: "<<x1<< "y1"<< y1<<" x2: "<<x2<< "y2"<< y2;
+  cl::log("board_graphic_t::run_command: ", message, " x1: ", x1, "y1", y1, " x2: ", x2,  "y2", y2);
   add_to_command_history("command: " + message);
 
   if(message == HELP_WORD)
   {
-    qDebug()<<"help_word";
+    cl::log("run_comman: dhelp_word");
     add_to_command_history("1.For move, type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4)" + "\n"+
     "2.For back move, type '" + BACK_MOVE + "'" + "\n"+
     "3.For start new game, type '" + NEW_GAME + "'" + "\n"+
@@ -78,7 +80,7 @@ bool board_graphic_t::set_correct_coord(Coord& c, const int x, const int y)
 {
   if(x < 0 || y < 0 || x > (CELL_SIZE_X * CELL_NUM) || y > (CELL_SIZE_Y * CELL_NUM))
   {
-    qDebug()<<"Warning! in board_graphic_t::set_correct_coord: Incorrect coord";
+    cl::log("Warning! in set_correct_coord: Incorrect coord");
     return false;
   }
 
@@ -118,7 +120,7 @@ void board_graphic_t::set_board_mask(const QString& mask)
 {
   if(mask.size() != CELL_NUM * CELL_NUM)
   {
-    qDebug()<<"Warning! in board_graphic_t::set_board_mask: Wrong board mask size";
+    cl::log("Warning! in set_board_mask: Wrong board mask size");
     return;
   }
 
@@ -238,7 +240,7 @@ void board_graphic_t::write_moves_to_file(const QString& path)
   std::ofstream in_file(path.toStdString());
   if(!in_file.is_open())
   {
-    qDebug()<<"Warning! in board_graphic_t::write_moves_to_file: Couldn't open file.";
+    cl::log("Warning! in write_moves_to_file: Couldn't open file.");
     return;
   }
   for(auto &s : _str_moves_history)
@@ -254,7 +256,7 @@ void board_graphic_t::read_moves_from_file(const QString& path)
   std::ifstream from_file(path.toStdString());
   if(!from_file.is_open())
   {
-    qDebug()<<"Warning! board_graphic_t::write_moves_to_file: Couldn't open file.";
+    cl::log("Warning! read_moves_from_file: Couldn't open file.");
     return;
   }
 
@@ -278,7 +280,7 @@ void board_graphic_t::set_connect_status(const int status)
       _udp_connection_status = "Opponent disconnected";
       break;
     default:
-      qDebug()<<"Warning! in board_graphic_t::set_connect_status: Unknown status";
+      cl::log("Warning! in set_connect_status: Unknown status");
       return;
   }
   emit udp_connection_status_changed();
@@ -365,7 +367,7 @@ QVariant board_graphic_t::data(const QModelIndex & index, int role) const
 
 QHash<int, QByteArray> board_graphic_t::roleNames() const
 {
- QHash<int, QByteArray> roles;
+  QHash<int, QByteArray> roles;
   roles[NameRole] = "figure_name";
   roles[XRole] = "x_coord";
   roles[YRole] = "y_coord";

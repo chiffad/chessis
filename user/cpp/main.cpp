@@ -9,6 +9,7 @@
 #include "client.h"
 #include "fb_obj.h"
 #include "messages.h"
+#include "log.h"
 
 
 int main(int argc, char *argv[])
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
           || type == messages::SERVER_HERE
           || type == messages::OPPONENT_LOST)
         {
-          qDebug()<<"main: type == messages::SERVER_LOST || type == messages::SERVER_HERE || type == messages::OPPONENT_LOST)";
+          cl::log("type == messages::SERVER_LOST || type == messages::SERVER_HERE || type == messages::OPPONENT_LOST");
           board_graphic.set_connect_status(message.toInt());
           continue;
         }
@@ -58,12 +59,12 @@ int main(int argc, char *argv[])
         else switch(type)
         {
           case messages::INF_REQUEST:
-            qDebug()<<"main: messages::INF_REQUEST";
+            cl::log("messages::INF_REQUEST");
             board_graphic.add_to_command_history(message.mid(message.indexOf(" ")));
             break;
           case messages::GAME_INF:
           {
-            qDebug()<<"main: messages::GAME_INF";
+            cl::log("messages::GAME_INF");
             QString m = message.mid(message.indexOf(" ") + 1);
             const int INDEX = m.indexOf(";");
             const int NEXT_IND = INDEX + 1;
@@ -83,15 +84,15 @@ int main(int argc, char *argv[])
             break;
           }
           case messages::GET_LOGIN:
-            qDebug()<<"main: messages::GET_LOGIN";
+            cl::log("messages::GET_LOGIN");
             board_graphic.get_login();
             break;
           case messages::INCORRECT_LOG:
-            qDebug()<<"main: messages::INCORRECT_LOG";
+            cl::log("messages::INCORRECT_LOG");
             board_graphic.get_login("This login already exist. Enter another login!");
             break;
           default:
-            qDebug()<<"Warning! in main: Unknown message type"<<type;
+            cl::log("Warning! Unknown message type", type);
         }
       }
     }

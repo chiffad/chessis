@@ -1,6 +1,5 @@
 #include "cube_renderer.h"
 
-
 #include <QPainter>
 #include <QPaintEngine>
 #include <cmath>
