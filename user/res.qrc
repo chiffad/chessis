@@ -24,5 +24,6 @@
         <file>res/MoveTurn.qml</file>
         <file>res/MoveOutput.qml</file>
         <file>res/CommandField.qml</file>
+        <file>res/Login_input.qml</file>
     </qresource>
 </RCC>

@@ -38,10 +38,11 @@ Window
   readonly property int cHECK_MATE_IMG_Z: 4
   readonly property int eNTER_LOGIN_Z: 5
 
-  Enter_login
+  Login_input
   {
-    id: _login
+    id: _login_input
 
+    visible: false
     anchors.centerIn: parent
     z: _root.eNTER_LOGIN_Z
 
@@ -50,10 +51,26 @@ Window
       if(login.length && FigureModel.set_login(login))
       {
         _error = false
-        _login.visible = false
+        _login_input.visible = false
         _menu_layout._text_inp.focus = true
       }
-      else _error = true
+      else
+      {
+        _error_text.visible = true
+        _error_text.text = "Wrong login!"
+      }
+    }
+  }
+
+  Connections
+  {
+    target: FigureModel
+
+    onEnter_login:
+    {
+      _login_input.visible = true
+      _login_input._error_text.visible = true
+      _login_input._error_text.text = error_text
     }
   }
 

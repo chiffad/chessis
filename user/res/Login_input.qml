@@ -6,7 +6,7 @@ Item
 {
   id: _root
 
-  property alias _error : error_text.visible
+  property alias _error_text : error_text
   signal login_entered(string login)
 
   height: parent.height/5
@@ -70,16 +70,14 @@ Item
     Text
     {
       id: error_text
+      visible: parent.visible
 
       anchors.bottom: parent.bottom
       anchors.bottomMargin: 5
       anchors.horizontalCenter: parent.horizontalCenter
 
-      text: "Wrong login!"
-
       font.pointSize: 9
       color: "red"
-      visible: false
       opacity:0.7
     }
   }
