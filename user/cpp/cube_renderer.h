@@ -8,19 +8,19 @@
 namespace graphic
 {
 
-class Cube_renderer
+class cube_renderer_t
 {
 public:
-  Cube_renderer();
-  ~Cube_renderer();
+  cube_renderer_t();
+  ~cube_renderer_t();
 
   void render();
   void initialize();
   void set_cube_updates(const QString &fig_type, const int tilt_angle, const float scale);
 
 public:
-  Cube_renderer(const Cube_renderer&) = delete;
-  Cube_renderer& operator=(const Cube_renderer&) = delete;
+  cube_renderer_t(const cube_renderer_t&) = delete;
+  cube_renderer_t& operator=(const cube_renderer_t&) = delete;
 
 
 private:

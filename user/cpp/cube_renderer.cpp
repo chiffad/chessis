@@ -18,7 +18,7 @@
 
 using namespace graphic;
 
-struct Cube_renderer::impl_t : public QOpenGLFunctions
+struct cube_renderer_t::impl_t : public QOpenGLFunctions
 {
   impl_t();
   void render();
@@ -48,37 +48,37 @@ struct Cube_renderer::impl_t : public QOpenGLFunctions
   int matrix_uniform;
 };
 
-Cube_renderer::Cube_renderer()
+cube_renderer_t::cube_renderer_t()
     : impl(new impl_t)
 {
 }
 
-Cube_renderer::~Cube_renderer()
+cube_renderer_t::~cube_renderer_t()
 {
 }
 
-void Cube_renderer::render()
+void cube_renderer_t::render()
 {
   impl->render();
 }
 
-void Cube_renderer::initialize()
+void cube_renderer_t::initialize()
 {
   impl->initialize();
 }
 
-void Cube_renderer::set_cube_updates(const QString &fig_type, const int tilt_angle, const float scale)
+void cube_renderer_t::set_cube_updates(const QString &fig_type, const int tilt_angle, const float scale)
 {
   impl->set_cube_updates(fig_type, tilt_angle, scale);
 }
 
-Cube_renderer::impl_t::impl_t()
+cube_renderer_t::impl_t::impl_t()
     : program(std::make_shared<QOpenGLShaderProgram>()), model_view(QMatrix4x4()),
       x_angle(0), y_angle(0), z_angle(0), scale_vect(1,1,1)
 {
 }
 
-void Cube_renderer::impl_t::initialize()
+void cube_renderer_t::impl_t::initialize()
 {
   initializeOpenGLFunctions();
 
@@ -123,7 +123,7 @@ void Cube_renderer::impl_t::initialize()
   program->setUniformValue("texture", 0);
 }
 
-void Cube_renderer::impl_t::set_cube_updates(const QString &name, const int tilt_angle, const float scale)
+void cube_renderer_t::impl_t::set_cube_updates(const QString &name, const int tilt_angle, const float scale)
 {
   if(fig_name == name)
     { return; }
@@ -133,7 +133,7 @@ void Cube_renderer::impl_t::set_cube_updates(const QString &name, const int tilt
   update_model_view(scale);
 }
 
-void Cube_renderer::impl_t::load_correct_texture(const QString &name)
+void cube_renderer_t::impl_t::load_correct_texture(const QString &name)
 {
   const QString PATH_TO_IMG = "../res/img/";
 
@@ -161,7 +161,7 @@ void Cube_renderer::impl_t::load_correct_texture(const QString &name)
   fig_name = name;
 }
 
-void Cube_renderer::impl_t::update_model_view(const float scale)
+void cube_renderer_t::impl_t::update_model_view(const float scale)
 {
   scale_vect *= scale;
 
@@ -172,7 +172,7 @@ void Cube_renderer::impl_t::update_model_view(const float scale)
   model_view.scale(scale_vect);
 }
 
-void Cube_renderer::impl_t::render()
+void cube_renderer_t::impl_t::render()
 {
   create_geometry();
 
@@ -201,7 +201,7 @@ void Cube_renderer::impl_t::render()
   }
 }
 
-void Cube_renderer::impl_t::create_geometry()
+void cube_renderer_t::impl_t::create_geometry()
 {
   QVector<GLfloat> vert_data = {+1, -1, -1,   1, 1,   -1, -1, -1,   0,1,   -1, +1, -1,   0,0,   +1, +1, -1,   1,0,
                                 +1, +1, -1,   1, 1,   -1, +1, -1,   0,1,   -1, +1, +1,   0,0,   +1, +1, +1,   1,0,

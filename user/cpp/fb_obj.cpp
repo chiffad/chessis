@@ -1,11 +1,10 @@
-#include "cube_renderer.h"
-
+#include "fb_obj.h"
 
 #include <QtGui/QOpenGLFramebufferObject>
 #include <QtQuick/QQuickWindow>
-
 #include <qsgsimpletexturenode.h>
-#include "fb_obj.h"
+
+#include "cube_renderer.h"
 
 
 using namespace graphic;
@@ -20,7 +19,7 @@ public:
   void render() Q_DECL_OVERRIDE;
 
 private:
-  Cube_renderer *cube;
+  cube_renderer_t *cube;
 };
 
 
@@ -76,7 +75,7 @@ void Fb_obj::set_cube_scale(const float scale)
 
 //======================================================
 
-Fbo_renderer::Fbo_renderer() : cube(new Cube_renderer())
+Fbo_renderer::Fbo_renderer() : cube(new cube_renderer_t())
 {
   cube->initialize();
   update();

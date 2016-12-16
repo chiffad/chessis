@@ -3,8 +3,6 @@
 
 #include <QtQuick/QQuickFramebufferObject>
 
-#include "cube_renderer.h"
-
 
 namespace graphic
 {
@@ -34,6 +32,7 @@ signals:
   void fig_type_changed();
   void tilt_angle_changed();
   void cube_scale_changed();
+
 
 private:
   QString fig_type;
