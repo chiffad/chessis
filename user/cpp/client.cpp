@@ -87,6 +87,8 @@ client_t::impl_t::impl_t()
     if(i + FIRST_PORT == LAST_PORT - 1)
      { i = 0; }
   }
+
+  send(Messages::HELLO_SERVER);
 }
 
 void client_t::impl_t::send(const QByteArray& message, bool is_prev_serial_need)

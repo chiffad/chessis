@@ -199,6 +199,12 @@ void Board_graphic::update_hilight(const int move_num, const QString& history)
   }
 }
 
+void Board_graphic::get_login(const QString& error_mess)
+{
+//  set_login("asdasd" + (error_mess.isEmpty() ? QString() : QString("111111111111111")));
+  emit enter_login(error_mess);
+}
+
 void Board_graphic::emit_figure_changed(const unsigned INDEX)
 {
   QModelIndex topLeft = index(INDEX, 0);
@@ -296,7 +302,7 @@ bool Board_graphic::set_login(const QString &login)
       { return false; }
   }
 
-  add_to_messages_for_server(Messages::HELLO_SERVER, login);
+  add_to_messages_for_server(Messages::LOGIN, login);
   return true;
 }
 

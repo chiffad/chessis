@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
   graphic::Board_graphic board_graphic;
 
   engine.rootContext()->setContextProperty("FigureModel", &board_graphic);
-//  engine.load(QUrl(QStringLiteral("../c/res/app.qml")));
+//  engine.load(QUrl(QStringLiteral("../res/app.qml")));
 
   inet::client_t client;
   const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
@@ -42,41 +42,51 @@ int main(int argc, char *argv[])
 
       while(client.is_message_append())
       {
-         const QString message = client.pull();
-         const int type = message.mid(0, message.indexOf(" ")).toInt();
+        const QString message = client.pull();
+        const int type = message.mid(0, message.indexOf(" ")).toInt();
 
-         if(type == Messages::INF_REQUEST)
-           { board_graphic.add_to_command_history(message.mid(message.indexOf(" "))); }
+        if(type == Messages::SERVER_LOST
+          || type == Messages::SERVER_HERE
+          || type == Messages::OPPONENT_LOST)
+        {
+          board_graphic.set_connect_status(message.toInt());
+          continue;
+        }
 
-         else if(type == Messages::SERVER_LOST
-                 || type == Messages::SERVER_HERE
-                 || type == Messages::OPPONENT_LOST)
-           { board_graphic.set_connect_status(message.toInt()); }
+        else switch(type)
+        {
+          case Messages::INF_REQUEST:
+            board_graphic.add_to_command_history(message.mid(message.indexOf(" ")));
+            break;
+          case Messages::GAME_INF:
+          {
+            QString m = message.mid(message.indexOf(" ") + 1);
+            const int INDEX = m.indexOf(";");
+            const int NEXT_IND = INDEX + 1;
+            const QString board_mask = m.mid(0, INDEX);
+            const QString moves_history = m.mid(NEXT_IND, m.indexOf(";", NEXT_IND) - NEXT_IND);
+            const QString move_num = m.mid(m.indexOf(";", NEXT_IND) + 1);
 
-         else if(type == Messages::GAME_INF)
-         {
-           QString m = message.mid(message.indexOf(" ") + 1);
-           const int INDEX = m.indexOf(";");
-           const int NEXT_IND = INDEX + 1;
-           const QString board_mask = m.mid(0, INDEX);
-           const QString moves_history = m.mid(NEXT_IND, m.indexOf(";", NEXT_IND) - NEXT_IND);
-           const QString move_num = m.mid(m.indexOf(";", NEXT_IND) + 1);
+            board_graphic.set_board_mask(board_mask);
+            board_graphic.set_move_color(move_num.toInt());
+            board_graphic.set_connect_status(Messages::SERVER_HERE);
+            board_graphic.set_moves_history(moves_history);
+            board_graphic.update_hilight(move_num.toInt(),moves_history);
 
-           board_graphic.set_board_mask(board_mask);
-           board_graphic.set_move_color(move_num.toInt());
-           board_graphic.set_connect_status(Messages::SERVER_HERE);
-           board_graphic.set_moves_history(moves_history);
-           board_graphic.update_hilight(move_num.toInt(),moves_history);
+            if(moves_history.endsWith("#"))
+              { board_graphic.set_check_mate(); }
 
-           if(moves_history.endsWith("#"))
-             { board_graphic.set_check_mate(); }
-         }
-         else if(type == Messages::INCORRECT_LOG)
-         {
-           qDebug()<<"main: Messages::INCORRECT_LOG";
-           //need update
-         }
-         else qDebug()<<"Warning! in main: Unknown message type"<<type;
+            break;
+          }
+          case Messages::GET_LOGIN:
+            board_graphic.get_login();
+            break;
+          case Messages::INCORRECT_LOG:
+            board_graphic.get_login("This login already exist. Enter another login!");
+            break;
+          default:
+            qDebug()<<"Warning! in main: Unknown message type"<<type;
+        }
       }
     }
   }

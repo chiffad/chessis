@@ -66,6 +66,7 @@ public:
   void set_moves_history(const QString &history);
   void add_to_command_history(const QString& str);
   void update_hilight(const int move_num, const QString& history);
+  void get_login(const QString& error_message = QString());
 
 signals:
   void check_mate();
@@ -73,6 +74,7 @@ signals:
   void commands_hist_changed();
   void move_turn_color_changed();
   void udp_connection_status_changed();
+  void enter_login(const QString& error_text);
 
 public:
   Board_graphic(const Board_graphic&) = delete;
