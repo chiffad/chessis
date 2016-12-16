@@ -4,7 +4,7 @@
 #include <QtQuick/QQuickPaintedItem>
 #include <QAbstractListModel>
 #include <QString>
-#include <QVector>
+#include <vector>
 #include <QVariant>
 #include <QHash>
 #include <QModelIndex>
@@ -110,7 +110,7 @@ private:
   QStringList _str_moves_history;
   QStringList _commands_history;
   QList<figure_t> _figures_model;
-  QVector<QString> _messages_for_server;
+  std::vector<QString> _messages_for_server;
   QString _field;
 };
 

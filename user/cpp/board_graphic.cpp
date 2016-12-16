@@ -168,7 +168,7 @@ const QString board_graphic_t::coord_to_str(const Coord& from, const Coord& to) 
 
 void board_graphic_t::add_to_messages_for_server(const messages::MESSAGE mes_type, const QString& content)
 {
-  _messages_for_server.append(QString::number(mes_type) + FREE_SPACE + content);
+  _messages_for_server.push_back(QString::number(mes_type) + FREE_SPACE + content);
 }
 
 void board_graphic_t::update_hilight(const int move_num, const QString& history)
@@ -302,13 +302,13 @@ bool board_graphic_t::set_login(const QString& login)
 
 bool board_graphic_t::is_message_appear() const
 {
-  return !_messages_for_server.isEmpty();
+  return !_messages_for_server.empty();
 }
 
 const QString board_graphic_t::pull()
 {
-  QString command(_messages_for_server.first());
-  _messages_for_server.removeFirst();
+  QString command(_messages_for_server.front());
+  _messages_for_server.erase(_messages_for_server.begin());
   return command;
 }
 
