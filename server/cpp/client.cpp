@@ -60,7 +60,7 @@ struct client_t::impl_t
   int port;
   QHostAddress ip;
 
-  const QChar FREE_SPASE = ' ';
+  const char FREE_SPASE = ' ';
 };
 
 
