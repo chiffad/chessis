@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) try
           sr::log("desk == desk.end()");
 
           if(type == messages::OPPONENT_INF)
-            { c->push_for_send("No opponent: no game in progress!"); }
+            { c->push_for_send(QByteArray::number(messages::INF_REQUEST) + " No opponent: no game in progress!"); }
 
           continue;
         }
