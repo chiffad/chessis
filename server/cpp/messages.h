@@ -1,44 +1,43 @@
 #ifndef __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD
 #define __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD
 
+#include <string>
+#include <memory>
+
 namespace messages
 {
   enum MESSAGE {HELLO_SERVER = 1, MESSAGE_RECEIVED, IS_SERVER_LOST, IS_CLIENT_LOST,
                 OPPONENT_INF, MY_INF, GET_LOGIN, LOGIN, INCORRECT_LOG,
                 MOVE, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, FROM_FILE, INF_REQUEST,
                 SERVER_LOST, SERVER_HERE, CLIENT_LOST, OPPONENT_LOST, GAME_INF};
-/*
 
-  template<typename T>
-  class foo_t
+
+  struct message_t
   {
-  public:
-    foo_t(const T& _1, const int ser_num);
-    const T& get() const;
-    const int get_ser_num() const;
-    void initialize(const std::string s);
-
-  private:
-    T t;
-    int ser_num;
+    message_t(const int t);
+    virtual void gather(const std::string& str);//cut str and innitialize all values with resulting pieces
+    int type;
   };
 
-  struct some_message_strut_1
+  struct go_to_history_t : public message_t
   {
-    void gather(string str)//cut str and innitialize all values with resulting pieces
-    string something;
-    string something1;
-    ....
+    go_to_history_t();
+    virtual void gather(const std::string& str);
+    int hist_ind;
   };
 
-  struct some_message_strut_2
+  struct inf_request_t : public message_t
   {
-    void gather(string str) //cut str and innitialize all values with resulting pieces
-    string something;
-    string something1;
-    ...
+    inf_request_t();
+    virtual void gather(const std::string& str);
+    std::string data;
   };
-*/
+
+  struct helper
+  {
+    static std::shared_ptr<message_t> get_and_init_message_struct(const std::string& str);
+  };
+
 }
 
 #endif // __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD

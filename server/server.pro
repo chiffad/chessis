@@ -8,6 +8,7 @@ CONFIG += c++14
 SOURCES += cpp/main.cpp \
            cpp/chess.cpp \
            cpp/desk.cpp \
+           cpp/messages.cpp \
            cpp/server.cpp \
            cpp/client.cpp \
 
