@@ -22,13 +22,13 @@ int main(int argc, char *argv[])
   graphic::board_graphic_t board_graphic;
 
   engine.rootContext()->setContextProperty("FigureModel", &board_graphic);
-//  engine.load(QUrl(QStringLiteral("../res/app.qml")));
+  engine.load(QUrl(QStringLiteral("../res/app.qml")));
 
   cl::client_t client;
   const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();
 
-  while(true)//!app.allWindows().isEmpty() && app.allWindows().last()->visibility())
+  while(!app.allWindows().isEmpty() && app.allWindows().last()->visibility())
   {
     app.processEvents();
 
@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
             board_graphic.set_connect_status(messages::SERVER_HERE);
             board_graphic.set_moves_history(moves_history);
             board_graphic.update_hilight(move_num.toInt(),moves_history);
+            board_graphic.redraw_board();
 
             if(moves_history.endsWith("#"))
               { board_graphic.set_check_mate(); }

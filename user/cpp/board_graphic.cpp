@@ -102,8 +102,6 @@ void board_graphic_t::update_coordinates()
       ++f_it;
     }
     else fig_mod.set_visible(false);
-
-    emit_figure_changed(_figures_model.indexOf(fig_mod));
   }
 }
 
@@ -182,7 +180,6 @@ void board_graphic_t::update_hilight(const int move_num, const QString& history)
       HILIGHT ind = (i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT;
       _figures_model[ind].set_visible(true);
       _figures_model[ind].set_coord(c);
-      emit_figure_changed(ind);
     }
   }
 }
@@ -193,10 +190,10 @@ void board_graphic_t::get_login(const QString& error_mess)
   emit enter_login(error_mess);
 }
 
-void board_graphic_t::emit_figure_changed(const unsigned INDEX)
+void board_graphic_t::redraw_board()
 {
-  QModelIndex topLeft = index(INDEX, 0);
-  QModelIndex bottomRight = index(INDEX, 0);
+  QModelIndex topLeft = index(0, 0);
+  QModelIndex bottomRight = index(_figures_model.size() - 1, 0);
   emit dataChanged(topLeft, bottomRight);
 }
 

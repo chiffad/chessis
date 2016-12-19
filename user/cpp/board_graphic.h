@@ -66,6 +66,7 @@ public:
   void add_to_command_history(const QString& str);
   void update_hilight(const int move_num, const QString& history);
   void get_login(const QString& error_message = QString());
+  void redraw_board();
 
 signals:
   void check_mate();
@@ -97,7 +98,6 @@ private:
   void update_coordinates();
   Coord get_field_coord(const int i) const;
   void write_moves_to_file(const QString& path);
-  void emit_figure_changed(const unsigned index);
   void read_moves_from_file(const QString& path);
   const QString coord_to_str(const Coord& from, const Coord& to) const;
   Coord get_coord(const int x, const int y);
