@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
             board_graphic.get_login("This login already exist. Enter another login!");
             break;
           default:
-            cl::log("Warning! Unknown message type", type);
+            cl::log("Warning! Unknown message type: ", type);
         }
       }
     }

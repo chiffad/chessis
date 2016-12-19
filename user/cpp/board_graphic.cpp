@@ -35,7 +35,7 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
   const QString HISTORY = "to history";
   const QString SHOW_OPPONENT = "show opponent";
 
-  cl::log("board_graphic_t::run_command: ", message, " x1: ", x1, "y1", y1, " x2: ", x2,  "y2", y2);
+  cl::log("board_graphic_t::run_command: ", message, " x1: ", x1, "; y1: ", y1, "; x2: ", x2,  "; y2: ", y2);
   add_to_command_history("command: " + message);
 
   if(message == HELP_WORD)
