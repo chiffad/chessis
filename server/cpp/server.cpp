@@ -20,7 +20,7 @@ struct server_t::impl_t
 };
 
 server_t::server_t()
-    : impl(new impl_t())
+    : impl(std::make_unique<impl_t>())
 {
 }
 

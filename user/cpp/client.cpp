@@ -46,7 +46,7 @@ struct client_t::impl_t
 
 
 client_t::client_t()
-    : impl(new impl_t())
+    : impl(std::make_unique<impl_t>())
 {
 }
 

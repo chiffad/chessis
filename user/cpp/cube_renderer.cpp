@@ -48,7 +48,7 @@ struct cube_renderer_t::impl_t : public QOpenGLFunctions
 };
 
 cube_renderer_t::cube_renderer_t()
-    : impl(new impl_t)
+    : impl(std::make_unique<impl_t>())
 {
 }
 

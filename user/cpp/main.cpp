@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QApplication>
 #include <QWindow>
+#include <QString>
 #include <ctime>
 #include <exception>
 

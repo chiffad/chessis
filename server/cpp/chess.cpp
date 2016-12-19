@@ -72,7 +72,7 @@ struct board_t::impl_t
 };
 
 board_t::board_t()
-    : impl(new impl_t)
+    : impl(std::make_unique<impl_t>())
 {
 }
 

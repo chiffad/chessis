@@ -65,7 +65,7 @@ struct client_t::impl_t
 
 
 client_t::client_t(const int port, const QHostAddress& ip)
-    : impl(new impl_t(port, ip))
+    : impl(std::make_unique<impl_t>(port, ip))
 {
 }
 
