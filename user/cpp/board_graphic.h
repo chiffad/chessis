@@ -100,7 +100,7 @@ private:
   void emit_figure_changed(const unsigned index);
   void read_moves_from_file(const QString& path);
   const QString coord_to_str(const Coord& from, const Coord& to) const;
-  bool set_correct_coord(Coord& coord, const int x, const int y);
+  Coord get_coord(const int x, const int y);
   void add_to_messages_for_server(const messages::MESSAGE mes_type, const QString& content = QString());
 
 private:

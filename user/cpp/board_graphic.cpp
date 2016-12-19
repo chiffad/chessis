@@ -68,28 +68,22 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
       if(!command_content.isEmpty())
         { add_to_messages_for_server(messages::MOVE, command_content); }
       else
-      {
-        Coord from, to;
-        if(set_correct_coord(from, x1, y1) && set_correct_coord(to, x2, y2))
-          { add_to_messages_for_server(messages::MOVE, coord_to_str(from, to)); }
-      }
+        { add_to_messages_for_server(messages::MOVE, coord_to_str(get_coord(x1, y1), get_coord(x2, y2))); }
     }
     else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
   }
 }
 
-bool board_graphic_t::set_correct_coord(Coord& c, const int x, const int y)
+Coord board_graphic_t::get_coord(const int x, const int y)
 {
   if(x < 0 || y < 0 || x > (CELL_SIZE_X * CELL_NUM) || y > (CELL_SIZE_Y * CELL_NUM))
   {
-    cl::log("Warning! in set_correct_coord: Incorrect coord");
-    return false;
+    cl::log("Warning! in get_coord: Incorrect coord");
+    return Coord (x,y);
   }
 
-  c.x = (x + (CELL_SIZE_X / 2)) / CELL_SIZE_X;
-  c.y = (y + (CELL_SIZE_Y / 2)) / CELL_SIZE_Y;
-
-  return true;
+  return Coord ((x + (CELL_SIZE_X / 2)) / CELL_SIZE_X,
+                (y + (CELL_SIZE_Y / 2)) / CELL_SIZE_Y);
 }
 
 void board_graphic_t::update_coordinates()
