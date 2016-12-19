@@ -53,7 +53,7 @@ server_t::impl_t::impl_t()
       log("server bind: ", FIRST_PORT + i);
       break;
     }
-    if(i + FIRST_PORT == LAST_PORT - 1)
+    if(i + FIRST_PORT == LAST_PORT)
       { i = -1; }
   }
 }

@@ -85,8 +85,8 @@ client_t::impl_t::impl_t()
       log("bind: ", FIRST_PORT + i);
       break;
     }
-    if(i + FIRST_PORT == LAST_PORT - 1)
-     { i = 0; }
+    if(i + FIRST_PORT == LAST_PORT)
+     { i = -1; }
   }
 
   send(messages::HELLO_SERVER);
