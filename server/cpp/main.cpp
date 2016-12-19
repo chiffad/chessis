@@ -19,13 +19,7 @@ QByteArray get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
 int main(int argc, char *argv[]) try
 {
-  const std::string s = std::to_string(messages::INF_REQUEST) + " asdasdasdadsa";
-
-  auto _1 = messages::helper::get_and_init_message_struct(s);
-
-
-
-/*  QApplication app(argc, argv);
+  QApplication app(argc, argv);
 
   sr::server_t server;
   std::vector<std::shared_ptr<sr::client_t>> clients;
@@ -152,7 +146,7 @@ int main(int argc, char *argv[]) try
         }
       }
     }
-  }*/
+  }
 
   return 0;
 }
