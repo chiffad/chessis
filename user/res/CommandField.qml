@@ -55,8 +55,8 @@ Rectangle
 
     onAccepted:
     {
-      _root.text_inp_accepted(_text_input.text)
-      _text_input.clear()
+      _root.text_inp_accepted(_text_input.text);
+      _text_input.text = "";
     }
   }
 
@@ -64,7 +64,6 @@ Rectangle
   {
     if(event.key === Qt.Key_F1)
     {
-      _text_input.clear();
       _root.visible = true;
     }
     if(event.key === Qt.Key_Escape)
