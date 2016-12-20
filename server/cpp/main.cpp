@@ -19,6 +19,18 @@ QByteArray get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
 int main(int argc, char *argv[]) try
 {
+  const std::string s = std::to_string(messages::INF_REQUEST) + " asdasdasdadsa";
+
+  auto _1 = messages::helper::get_and_init_message_struct(s);
+
+  auto few = std::static_pointer_cast<messages::message_t>(_1);
+
+  if(few->type == 15)
+  {
+    auto few1 = std::static_pointer_cast<messages::inf_request_t>(_1);
+    sr::log(QString::fromStdString(few1->data));
+  }
+
   QApplication app(argc, argv);
 
   sr::server_t server;
@@ -52,7 +64,9 @@ int main(int argc, char *argv[]) try
       {
         const auto message = c->pull_for_logic();
         sr::log("message_from_logic: ", message);
+        auto desk = std::find_if(desks.begin(), desks.end(), [&c](const auto& d){ return d->is_contain_player(c); });
 
+        //auto _1 = messages::helper::get_and_init_message_struct(s);
         const int type = message.mid(0, message.indexOf(" ")).toInt();
 
         if(type == messages::LOGIN)
@@ -83,7 +97,6 @@ int main(int argc, char *argv[]) try
           continue;
         }
 
-        auto desk = std::find_if(desks.begin(), desks.end(), [&c](const auto& d){ return d->is_contain_player(c); });
         if(desk == desks.end())
         {
           sr::log("desk == desk.end()");
@@ -120,9 +133,6 @@ int main(int argc, char *argv[]) try
             switch(type)
             {
               case messages::MOVE:
-                (*desk)->make_moves_from_str(data.toStdString());
-                break;
-              case messages::FROM_FILE:
                 (*desk)->make_moves_from_str(data.toStdString());
                 break;
               case messages::BACK_MOVE:
