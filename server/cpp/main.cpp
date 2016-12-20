@@ -122,6 +122,9 @@ int main(int argc, char *argv[]) try
               case messages::MOVE:
                 (*desk)->make_moves_from_str(data.toStdString());
                 break;
+              case messages::FROM_FILE:
+                (*desk)->make_moves_from_str(data.toStdString());
+                break;
               case messages::BACK_MOVE:
                 (*desk)->back_move();
                 break;
