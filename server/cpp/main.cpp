@@ -52,7 +52,6 @@ int main(int argc, char *argv[]) try
       {
         const auto message = c->pull_for_logic();
         sr::log("message_from_logic: ", message);
-        auto desk = std::find_if(desks.begin(), desks.end(), [&c](const auto& d){ return d->is_contain_player(c); });
 
         const int type = message.mid(0, message.indexOf(" ")).toInt();
 
@@ -84,6 +83,7 @@ int main(int argc, char *argv[]) try
           continue;
         }
 
+        auto desk = std::find_if(desks.begin(), desks.end(), [&c](const auto& d){ return d->is_contain_player(c); });
         if(desk == desks.end())
         {
           sr::log("desk == desk.end()");
