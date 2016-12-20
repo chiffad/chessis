@@ -19,18 +19,16 @@ QByteArray get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
 int main(int argc, char *argv[]) try
 {
-  const std::string s = std::to_string(messages::INF_REQUEST) + " asdasdasdadsa";
+/*  const std::string s = std::to_string(messages::INF_REQUEST) + " asdasdasdadsa";
 
   auto _1 = messages::helper::get_and_init_message_struct(s);
 
-  auto few = std::static_pointer_cast<messages::message_t>(_1);
-
-  if(few->type == 15)
+  if(_1->type == 15)
   {
     auto few1 = std::static_pointer_cast<messages::inf_request_t>(_1);
     sr::log(QString::fromStdString(few1->data));
   }
-
+*/
   QApplication app(argc, argv);
 
   sr::server_t server;
@@ -64,14 +62,14 @@ int main(int argc, char *argv[]) try
       {
         const auto message = c->pull_for_logic();
         sr::log("message_from_logic: ", message);
-        auto desk = std::find_if(desks.begin(), desks.end(), [&c](const auto& d){ return d->is_contain_player(c); });
-
-        //auto _1 = messages::helper::get_and_init_message_struct(s);
-        const int type = message.mid(0, message.indexOf(" ")).toInt();
+        const auto message_ptr = messages::helper::get_and_init_message_struct(message.toStdString());
+        const auto type = message_ptr->type;
 
         if(type == messages::LOGIN)
         {
-          const auto log = message.mid(message.indexOf(" ") + 1);
+//          const auto log = message.mid(message.indexOf(" ") + 1);
+          const auto log = QByteArray::fromStdString(std::dynamic_pointer_cast<messages::login_t>(message_ptr)->login);
+
           if(clients.end() != std::find_if(clients.begin(), clients.end(),
                                            [&log](const auto& i){ return i->get_login() == log; }))
             { c->push_for_send(QByteArray::number(messages::INCORRECT_LOG)); }
@@ -97,6 +95,7 @@ int main(int argc, char *argv[]) try
           continue;
         }
 
+        auto desk = std::find_if(desks.begin(), desks.end(), [&c](const auto& d){ return d->is_contain_player(c); });
         if(desk == desks.end())
         {
           sr::log("desk == desk.end()");

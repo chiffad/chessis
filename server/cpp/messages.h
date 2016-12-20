@@ -19,6 +19,12 @@ namespace messages
     const MESSAGE type;
   };
 
+  struct login_t : public message_t
+  {
+    login_t(const std::string& str);
+    std::string login;
+  };
+
   struct go_to_history_t : public message_t
   {
     go_to_history_t(const std::string& str);
@@ -33,7 +39,7 @@ namespace messages
 
   struct helper
   {
-    static std::shared_ptr<void> get_and_init_message_struct(const std::string& str);
+    static std::shared_ptr<message_t> get_and_init_message_struct (const std::string& str);
   };
 
 }
