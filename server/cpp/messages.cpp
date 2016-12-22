@@ -15,7 +15,7 @@ message_t::message_t(const MESSAGE t)
 
 message_t::~message_t()
 {
-  std::cout<<"message_t::~message_t()"<<std::endl;
+  sr::log("message_t::~message_t()");
 }
 
 login_t::login_t(const std::string& str)

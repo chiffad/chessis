@@ -5,6 +5,7 @@
 #include <QTextStream>
 #include <QDebug>
 #include <exception>
+#include <string>
 
 
 namespace sr
@@ -15,6 +16,12 @@ namespace sr
     void log_fn1(OS& ostream, T _1)
     {
       ostream<< _1;
+    }
+
+    template<typename OS>
+    void log_fn1(OS& ostream, const std::string& _1)
+    {
+      ostream<< QString::fromStdString(_1);
     }
 
     template<typename OS, typename T, typename... Args>
