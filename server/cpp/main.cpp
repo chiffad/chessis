@@ -2,6 +2,7 @@
 #include <QByteArray>
 #include <QDebug>
 #include <vector>
+#include <string>
 #include <memory>
 #include <exception>
 #include <algorithm>
@@ -12,10 +13,9 @@
 #include "log.h"
 #include "messages.h"
 
-#include <string>
 
-QByteArray get_board_state(const std::shared_ptr<const logic::desk_t>& d);
-QByteArray get_person_inf(const std::shared_ptr<const sr::client_t>& c);
+std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d);
+std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
 int main(int argc, char *argv[]) try
 {
@@ -50,29 +50,29 @@ int main(int argc, char *argv[]) try
         c = --clients.end();
       }
 
-      (*c)->push_from_server(data.message);
+      (*c)->push_from_server(data.message.toStdString());
     }
 
     for(auto c : clients)
     {
       if(c->is_message_for_server_append())
-        { server.send(c->pull_for_server(), c->get_port(), c->get_ip()); }
+        { server.send(QByteArray::fromStdString(c->pull_for_server()), c->get_port(), c->get_ip()); }
 
       if(c->is_message_for_logic_append())
       {
         const auto message = c->pull_for_logic();
         sr::log("message_from_logic: ", message);
-        const auto message_ptr = messages::helper::get_and_init_message_struct(message.toStdString());
+        const auto message_ptr = messages::helper::get_and_init_message_struct(message);
         const auto type = message_ptr->type;
 
         if(type == messages::LOGIN)
         {
 //          const auto log = message.mid(message.indexOf(" ") + 1);
-          const auto log = QByteArray::fromStdString(std::dynamic_pointer_cast<messages::login_t>(message_ptr)->login);
+          const auto log = std::dynamic_pointer_cast<messages::login_t>(message_ptr)->login;
 
           if(clients.end() != std::find_if(clients.begin(), clients.end(),
                                            [&log](const auto& i){ return i->get_login() == log; }))
-            { c->push_for_send(QByteArray::number(messages::INCORRECT_LOG)); }
+            { c->push_for_send(std::to_string(messages::INCORRECT_LOG)); }
           else
           {
             c->set_login(log);
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) try
               {
                 desks.push_back(std::make_shared<logic::desk_t>(c, c2));
 
-                const QByteArray m = get_board_state(desks.back());
+                const std::string m = get_board_state(desks.back());
                 c->push_for_send(m);
                 c2->push_for_send(m);
               }
@@ -101,12 +101,12 @@ int main(int argc, char *argv[]) try
           sr::log("desk == desk.end()");
 
           if(type == messages::OPPONENT_INF)
-            { c->push_for_send(QByteArray::number(messages::INF_REQUEST) + " No opponent: no game in progress!"); }
+            { c->push_for_send(std::to_string(messages::INF_REQUEST) + " No opponent: no game in progress!"); }
 
           continue;
         }
 
-        const auto data = message.mid(message.indexOf(" ") + 1);
+        const auto data = message.substr(message.find(" ") + 1);
         sr::log("main: message: ", data);
 
         switch(type)
@@ -125,20 +125,20 @@ int main(int argc, char *argv[]) try
           case messages::CLIENT_LOST:
           {
             auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
-            (*opp)->push_for_send(QByteArray::number(messages::OPPONENT_LOST));
+            (*opp)->push_for_send(std::to_string(messages::OPPONENT_LOST));
             break;
           }
           default:
             switch(type)
             {
               case messages::MOVE:
-                (*desk)->make_moves_from_str(data.toStdString());
+                (*desk)->make_moves_from_str(data);
                 break;
               case messages::BACK_MOVE:
                 (*desk)->back_move();
                 break;
               case messages::GO_TO_HISTORY:
-                (*desk)->go_to_history_index(data.toInt());
+                (*desk)->go_to_history_index(std::stoi(data));
                 break;
               case messages::NEW_GAME:
                 (*desk)->start_new_game();
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) try
             if(c2 == clients.end())
               { sr::throw_exception("c2 == client.end()"); }
 
-            const QByteArray m = get_board_state(*desk);
+            const std::string m = get_board_state(*desk);
             c->push_for_send(m);
             (*c2)->push_for_send(m);
         }
@@ -168,16 +168,16 @@ catch(std::exception const& ex)
   qDebug()<<"Exception!"<<ex.what();
 }
 
-QByteArray get_board_state(const std::shared_ptr<const logic::desk_t>& d)
+std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d)
 {
-  return (QByteArray::number(messages::GAME_INF) + " " + QByteArray::fromStdString(d->get_board_mask()) + ";"
-          + QByteArray::fromStdString(d->get_moves_history()) + (d->is_mate() ? "#;" : ";")
-          + QByteArray::number(d->get_move_num()));
+  return (std::to_string(messages::GAME_INF) + " " + d->get_board_mask() + ";"
+          + d->get_moves_history() + (d->is_mate() ? "#;" : ";")
+          + std::to_string(d->get_move_num()));
 }
 
-QByteArray get_person_inf(const std::shared_ptr<const sr::client_t>& c)
+std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c)
 {
-  return (QByteArray::number(messages::INF_REQUEST)
-          + " Login: " + c->get_login() + "; Elo rating: " + QByteArray::number(c->get_rating()));
+  return (std::to_string(messages::INF_REQUEST) + " Login: " + c->get_login()
+          + "; Elo rating: " + std::to_string(c->get_rating()));
 }
 
