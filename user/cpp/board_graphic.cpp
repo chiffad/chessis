@@ -255,7 +255,7 @@ void board_graphic_t::read_moves_from_file(const QString& path)
 
   std::string data_from_file(std::istream_iterator<char>(from_file), (std::istream_iterator<char>()));
 
-  add_to_messages_for_server(messages::FROM_FILE, QString::fromStdString(data_from_file));
+  add_to_messages_for_server(messages::MOVE, QString::fromStdString(data_from_file));
 }
 
 void board_graphic_t::set_connect_status(const int status)
