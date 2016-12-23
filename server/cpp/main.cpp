@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) try
     for(auto c : clients)
     {
       if(c->is_message_for_server_append())
-        { server.send(QByteArray::fromStdString(c->pull_for_server()), c->get_port(), c->get_ip()); }
+        { server.send(c->pull_for_server().data(), c->get_port(), c->get_ip()); }
 
       if(c->is_message_for_logic_append())
       {
