@@ -45,42 +45,41 @@ int main(int argc, char *argv[])
 
       while(client.is_message_append())
       {
-        const QString message = client.pull();
-        const int type = message.mid(0, message.indexOf(" ")).toInt();
+        auto _1 = client.pull().toStdString();
+        const auto type = messages::helper::cut_type(_1);
+        const auto message(std::move(_1));
 
         if(type == messages::SERVER_LOST
           || type == messages::SERVER_HERE
           || type == messages::OPPONENT_LOST)
         {
           cl::log("type == messages::SERVER_LOST || type == messages::SERVER_HERE || type == messages::OPPONENT_LOST");
-          board_graphic.set_connect_status(message.toInt());
+          board_graphic.set_connect_status(type);
           continue;
         }
 
         else switch(type)
         {
           case messages::INF_REQUEST:
+          {
             cl::log("messages::INF_REQUEST");
-            board_graphic.add_to_command_history(message.mid(message.indexOf(" ")));
+            messages::inf_request_t inf(message);
+            board_graphic.add_to_command_history(QString::fromStdString(inf.data));
             break;
+          }
           case messages::GAME_INF:
           {
             cl::log("messages::GAME_INF");
-            QString m = message.mid(message.indexOf(" ") + 1);
-            const int INDEX = m.indexOf(";");
-            const int NEXT_IND = INDEX + 1;
-            const QString board_mask = m.mid(0, INDEX);
-            const QString moves_history = m.mid(NEXT_IND, m.indexOf(";", NEXT_IND) - NEXT_IND);
-            const QString move_num = m.mid(m.indexOf(";", NEXT_IND) + 1);
+            messages::game_inf_t game_inf(message);
 
-            board_graphic.set_board_mask(board_mask);
-            board_graphic.set_move_color(move_num.toInt());
+            board_graphic.set_board_mask(QString::fromStdString(game_inf.board_mask));
+            board_graphic.set_move_color(game_inf.move_num);
             board_graphic.set_connect_status(messages::SERVER_HERE);
-            board_graphic.set_moves_history(moves_history);
-            board_graphic.update_hilight(move_num.toInt(),moves_history);
+            board_graphic.set_moves_history(QString::fromStdString(game_inf.moves_history));
+            board_graphic.update_hilight(game_inf.move_num, QString::fromStdString(game_inf.moves_history));
             board_graphic.redraw_board();
 
-            if(moves_history.endsWith("#"))
+            if(game_inf.is_mate)
               { board_graphic.set_check_mate(); }
 
             break;

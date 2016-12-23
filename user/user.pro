@@ -18,6 +18,7 @@ HEADERS += cpp/board_graphic.h \
            cpp/log.h \
 
 SOURCES += cpp/main.cpp\
+           cpp/messages.cpp \
            cpp/board_graphic.cpp \
            cpp/client.cpp \
            cpp/fb_obj.cpp \
