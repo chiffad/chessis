@@ -48,7 +48,7 @@ struct client_t::impl_t
   std::string last_send_message;
 
   std::string login;
-  int elo;
+  int elo = 0;
 
   QTimer response_timer;
   QTimer connection_timer;

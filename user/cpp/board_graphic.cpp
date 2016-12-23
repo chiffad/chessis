@@ -36,7 +36,6 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
   const QString SHOW_OPPONENT = "show opponent";
 
   cl::log("board_graphic_t::run_command: ", message, " x1: ", x1, "; y1: ", y1, "; x2: ", x2,  "; y2: ", y2);
-  add_to_command_history("command: " + message);
 
   if(message == HELP_WORD)
   {
@@ -57,7 +56,11 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
   else if(message == BACK_MOVE)
     { add_to_messages_for_server(messages::BACK_MOVE); }
   else if(message == HISTORY)
-    { add_to_messages_for_server(messages::GO_TO_HISTORY, QString::number(x1 + 1)); }
+  {
+    add_to_messages_for_server(messages::GO_TO_HISTORY, QString::number(x1 + 1));
+    add_to_command_history("command: " + message + " " + QString::number(x1 + 1));
+    return;
+  }
   else
   {
     const QString command(message.mid(0,message.indexOf(FREE_SPACE)));
@@ -68,10 +71,16 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
       if(!command_content.isEmpty())
         { add_to_messages_for_server(messages::MOVE, command_content); }
       else
-        { add_to_messages_for_server(messages::MOVE, coord_to_str(get_coord(x1, y1), get_coord(x2, y2))); }
+      {
+        const auto str_coord = coord_to_str(get_coord(x1, y1), get_coord(x2, y2));
+        add_to_messages_for_server(messages::MOVE, str_coord);
+        add_to_command_history("command: " + message + " " + str_coord);
+        return;
+      }
     }
     else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
   }
+  add_to_command_history("command: " + message);
 }
 
 Coord board_graphic_t::get_coord(const int x, const int y)
