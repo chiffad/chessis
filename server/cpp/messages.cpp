@@ -1,63 +1,54 @@
 #include "messages.h"
 
-#include <iostream>
 #include <algorithm>
-#include <utility>
+#include <iostream>
 
 #include "log.h"
 
 using namespace messages;
 
-message_t::message_t(const MESSAGE t)
-    : type(t)
-{
-}
-
-message_t::~message_t()
-{
-  sr::log("message_t::~message_t()");
-}
-
 login_t::login_t(const std::string& str)
-    : message_t(LOGIN), login(str)
+    : login(str)
+{
+}
+
+move_t::move_t(const std::string& str)
+    : data(str)
 {
 }
 
 go_to_history_t::go_to_history_t(const std::string& str)
-    : message_t(GO_TO_HISTORY), hist_ind(std::stoi(str))
+    : hist_ind(std::stoi(str))
 {
 }
 
 inf_request_t::inf_request_t(const std::string& str)
-    : message_t(INF_REQUEST), data(str)
+    : data(str)
 {
 }
 
-std::shared_ptr<message_t> helper::get_and_init_message_struct (const std::string& str)
+game_inf_t::game_inf_t(const std::string& str)
 {
-  const auto first_space = std::find(str.begin(), str.end(), ' ');
-  const std::string str_type(str.begin(), first_space);
-  const int type = std::stoi(str_type);
-  const std::string data((first_space == str.end() ? first_space : first_space + 1), str.end());
+  const std::string separ = ";";
+  const auto sep_size = separ.size();
+  const auto first_end = str.find(separ);
+  const auto second_end = str.find(separ, first_end + sep_size);
+  const auto third_end = str.find(separ, second_end + sep_size);
 
-  std::shared_ptr<message_t> _1 = std::make_shared<message_t>(HELLO_SERVER);
-  switch(type)
-  {
-    case GO_TO_HISTORY:
-    {
-      sr::log("GO_TO_HISTORY");
-      _1 = std::make_shared<go_to_history_t>(data);
-      break;
-    }
-    case INF_REQUEST:
-    {
-      sr::log("INF_REQUEST");
-      _1 = std::make_shared<inf_request_t>(data);
-      break;
-    }
-    default:
-      sr::log("default");
-  }
+  board_mask = str.substr(0, first_end);
+  moves_history = str.substr(first_end + sep_size, (second_end - sep_size) - first_end);
+  is_mate = !(str.substr(second_end + sep_size, (third_end - sep_size) - second_end).empty());
+  move_num = std::stoi(str.substr(third_end + 1));
 
-  return _1;
+  std::cout<<"in game_inf_t str was:"<< str<<std::endl;
+  std::cout<<"in game_inf_t:"<< board_mask<< "/ "<< moves_history<< "/ "<< (is_mate)<< "/ "<< move_num<<std::endl;
+}
+
+MESSAGE helper::cut_type(std::string& message)
+{
+  const auto type_end = message.find(" ");
+  auto i = (std::stoi(message.substr(0, type_end)));
+  message.erase(message.begin(), message.begin() + type_end + 1);
+
+  return MESSAGE(i);
 }

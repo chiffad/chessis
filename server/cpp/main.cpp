@@ -19,16 +19,6 @@ std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
 int main(int argc, char *argv[]) try
 {
-/*  const std::string s = std::to_string(messages::INF_REQUEST) + " asdasdasdadsa";
-
-  auto _1 = messages::helper::get_and_init_message_struct(s);
-
-  if(_1->type == 15)
-  {
-    auto few1 = std::static_pointer_cast<messages::inf_request_t>(_1);
-    sr::log(QString::fromStdString(few1->data));
-  }
-*/
   QApplication app(argc, argv);
 
   sr::server_t server;
@@ -60,22 +50,20 @@ int main(int argc, char *argv[]) try
 
       if(c->is_message_for_logic_append())
       {
-        const auto message = c->pull_for_logic();
-        sr::log("message_from_logic: ", message);
-        const auto message_ptr = messages::helper::get_and_init_message_struct(message);
-        const auto type = message_ptr->type;
+        auto _1 = c->pull_for_logic();
+        sr::log("message_from_logic: ", _1);
+        const auto type = messages::helper::cut_type(_1);
+        const auto message(std::move(_1));
 
         if(type == messages::LOGIN)
         {
-//          const auto log = message.mid(message.indexOf(" ") + 1);
-          const auto log = std::dynamic_pointer_cast<messages::login_t>(message_ptr)->login;
-
+          messages::login_t login(message);
           if(clients.end() != std::find_if(clients.begin(), clients.end(),
-                                           [&log](const auto& i){ return i->get_login() == log; }))
+                                           [&login](const auto& i){ return i->get_login() == login.login; }))
             { c->push_for_send(std::to_string(messages::INCORRECT_LOG)); }
           else
           {
-            c->set_login(log);
+            c->set_login(login.login);
             for(const auto c2 : clients)
             {
               if(c2 == c)
@@ -106,9 +94,6 @@ int main(int argc, char *argv[]) try
           continue;
         }
 
-        const auto data = message.substr(message.find(" ") + 1);
-        sr::log("main: message: ", data);
-
         switch(type)
         {
           //case messages::MESSAGE_RECEIVED: //in client
@@ -132,14 +117,20 @@ int main(int argc, char *argv[]) try
             switch(type)
             {
               case messages::MOVE:
-                (*desk)->make_moves_from_str(data);
+              {
+                messages::move_t move(message);
+                (*desk)->make_moves_from_str(move.data);
                 break;
+              }
               case messages::BACK_MOVE:
                 (*desk)->back_move();
                 break;
               case messages::GO_TO_HISTORY:
-                (*desk)->go_to_history_index(std::stoi(data));
+              {
+                messages::go_to_history_t gth(message);
+                (*desk)->go_to_history_index(gth.hist_ind);
                 break;
+              }
               case messages::NEW_GAME:
                 (*desk)->start_new_game();
                 break;
@@ -171,7 +162,7 @@ catch(std::exception const& ex)
 std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d)
 {
   return (std::to_string(messages::GAME_INF) + " " + d->get_board_mask() + ";"
-          + d->get_moves_history() + (d->is_mate() ? "#;" : ";")
+          + d->get_moves_history()+ ";" + (d->is_mate() ? "#;" : ";")
           + std::to_string(d->get_move_num()));
 }
 
