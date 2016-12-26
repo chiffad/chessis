@@ -52,12 +52,15 @@ int main(int argc, char *argv[]) try
       {
         auto _1 = c->pull_for_logic();
         sr::log("message_from_logic: ", _1);
-        const auto type = messages::helper::cut_type(_1);
+        const auto type = messages::cut_type(_1);
         const auto message(std::move(_1));
 
         if(type == messages::LOGIN)
         {
           messages::login_t login(message);
+          if(!login.is_ok)
+            { continue; }
+
           if(clients.end() != std::find_if(clients.begin(), clients.end(),
                                            [&login](const auto& i){ return i->get_login() == login.login; }))
             { c->push_for_send(std::to_string(messages::INCORRECT_LOG)); }
@@ -119,6 +122,9 @@ int main(int argc, char *argv[]) try
               case messages::MOVE:
               {
                 messages::move_t move(message);
+                if(!move.is_ok)
+                  { continue; }
+
                 (*desk)->make_moves_from_str(move.data);
                 break;
               }
@@ -128,6 +134,9 @@ int main(int argc, char *argv[]) try
               case messages::GO_TO_HISTORY:
               {
                 messages::go_to_history_t gth(message);
+                if(!gth.is_ok)
+                  { continue; }
+
                 (*desk)->go_to_history_index(gth.hist_ind);
                 break;
               }

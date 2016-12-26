@@ -6,10 +6,21 @@
 
 namespace messages
 {
-  enum MESSAGE {HELLO_SERVER = 1, MESSAGE_RECEIVED, IS_SERVER_LOST, IS_CLIENT_LOST,
+  enum MESSAGE {WRONG_TYPE, HELLO_SERVER, MESSAGE_RECEIVED, IS_SERVER_LOST, IS_CLIENT_LOST,
                 OPPONENT_INF, MY_INF, GET_LOGIN, LOGIN, INCORRECT_LOG,
                 MOVE, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, INF_REQUEST,
                 SERVER_LOST, SERVER_HERE, CLIENT_LOST, OPPONENT_LOST, GAME_INF};
+
+  MESSAGE cut_type(std::string& message);
+
+  namespace detail
+  {
+    struct mess_t
+    {
+      virtual ~mess_t();
+      bool is_ok = true;
+    };
+  }
 /*
   struct hello_server_t // + server get
   {
@@ -39,7 +50,7 @@ namespace messages
   {
   };
 */
-  struct login_t //+ server get
+  struct login_t : public detail::mess_t//+ server get
   {
     login_t(const std::string& str);
     std::string login;
@@ -49,7 +60,7 @@ namespace messages
   {
   };
 */
-  struct move_t//+ server get
+  struct move_t : public detail::mess_t//+ server get
   {
     move_t(const std::string& str);
     std::string data;
@@ -59,7 +70,7 @@ namespace messages
   {
   };
 */
-  struct go_to_history_t //+ server get
+  struct go_to_history_t : public detail::mess_t//+ server get
   {
     go_to_history_t(const std::string& str);
     int hist_ind;
@@ -69,7 +80,7 @@ namespace messages
   {
   };
 */
-  struct inf_request_t // + client get
+  struct inf_request_t : public detail::mess_t// + client get
   {
     inf_request_t(const std::string& str);
     std::string data;
@@ -91,7 +102,7 @@ namespace messages
   {
   };
 */
-  struct game_inf_t// + client get
+  struct game_inf_t : public detail::mess_t// + client get
   {
     game_inf_t(const std::string& str);
     std::string board_mask;
@@ -99,12 +110,9 @@ namespace messages
     bool is_mate;
     int move_num;
   };
-
-  struct helper
-  {
-     static MESSAGE cut_type(std::string& message);
-  };
-
 }
+
+bool operator==(const std::string& str, const messages::MESSAGE m);
+bool operator!=(const std::string& str, const messages::MESSAGE m);
 
 #endif // __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD

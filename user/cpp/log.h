@@ -5,6 +5,7 @@
 #include <QTextStream>
 #include <QDebug>
 #include <exception>
+#include <string>
 
 
 namespace cl
@@ -17,34 +18,41 @@ namespace cl
       ostream<< _1;
     }
 
+    template<typename OS>
+    void log_fn1(OS& ostream, const std::string& _1)
+    {
+      ostream<< QString::fromStdString(_1);
+    }
+
     template<typename OS, typename T, typename... Args>
     void log_fn1(OS& ostream, T _1, Args... args)
     {
-        ostream<< _1;
-        log_fn1(ostream, args...);
+      ostream<<_1;
+
+      log_fn1(ostream, args...);
+    }
+
+    template<typename... Args>
+    QString get(Args... args)
+    {
+      QString str;
+      QTextStream stream(&str);
+
+      detail::log_fn1(stream, args...);
+      return str;
     }
   } // namespace detail
 
   template<typename... Args>
   void exception_fn(Args... args)
   {
-    QString str;
-    QTextStream stream(&str);
-
-    detail::log_fn1(stream, args...);
-
-    throw std::logic_error(str.toStdString());
+    throw std::logic_error(detail::get(args...).toStdString());
   }
 
   template<typename... Args>
   void log_fn(Args... args)
   {
-    QString str;
-    QTextStream stream(&str);
-
-    detail::log_fn1(stream, args...);
-
-    qDebug()<<str;
+    qDebug()<<detail::get(args...);
   }
 
   #define throw_exception(...)  exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)

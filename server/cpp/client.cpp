@@ -198,7 +198,7 @@ std::string client_t::impl_t::pull_for_server()
   const auto& _1 = messages_for_server.front();
   const std::string m = add_serial_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
 
-  if(_1.message != std::to_string(messages::MESSAGE_RECEIVED))
+  if(_1.message != messages::MESSAGE_RECEIVED)
     { begin_wait_receive(_1.message); }
 
   messages_for_server.erase(messages_for_server.begin());
@@ -250,7 +250,7 @@ bool client_t::impl_t::check_ser_num(std::string& m)
 {
   const int serial_num = cut_serial_num(m);
 
-  if(serial_num == received_serial_num - 1 && m != std::to_string(messages::MESSAGE_RECEIVED))
+  if(serial_num == received_serial_num - 1 && m != messages::MESSAGE_RECEIVED)
   {
     connection_timer.start();
     add_for_server(messages::MESSAGE_RECEIVED, true);
@@ -305,7 +305,7 @@ bool client_t::impl_t::is_message_received()
   {
     add_for_server(last_send_message, true);
 
-    if(last_send_message == std::to_string(messages::IS_CLIENT_LOST) || num_of_restarts == 3)
+    if(last_send_message == messages::IS_CLIENT_LOST || num_of_restarts == 3)
       { messages_for_logic.push_back(std::to_string(messages::CLIENT_LOST)); }
 
     ++num_of_restarts;

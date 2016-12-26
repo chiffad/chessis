@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
       while(client.is_message_append())
       {
         auto _1 = client.pull().toStdString();
-        const auto type = messages::helper::cut_type(_1);
+        const auto type = messages::cut_type(_1);
         const auto message(std::move(_1));
 
         if(type == messages::SERVER_LOST
@@ -64,6 +64,9 @@ int main(int argc, char *argv[])
           {
             cl::log("messages::INF_REQUEST");
             messages::inf_request_t inf(message);
+            if(!inf.is_ok)
+              { continue; }
+
             board_graphic.add_to_command_history(QString::fromStdString(inf.data));
             break;
           }
@@ -71,6 +74,8 @@ int main(int argc, char *argv[])
           {
             cl::log("messages::GAME_INF");
             messages::game_inf_t game_inf(message);
+            if(!game_inf.is_ok)
+              { continue; }
 
             board_graphic.set_board_mask(QString::fromStdString(game_inf.board_mask));
             board_graphic.set_move_color(game_inf.move_num);
