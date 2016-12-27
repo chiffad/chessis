@@ -5,6 +5,8 @@ QT += qml quick\
 
 CONFIG += c++14
 
+LIBS += -lboost_system\   # for boost
+
 SOURCES += cpp/main.cpp \
            cpp/chess.cpp \
            cpp/desk.cpp \
