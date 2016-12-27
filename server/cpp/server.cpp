@@ -42,6 +42,11 @@ std::vector<server_t::datagram_t> server_t::pull()
   return impl->pull();
 }
 
+void server_t::start_receive()
+{
+  impl->start_receive();
+}
+
 server_t::impl_t::impl_t(boost::asio::io_service& io_serv)
     : socket(io_serv)
 {
@@ -81,15 +86,13 @@ void server_t::impl_t::start_receive()
 {
   sr::log("start_receive()");
 
-  boost::array<char, 1> recv_buffer;
+  boost::array<char, 3> recv_buffer;
   datagram_t data;
-
-  socket.receive_from(boost::asio::buffer(recv_buffer), data.sender);
+  socket.receive_from(boost::asio::buffer(recv_buffer), data.address);
 
   data.message = std::string(recv_buffer.begin(), recv_buffer.end());
-  sr::log("received:" + data.message);
+  sr::log("received: " + data.message);
   messages.push_back(data);
-  start_receive();
 }
 
 std::vector<server_t::datagram_t> server_t::impl_t::pull()

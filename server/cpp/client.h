@@ -2,9 +2,8 @@
 #define __CLIENT_H__GOVLIYVFTYUVFTYFDIKVGLUIHL
 
 #include <string>
-#include <QHostAddress>
 #include <memory>
-
+#include <boost/asio.hpp>
 
 namespace sr
 {
@@ -12,7 +11,7 @@ namespace sr
 class client_t
 {
 public:
-  client_t(const int port, const QHostAddress& ip);
+  client_t(boost::asio::io_service& io_serv, const boost::asio::ip::udp::endpoint& addr);
   ~client_t();
   void push_from_server(const std::string& message);
   void push_for_send(const std::string& message);
@@ -20,8 +19,7 @@ public:
   bool is_message_for_logic_append() const;
   std::string pull_for_server();
   std::string pull_for_logic();
-  int get_port() const;
-  QHostAddress get_ip() const;
+  boost::asio::ip::udp::endpoint get_address() const;
 
   void set_login(const std::string& log);
   std::string get_login() const;

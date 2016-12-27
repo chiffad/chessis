@@ -1,26 +1,26 @@
 #include "client.h"
 
-#include <QObject>
-#include <QTimer>
 #include <vector>
 
 #include "messages.h"
 #include "log.h"
 
+void foo(const boost::system::error_code& /*error*/)
+{ sr::log("foo!!");}
 
 using namespace sr;
 
 struct client_t::impl_t
 {
-  impl_t(const int _port, const QHostAddress& _ip);
+  impl_t(boost::asio::io_service& io_serv, const boost::asio::ip::udp::endpoint& addr);
   void push_from_server(std::string message);
   void push_for_send(const std::string& message);
   bool is_message_for_server_append() const;
   bool is_message_for_logic_append() const;
   std::string pull_for_server();
   std::string pull_for_logic();
-  int get_port() const;
-  QHostAddress get_ip() const;
+  boost::asio::ip::udp::endpoint get_address() const;
+
   void set_login(const std::string& log);
   std::string get_login() const;
   void set_rating(const int rating);
@@ -29,8 +29,8 @@ struct client_t::impl_t
   bool check_ser_num(std::string& m);
   void add_for_server(const std::string& message, bool is_extra_message = false);
   void add_for_server(const messages::MESSAGE r_mes, bool is_extra_message = false);
-  bool is_message_received();
-  void connection_timer_timeout();
+  void is_message_received(const boost::system::error_code& error);
+  void connection_timer_timeout(const boost::system::error_code& error);
   void begin_wait_receive(const std::string& message);
   std::string add_serial_num(const std::string& data, const int num) const;
   int cut_serial_num(std::string& data) const;
@@ -43,6 +43,9 @@ struct client_t::impl_t
     bool is_extra;
   };
 
+  boost::asio::deadline_timer response_timer;
+  boost::asio::deadline_timer connection_timer;
+
   std::vector<server_mess_t> messages_for_server;
   std::vector<std::string> messages_for_logic;
   std::string last_send_message;
@@ -50,22 +53,21 @@ struct client_t::impl_t
   std::string login;
   int elo = 0;
 
-  QTimer response_timer;
-  QTimer connection_timer;
-
   int received_serial_num;
   int send_serial_num;
   bool is_received;
 
-  int port;
-  QHostAddress ip;
+  boost::asio::ip::udp::endpoint address;
 
   const char FREE_SPASE = ' ';
+
+  enum { RESPONSE_WAIT_TIME = 1500, CHECK_CONNECT_TIME = 7000};
+  #define response_timer_start() response_timer.expires_from_now(boost::posix_time::milliseconds(RESPONSE_WAIT_TIME))
+  #define connection_timer_start() connection_timer.expires_from_now(boost::posix_time::milliseconds(CHECK_CONNECT_TIME))
 };
 
-
-client_t::client_t(const int port, const QHostAddress& ip)
-    : impl(std::make_unique<impl_t>(port, ip))
+client_t::client_t(boost::asio::io_service& io_serv, const boost::asio::ip::udp::endpoint& addr)
+    : impl(std::make_unique<impl_t>(io_serv, addr))
 {
 }
 
@@ -103,14 +105,9 @@ std::string client_t::pull_for_logic()
   return impl->pull_for_logic();
 }
 
-int client_t::get_port() const
+boost::asio::ip::udp::endpoint client_t::get_address() const
 {
-  return impl->get_port();
-}
-
-QHostAddress client_t::get_ip() const
-{
-  return impl->get_ip();
+  return impl->get_address();
 }
 
 void client_t::set_login(const std::string& log)
@@ -133,15 +130,11 @@ int client_t::get_rating() const
   return impl->get_rating();
 }
 
-client_t::impl_t::impl_t(const int _port, const QHostAddress& _ip)
-    : received_serial_num(1), send_serial_num(0), is_received(true), port(_port), ip(_ip)
+client_t::impl_t::impl_t(boost::asio::io_service& io_serv, const boost::asio::ip::udp::endpoint& addr)
+    : response_timer(io_serv), connection_timer(io_serv), received_serial_num(1), send_serial_num(0), is_received(true), address(addr)
 {
-  enum { RESPONSE_WAIT_TIME = 1500, CHECK_CONNECT_TIME = 7000};
-  response_timer.setInterval(RESPONSE_WAIT_TIME);
-  connection_timer.setInterval(CHECK_CONNECT_TIME);
-
-  QObject::connect(&response_timer, &QTimer::timeout, [&](){ is_message_received(); });
-  QObject::connect(&connection_timer, &QTimer::timeout, [&](){ connection_timer_timeout(); });
+  response_timer.async_wait(&foo);//[&](const boost::system::error_code& error){ is_message_received(error); });
+  connection_timer.async_wait(&foo);//[&](const boost::system::error_code& error){ connection_timer_timeout(error); });
 }
 
 void client_t::impl_t::push_from_server(std::string m)
@@ -152,7 +145,8 @@ void client_t::impl_t::push_from_server(std::string m)
     { return; }
 
   ++received_serial_num;
-  connection_timer.start();
+  sr::log("connection_timer_start();");
+  connection_timer_start();
 
   const auto type = std::stoi(m.substr(0, m.find(FREE_SPASE)));
 
@@ -216,14 +210,9 @@ std::string client_t::impl_t::pull_for_logic()
   return m;
 }
 
-int client_t::impl_t::get_port() const
+boost::asio::ip::udp::endpoint client_t::impl_t::get_address() const
 {
-  return port;
-}
-
-QHostAddress client_t::impl_t::get_ip() const
-{
-  return ip;
+  return address;
 }
 
 void client_t::impl_t::set_login(const std::string& log)
@@ -252,7 +241,8 @@ bool client_t::impl_t::check_ser_num(std::string& m)
 
   if(serial_num == received_serial_num - 1 && m != messages::MESSAGE_RECEIVED)
   {
-    connection_timer.start();
+    sr::log("connection_timer_start();");
+    connection_timer_start();
     add_for_server(messages::MESSAGE_RECEIVED, true);
     return false;
   }
@@ -290,15 +280,17 @@ void client_t::impl_t::begin_wait_receive(const std::string& message)
 {
   is_received = false;
   last_send_message = message;
-  response_timer.start();
+  sr::log("response_timer_start();");
+  response_timer_start();
 }
 
-bool client_t::impl_t::is_message_received()
+void client_t::impl_t::is_message_received(const boost::system::error_code& /*error*/)
 {
+  sr::log("is_message_received");
   static int num_of_restarts = 0;
   if(is_received)
   {
-    response_timer.stop();
+    response_timer.wait();
     num_of_restarts = 0;
   }
   else
@@ -309,15 +301,16 @@ bool client_t::impl_t::is_message_received()
       { messages_for_logic.push_back(std::to_string(messages::CLIENT_LOST)); }
 
     ++num_of_restarts;
-    response_timer.start();
+    sr::log("response_timer_start();");
+    response_timer_start();
   }
-  return is_received;
 }
 
-void client_t::impl_t::connection_timer_timeout()
+void client_t::impl_t::connection_timer_timeout(const boost::system::error_code& /*error*/)
 {
+  sr::log("connection_timer_timeout");
   add_for_server(messages::IS_CLIENT_LOST);
-  connection_timer.stop();
+  connection_timer.wait();
 }
 
 std::string client_t::impl_t::add_serial_num(const std::string& data, const int num) const

@@ -1,11 +1,9 @@
-#include <QApplication>
-#include <QByteArray>
-#include <QDebug>
 #include <vector>
 #include <string>
 #include <memory>
 #include <exception>
 #include <algorithm>
+#include <boost/asio.hpp>
 
 #include "server.h"
 #include "client.h"
@@ -13,47 +11,56 @@
 #include "log.h"
 #include "messages.h"
 
-#include <boost/asio.hpp>
 
 std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d);
 std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
-int main() try//int argc, char *argv[]) try
+void print(const boost::system::error_code& /*e*/)
 {
+  sr::log("Hello, world!");
+}
+
+int main() try
+{
+  boost::asio::io_service io;
+
+  boost::asio::deadline_timer t(io, boost::posix_time::seconds(1));
+//  t.expires_from_now(boost::posix_time::seconds(1));
+  t.async_wait(&print);
+
+  io.run();
+//  t.expires_from_now(boost::posix_time::seconds(1));
+//  io.run();
+
+  return 0;
+
+/*
   boost::asio::io_service io_service;
   sr::server_t server(io_service);
-
-while(true)
-{ io_service.poll(); }
-
-/*  QApplication app(argc, argv);
-
-  sr::server_t server;
   std::vector<std::shared_ptr<sr::client_t>> clients;
   std::vector<std::shared_ptr<logic::desk_t>> desks;
 
   while(true)
   {
-    app.processEvents();
+    io_service.run_one();
 
     for(auto data : server.pull())
     {
-      auto c = std::find_if(clients.cbegin(), clients.cend(), [&data](const auto& i){ return (i->get_port() == data.port && i->get_ip() == data.ip); });
+      auto c = std::find_if(clients.cbegin(), clients.cend(), [&data](const auto& i){ return (i->get_address() == data.address); });
 
       if(c == clients.end())
       {
         sr::log("New client");
-        clients.push_back(std::make_shared<sr::client_t>(data.port, data.ip));
+        clients.push_back(std::make_shared<sr::client_t>(io_service, data.address));
         c = --clients.end();
       }
-
-      (*c)->push_from_server(data.message.toStdString());
+      (*c)->push_from_server(data.message);
     }
 
     for(auto c : clients)
     {
       if(c->is_message_for_server_append())
-        { server.send(c->pull_for_server().data(), c->get_port(), c->get_ip()); }
+        { server.send(c->pull_for_server().data(), c->get_address()); }
 
       if(c->is_message_for_logic_append())
       {
@@ -151,13 +158,13 @@ while(true)
                 (*desk)->start_new_game();
                 break;
               default:
-                sr::throw_exception("Unknown message type!: ", type);
+                sr::throw_except("Unknown message type!: ", type);
             }
 
             auto c2 = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
 
             if(c2 == clients.end())
-              { sr::throw_exception("c2 == client.end()"); }
+              { sr::throw_except("c2 == client.end()"); }
 
             const std::string m = get_board_state(*desk);
             c->push_for_send(m);
@@ -165,6 +172,7 @@ while(true)
         }
       }
     }
+    server.start_receive();
   }
 */
   return 0;

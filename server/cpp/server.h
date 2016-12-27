@@ -1,13 +1,11 @@
 #ifndef __SERVER_H__BVGHVJHBDCWFDVAKYUVLWBALIGDVGSADW
 #define __SERVER_H__BVGHVJHBDCWFDVAKYUVLWBALIGDVGSADW
 
-#include <QByteArray>
-#include <QHostAddress>
 #include <vector>
 #include <memory>
-
 #include <boost/asio.hpp>
 #include <string>
+
 
 namespace sr
 {
@@ -18,13 +16,14 @@ public:
 
   struct datagram_t
   {
-    boost::asio::ip::udp::endpoint sender;
+    boost::asio::ip::udp::endpoint address;
     std::string message;
   };
 
   server_t(boost::asio::io_service& io_serv);
   ~server_t();
   void send(const std::string& message, const boost::asio::ip::udp::endpoint& destination);
+  void start_receive();
   std::vector<datagram_t> pull();
 
 public:
