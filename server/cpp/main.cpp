@@ -13,13 +13,20 @@
 #include "log.h"
 #include "messages.h"
 
+#include <boost/asio.hpp>
 
 std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d);
 std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
-int main(int argc, char *argv[]) try
+int main() try//int argc, char *argv[]) try
 {
-  QApplication app(argc, argv);
+  boost::asio::io_service io_service;
+  sr::server_t server(io_service);
+
+while(true)
+{ io_service.poll(); }
+
+/*  QApplication app(argc, argv);
 
   sr::server_t server;
   std::vector<std::shared_ptr<sr::client_t>> clients;
@@ -159,7 +166,7 @@ int main(int argc, char *argv[]) try
       }
     }
   }
-
+*/
   return 0;
 }
 

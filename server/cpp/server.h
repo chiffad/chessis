@@ -6,6 +6,8 @@
 #include <vector>
 #include <memory>
 
+#include <boost/asio.hpp>
+#include <string>
 
 namespace sr
 {
@@ -16,14 +18,17 @@ public:
 
   struct datagram_t
   {
-    int port;
-    QHostAddress ip;
-    QByteArray message;
+//    int port;
+//    QHostAddress ip;
+//    QByteArray message;
+//    boost::asio::ip::udp::endpoint sender;
+//    std::string message;
   };
 
-  server_t();
+  server_t(boost::asio::io_service& io_serv);
   ~server_t();
-  void send(const QByteArray& message, const int port, const QHostAddress& ip);
+//  void send(const QByteArray& message, const int port, const QHostAddress& ip);
+//  void send(const std::string& message, const boost::asio::ip::udp::endpoint& destination);
   std::vector<datagram_t> pull();
 
 public:

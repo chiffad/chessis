@@ -55,8 +55,9 @@ namespace sr
     qDebug()<<detail::get(args...);
   }
 
-  #define throw_exception(...)  exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
+  #define throw_excepti(...)  exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
   #define log(...)  log_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
+
 } //namespace sc
 
 #endif // __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
