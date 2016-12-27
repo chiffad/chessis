@@ -18,17 +18,13 @@ public:
 
   struct datagram_t
   {
-//    int port;
-//    QHostAddress ip;
-//    QByteArray message;
-//    boost::asio::ip::udp::endpoint sender;
-//    std::string message;
+    boost::asio::ip::udp::endpoint sender;
+    std::string message;
   };
 
   server_t(boost::asio::io_service& io_serv);
   ~server_t();
-//  void send(const QByteArray& message, const int port, const QHostAddress& ip);
-//  void send(const std::string& message, const boost::asio::ip::udp::endpoint& destination);
+  void send(const std::string& message, const boost::asio::ip::udp::endpoint& destination);
   std::vector<datagram_t> pull();
 
 public:
