@@ -22,19 +22,25 @@ void print(const boost::system::error_code& /*e*/)
 
 int main() try
 {
-  boost::asio::io_service io;
+ /* boost::asio::io_service io;
+  boost::asio::io_service::work work(io);
 
   boost::asio::deadline_timer t(io, boost::posix_time::seconds(1));
 //  t.expires_from_now(boost::posix_time::seconds(1));
+  t.cancel();
   t.async_wait(&print);
+  sr::log("here!");
+  io.run_one();
 
-  io.run();
+  t.expires_from_now(boost::posix_time::seconds(1));
+  t.async_wait(&print);
 //  t.expires_from_now(boost::posix_time::seconds(1));
-//  io.run();
+  io.run_one();
 
   return 0;
+*/
 
-/*
+
   boost::asio::io_service io_service;
   sr::server_t server(io_service);
   std::vector<std::shared_ptr<sr::client_t>> clients;
@@ -172,9 +178,8 @@ int main() try
         }
       }
     }
-    server.start_receive();
   }
-*/
+
   return 0;
 }
 

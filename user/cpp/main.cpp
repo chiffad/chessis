@@ -22,13 +22,13 @@ int main(int argc, char *argv[])
   graphic::board_graphic_t board_graphic;
 
   engine.rootContext()->setContextProperty("FigureModel", &board_graphic);
-  engine.load(QUrl(QStringLiteral("../res/app.qml")));
+//  engine.load(QUrl(QStringLiteral("../res/app.qml")));
 
   cl::client_t client;
   const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();
 
-  while(!app.allWindows().isEmpty() && app.allWindows().last()->visibility())
+  while(true)//!app.allWindows().isEmpty() && app.allWindows().last()->visibility())
   {
     app.processEvents();
 
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
           || type == messages::SERVER_HERE
           || type == messages::OPPONENT_LOST)
         {
-          cl::log("type == messages::SERVER_LOST || type == messages::SERVER_HERE || type == messages::OPPONENT_LOST");
+          type == messages::SERVER_LOST ? cl::log("type == messages::SERVER_LOST") :  type == messages::SERVER_HERE ? cl::log("type == messages::SERVER_HERE") : cl::log("type == messages::OPPONENT_LOST");
           board_graphic.set_connect_status(type);
           continue;
         }

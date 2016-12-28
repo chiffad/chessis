@@ -5,9 +5,6 @@
 #include "messages.h"
 #include "log.h"
 
-void foo(const boost::system::error_code& /*error*/)
-{ sr::log("foo!!");}
-
 using namespace sr;
 
 struct client_t::impl_t
@@ -29,11 +26,13 @@ struct client_t::impl_t
   bool check_ser_num(std::string& m);
   void add_for_server(const std::string& message, bool is_extra_message = false);
   void add_for_server(const messages::MESSAGE r_mes, bool is_extra_message = false);
-  void is_message_received(const boost::system::error_code& error);
-  void connection_timer_timeout(const boost::system::error_code& error);
+  void is_message_received();
+  void connection_timer_timeout();
   void begin_wait_receive(const std::string& message);
   std::string add_serial_num(const std::string& data, const int num) const;
   int cut_serial_num(std::string& data) const;
+  void start_connection_timer();
+  void start_response_timer();
 
   struct server_mess_t
   {
@@ -60,10 +59,6 @@ struct client_t::impl_t
   boost::asio::ip::udp::endpoint address;
 
   const char FREE_SPASE = ' ';
-
-  enum { RESPONSE_WAIT_TIME = 1500, CHECK_CONNECT_TIME = 7000};
-  #define response_timer_start() response_timer.expires_from_now(boost::posix_time::milliseconds(RESPONSE_WAIT_TIME))
-  #define connection_timer_start() connection_timer.expires_from_now(boost::posix_time::milliseconds(CHECK_CONNECT_TIME))
 };
 
 client_t::client_t(boost::asio::io_service& io_serv, const boost::asio::ip::udp::endpoint& addr)
@@ -133,8 +128,6 @@ int client_t::get_rating() const
 client_t::impl_t::impl_t(boost::asio::io_service& io_serv, const boost::asio::ip::udp::endpoint& addr)
     : response_timer(io_serv), connection_timer(io_serv), received_serial_num(1), send_serial_num(0), is_received(true), address(addr)
 {
-  response_timer.async_wait(&foo);//[&](const boost::system::error_code& error){ is_message_received(error); });
-  connection_timer.async_wait(&foo);//[&](const boost::system::error_code& error){ connection_timer_timeout(error); });
 }
 
 void client_t::impl_t::push_from_server(std::string m)
@@ -145,8 +138,7 @@ void client_t::impl_t::push_from_server(std::string m)
     { return; }
 
   ++received_serial_num;
-  sr::log("connection_timer_start();");
-  connection_timer_start();
+  start_connection_timer();
 
   const auto type = std::stoi(m.substr(0, m.find(FREE_SPASE)));
 
@@ -241,8 +233,7 @@ bool client_t::impl_t::check_ser_num(std::string& m)
 
   if(serial_num == received_serial_num - 1 && m != messages::MESSAGE_RECEIVED)
   {
-    sr::log("connection_timer_start();");
-    connection_timer_start();
+    start_connection_timer();
     add_for_server(messages::MESSAGE_RECEIVED, true);
     return false;
   }
@@ -280,17 +271,16 @@ void client_t::impl_t::begin_wait_receive(const std::string& message)
 {
   is_received = false;
   last_send_message = message;
-  sr::log("response_timer_start();");
-  response_timer_start();
+  start_response_timer();
 }
 
-void client_t::impl_t::is_message_received(const boost::system::error_code& /*error*/)
+void client_t::impl_t::is_message_received()
 {
   sr::log("is_message_received");
   static int num_of_restarts = 0;
   if(is_received)
   {
-    response_timer.wait();
+    response_timer.cancel();
     num_of_restarts = 0;
   }
   else
@@ -301,16 +291,13 @@ void client_t::impl_t::is_message_received(const boost::system::error_code& /*er
       { messages_for_logic.push_back(std::to_string(messages::CLIENT_LOST)); }
 
     ++num_of_restarts;
-    sr::log("response_timer_start();");
-    response_timer_start();
+    start_response_timer();
   }
 }
 
-void client_t::impl_t::connection_timer_timeout(const boost::system::error_code& /*error*/)
+void client_t::impl_t::connection_timer_timeout()
 {
-  sr::log("connection_timer_timeout");
   add_for_server(messages::IS_CLIENT_LOST);
-  connection_timer.wait();
 }
 
 std::string client_t::impl_t::add_serial_num(const std::string& data, const int num) const
@@ -324,6 +311,26 @@ int client_t::impl_t::cut_serial_num(std::string& data) const
   data.erase(0, data.find(FREE_SPASE) + 1);
 
   return std::stoi(serial_num);
+}
+
+void client_t::impl_t::start_connection_timer()
+{
+  sr::log("start_connection_timer();");
+  connection_timer.cancel();
+  connection_timer.expires_from_now(boost::posix_time::milliseconds(7000));
+  connection_timer.async_wait([&](const boost::system::error_code& error){ if(!error){connection_timer_timeout();} sr::log(">>>>connection_timer<<<<");});
+//  connection_timer.async_wait([&](auto /*e*/){sr::log(">>>>connection_timer<<<<");});
+//  connection_timer.cancel();
+}
+
+void client_t::impl_t::start_response_timer()
+{
+  sr::log("start_response_timer();");
+  response_timer.cancel();
+  response_timer.expires_from_now(boost::posix_time::milliseconds(1500));
+  response_timer.async_wait([&](const boost::system::error_code& error)
+  { if(!error){is_message_received();} sr::log(">>>>response_timer<<<<");});
+  //response_timer.async_wait([&](auto /*e*/){sr::log(">>>>response_timer<<<<");});
 }
 
 client_t::impl_t::server_mess_t::server_mess_t(const std::string& m, const bool is_extra_message)

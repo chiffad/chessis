@@ -16,6 +16,7 @@ public:
 
   struct datagram_t
   {
+    datagram_t(const boost::asio::ip::udp::endpoint& addr, const std::string& mess);
     boost::asio::ip::udp::endpoint address;
     std::string message;
   };
@@ -23,7 +24,6 @@ public:
   server_t(boost::asio::io_service& io_serv);
   ~server_t();
   void send(const std::string& message, const boost::asio::ip::udp::endpoint& destination);
-  void start_receive();
   std::vector<datagram_t> pull();
 
 public:
