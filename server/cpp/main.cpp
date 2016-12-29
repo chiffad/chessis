@@ -40,7 +40,6 @@ int main() try
   return 0;
 */
 
-
   boost::asio::io_service io_service;
   sr::server_t server(io_service);
   std::vector<std::shared_ptr<sr::client_t>> clients;

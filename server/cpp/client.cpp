@@ -6,17 +6,20 @@
 #include "log.h"
 
 using namespace sr;
+typedef boost::asio::io_service io_service_t;
+typedef boost::asio::ip::udp::endpoint endpoint_t;
+typedef boost::asio::deadline_timer deadline_timer_t;
 
 struct client_t::impl_t
 {
-  impl_t(boost::asio::io_service& io_serv, const boost::asio::ip::udp::endpoint& addr);
+  impl_t(io_service_t& io_serv, const endpoint_t& addr);
   void push_from_server(std::string message);
   void push_for_send(const std::string& message);
   bool is_message_for_server_append() const;
   bool is_message_for_logic_append() const;
   std::string pull_for_server();
   std::string pull_for_logic();
-  boost::asio::ip::udp::endpoint get_address() const;
+  endpoint_t get_address() const;
 
   void set_login(const std::string& log);
   std::string get_login() const;
@@ -42,8 +45,8 @@ struct client_t::impl_t
     bool is_extra;
   };
 
-  boost::asio::deadline_timer response_timer;
-  boost::asio::deadline_timer connection_timer;
+  deadline_timer_t response_timer;
+  deadline_timer_t connection_timer;
 
   std::vector<server_mess_t> messages_for_server;
   std::vector<std::string> messages_for_logic;
@@ -56,12 +59,12 @@ struct client_t::impl_t
   int send_serial_num;
   bool is_received;
 
-  boost::asio::ip::udp::endpoint address;
+  endpoint_t address;
 
   const char FREE_SPASE = ' ';
 };
 
-client_t::client_t(boost::asio::io_service& io_serv, const boost::asio::ip::udp::endpoint& addr)
+client_t::client_t(io_service_t& io_serv, const endpoint_t& addr)
     : impl(std::make_unique<impl_t>(io_serv, addr))
 {
 }
@@ -100,7 +103,7 @@ std::string client_t::pull_for_logic()
   return impl->pull_for_logic();
 }
 
-boost::asio::ip::udp::endpoint client_t::get_address() const
+endpoint_t client_t::get_address() const
 {
   return impl->get_address();
 }
@@ -125,7 +128,7 @@ int client_t::get_rating() const
   return impl->get_rating();
 }
 
-client_t::impl_t::impl_t(boost::asio::io_service& io_serv, const boost::asio::ip::udp::endpoint& addr)
+client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
     : response_timer(io_serv), connection_timer(io_serv), received_serial_num(1), send_serial_num(0), is_received(true), address(addr)
 {
 }
@@ -202,7 +205,7 @@ std::string client_t::impl_t::pull_for_logic()
   return m;
 }
 
-boost::asio::ip::udp::endpoint client_t::impl_t::get_address() const
+endpoint_t client_t::impl_t::get_address() const
 {
   return address;
 }
@@ -315,21 +318,20 @@ int client_t::impl_t::cut_serial_num(std::string& data) const
 
 void client_t::impl_t::start_connection_timer()
 {
-  sr::log("start_connection_timer();");
+  log("start_connection_timer();");
   connection_timer.cancel();
   connection_timer.expires_from_now(boost::posix_time::milliseconds(7000));
-  connection_timer.async_wait([&](const boost::system::error_code& error){ if(!error){connection_timer_timeout();} sr::log(">>>>connection_timer<<<<");});
+  connection_timer.async_wait([&](const boost::system::error_code& error){ if(!error){connection_timer_timeout();} log(">>>>connection_timer<<<<", (error ? " error!" : ""));});
 //  connection_timer.async_wait([&](auto /*e*/){sr::log(">>>>connection_timer<<<<");});
-//  connection_timer.cancel();
 }
 
 void client_t::impl_t::start_response_timer()
 {
-  sr::log("start_response_timer();");
+  log("start_response_timer();");
   response_timer.cancel();
   response_timer.expires_from_now(boost::posix_time::milliseconds(1500));
-  response_timer.async_wait([&](const boost::system::error_code& error)
-  { if(!error){is_message_received();} sr::log(">>>>response_timer<<<<");});
+  response_timer.async_wait( [&](const boost::system::error_code& error)
+  { if(!error){ is_message_received(); } log(">>>>response_timer<<<<", (error ? " error!" : ""));});
   //response_timer.async_wait([&](auto /*e*/){sr::log(">>>>response_timer<<<<");});
 }
 
