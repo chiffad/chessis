@@ -15,31 +15,8 @@
 std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d);
 std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
-void print(const boost::system::error_code& /*e*/)
-{
-  sr::log("Hello, world!");
-}
-
 int main() try
 {
- /* boost::asio::io_service io;
-  boost::asio::io_service::work work(io);
-
-  boost::asio::deadline_timer t(io, boost::posix_time::seconds(1));
-//  t.expires_from_now(boost::posix_time::seconds(1));
-  t.cancel();
-  t.async_wait(&print);
-  sr::log("here!");
-  io.run_one();
-
-  t.expires_from_now(boost::posix_time::seconds(1));
-  t.async_wait(&print);
-//  t.expires_from_now(boost::posix_time::seconds(1));
-  io.run_one();
-
-  return 0;
-*/
-
   boost::asio::io_service io_service;
   sr::server_t server(io_service);
   std::vector<std::shared_ptr<sr::client_t>> clients;
