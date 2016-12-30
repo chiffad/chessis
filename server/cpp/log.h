@@ -1,11 +1,10 @@
 #ifndef __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
 #define __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
 
-#include <QString>
-#include <QTextStream>
-#include <QDebug>
 #include <exception>
 #include <string>
+#include <sstream>
+#include <iostream>
 
 
 namespace sr
@@ -18,12 +17,6 @@ namespace sr
       ostream<< _1;
     }
 
-    template<typename OS>
-    void log_fn1(OS& ostream, const std::string& _1)
-    {
-      ostream<< QString::fromStdString(_1);
-    }
-
     template<typename OS, typename T, typename... Args>
     void log_fn1(OS& ostream, T _1, Args... args)
     {
@@ -33,26 +26,24 @@ namespace sr
     }
 
     template<typename... Args>
-    QString get(Args... args)
+    std::string get(Args... args)
     {
-      QString str;
-      QTextStream stream(&str);
-
-      detail::log_fn1(stream, args...);
-      return str;
+      std::ostringstream ss;
+      detail::log_fn1(ss, args...);
+      return ss.str();
     }
   } // namespace detail
 
   template<typename... Args>
   void exception_fn(Args... args)
   {
-    throw std::logic_error(detail::get(args...).toStdString());
+    throw std::logic_error(detail::get(args...));
   }
 
   template<typename... Args>
   void log_fn(Args... args)
   {
-    qDebug()<<detail::get(args...);
+    std::cout<<detail::get(args...)<<std::endl;
   }
 
   #define throw_except(...)  exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
