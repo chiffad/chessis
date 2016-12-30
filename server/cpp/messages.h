@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 
+
 namespace messages
 {
   enum MESSAGE {WRONG_TYPE, HELLO_SERVER, MESSAGE_RECEIVED, IS_SERVER_LOST, IS_CLIENT_LOST,

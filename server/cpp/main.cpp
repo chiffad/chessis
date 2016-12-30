@@ -161,7 +161,7 @@ int main() try
 
 catch(std::exception const& ex)
 {
-  qDebug()<<"Exception!"<<ex.what();
+  std::cout<<"Exception! "<<ex.what()<<std::endl;
 }
 
 std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d)

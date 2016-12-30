@@ -6,11 +6,11 @@
 
 #include "log.h"
 
+
+using namespace sr;
 typedef boost::asio::io_service io_service_t;
 typedef boost::asio::ip::udp::endpoint endpoint_t;
 typedef boost::system::error_code error_code_t;
-
-using namespace sr;
 
 struct server_t::impl_t
 {

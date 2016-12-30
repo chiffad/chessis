@@ -5,6 +5,7 @@
 #include "messages.h"
 #include "log.h"
 
+
 using namespace sr;
 typedef boost::asio::io_service io_service_t;
 typedef boost::asio::ip::udp::endpoint endpoint_t;
@@ -279,7 +280,7 @@ void client_t::impl_t::begin_wait_receive(const std::string& message)
 
 void client_t::impl_t::is_message_received()
 {
-  sr::log("is_message_received");
+  log("is_message_received");
   static int num_of_restarts = 0;
   if(is_received)
   {
