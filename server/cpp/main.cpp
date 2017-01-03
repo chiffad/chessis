@@ -144,13 +144,13 @@ int main() try
                 (*desk)->start_new_game();
                 break;
               default:
-                sr::helper::throw_except("Unknown message type!: ", type);
+                sr::helper::throw_exception("Unknown message type!: ", type);
             }
 
             auto c2 = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
 
             if(c2 == clients.end())
-              { sr::helper::throw_except("c2 == client.end()"); }
+              { sr::helper::throw_exception("c2 == client.end()"); }
 
             const std::string m = get_board_state(*desk);
             c->push_for_send(m);
