@@ -4,7 +4,7 @@
 #include <boost/bind.hpp>
 #include <iostream>
 
-#include "log.h"
+#include "helper.h"
 
 
 using namespace sr;
@@ -65,13 +65,13 @@ server_t::impl_t::impl_t(io_service_t& io_serv)
       { socket.bind(endpoint_t(boost::asio::ip::address::from_string("127.0.0.1"), FIRST_PORT + i)); }
     catch(const boost::system::system_error& ex)
     {
-      log("can not bind to: ", FIRST_PORT + i);
+      helper::log("can not bind to: ", FIRST_PORT + i);
       if(i + FIRST_PORT == LAST_PORT)
         { i = -1; }
 
       continue;
     }
-    log("server bind: ", FIRST_PORT + i);
+    helper::log("server bind: ", FIRST_PORT + i);
     break;
   }
   start_receive();
@@ -84,7 +84,7 @@ server_t::impl_t::~impl_t()
 
 void server_t::impl_t::send(const std::string& message, const endpoint_t& destination)
 {
-  log("send: ", message + " ;to: " + destination.address().to_string());
+  helper::log("send: ", message + " ;to: " + destination.address().to_string());
   socket.async_send_to(boost::asio::buffer(message), destination, [](auto /*_1*/, auto /*_2*/){});
 }
 
@@ -93,18 +93,18 @@ void server_t::impl_t::handle_receive(const error_code_t& e, const size_t readed
   if(!e || e == boost::asio::error::message_size)
   {
     std::string mess(incoming_message.begin(), incoming_message.begin() + readed_size);
-    sr::log("read: ", mess);
+    helper::log("read: ", mess);
 
     messages.push_back(datagram_t(last_mess_sender, mess));
     start_receive();
   }
   else
-  { sr::log("hendle error!!");}
+  { helper::log("hendle error!!");}
 }
 
 void server_t::impl_t::start_receive()
 {
-  sr::log("start_receive()");
+  helper::log("start_receive()");
   socket.async_receive_from(boost::asio::buffer(incoming_message), last_mess_sender,
                             boost::bind(&server_t::impl_t::handle_receive, this,
                                          boost::asio::placeholders::error,  boost::asio::placeholders::bytes_transferred));

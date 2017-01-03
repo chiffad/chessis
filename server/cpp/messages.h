@@ -56,7 +56,7 @@ namespace messages
 */
   struct login_t : public detail::mess_t//+ server get
   {
-    login_t(const std::string& str);
+    login_t();
     std::string login;
 //    std::string pwd;
 
@@ -70,7 +70,7 @@ namespace messages
 */
   struct move_t : public detail::mess_t//+ server get
   {
-    move_t(const std::string& str);
+    move_t();
     std::string data;
 
     virtual std::string to_json() const;
@@ -83,7 +83,7 @@ namespace messages
 */
   struct go_to_history_t : public detail::mess_t//+ server get
   {
-    go_to_history_t(const std::string& str);
+    go_to_history_t();
     int hist_ind;
 
     virtual std::string to_json() const;
@@ -96,7 +96,7 @@ namespace messages
 */
   struct inf_request_t : public detail::mess_t// + client get
   {
-    inf_request_t(const std::string& str);
+    inf_request_t();
     std::string data;
 
     virtual std::string to_json() const;
@@ -121,7 +121,7 @@ namespace messages
 */
   struct game_inf_t : public detail::mess_t// + client get
   {
-    game_inf_t(const std::string& str);
+    game_inf_t();
     std::string board_mask;
     std::string moves_history;
     bool is_mate;

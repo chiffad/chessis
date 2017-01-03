@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "messages.h"
-#include "log.h"
+#include "helper.h"
 
 
 using namespace sr;
@@ -136,7 +136,7 @@ client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
 
 void client_t::impl_t::push_from_server(std::string m)
 {
-  log("push_from_server: ",m);
+  helper::log("push_from_server: ",m);
 
   if(!check_ser_num(m))
     { return; }
@@ -183,7 +183,7 @@ bool client_t::impl_t::is_message_for_logic_append() const
 
 std::string client_t::impl_t::pull_for_server()
 {
-  log("pull_for_server");
+  helper::log("pull_for_server");
 
   const auto& _1 = messages_for_server.front();
   const std::string m = add_serial_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
@@ -198,7 +198,7 @@ std::string client_t::impl_t::pull_for_server()
 
 std::string client_t::impl_t::pull_for_logic()
 {
-  log("pull_for_logic");
+  helper::log("pull_for_logic");
 
   const std::string m = messages_for_logic.front();
   messages_for_logic.erase(messages_for_logic.begin());
@@ -244,7 +244,7 @@ bool client_t::impl_t::check_ser_num(std::string& m)
 
   if(serial_num != received_serial_num)
   {
-    log("check_ser_num: Warning! Wrong serial number!");
+    helper::log("check_ser_num: Warning! Wrong serial number!");
     return false;
   }
 
@@ -253,7 +253,7 @@ bool client_t::impl_t::check_ser_num(std::string& m)
 
 void client_t::impl_t::add_for_server(const std::string& m, bool is_extra_message)
 {
-  log("add_for_server: ", m);
+  helper::log("add_for_server: ", m);
   auto _1 = server_mess_t(m, is_extra_message);
   if(is_extra_message)
     { messages_for_server.insert(messages_for_server.begin(), _1); }
@@ -263,7 +263,7 @@ void client_t::impl_t::add_for_server(const std::string& m, bool is_extra_messag
 
 void client_t::impl_t::add_for_server(const messages::MESSAGE r_mes, bool is_extra_message)
 {
-  log("add_for_server messages::MESSAGE: ", r_mes);
+  helper::log("add_for_server messages::MESSAGE: ", r_mes);
   auto _1 = server_mess_t(std::to_string(r_mes), is_extra_message);
   if(is_extra_message)
     { messages_for_server.insert(messages_for_server.begin(), _1); }
@@ -280,7 +280,7 @@ void client_t::impl_t::begin_wait_receive(const std::string& message)
 
 void client_t::impl_t::is_message_received()
 {
-  log("is_message_received");
+  helper::log("is_message_received");
   static int num_of_restarts = 0;
   if(is_received)
   {
@@ -319,20 +319,20 @@ int client_t::impl_t::cut_serial_num(std::string& data) const
 
 void client_t::impl_t::start_connection_timer()
 {
-  log("start_connection_timer();");
+  helper::log("start_connection_timer();");
   connection_timer.cancel();
   connection_timer.expires_from_now(boost::posix_time::milliseconds(7000));
-  connection_timer.async_wait([&](const boost::system::error_code& error){ if(!error){connection_timer_timeout();} log(">>>>connection_timer<<<<", (error ? " error!" : ""));});
+  connection_timer.async_wait([&](const boost::system::error_code& error){ if(!error){connection_timer_timeout();} helper::log(">>>>connection_timer<<<<", (error ? " error!" : ""));});
 //  connection_timer.async_wait([&](auto /*e*/){sr::log(">>>>connection_timer<<<<");});
 }
 
 void client_t::impl_t::start_response_timer()
 {
-  log("start_response_timer();");
+  helper::log("start_response_timer();");
   response_timer.cancel();
   response_timer.expires_from_now(boost::posix_time::milliseconds(1500));
   response_timer.async_wait( [&](const boost::system::error_code& error)
-  { if(!error){ is_message_received(); } log(">>>>response_timer<<<<", (error ? " error!" : ""));});
+  { if(!error){ is_message_received(); } helper::log(">>>>response_timer<<<<", (error ? " error!" : ""));});
   //response_timer.async_wait([&](auto /*e*/){sr::log(">>>>response_timer<<<<");});
 }
 

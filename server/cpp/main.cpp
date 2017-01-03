@@ -8,7 +8,7 @@
 #include "server.h"
 #include "client.h"
 #include "desk.h"
-#include "log.h"
+#include "helper.h"
 #include "messages.h"
 
 
@@ -33,7 +33,7 @@ int main() try
 
       if(c == clients.end())
       {
-        sr::log("New client");
+        sr::helper::log("New client");
         clients.push_back(std::make_shared<sr::client_t>(io_service, data.address));
         c = --clients.end();
       }
@@ -48,13 +48,14 @@ int main() try
       if(c->is_message_for_logic_append())
       {
         auto _1 = c->pull_for_logic();
-        sr::log("message_from_logic: ", _1);
+        sr::helper::log("message_from_logic: ", _1);
         const auto type = messages::cut_type(_1);
         const auto message(std::move(_1));
 
         if(type == messages::LOGIN)
         {
-          messages::login_t login(message);
+          messages::login_t login;
+          login.from_json(message);
           if(!login.is_ok)
             { continue; }
 
@@ -86,7 +87,7 @@ int main() try
         auto desk = std::find_if(desks.begin(), desks.end(), [&c](const auto& d){ return d->is_contain_player(c); });
         if(desk == desks.end())
         {
-          sr::log("desk == desk.end()");
+          sr::helper::log("desk == desk.end()");
 
           if(type == messages::OPPONENT_INF)
             { c->push_for_send(std::to_string(messages::INF_REQUEST) + " No opponent: no game in progress!"); }
@@ -118,7 +119,8 @@ int main() try
             {
               case messages::MOVE:
               {
-                messages::move_t move(message);
+                messages::move_t move;
+                move.from_json(message);
                 if(!move.is_ok)
                   { continue; }
 
@@ -130,7 +132,8 @@ int main() try
                 break;
               case messages::GO_TO_HISTORY:
               {
-                messages::go_to_history_t gth(message);
+                messages::go_to_history_t gth;
+                gth.from_json(message);
                 if(!gth.is_ok)
                   { continue; }
 
@@ -141,13 +144,13 @@ int main() try
                 (*desk)->start_new_game();
                 break;
               default:
-                sr::throw_except("Unknown message type!: ", type);
+                sr::helper::throw_except("Unknown message type!: ", type);
             }
 
             auto c2 = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
 
             if(c2 == clients.end())
-              { sr::throw_except("c2 == client.end()"); }
+              { sr::helper::throw_except("c2 == client.end()"); }
 
             const std::string m = get_board_state(*desk);
             c->push_for_send(m);
@@ -167,14 +170,13 @@ catch(std::exception const& ex)
 
 std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d)
 {
-  return (std::to_string(messages::GAME_INF) + " " + d->get_board_mask() + ";"
-          + d->get_moves_history()+ ";" + (d->is_mate() ? "#;" : ";")
-          + std::to_string(d->get_move_num()));
+  return sr::helper::get_str("{", "\"board_mask\": ", d->get_board_mask(), ", \"moves_history\": ", d->get_moves_history(),
+                             ", \"is_mate\": ", d->is_mate(), ", \"move_num\": ", d->get_move_num(), "}");
 }
 
 std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c)
 {
-  return (std::to_string(messages::INF_REQUEST) + " Login: " + c->get_login()
+  return(std::to_string(messages::INF_REQUEST) + " Login: " + c->get_login()
           + "; Elo rating: " + std::to_string(c->get_rating()));
 }
 
