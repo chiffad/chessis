@@ -20,6 +20,9 @@ namespace messages
     {
       virtual ~mess_t();
       bool is_ok = true;
+
+      virtual std::string to_json() const = 0;
+      virtual void from_json(const std::string& str) = 0;
     };
   }
 /*
@@ -55,6 +58,10 @@ namespace messages
   {
     login_t(const std::string& str);
     std::string login;
+//    std::string pwd;
+
+    virtual std::string to_json() const;
+    virtual void from_json(const std::string& str);
   };
 
 /*  struct incorrect_log_t //+ server get
@@ -65,6 +72,9 @@ namespace messages
   {
     move_t(const std::string& str);
     std::string data;
+
+    virtual std::string to_json() const;
+    virtual void from_json(const std::string& str);
   };
 
 /*  struct back_move_t //+ server get
@@ -75,6 +85,9 @@ namespace messages
   {
     go_to_history_t(const std::string& str);
     int hist_ind;
+
+    virtual std::string to_json() const;
+    virtual void from_json(const std::string& str);
   };
 /*
   struct new_game_t//+ server get
@@ -85,6 +98,9 @@ namespace messages
   {
     inf_request_t(const std::string& str);
     std::string data;
+
+    virtual std::string to_json() const;
+    virtual void from_json(const std::string& str);
   };
 /*
   struct server_lost_t // + client get
@@ -110,6 +126,9 @@ namespace messages
     std::string moves_history;
     bool is_mate;
     int move_num;
+
+    virtual std::string to_json() const;
+    virtual void from_json(const std::string& str);
   };
 }
 

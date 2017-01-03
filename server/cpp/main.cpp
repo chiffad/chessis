@@ -17,6 +17,7 @@ std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
 int main() try
 {
+
   boost::asio::io_service io_service;
   sr::server_t server(io_service);
   std::vector<std::shared_ptr<sr::client_t>> clients;
