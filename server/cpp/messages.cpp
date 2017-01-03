@@ -53,7 +53,7 @@ login_t::login_t()
 
 std::string login_t::to_json() const
 {
-  return sr::helper::get_str("{", "\"login\": ", /*",\"pwd\": ", pwd,*/"\"",login, "\"", "}");
+  return sr::helper::get_str("{\"login\": ", /*",\"pwd\": ", pwd,*/"\"",login, "\"}");
 }
 
 void login_t::from_json(const std::string& str)
@@ -71,7 +71,7 @@ move_t::move_t()
 
 std::string move_t::to_json() const
 {
-  return sr::helper::get_str("{", "\"move\": ", "\"",data, "\"", "}");
+  return sr::helper::get_str("{\"move\": \"",data, "\"}");
 }
 
 void move_t::from_json(const std::string& str)
@@ -88,7 +88,7 @@ go_to_history_t::go_to_history_t()
 
 std::string go_to_history_t::to_json() const
 {
-  return sr::helper::get_str("{", "\"hist_ind\": ", hist_ind, "}");
+  return sr::helper::get_str("{\"hist_ind\": ", hist_ind, "}");
 }
 
 void go_to_history_t::from_json(const std::string& str)
@@ -106,7 +106,7 @@ inf_request_t::inf_request_t()
 
 std::string inf_request_t::to_json() const
 {
-  return sr::helper::get_str("{", "\"inf\": ", "\"", data, "\"", "}");
+  return sr::helper::get_str("{\"inf\": \"", data, "\"}");
 }
 
 void inf_request_t::from_json(const std::string& str)
@@ -124,7 +124,7 @@ game_inf_t::game_inf_t()
 
 std::string game_inf_t::to_json() const
 {
-  return sr::helper::get_str("{", "\"board_mask\": ", "\"", board_mask, "\"",  ", \"moves_history\": ", "\"", moves_history, "\"", ", \"is_mate\": ", is_mate, ", \"move_num\": ", move_num, "}");
+  return sr::helper::get_str("{\"board_mask\": \"", board_mask, "\", \"moves_history\": \"", moves_history, "\", \"is_mate\": ", is_mate, ", \"move_num\": ", move_num, "}");
 }
 
 void game_inf_t::from_json(const std::string& str)
