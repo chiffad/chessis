@@ -54,7 +54,7 @@ login_t::login_t()
 
 std::string login_t::to_json() const
 {
-  return cl::helper::get_str("{", "\"login\": ", /*",\"pwd\": ", pwd,*/ "\"", QString::fromStdString(login), "\"", "}");
+  return cl::helper::get_str("{\"login\": ", /*",\"pwd\": ", pwd,*/ "\"", QString::fromStdString(login), "\"}");
 }
 
 void login_t::from_json(const std::string& str)
@@ -72,7 +72,7 @@ move_t::move_t()
 
 std::string move_t::to_json() const
 {
-  return cl::helper::get_str("{", "\"move\": ", "\"", QString::fromStdString(data), "\"", "}");
+  return cl::helper::get_str("{\"move\": \"", QString::fromStdString(data), "\"}");
 }
 
 void move_t::from_json(const std::string& str)
@@ -89,7 +89,7 @@ go_to_history_t::go_to_history_t()
 
 std::string go_to_history_t::to_json() const
 {
-  return cl::helper::get_str("{", "\"hist_ind\": ", hist_ind, "}");
+  return cl::helper::get_str("{\"hist_ind\": ", hist_ind, "}");
 }
 
 void go_to_history_t::from_json(const std::string& str)
@@ -107,7 +107,7 @@ inf_request_t::inf_request_t()
 
 std::string inf_request_t::to_json() const
 {
-  return cl::helper::get_str("{", "\"inf\": ", "\"",QString::fromStdString(data), "\"", "}");
+  return cl::helper::get_str("{\"inf\": \"",QString::fromStdString(data), "\"}");
 }
 
 void inf_request_t::from_json(const std::string& str)
@@ -125,8 +125,8 @@ game_inf_t::game_inf_t()
 
 std::string game_inf_t::to_json() const
 {
-  return cl::helper::get_str("{", "\"board_mask\": ", "\"", QString::fromStdString(board_mask), "\"",
-                             ", \"moves_history\": ", "\"", QString::fromStdString(moves_history), "\"", ", \"is_mate\": ", is_mate, ", \"move_num\": ", move_num, "}");
+  return cl::helper::get_str("{\"board_mask\": \"", QString::fromStdString(board_mask),
+                             "\", \"moves_history\": \"", QString::fromStdString(moves_history), "\", \"is_mate\": ", is_mate, ", \"move_num\": ", move_num, "}");
 }
 
 void game_inf_t::from_json(const std::string& str)
