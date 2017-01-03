@@ -54,7 +54,7 @@ struct client_t::impl_t
   std::string last_send_message;
 
   std::string login;
-  int elo = 0;
+  int elo = 1200;
 
   int received_serial_num;
   int send_serial_num;

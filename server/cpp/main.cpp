@@ -90,7 +90,7 @@ int main() try
           sr::helper::log("desk == desk.end()");
 
           if(type == messages::OPPONENT_INF)
-            { c->push_for_send(std::to_string(messages::INF_REQUEST) + " No opponent: no game in progress!"); }
+            { c->push_for_send(sr::helper::get_str((messages::INF_REQUEST), " { \"inf\": \"No opponent: no game in progress!\"}")); }
 
           continue;
         }
@@ -170,13 +170,13 @@ catch(std::exception const& ex)
 
 std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d)
 {
-  return sr::helper::get_str("{", "\"board_mask\": ", d->get_board_mask(), ", \"moves_history\": ", d->get_moves_history(),
+  return sr::helper::get_str(messages::GAME_INF, " {", "\"board_mask\": ", "\"", d->get_board_mask(), "\"", ", \"moves_history\": ", "\"", d->get_moves_history(), "\"",
                              ", \"is_mate\": ", d->is_mate(), ", \"move_num\": ", d->get_move_num(), "}");
 }
 
 std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c)
 {
-  return(std::to_string(messages::INF_REQUEST) + " Login: " + c->get_login()
-          + "; Elo rating: " + std::to_string(c->get_rating()));
+  return sr::helper::get_str(messages::INF_REQUEST, " {", "\"inf\": ", "\"", "Login: ", c->get_login()
+                             , "; Elo rating: ", c->get_rating(), "\" }");
 }
 

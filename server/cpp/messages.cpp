@@ -6,6 +6,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <sstream>
+#include <utility>
 
 #include "helper.h"
 
@@ -14,13 +15,20 @@ using namespace messages;
 
 boost::property_tree::ptree get_ptree(const std::string& json_str)
 {
-  std::stringstream ss;
-  ss.str(json_str);
+  try
+  {
+    std::stringstream ss;
+    ss.str(json_str);
 
-  boost::property_tree::ptree pt;
-  boost::property_tree::read_json(ss, pt);
-
-  return pt;
+    boost::property_tree::ptree pt;
+    boost::property_tree::read_json(ss, pt);
+    return pt;
+  }
+  catch(const std::exception& e)
+  {
+    sr::helper::throw_exception("in get_ptree something wrong" ,e.what());
+    return boost::property_tree::ptree();
+  }
 }
 
 template<typename T>
@@ -45,7 +53,7 @@ login_t::login_t()
 
 std::string login_t::to_json() const
 {
-  return sr::helper::get_str("{", "\"login\": ", /*",\"pwd\": ", pwd,*/login, "}");
+  return sr::helper::get_str("{", "\"login\": ", /*",\"pwd\": ", pwd,*/"\"",login, "\"", "}");
 }
 
 void login_t::from_json(const std::string& str)
@@ -63,7 +71,7 @@ move_t::move_t()
 
 std::string move_t::to_json() const
 {
-  return sr::helper::get_str("{", "\"move\": ", data, "}");
+  return sr::helper::get_str("{", "\"move\": ", "\"",data, "\"", "}");
 }
 
 void move_t::from_json(const std::string& str)
@@ -98,7 +106,7 @@ inf_request_t::inf_request_t()
 
 std::string inf_request_t::to_json() const
 {
-  return sr::helper::get_str("{", "\"inf\": ", data, "}");
+  return sr::helper::get_str("{", "\"inf\": ", "\"", data, "\"", "}");
 }
 
 void inf_request_t::from_json(const std::string& str)
@@ -116,7 +124,7 @@ game_inf_t::game_inf_t()
 
 std::string game_inf_t::to_json() const
 {
-  return sr::helper::get_str("{", "\"board_mask\": ", board_mask, ", \"moves_history\": ", moves_history, ", \"is_mate\": ", is_mate, ", \"move_num\": ", move_num, "}");
+  return sr::helper::get_str("{", "\"board_mask\": ", "\"", board_mask, "\"",  ", \"moves_history\": ", "\"", moves_history, "\"", ", \"is_mate\": ", is_mate, ", \"move_num\": ", move_num, "}");
 }
 
 void game_inf_t::from_json(const std::string& str)
