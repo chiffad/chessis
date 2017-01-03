@@ -15,7 +15,7 @@ HEADERS += cpp/board_graphic.h \
            cpp/cube_renderer.h \
            cpp/coord.h \
            cpp/figure.h \
-           cpp/log.h \
+           cpp/helper.h \
 
 SOURCES += cpp/main.cpp\
            cpp/messages.cpp \

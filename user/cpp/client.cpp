@@ -6,7 +6,7 @@
 #include <QTimer>
 
 #include "messages.h"
-#include "log.h"
+#include "helper.h"
 
 
 using namespace cl;
@@ -82,7 +82,7 @@ client_t::impl_t::impl_t()
     if(socket.bind(SERVER_IP, FIRST_PORT + i))
     {
       my_port = FIRST_PORT + i;
-      log("bind: ", FIRST_PORT + i);
+      helper::log("bind: ", FIRST_PORT + i);
       break;
     }
     if(i + FIRST_PORT == LAST_PORT)
@@ -100,7 +100,7 @@ void client_t::impl_t::send(const QByteArray& message, bool is_prev_serial_need)
     return;
   }
 
-  log("send: ", message);
+  helper::log("send: ", message);
 
   socket.writeDatagram(add_serial_num(message, is_prev_serial_need), SERVER_IP, server_port);
   begin_wait_receive(message);
@@ -121,7 +121,7 @@ void client_t::impl_t::send(const messages::MESSAGE r_mes, bool is_prev_serial_n
     begin_wait_receive(message);
   }
 
-  log("send: ", message);
+  helper::log("send: ", message);
 
   socket.writeDatagram(add_serial_num(message, is_prev_serial_need), SERVER_IP, server_port);
 }
@@ -137,10 +137,10 @@ void client_t::impl_t::read()
 
   const int serial_num = cut_serial_num(message);
 
-  log("read: ", message);
+  helper::log("read: ", message);
   if(sender_IP != SERVER_IP || sender_port != server_port || sender_port == my_port)
   {
-    log("Warning! in read_data: Wrong sender!", message);
+    helper::log("Warning! in read_data: Wrong sender!", message);
     return;
   }
 
@@ -152,7 +152,7 @@ void client_t::impl_t::read()
       connection_checker.start(CHECK_CONNECT_TIME);
       send(messages::MESSAGE_RECEIVED, true);
     }
-    log("Warning! in read_data: Wrong serial number!");
+    helper::log("Warning! in read_data: Wrong serial number!");
     return;
   }
 

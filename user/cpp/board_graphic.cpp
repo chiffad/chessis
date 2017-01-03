@@ -9,7 +9,7 @@
 #include <fstream>
 #include <QChar>
 
-#include "log.h"
+#include "helper.h"
 
 
 using namespace graphic;
@@ -35,11 +35,11 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
   const QString HISTORY = "to history";
   const QString SHOW_OPPONENT = "show opponent";
 
-  cl::log("board_graphic_t::run_command: ", message, " x1: ", x1, "; y1: ", y1, "; x2: ", x2,  "; y2: ", y2);
+  cl::helper::log("board_graphic_t::run_command: ", message, " x1: ", x1, "; y1: ", y1, "; x2: ", x2,  "; y2: ", y2);
 
   if(message == HELP_WORD)
   {
-    cl::log("run_comman: dhelp_word");
+    cl::helper::log("run_comman: dhelp_word");
     add_to_command_history("1.For move, type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4)" + "\n"+
     "2.For back move, type '" + BACK_MOVE + "'" + "\n"+
     "3.For start new game, type '" + NEW_GAME + "'" + "\n"+
@@ -57,10 +57,19 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
     { add_to_messages_for_server(messages::BACK_MOVE); }
   else if(message == HISTORY)
   {
-    add_to_messages_for_server(messages::GO_TO_HISTORY, QString::number(x1 + 1));
+    messages::go_to_history_t gtp;
+    gtp.hist_ind = x1+1;
+    add_to_messages_for_server(messages::GO_TO_HISTORY, QString::fromStdString(gtp.to_json()));
     add_to_command_history("command: " + message + " " + QString::number(x1 + 1));
     return;
   }
+  else if(message.contains(HISTORY))
+  {
+    messages::go_to_history_t gtp;
+    gtp.hist_ind = message.mid(HISTORY.size() + 1).toInt();
+    add_to_messages_for_server(messages::GO_TO_HISTORY, QString::fromStdString(gtp.to_json()));
+  }
+
   else
   {
     const QString command(message.mid(0,message.indexOf(FREE_SPACE)));
@@ -68,15 +77,20 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
 
     if(command == MOVE_WORD)
     {
+      messages::move_t move;
       if(!command_content.isEmpty())
-        { add_to_messages_for_server(messages::MOVE, command_content); }
-      else
       {
-        const auto str_coord = coord_to_str(get_coord(x1, y1), get_coord(x2, y2));
-        add_to_messages_for_server(messages::MOVE, str_coord);
-        add_to_command_history("command: " + message + " " + str_coord);
+        move.data = command_content.toStdString();
+        add_to_messages_for_server(messages::MOVE, QString::fromStdString(move.to_json()));
+      }
+      else if(x1 + x2 + y1 + y2 != 0)
+      {
+        move.data = coord_to_str(get_coord(x1, y1), get_coord(x2, y2)).toStdString();
+        add_to_messages_for_server(messages::MOVE, QString::fromStdString(move.to_json()));
+        add_to_command_history("command: " + message + " " + QString::fromStdString(move.data));
         return;
       }
+      else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
     }
     else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
   }
@@ -87,7 +101,7 @@ Coord board_graphic_t::get_coord(const int x, const int y)
 {
   if(x < 0 || y < 0 || x > (CELL_SIZE_X * CELL_NUM) || y > (CELL_SIZE_Y * CELL_NUM))
   {
-    cl::log("Warning! in get_coord: Incorrect coord");
+    cl::helper::log("Warning! in get_coord: Incorrect coord");
     return Coord (x,y);
   }
 
@@ -123,7 +137,7 @@ void board_graphic_t::set_board_mask(const QString& mask)
 {
   if(mask.size() != CELL_NUM * CELL_NUM)
   {
-    cl::log("Warning! in set_board_mask: Wrong board mask size");
+    cl::helper::log("Warning! in set_board_mask: Wrong board mask size");
     return;
   }
 
@@ -242,7 +256,7 @@ void board_graphic_t::write_moves_to_file(const QString& path)
   std::ofstream in_file(path.toStdString());
   if(!in_file.is_open())
   {
-    cl::log("Warning! in write_moves_to_file: Couldn't open file.");
+    cl::helper::log("Warning! in write_moves_to_file: Couldn't open file.");
     return;
   }
   for(auto &s : _str_moves_history)
@@ -258,7 +272,7 @@ void board_graphic_t::read_moves_from_file(const QString& path)
   std::ifstream from_file(path.toStdString());
   if(!from_file.is_open())
   {
-    cl::log("Warning! read_moves_from_file: Couldn't open file.");
+    cl::helper::log("Warning! read_moves_from_file: Couldn't open file.");
     return;
   }
 
@@ -282,7 +296,7 @@ void board_graphic_t::set_connect_status(const int status)
       _udp_connection_status = "Opponent disconnected";
       break;
     default:
-      cl::log("Warning! in set_connect_status: Unknown status");
+      cl::helper::log("Warning! in set_connect_status: Unknown status");
       return;
   }
   emit udp_connection_status_changed();
@@ -296,7 +310,9 @@ bool board_graphic_t::set_login(const QString& login)
       { return false; }
   }
 
-  add_to_messages_for_server(messages::LOGIN, login);
+  messages::login_t l;
+  l.login = login.toStdString();
+  add_to_messages_for_server(messages::LOGIN, QString::fromStdString(l.to_json()));
   return true;
 }
 

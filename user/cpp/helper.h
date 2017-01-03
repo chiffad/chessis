@@ -10,6 +10,8 @@
 
 namespace cl
 {
+namespace helper
+{
   namespace detail
   {
     template<typename OS, typename T>
@@ -55,8 +57,16 @@ namespace cl
     qDebug()<<detail::get(args...);
   }
 
+  template<typename... Args>
+  std::string get_str(const Args& ... args)
+  {
+    return detail::get(args...).toStdString();
+  }
+
   #define throw_exception(...)  exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
   #define log(...)  log_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
+
+} //namespace helper
 } //namespace sc
 
 #endif // __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__

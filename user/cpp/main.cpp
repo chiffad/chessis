@@ -10,7 +10,7 @@
 #include "client.h"
 #include "fb_obj.h"
 #include "messages.h"
-#include "log.h"
+#include "helper.h"
 
 
 int main(int argc, char *argv[])
@@ -53,9 +53,9 @@ int main(int argc, char *argv[])
           || type == messages::SERVER_HERE
           || type == messages::OPPONENT_LOST)
         {
-          type == messages::SERVER_LOST ? cl::log("type == messages::SERVER_LOST") 
-                                        :  type == messages::SERVER_HERE ? cl::log("type == messages::SERVER_HERE") 
-                                                                         : cl::log("type == messages::OPPONENT_LOST");
+          type == messages::SERVER_LOST ? cl::helper::log("type == messages::SERVER_LOST") 
+                                        :  type == messages::SERVER_HERE ? cl::helper::log("type == messages::SERVER_HERE") 
+                                                                         : cl::helper::log("type == messages::OPPONENT_LOST");
           board_graphic.set_connect_status(type);
           continue;
         }
@@ -64,8 +64,9 @@ int main(int argc, char *argv[])
         {
           case messages::INF_REQUEST:
           {
-            cl::log("messages::INF_REQUEST");
-            messages::inf_request_t inf(message);
+            cl::helper::log("messages::INF_REQUEST");
+            messages::inf_request_t inf;
+            inf.from_json(message);
             if(!inf.is_ok)
               { continue; }
 
@@ -74,8 +75,9 @@ int main(int argc, char *argv[])
           }
           case messages::GAME_INF:
           {
-            cl::log("messages::GAME_INF");
-            messages::game_inf_t game_inf(message);
+            cl::helper::log("messages::GAME_INF");
+            messages::game_inf_t game_inf;
+            game_inf.from_json(message);
             if(!game_inf.is_ok)
               { continue; }
 
@@ -92,15 +94,15 @@ int main(int argc, char *argv[])
             break;
           }
           case messages::GET_LOGIN:
-            cl::log("messages::GET_LOGIN");
+            cl::helper::log("messages::GET_LOGIN");
             board_graphic.get_login();
             break;
           case messages::INCORRECT_LOG:
-            cl::log("messages::INCORRECT_LOG");
+            cl::helper::log("messages::INCORRECT_LOG");
             board_graphic.get_login("This login already exist. Enter another login!");
             break;
           default:
-            cl::log("Warning! Unknown message type: ", type);
+            cl::helper::log("Warning! Unknown message type: ", type);
         }
       }
     }

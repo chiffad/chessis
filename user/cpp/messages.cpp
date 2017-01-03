@@ -3,63 +3,145 @@
 #include <algorithm>
 #include <iostream>
 #include <exception>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <sstream>
+#include <boost/property_tree/ini_parser.hpp>
 
-#include "log.h"
+#include "helper.h"
 
 
 using namespace messages;
 
-login_t::login_t(const std::string& str)
-    : detail::mess_t(), login(str)
-{
-}
-
-move_t::move_t(const std::string& str)
-    : data(str)
-{
-}
-
-go_to_history_t::go_to_history_t(const std::string& str)
-    : detail::mess_t()
+boost::property_tree::ptree get_ptree(const std::string& json_str)
 {
   try
-    { hist_ind = std::stoi(str); }
-  catch(const std::invalid_argument& e)
   {
-    cl::log("Warning! In go_to_history_t can not convert " + str + " to int");
-    hist_ind = 0;
-    is_ok = false;
+    std::stringstream ss;
+    ss.str(json_str);
+
+    boost::property_tree::ptree pt;
+    boost::property_tree::read_json(ss, pt);
+    return pt;
   }
+  catch(const std::exception& e)
+  {
+    cl::helper::throw_exception("can nor convert ", QString::fromStdString(json_str), " to ptree!");
+  }
+
+  return boost::property_tree::ptree();
 }
 
-inf_request_t::inf_request_t(const std::string& str)
-    : detail::mess_t(), data(str)
+template<typename T>
+bool try_to_set(T& var, const boost::property_tree::ptree& pt, const std::string& name, const std::string& error_mess = std::string())
 {
+  try
+    { var = pt.get<T>(name); }
+  catch(const std::exception& e)
+  {
+    cl::helper::log(QString::fromStdString(error_mess), " ; ", e.what());
+    var = T();
+    return false;
+  }
+
+  return true;
 }
 
-game_inf_t::game_inf_t(const std::string& str)
+login_t::login_t()
     : detail::mess_t()
 {
-  const std::string separ = ";";
-  const auto sep_size = separ.size();
-  const auto first_end = str.find(separ);
-  const auto second_end = str.find(separ, first_end + sep_size);
-  const auto third_end = str.find(separ, second_end + sep_size);
+}
 
-  board_mask = str.substr(0, first_end);
-  moves_history = str.substr(first_end + sep_size, (second_end - sep_size) - first_end);
-  is_mate = !(str.substr(second_end + sep_size, (third_end - sep_size) - second_end).empty());
-  try
-    { move_num = std::stoi(str.substr(third_end + 1)); }
-  catch(const std::invalid_argument& e)
+std::string login_t::to_json() const
+{
+  return cl::helper::get_str("{", "\"login\": ", /*",\"pwd\": ", pwd,*/ "\"", QString::fromStdString(login), "\"", "}");
+}
+
+void login_t::from_json(const std::string& str)
+{
+  const auto pt = get_ptree(str);
+  if(!try_to_set(login, pt, "login", "login_t: Can not find login or pwd in " + str))
+    { is_ok = false; }
+}
+
+
+move_t::move_t()
+    : detail::mess_t()
+{
+}
+
+std::string move_t::to_json() const
+{
+  return cl::helper::get_str("{", "\"move\": ", "\"", QString::fromStdString(data), "\"", "}");
+}
+
+void move_t::from_json(const std::string& str)
+{
+  const auto pt = get_ptree(str);
+  if(!try_to_set(data, pt, "move", "move_t: Can not find move in " + str))
+    { is_ok = false; }
+}
+
+go_to_history_t::go_to_history_t()
+    : detail::mess_t()
+{
+}
+
+std::string go_to_history_t::to_json() const
+{
+  return cl::helper::get_str("{", "\"hist_ind\": ", hist_ind, "}");
+}
+
+void go_to_history_t::from_json(const std::string& str)
+{
+  const auto pt = get_ptree(str);
+  if(!try_to_set(hist_ind, pt, "hist_ind", "go_to_history_t: Can not find hist_ind in " + str))
+    { is_ok = false; }
+}
+
+
+inf_request_t::inf_request_t()
+    : detail::mess_t()
+{
+}
+
+std::string inf_request_t::to_json() const
+{
+  return cl::helper::get_str("{", "\"inf\": ", "\"",QString::fromStdString(data), "\"", "}");
+}
+
+void inf_request_t::from_json(const std::string& str)
+{
+  const auto pt = get_ptree(str);
+  if(!try_to_set(data, pt, "inf", "inf_request_t: Can not find inf in " + str))
+    { is_ok = false; }
+}
+
+
+game_inf_t::game_inf_t()
+    : detail::mess_t()
+{
+}
+
+std::string game_inf_t::to_json() const
+{
+  return cl::helper::get_str("{", "\"board_mask\": ", "\"", QString::fromStdString(board_mask), "\"",
+                             ", \"moves_history\": ", "\"", QString::fromStdString(moves_history), "\"", ", \"is_mate\": ", is_mate, ", \"move_num\": ", move_num, "}");
+}
+
+void game_inf_t::from_json(const std::string& str)
+{
+  const auto pt = get_ptree(str);
+  if(
+    !try_to_set(board_mask,    pt, "board_mask")    ||
+    !try_to_set(moves_history, pt, "moves_history") ||
+    !try_to_set(is_mate,       pt, "is_mate")       ||
+    !try_to_set(move_num,      pt, "move_num")
+  )
   {
-    cl::log("Warning! In game_inf_t: can not convert " + str.substr(third_end + 1) + " to int");
     is_ok = false;
-    move_num = 0;
+    cl::helper::log("game_inf_t: Can not find inf in ", QString::fromStdString(str));
   }
-
-  std::cout<<"in game_inf_t str was:"<< str<<std::endl;
-  std::cout<<"in game_inf_t:"<< board_mask<< "/ "<< moves_history<< "/ "<< (is_mate)<< "/ "<< move_num<<std::endl;
 }
 
 MESSAGE messages::cut_type(std::string& message)
@@ -73,7 +155,7 @@ MESSAGE messages::cut_type(std::string& message)
   }
   catch(const std::invalid_argument& e)
   {
-    cl::log("Warning! In cut_type: can not convert " + message.substr(0, type_end) + " to int");
+    cl::helper::log("Warning! In cut_type: can not convert " + QString::fromStdString(message.substr(0, type_end)) + " to int");
     return WRONG_TYPE;
   }
 }

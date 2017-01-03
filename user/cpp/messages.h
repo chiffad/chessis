@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 
+
 namespace messages
 {
   enum MESSAGE {WRONG_TYPE, HELLO_SERVER, MESSAGE_RECEIVED, IS_SERVER_LOST, IS_CLIENT_LOST,
@@ -19,6 +20,9 @@ namespace messages
     {
       virtual ~mess_t();
       bool is_ok = true;
+
+      virtual std::string to_json() const = 0;
+      virtual void from_json(const std::string& str) = 0;
     };
   }
 /*
@@ -52,8 +56,12 @@ namespace messages
 */
   struct login_t : public detail::mess_t//+ server get
   {
-    login_t(const std::string& str);
+    login_t();
     std::string login;
+//    std::string pwd;
+
+    virtual std::string to_json() const;
+    virtual void from_json(const std::string& str);
   };
 
 /*  struct incorrect_log_t //+ server get
@@ -62,8 +70,11 @@ namespace messages
 */
   struct move_t : public detail::mess_t//+ server get
   {
-    move_t(const std::string& str);
+    move_t();
     std::string data;
+
+    virtual std::string to_json() const;
+    virtual void from_json(const std::string& str);
   };
 
 /*  struct back_move_t //+ server get
@@ -72,8 +83,11 @@ namespace messages
 */
   struct go_to_history_t : public detail::mess_t//+ server get
   {
-    go_to_history_t(const std::string& str);
+    go_to_history_t();
     int hist_ind;
+
+    virtual std::string to_json() const;
+    virtual void from_json(const std::string& str);
   };
 /*
   struct new_game_t//+ server get
@@ -82,8 +96,11 @@ namespace messages
 */
   struct inf_request_t : public detail::mess_t// + client get
   {
-    inf_request_t(const std::string& str);
+    inf_request_t();
     std::string data;
+
+    virtual std::string to_json() const;
+    virtual void from_json(const std::string& str);
   };
 /*
   struct server_lost_t // + client get
@@ -104,11 +121,14 @@ namespace messages
 */
   struct game_inf_t : public detail::mess_t// + client get
   {
-    game_inf_t(const std::string& str);
+    game_inf_t();
     std::string board_mask;
     std::string moves_history;
     bool is_mate;
     int move_num;
+
+    virtual std::string to_json() const;
+    virtual void from_json(const std::string& str);
   };
 }
 
