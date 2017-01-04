@@ -6,7 +6,6 @@
 #include <sstream>
 #include <iostream>
 
-
 namespace sr
 {
 namespace helper

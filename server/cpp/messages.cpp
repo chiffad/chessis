@@ -13,43 +13,39 @@
 
 using namespace messages;
 
-boost::property_tree::ptree get_ptree(const std::string& json_str)
+struct my_ptree_t
 {
-  try
+  my_ptree_t(const std::string& data)
+      : json(data)
   {
-    std::stringstream ss;
-    ss.str(json_str);
+    try
+    {
+      std::stringstream ss;
+      ss.str(data);
 
+      boost::property_tree::read_json(ss, pt);
+    }
+    catch(const std::exception& e)
+      { throw my_except("Can't read json from data: " + data); }
+  }
+
+  #define set(var)  set_fn(var, #var)
+
+  template<typename T>
+  void set_fn(T& var, const std::string& var_name) const
+  {
+    try
+      { var = pt.get<T>(var_name); }
+    catch(const std::exception& e)
+    {
+      var = T();
+      throw my_except("Can't find '" + var_name + "' in " + json);
+    }
+  }
+  private:
     boost::property_tree::ptree pt;
-    boost::property_tree::read_json(ss, pt);
-    return pt;
-  }
-  catch(const std::exception& e)
-  {
-    sr::helper::throw_exception("in get_ptree something wrong" ,e.what());
-    return boost::property_tree::ptree();
-  }
-}
-
-template<typename T>
-bool try_to_set(T& var, const boost::property_tree::ptree& pt, const std::string& name, const std::string& error_mess = std::string())
-{
-  try
-    { var = pt.get<T>(name); }
-  catch(const std::exception& e)
-  {
-    sr::helper::log(error_mess, " ; ", e.what());
-    var = T();
-    return false;
-  }
-
-  return true;
-}
-
-login_t::login_t()
-    : detail::mess_t()
-{
-}
+    std::string json;
+};
 
 std::string login_t::to_json() const
 {
@@ -58,69 +54,46 @@ std::string login_t::to_json() const
 
 void login_t::from_json(const std::string& str)
 {
-  const auto pt = get_ptree(str);
-  if(!try_to_set(login, pt, "login", "login_t: Can not find login or pwd in " + str))
-    { is_ok = false; }
+  my_ptree_t pt(str);
+  pt.set(login);
 }
 
-
-move_t::move_t()
-    : detail::mess_t()
-{
-}
 
 std::string move_t::to_json() const
 {
-  return sr::helper::get_str("{\"move\": \"",data, "\"}");
+  return sr::helper::get_str("{\"data\": \"",data, "\"}");
 }
 
 void move_t::from_json(const std::string& str)
 {
-  const auto pt = get_ptree(str);
-  if(!try_to_set(data, pt, "move", "move_t: Can not find move in " + str))
-    { is_ok = false; }
+  my_ptree_t pt(str);
+  pt.set(data);
 }
 
-go_to_history_t::go_to_history_t()
-    : detail::mess_t()
-{
-}
 
 std::string go_to_history_t::to_json() const
 {
-  return sr::helper::get_str("{\"hist_ind\": ", hist_ind, "}");
+  return sr::helper::get_str("{\"index\": ", index, "}");
 }
 
 void go_to_history_t::from_json(const std::string& str)
 {
-  const auto pt = get_ptree(str);
-  if(!try_to_set(hist_ind, pt, "hist_ind", "go_to_history_t: Can not find hist_ind in " + str))
-    { is_ok = false; }
+  my_ptree_t pt(str);
+  pt.set(index);
 }
 
-
-inf_request_t::inf_request_t()
-    : detail::mess_t()
-{
-}
 
 std::string inf_request_t::to_json() const
 {
-  return sr::helper::get_str("{\"inf\": \"", data, "\"}");
+  return sr::helper::get_str("{\"data\": \"", data, "\"}");
 }
 
 void inf_request_t::from_json(const std::string& str)
 {
-  const auto pt = get_ptree(str);
-  if(!try_to_set(data, pt, "inf", "inf_request_t: Can not find inf in " + str))
-    { is_ok = false; }
+  my_ptree_t pt(str);
+  pt.set(data);
 }
 
-
-game_inf_t::game_inf_t()
-    : detail::mess_t()
-{
-}
 
 std::string game_inf_t::to_json() const
 {
@@ -129,17 +102,11 @@ std::string game_inf_t::to_json() const
 
 void game_inf_t::from_json(const std::string& str)
 {
-  const auto pt = get_ptree(str);
-  if(
-    !try_to_set(board_mask,    pt, "board_mask")    ||
-    !try_to_set(moves_history, pt, "moves_history") ||
-    !try_to_set(is_mate,       pt, "is_mate")       ||
-    !try_to_set(move_num,      pt, "move_num")
-  )
-  {
-    is_ok = false;
-    sr::helper::log("game_inf_t: Can not find inf in ", str);
-  }
+  my_ptree_t pt(str);
+  pt.set(board_mask);
+  pt.set(moves_history);
+  pt.set(is_mate);
+  pt.set(move_num);
 }
 
 MESSAGE messages::cut_type(std::string& message)
@@ -156,10 +123,6 @@ MESSAGE messages::cut_type(std::string& message)
     sr::helper::log("Warning! In cut_type: can not convert " + message.substr(0, type_end) + " to int");
     return WRONG_TYPE;
   }
-}
-
-detail::mess_t::~mess_t()
-{
 }
 
 bool operator==(const std::string& str, const MESSAGE m)

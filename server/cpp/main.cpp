@@ -17,7 +17,6 @@ std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
 int main() try
 {
-
   boost::asio::io_service io_service;
   sr::server_t server(io_service);
   std::vector<std::shared_ptr<sr::client_t>> clients;
@@ -47,115 +46,114 @@ int main() try
 
       if(c->is_message_for_logic_append())
       {
-        auto _1 = c->pull_for_logic();
-        sr::helper::log("message_from_logic: ", _1);
-        const auto type = messages::cut_type(_1);
-        const auto message(std::move(_1));
-
-        if(type == messages::LOGIN)
+        try
         {
-          messages::login_t login;
-          login.from_json(message);
-          if(!login.is_ok)
-            { continue; }
+          auto _1 = c->pull_for_logic();
+          sr::helper::log("message_from_logic: ", _1);
+          const auto type = messages::cut_type(_1);
+          const auto message(std::move(_1));
 
-          if(clients.end() != std::find_if(clients.begin(), clients.end(),
-                                           [&login](const auto& i){ return i->get_login() == login.login; }))
-            { c->push_for_send(std::to_string(messages::INCORRECT_LOG)); }
-          else
+          if(type == messages::LOGIN)
           {
-            c->set_login(login.login);
-            for(const auto c2 : clients)
+            messages::login_t login;
+            login.from_json(message);
+
+            if(clients.end() != std::find_if(clients.begin(), clients.end(),
+                                             [&login](const auto& i){ return i->get_login() == login.login; }))
+              { c->push_for_send(std::to_string(messages::INCORRECT_LOG)); }
+            else
             {
-              if(c2 == c)
-                { continue; }
-
-              if(desks.end() == std::find_if(desks.cbegin(), desks.cend(), [&](const auto& d){ return d->is_contain_player(c2); }))
+              c->set_login(login.login);
+              for(const auto c2 : clients)
               {
-                desks.push_back(std::make_shared<logic::desk_t>(c, c2));
-
-                const std::string m = get_board_state(desks.back());
-                c->push_for_send(m);
-                c2->push_for_send(m);
-              }
-            }
-          }
-
-          continue;
-        }
-
-        auto desk = std::find_if(desks.begin(), desks.end(), [&c](const auto& d){ return d->is_contain_player(c); });
-        if(desk == desks.end())
-        {
-          sr::helper::log("desk == desk.end()");
-
-          if(type == messages::OPPONENT_INF)
-            { c->push_for_send(sr::helper::get_str(messages::INF_REQUEST, " { \"inf\": \"No opponent: no game in progress!\"}")); }
-
-          continue;
-        }
-
-        switch(type)
-        {
-          //case messages::MESSAGE_RECEIVED: //in client
-          //case messages::IS_SERVER_LOST: // no need cause on this message already was sended responce
-          case messages::OPPONENT_INF:
-          {
-            auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
-            c->push_for_send(get_person_inf(*opp));
-            break;
-          }
-          case messages::MY_INF:
-            c->push_for_send(get_person_inf(c));
-            break;
-          case messages::CLIENT_LOST:
-          {
-            auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
-            (*opp)->push_for_send(std::to_string(messages::OPPONENT_LOST));
-            break;
-          }
-          default:
-            switch(type)
-            {
-              case messages::MOVE:
-              {
-                messages::move_t move;
-                move.from_json(message);
-                if(!move.is_ok)
+                if(c2 == c)
                   { continue; }
 
-                (*desk)->make_moves_from_str(move.data);
-                break;
-              }
-              case messages::BACK_MOVE:
-                (*desk)->back_move();
-                break;
-              case messages::GO_TO_HISTORY:
-              {
-                messages::go_to_history_t gth;
-                gth.from_json(message);
-                if(!gth.is_ok)
-                  { continue; }
+                if(desks.end() == std::find_if(desks.cbegin(), desks.cend(), [&](const auto& d){ return d->is_contain_player(c2); }))
+                {
+                  desks.push_back(std::make_shared<logic::desk_t>(c, c2));
 
-                (*desk)->go_to_history_index(gth.hist_ind);
-                break;
+                  const std::string m = get_board_state(desks.back());
+                  c->push_for_send(m);
+                  c2->push_for_send(m);
+                }
               }
-              case messages::NEW_GAME:
-                (*desk)->start_new_game();
-                break;
-              default:
-                sr::helper::throw_exception("Unknown message type!: ", type);
             }
 
-            auto c2 = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
+            continue;
+          }
 
-            if(c2 == clients.end())
-              { sr::helper::throw_exception("c2 == client.end()"); }
+          auto desk = std::find_if(desks.begin(), desks.end(), [&c](const auto& d){ return d->is_contain_player(c); });
+          if(desk == desks.end())
+          {
+            sr::helper::log("desk == desk.end()");
 
-            const std::string m = get_board_state(*desk);
-            c->push_for_send(m);
-            (*c2)->push_for_send(m);
+            if(type == messages::OPPONENT_INF)
+              { c->push_for_send(sr::helper::get_str(messages::INF_REQUEST, " { \"data\": \"No opponent: no game in progress!\"}")); }
+
+            continue;
+          }
+
+          switch(type)
+          {
+            //case messages::MESSAGE_RECEIVED: //in client
+            //case messages::IS_SERVER_LOST: // no need cause on this message already was sended responce
+            case messages::OPPONENT_INF:
+            {
+              auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
+              c->push_for_send(get_person_inf(*opp));
+              break;
+            }
+            case messages::MY_INF:
+              c->push_for_send(get_person_inf(c));
+              break;
+            case messages::CLIENT_LOST:
+            {
+              auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
+              (*opp)->push_for_send(std::to_string(messages::OPPONENT_LOST));
+              break;
+            }
+            default:
+              switch(type)
+              {
+                case messages::MOVE:
+                {
+                  messages::move_t move;
+                  move.from_json(message);
+
+                  (*desk)->make_moves_from_str(move.data);
+                  break;
+                }
+                case messages::BACK_MOVE:
+                  (*desk)->back_move();
+                  break;
+                case messages::GO_TO_HISTORY:
+                {
+                  messages::go_to_history_t gth;
+                  gth.from_json(message);
+
+                  (*desk)->go_to_history_index(gth.index);
+                  break;
+                }
+                case messages::NEW_GAME:
+                  (*desk)->start_new_game();
+                  break;
+                default:
+                  sr::helper::throw_exception("Unknown message type!: ", type);
+              }
+
+              auto c2 = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
+
+              if(c2 == clients.end())
+                { sr::helper::throw_exception("c2 == client.end()"); }
+
+              const std::string m = get_board_state(*desk);
+              c->push_for_send(m);
+              (*c2)->push_for_send(m);
+          }
         }
+        catch(const messages::my_except& e)
+          { std::cout<<"Exception! "<<e.what()<<std::endl; }
       }
     }
   }
@@ -176,7 +174,7 @@ std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d)
 
 std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c)
 {
-  return sr::helper::get_str(messages::INF_REQUEST, " {\"inf\": \"Login: ", c->get_login()
+  return sr::helper::get_str(messages::INF_REQUEST, " {\"data\": \"Login: ", c->get_login()
                              , "; Elo rating: ", c->get_rating(), "\" }");
 }
 
