@@ -15,6 +15,7 @@
 
 int main(int argc, char *argv[])
 {
+
   qmlRegisterType<graphic::fb_obj_t>("CubeRendering", 1, 0, "Cube");
 
   QGuiApplication app(argc, argv);
@@ -60,50 +61,51 @@ int main(int argc, char *argv[])
           continue;
         }
 
-        else switch(type)
+        else try
         {
-          case messages::INF_REQUEST:
+          switch(type)
           {
-            cl::helper::log("messages::INF_REQUEST");
-            messages::inf_request_t inf;
-            inf.from_json(message);
-            if(!inf.is_ok)
-              { continue; }
+            case messages::INF_REQUEST:
+            {
+              cl::helper::log("messages::INF_REQUEST");
+              messages::inf_request_t inf;
+              inf.from_json(message);
 
-            board_graphic.add_to_command_history(QString::fromStdString(inf.data));
-            break;
+              board_graphic.add_to_command_history(QString::fromStdString(inf.data));
+              break;
+            }
+            case messages::GAME_INF:
+            {
+              cl::helper::log("messages::GAME_INF");
+              messages::game_inf_t game_inf;
+              game_inf.from_json(message);
+
+              board_graphic.set_board_mask(QString::fromStdString(game_inf.board_mask));
+              board_graphic.set_move_color(game_inf.move_num);
+              board_graphic.set_connect_status(messages::SERVER_HERE);
+              board_graphic.set_moves_history(QString::fromStdString(game_inf.moves_history));
+              board_graphic.update_hilight(game_inf.move_num, QString::fromStdString(game_inf.moves_history));
+              board_graphic.redraw_board();
+
+              if(game_inf.is_mate)
+                { board_graphic.set_check_mate(); }
+
+              break;
+            }
+            case messages::GET_LOGIN:
+              cl::helper::log("messages::GET_LOGIN");
+              board_graphic.get_login();
+              break;
+            case messages::INCORRECT_LOG:
+              cl::helper::log("messages::INCORRECT_LOG");
+              board_graphic.get_login("This login already exist. Enter another login!");
+              break;
+            default:
+              cl::helper::log("Warning! Unknown message type: ", type);
           }
-          case messages::GAME_INF:
-          {
-            cl::helper::log("messages::GAME_INF");
-            messages::game_inf_t game_inf;
-            game_inf.from_json(message);
-            if(!game_inf.is_ok)
-              { continue; }
-
-            board_graphic.set_board_mask(QString::fromStdString(game_inf.board_mask));
-            board_graphic.set_move_color(game_inf.move_num);
-            board_graphic.set_connect_status(messages::SERVER_HERE);
-            board_graphic.set_moves_history(QString::fromStdString(game_inf.moves_history));
-            board_graphic.update_hilight(game_inf.move_num, QString::fromStdString(game_inf.moves_history));
-            board_graphic.redraw_board();
-
-            if(game_inf.is_mate)
-              { board_graphic.set_check_mate(); }
-
-            break;
-          }
-          case messages::GET_LOGIN:
-            cl::helper::log("messages::GET_LOGIN");
-            board_graphic.get_login();
-            break;
-          case messages::INCORRECT_LOG:
-            cl::helper::log("messages::INCORRECT_LOG");
-            board_graphic.get_login("This login already exist. Enter another login!");
-            break;
-          default:
-            cl::helper::log("Warning! Unknown message type: ", type);
         }
+        catch(const messages::my_except& e)
+          { cl::helper::log("Exception! ", e.what()); }
       }
     }
   }

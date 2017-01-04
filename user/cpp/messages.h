@@ -14,17 +14,6 @@ namespace messages
 
   MESSAGE cut_type(std::string& message);
 
-  namespace detail
-  {
-    struct mess_t
-    {
-      virtual ~mess_t();
-      bool is_ok = true;
-
-      virtual std::string to_json() const = 0;
-      virtual void from_json(const std::string& str) = 0;
-    };
-  }
 /*
   struct hello_server_t // + server get
   {
@@ -54,53 +43,49 @@ namespace messages
   {
   };
 */
-  struct login_t : public detail::mess_t//+ server get
+  struct login_t//+ server get
   {
-    login_t();
     std::string login;
 //    std::string pwd;
 
-    virtual std::string to_json() const;
-    virtual void from_json(const std::string& str);
+    std::string to_json() const;
+    void from_json(const std::string& str);
   };
 
 /*  struct incorrect_log_t //+ server get
   {
   };
 */
-  struct move_t : public detail::mess_t//+ server get
+  struct move_t //+ server get
   {
-    move_t();
     std::string data;
 
-    virtual std::string to_json() const;
-    virtual void from_json(const std::string& str);
+    std::string to_json() const;
+    void from_json(const std::string& str);
   };
 
 /*  struct back_move_t //+ server get
   {
   };
 */
-  struct go_to_history_t : public detail::mess_t//+ server get
+  struct go_to_history_t//+ server get
   {
-    go_to_history_t();
-    int hist_ind;
+    int index;
 
-    virtual std::string to_json() const;
-    virtual void from_json(const std::string& str);
+    std::string to_json() const;
+    void from_json(const std::string& str);
   };
 /*
   struct new_game_t//+ server get
   {
   };
 */
-  struct inf_request_t : public detail::mess_t// + client get
+  struct inf_request_t// + client get
   {
-    inf_request_t();
     std::string data;
 
-    virtual std::string to_json() const;
-    virtual void from_json(const std::string& str);
+    std::string to_json() const;
+    void from_json(const std::string& str);
   };
 /*
   struct server_lost_t // + client get
@@ -119,16 +104,26 @@ namespace messages
   {
   };
 */
-  struct game_inf_t : public detail::mess_t// + client get
+  struct game_inf_t// + client get
   {
-    game_inf_t();
     std::string board_mask;
     std::string moves_history;
     bool is_mate;
     int move_num;
 
-    virtual std::string to_json() const;
-    virtual void from_json(const std::string& str);
+    std::string to_json() const;
+    void from_json(const std::string& str);
+  };
+
+  struct my_except : public std::exception
+  {
+    my_except(const std::string& err) : std::exception(), error(err)
+    {}
+    virtual const char* what() const throw()
+      { return error.data(); }
+
+    private:
+      std::string error;
   };
 }
 

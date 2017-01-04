@@ -58,7 +58,7 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
   else if(message == HISTORY)
   {
     messages::go_to_history_t gtp;
-    gtp.hist_ind = x1+1;
+    gtp.index = x1+1;
     add_to_messages_for_server(messages::GO_TO_HISTORY, QString::fromStdString(gtp.to_json()));
     add_to_command_history("command: " + message + " " + QString::number(x1 + 1));
     return;
@@ -66,7 +66,7 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
   else if(message.contains(HISTORY))
   {
     messages::go_to_history_t gtp;
-    gtp.hist_ind = message.mid(HISTORY.size() + 1).toInt();
+    gtp.index = message.mid(HISTORY.size() + 1).toInt();
     add_to_messages_for_server(messages::GO_TO_HISTORY, QString::fromStdString(gtp.to_json()));
   }
 
