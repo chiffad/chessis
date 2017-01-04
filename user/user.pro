@@ -22,7 +22,8 @@ SOURCES += cpp/main.cpp\
            cpp/board_graphic.cpp \
            cpp/client.cpp \
            cpp/fb_obj.cpp \
-           cpp/cube_renderer.cpp
+           cpp/cube_renderer.cpp\
+           cpp/helper.cpp \
 
 RESOURCES += res.qrc
 

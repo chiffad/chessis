@@ -1,11 +1,13 @@
 #ifndef __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
 #define __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
 
-#include <QString>
-#include <QTextStream>
-#include <QDebug>
 #include <exception>
+#include <stdexcept>
 #include <string>
+#include <sstream>
+#include <iostream>
+#include <QString>
+#include <QByteArray>
 
 
 namespace cl
@@ -15,52 +17,44 @@ namespace helper
   namespace detail
   {
     template<typename OS, typename T>
-    void log_fn1(OS& ostream, T _1)
+    void get1(OS& ostream, const T& _1)
     {
       ostream<< _1;
     }
 
-    template<typename OS>
-    void log_fn1(OS& ostream, const std::string& _1)
-    {
-      ostream<< QString::fromStdString(_1);
-    }
-
     template<typename OS, typename T, typename... Args>
-    void log_fn1(OS& ostream, T _1, Args... args)
+    void get1(OS& ostream, const T& _1, const Args&... args)
     {
       ostream<<_1;
 
-      log_fn1(ostream, args...);
+      get1(ostream, args...);
     }
 
     template<typename... Args>
-    QString get(Args... args)
+    std::string get(const Args&... args)
     {
-      QString str;
-      QTextStream stream(&str);
-
-      detail::log_fn1(stream, args...);
-      return str;
+      std::ostringstream ss;
+      detail::get1(ss, args...);
+      return ss.str();
     }
   } // namespace detail
 
   template<typename... Args>
-  void exception_fn(Args... args)
+  void exception_fn(const Args&... args)
   {
-    throw std::logic_error(detail::get(args...).toStdString());
+    throw std::logic_error(detail::get(args...));
   }
 
   template<typename... Args>
-  void log_fn(Args... args)
+  void log_fn(const Args&... args)
   {
-    qDebug()<<detail::get(args...);
+    std::cout<<detail::get(args...)<<std::endl;
   }
 
   template<typename... Args>
   std::string get_str(const Args& ... args)
   {
-    return detail::get(args...).toStdString();
+    return detail::get(args...);
   }
 
   #define throw_exception(...)  exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
@@ -68,5 +62,8 @@ namespace helper
 
 } //namespace helper
 } //namespace sc
+
+std::ostream& operator <<(std::ostream& os, const QString& str);
+std::ostream& operator <<(std::ostream& os, const QByteArray& str);
 
 #endif // __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
