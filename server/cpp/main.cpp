@@ -11,12 +11,31 @@
 #include "helper.h"
 #include "messages.h"
 
+/*#include <iostream>
+#include <exception>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <sstream>
+*/
 
 std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d);
 std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c);
 
 int main() try
 {
+/*    boost::property_tree::ptree pt;
+    std::stringstream json;
+    pt.put("asdads", "asdad");
+    boost::property_tree::write_json(json, pt);
+    std::cout<<json.str()<<std::endl;
+    boost::property_tree::ptree pt2;
+    pt2.put_child("father", pt);
+    std::cout<<"============"<<std::endl;
+        std::stringstream json2;
+    boost::property_tree::write_json(json2, pt2);
+    std::cout<<json2.str()<<std::endl;
+    */
+
   boost::asio::io_service io_service;
   sr::server_t server(io_service);
   std::vector<std::shared_ptr<sr::client_t>> clients;
@@ -73,9 +92,9 @@ int main() try
                 {
                   desks.push_back(std::make_shared<logic::desk_t>(c, c2));
 
-                  const std::string m = get_board_state(desks.back());
-                  c->push_for_send(m);
-                  c2->push_for_send(m);
+                  const auto _1 = get_board_state(desks.back());
+                  c->push_for_send(_1);
+                  c2->push_for_send(_1);
                 }
               }
             }
@@ -101,11 +120,11 @@ int main() try
             case messages::OPPONENT_INF:
             {
               auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
-              c->push_for_send(get_person_inf(*opp));
+              c->push_for_send(get_person_inf(*opp));//
               break;
             }
             case messages::MY_INF:
-              c->push_for_send(get_person_inf(c));
+              c->push_for_send(get_person_inf(c));//
               break;
             case messages::CLIENT_LOST:
             {
@@ -147,9 +166,9 @@ int main() try
               if(c2 == clients.end())
                 { sr::helper::throw_exception("c2 == client.end()"); }
 
-              const std::string m = get_board_state(*desk);
-              c->push_for_send(m);
-              (*c2)->push_for_send(m);
+              const auto _1 = get_board_state(*desk);
+              c->push_for_send(_1);
+              (*c2)->push_for_send(_1);
           }
         }
         catch(const messages::my_except& e)
@@ -170,10 +189,20 @@ std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d)
 {
   return sr::helper::get_str(messages::GAME_INF, " {\"board_mask\": \"", d->get_board_mask(), "\", \"moves_history\": \"", d->get_moves_history(), 
                              "\", \"is_mate\": ", d->is_mate(), ", \"move_num\": ", d->get_move_num(), "}");
+/*
+  messages::game_inf_t _1;
+  _1.board_mask = d->get_board_mask();
+  _1.moves_history = d->get_moves_history();
+  _1.is_mate = d->is_mate();
+  _1.move_num = d->get_move_num();
+
+  return _1.to_json();*/
 }
 
 std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c)
 {
+//  messages::inf_request_t _1;
+
   return sr::helper::get_str(messages::INF_REQUEST, " {\"data\": \"Login: ", c->get_login()
                              , "; Elo rating: ", c->get_rating(), "\" }");
 }
