@@ -53,7 +53,7 @@ namespace helper
     return detail::get(args...);
   }
 
-  #define throw_exception(...)  exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
+  #define throw_except(...)  exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
   #define log(...)  log_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
 
 } //namespace helper
