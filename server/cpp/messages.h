@@ -22,45 +22,21 @@ namespace messages
   {
     std::string login;
 //    std::string pwd;
-
-    private:
-    friend class boost::serialization::access;
-    template <typename Archive>
-    void serialize(Archive& ar, const unsigned int /*version*/)
-      { ar & login; }
   };
 
   struct move_t //+ server get
   {
     std::string data;
-    
-    private:
-    friend class boost::serialization::access;
-    template <typename Archive>
-    void serialize(Archive& ar, const unsigned int /*version*/)
-      { ar & data; }
   };
 
   struct go_to_history_t//+ server get
   {
     int index;
-
-    private:
-    friend class boost::serialization::access;
-    template <typename Archive>
-    void serialize(Archive& ar, const unsigned int /*version*/)
-      { ar & index; }
   };
 
   struct inf_request_t// + client get
   {
     std::string data;
-    
-    private:
-    friend class boost::serialization::access;
-    template <typename Archive>
-    void serialize(Archive& ar, const unsigned int /*version*/)
-      { ar & data; }
   };
 
   struct game_inf_t// + client get
@@ -69,24 +45,40 @@ namespace messages
     game_inf_t(const std::string& b_mask, const std::string& m_hist, const bool mate, const int move_number)
         : board_mask(b_mask), moves_history(m_hist), is_mate(mate), move_num(move_number)
     {}
-    
+
     std::string board_mask;
     std::string moves_history;
     bool is_mate;
     int move_num;
-
-    private:
-    friend class boost::serialization::access;
-    template <typename Archive>
-    void serialize(Archive& ar, const unsigned int /*version*/)
-    {
-      ar & board_mask;
-      ar & moves_history;
-      ar & is_mate;
-      ar & move_num;
-    }
   };
+  
+  template <typename Archive>
+  void serialize(Archive& ar, game_inf_t& _1, const unsigned int /*version*/)
+  {
+    ar & _1.board_mask;
+    ar & _1.moves_history;
+    ar & _1.is_mate;
+    ar & _1.move_num;
+  }
+  
+  template <typename Archive>
+  void serialize(Archive& ar, inf_request_t& _1, const unsigned int /*version*/)
+  { ar & _1.data; }
+  
+  template <typename Archive>
+  void serialize(Archive& ar, go_to_history_t _1, const unsigned int /*version*/)
+  { ar & _1.index; }
+  
+  template <typename Archive>
+  void serialize(Archive& ar, move_t& _1, const unsigned int /*version*/)
+  { ar & _1.data; }
 
+  template <typename Archive>
+  void serialize(Archive& ar, login_t& _1, const unsigned int /*version*/)
+  {
+    ar & _1.login;
+    ar & _1.pwd;
+  }
   
 /*  struct mess_proto
   {
