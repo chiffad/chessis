@@ -5,7 +5,9 @@ QT += qml quick\
 
 CONFIG += c++14
 
-LIBS += -lboost_system\   # for boost
+LIBS += -lboost_system\
+        -lboost_serialization\
+        -L/home/dprokofiev/boost_1_63_0/stage/lib
 
 SOURCES += cpp/main.cpp \
            cpp/chess.cpp \
