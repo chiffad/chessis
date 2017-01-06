@@ -76,7 +76,7 @@ namespace messages
 
   template<typename m_type>
   struct get_type
-  { enum { value = my_tl::index_of<m_type, message_types>::value }; };
+    { enum { value = my_tl::index_of<m_type, message_types>::value }; };
   
   template<typename struct_t>
   struct_t init(const std::string& str)

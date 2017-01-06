@@ -10,38 +10,36 @@ struct typelist_t
 namespace my_tl
 {
 
-  template <size_t idx, typename T, class List>
+  template <size_t ind, typename T, class List>
   struct index_of_impl;
 
-  template <size_t idx, typename T> /// The type T is not in the list
-  struct index_of_impl <idx, T, typelist_t<>>
+  template <size_t ind, typename T>  // The type T is not in the list
+  struct index_of_impl <ind, T, typelist_t<>>
   {
-    using type = std::integral_constant<int, -1>;
+    enum { value = -1 };
   };
 
-  template <size_t idx, typename T, typename... Ts>    ///> The type is found
-  struct index_of_impl <idx, T, typelist_t<T, Ts...>>
+  template <size_t ind, typename T, typename... Ts>  // The type is found
+  struct index_of_impl <ind, T, typelist_t<T, Ts...>>
   {
-    using type = std::integral_constant<int, idx>;
+    enum { value = ind };
   };
 
-  template <size_t idx, typename T, typename H, typename... Ts>  ///> Recursion
-  struct index_of_impl <idx, T, typelist_t<H, Ts...>>
+  template <size_t ind, typename T, typename H, typename... Ts>  // Recursion
+  struct index_of_impl <ind, T, typelist_t<H, Ts...>>
   {
-    using type = typename index_of_impl<idx + 1, T, typelist_t<Ts...>>::type;
+    enum { value = index_of_impl<ind + 1, T, typelist_t<Ts...>>::value };
   };
 
-  /// Wrapping to supply initial index 0
+  // Wrapping to supply initial index 0
   template <typename T, class List>
   struct index_of;
 
-  /// Specializing for idx >= 0
+  // Specializing for ind >= 0
   template <typename T, typename... Ts>
   struct index_of<T, typelist_t<Ts...>>
   {
-    using type = typename index_of_impl<0, T, typelist_t<Ts...>>::type;
-    using value_type = typename type::value_type;
-    static constexpr value_type value = type::value;
+    enum { value = index_of_impl<0, T, typelist_t<Ts...>>::value};
   };
 
 } //namespace my_tl
