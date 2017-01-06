@@ -52,114 +52,22 @@ namespace messages
     int move_num;
   };
   
-  template <typename Archive>
-  void serialize(Archive& ar, game_inf_t& _1, const unsigned int /*version*/)
-  {
-    ar & _1.board_mask;
-    ar & _1.moves_history;
-    ar & _1.is_mate;
-    ar & _1.move_num;
-  }
-  
-  template <typename Archive>
-  void serialize(Archive& ar, inf_request_t& _1, const unsigned int /*version*/)
-  { ar & _1.data; }
-  
-  template <typename Archive>
-  void serialize(Archive& ar, go_to_history_t _1, const unsigned int /*version*/)
-  { ar & _1.index; }
-  
-  template <typename Archive>
-  void serialize(Archive& ar, move_t& _1, const unsigned int /*version*/)
-  { ar & _1.data; }
-
-  template <typename Archive>
-  void serialize(Archive& ar, login_t& _1, const unsigned int /*version*/)
-  {
-    ar & _1.login;
-    ar & _1.pwd;
-  }
-  
-/*  struct mess_proto
-  {
-    private:
-    friend class boost::serialization::access;
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version)
-    { }
-  };
-  
-  typedef mess_proto hello_server_t;
-  typedef mess_proto message_received_t;
-  typedef mess_proto is_server_lost_t;
-  typedef mess_proto is_client_lost_t;
-  typedef mess_proto opponent_inf_t;
-  typedef mess_proto my_inf_t;
-  typedef mess_proto get_login_t;
-  typedef mess_proto incorrect_log_t;
-  typedef mess_proto back_move_t;
-  typedef mess_proto new_game_t;
-  typedef mess_proto server_lost_t;
-  typedef mess_proto server_here_t;
-  typedef mess_proto client_lost_t;
-  typedef mess_proto opponent_lost_t;
-*/
-  struct hello_server_t // + server get
-  {
-  };
-
-  struct message_received_t // + server get
-  {
-  };
-
-  struct is_server_lost_t // + server get
-  {
-  };
-
-  struct is_client_lost_t //  + client_get
-  {
-  };
-
-  struct opponent_inf_t // + server get
-  {
-  };
-
-  struct my_inf_t //+ server get
-  {
-  };
-
-  struct get_login_t //+ server get
-  {
-  };
-
-  struct incorrect_log_t //+ server get
-  {
-  };
-
-  struct back_move_t //+ server get
-  {
-  };
-
-  struct new_game_t//+ server get
-  {
-  };
-  
-  struct server_lost_t // + client get
-  {
-  };
-
-  struct server_here_t // + client get
-  {
-  };
-
-  struct client_lost_t //+ server get
-  {
-  };
-
-  struct opponent_lost_t// + client get
-  {
-  };
-
+  #define struct_proto(name)   struct name { private: friend class boost::serialization::access; template <typename Archive> void serialize(Archive &ar, const unsigned int /*version*/){} };
+  struct_proto(hello_server_t    );
+  struct_proto(message_received_t);
+  struct_proto(is_server_lost_t  );
+  struct_proto(is_client_lost_t  );
+  struct_proto(opponent_inf_t    );
+  struct_proto(my_inf_t          );
+  struct_proto(get_login_t       );
+  struct_proto(incorrect_log_t   );
+  struct_proto(back_move_t       );
+  struct_proto(new_game_t        );
+  struct_proto(server_lost_t     );
+  struct_proto(server_here_t     );
+  struct_proto(client_lost_t     );
+  struct_proto(opponent_lost_t   );
+  #undef struct_proto
   
   typedef TYPELIST_19(hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t,
                       my_inf_t, get_login_t, login_t, incorrect_log_t, move_t, back_move_t, go_to_history_t,
@@ -197,6 +105,34 @@ namespace messages
     oa << s;
     
     return ss.str();
+  }
+  
+  template <typename Archive>
+  void serialize(Archive& ar, game_inf_t& _1, const unsigned int /*version*/)
+  {
+    ar & _1.board_mask;
+    ar & _1.moves_history;
+    ar & _1.is_mate;
+    ar & _1.move_num;
+  }
+  
+  template <typename Archive>
+  void serialize(Archive& ar, inf_request_t& _1, const unsigned int /*version*/)
+  { ar & _1.data; }
+  
+  template <typename Archive>
+  void serialize(Archive& ar, go_to_history_t _1, const unsigned int /*version*/)
+  { ar & _1.index; }
+  
+  template <typename Archive>
+  void serialize(Archive& ar, move_t& _1, const unsigned int /*version*/)
+  { ar & _1.data; }
+
+  template <typename Archive>
+  void serialize(Archive& ar, login_t& _1, const unsigned int /*version*/)
+  {
+    ar & _1.login;
+//    ar & _1.pwd;
   }
 }
 
