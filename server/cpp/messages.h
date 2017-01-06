@@ -18,28 +18,28 @@ namespace messages
 
   MESSAGE cut_type(std::string& message);
 
-  struct login_t//+ server get
+  struct login_t
   {
     std::string login;
 //    std::string pwd;
   };
 
-  struct move_t //+ server get
+  struct move_t
   {
     std::string data;
   };
 
-  struct go_to_history_t//+ server get
+  struct go_to_history_t
   {
     int index;
   };
 
-  struct inf_request_t// + client get
+  struct inf_request_t
   {
     std::string data;
   };
 
-  struct game_inf_t// + client get
+  struct game_inf_t
   {
     game_inf_t() = default;
     game_inf_t(const std::string& b_mask, const std::string& m_hist, const bool mate, const int move_number)
@@ -69,14 +69,14 @@ namespace messages
   struct_proto(opponent_lost_t   );
   #undef struct_proto
   
-  typedef TYPELIST_19(hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t,
+  typedef typelist_t<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t,
                       my_inf_t, get_login_t, login_t, incorrect_log_t, move_t, back_move_t, go_to_history_t,
-                      new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t, game_inf_t)
+                      new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t, game_inf_t>
            message_types;
 
   template<typename m_type>
   struct get_type
-    { enum { value = my_tl::index_of<message_types, m_type>::value }; };
+  { enum { value = my_tl::index_of<m_type, message_types>::value }; };
   
   template<typename struct_t>
   struct_t init(const std::string& str)
