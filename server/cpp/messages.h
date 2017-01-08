@@ -100,13 +100,17 @@ namespace msg
   std::string prepare_for_send(const struct_t& s)
   {
     std::stringstream ss;
-    //ss<<get_type<struct_t>::value;
+    ss<<get_type<struct_t>::value;
     boost::archive::text_oarchive oa(ss);
     oa <<get_type<struct_t>::value;
     oa << s;
     
     return ss.str();
   }
+  
+  template<typename struct_t>
+  bool is_equal_types(const std::string& str)
+    { return (get_msg_type(str) == get_type<struct_t>::value); }
   
   template <typename Archive>
   void serialize(Archive& ar, game_inf_t& _1, const unsigned /*version*/)

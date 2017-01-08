@@ -52,11 +52,11 @@ int main() try
 
         if(type == msg::get_type<msg::login_t>::value)
         {
-          auto login = msg::init<msg::login_t> (message);
+          auto login = msg::init<msg::login_t>(message);
 
           if(clients.end() != std::find_if(clients.begin(), clients.end(),
                                            [&login](const auto& i){ return i->get_login() == login.login; }))
-            { c->push_for_send(msg::prepare_for_send(msg::incorrect_log_t())); }//
+            { c->push_for_send(msg::prepare_for_send(msg::incorrect_log_t())); }
           else
           {
             c->set_login(login.login);
@@ -92,16 +92,16 @@ int main() try
 
         switch(type)
         {
-          //case msg::MESSAGE_RECEIVED: //in client
-          //case msg::IS_SERVER_LOST: // no need cause on this message already was sended responce
+          //case msg::message_received_t: //in client
+          //case msg::is_server_lost_t: // no need cause on this message already was sended responce
           case msg::get_type<msg::opponent_inf_t>::value:
           {
             auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
-            c->push_for_send(get_person_inf(*opp));//
+            c->push_for_send(get_person_inf(*opp));
             break;
           }
           case msg::get_type<msg::my_inf_t>::value:
-            c->push_for_send(get_person_inf(c));//
+            c->push_for_send(get_person_inf(c));
             break;
           case msg::get_type<msg::client_lost_t>::value:
           {
@@ -157,8 +157,8 @@ catch(std::exception const& ex)
 
 std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d)
 {
-  msg::game_inf_t _1(d->get_board_mask(), d->get_moves_history(), d->is_mate(), d->get_move_num());
-  return msg::prepare_for_send(_1);
+  return msg::prepare_for_send(msg::game_inf_t(d->get_board_mask(), d->get_moves_history(),
+                                               d->is_mate(), d->get_move_num()));
 }
 
 std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c)
