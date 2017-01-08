@@ -9,14 +9,9 @@
 #include "typelist.h"
 
 
-namespace messages
+namespace msg
 {
-  enum MESSAGE {WRONG_TYPE, HELLO_SERVER, MESSAGE_RECEIVED, IS_SERVER_LOST, IS_CLIENT_LOST,
-                OPPONENT_INF, MY_INF, GET_LOGIN, LOGIN, INCORRECT_LOG,
-                MOVE, BACK_MOVE, GO_TO_HISTORY, NEW_GAME, INF_REQUEST,
-                SERVER_LOST, SERVER_HERE, CLIENT_LOST, OPPONENT_LOST, GAME_INF};
-
-  MESSAGE cut_type(std::string& message);
+  int get_msg_type(const std::string& message);
 
   struct login_t
   {
@@ -36,6 +31,11 @@ namespace messages
 
   struct inf_request_t
   {
+    inf_request_t() = default;
+    inf_request_t(const std::string& str)
+        : data(str)
+    {}
+    
     std::string data;
   };
 
@@ -52,7 +52,7 @@ namespace messages
     int move_num;
   };
   
-  #define struct_proto(name)   struct name { private: friend class boost::serialization::access; template <typename Archive> void serialize(Archive &ar, const unsigned int /*version*/){} };
+  #define struct_proto(name)   struct name { private: friend class boost::serialization::access; template <typename Archive> void serialize(Archive &/*ar*/, const unsigned /*version*/){} };
   struct_proto(hello_server_t    );
   struct_proto(message_received_t);
   struct_proto(is_server_lost_t  );
@@ -100,15 +100,16 @@ namespace messages
   std::string prepare_for_send(const struct_t& s)
   {
     std::stringstream ss;
-    ss<<get_type<struct_t>::value;
+    //ss<<get_type<struct_t>::value;
     boost::archive::text_oarchive oa(ss);
+    oa <<get_type<struct_t>::value;
     oa << s;
     
     return ss.str();
   }
   
   template <typename Archive>
-  void serialize(Archive& ar, game_inf_t& _1, const unsigned int /*version*/)
+  void serialize(Archive& ar, game_inf_t& _1, const unsigned /*version*/)
   {
     ar & _1.board_mask;
     ar & _1.moves_history;
@@ -117,26 +118,27 @@ namespace messages
   }
   
   template <typename Archive>
-  void serialize(Archive& ar, inf_request_t& _1, const unsigned int /*version*/)
+  void serialize(Archive& ar, inf_request_t& _1, const unsigned /*version*/)
   { ar & _1.data; }
   
   template <typename Archive>
-  void serialize(Archive& ar, go_to_history_t _1, const unsigned int /*version*/)
+  void serialize(Archive& ar, go_to_history_t _1, const unsigned /*version*/)
   { ar & _1.index; }
   
   template <typename Archive>
-  void serialize(Archive& ar, move_t& _1, const unsigned int /*version*/)
+  void serialize(Archive& ar, move_t& _1, const unsigned /*version*/)
   { ar & _1.data; }
 
   template <typename Archive>
-  void serialize(Archive& ar, login_t& _1, const unsigned int /*version*/)
+  void serialize(Archive& ar, login_t& _1, const unsigned /*version*/)
   {
     ar & _1.login;
 //    ar & _1.pwd;
   }
+  
+  template<typename Archive>
+  void serialize(Archive& ar, int& type, const unsigned /*version*/)
+  { ar & type; }
 }
-
-bool operator==(const std::string& str, const messages::MESSAGE m);
-bool operator!=(const std::string& str, const messages::MESSAGE m);
 
 #endif // __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD

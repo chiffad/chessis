@@ -29,7 +29,6 @@ struct client_t::impl_t
 
   bool check_ser_num(std::string& m);
   void add_for_server(const std::string& message, bool is_extra_message = false);
-  void add_for_server(const messages::MESSAGE r_mes, bool is_extra_message = false);
   void is_message_received();
   void connection_timer_timeout();
   void begin_wait_receive(const std::string& message);
@@ -144,22 +143,22 @@ void client_t::impl_t::push_from_server(std::string m)
   ++received_serial_num;
   start_connection_timer();
 
-  const auto type = std::stoi(m.substr(0, m.find(FREE_SPASE)));
+  const auto type = msg::get_msg_type(m);
 
-  if(type == messages::MESSAGE_RECEIVED)
+  if(type == msg::get_type<msg::message_received_t>::value)
   {
     is_received = true;
     return;
   }
 
-  add_for_server(messages::MESSAGE_RECEIVED);
+  add_for_server(msg::prepare_for_send(msg::message_received_t()));
 
   switch(type)
   {
-    case messages::IS_SERVER_LOST:
+    case msg::get_type<msg::is_server_lost_t>::value:
       break;
-    case messages::HELLO_SERVER:
-      add_for_server(messages::GET_LOGIN);
+    case msg::get_type<msg::hello_server_t>::value:
+      add_for_server(msg::prepare_for_send(msg::get_login_t()));
       break;
     default:
       messages_for_logic.push_back(m);
@@ -188,8 +187,8 @@ std::string client_t::impl_t::pull_for_server()
   const auto& _1 = messages_for_server.front();
   const std::string m = add_serial_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
 
-  if(_1.message != messages::MESSAGE_RECEIVED)
-    { begin_wait_receive(_1.message); }
+  //if(_1.message != msg::MESSAGE_RECEIVED) //!!!!
+    //{ begin_wait_receive(_1.message); }
 
   messages_for_server.erase(messages_for_server.begin());
 
@@ -235,10 +234,10 @@ bool client_t::impl_t::check_ser_num(std::string& m)
 {
   const int serial_num = cut_serial_num(m);
 
-  if(serial_num == received_serial_num - 1 && m != messages::MESSAGE_RECEIVED)
+  if(serial_num == received_serial_num - 1)// && m != msg::MESSAGE_RECEIVED) //!!!!
   {
     start_connection_timer();
-    add_for_server(messages::MESSAGE_RECEIVED, true);
+    add_for_server(msg::prepare_for_send(msg::message_received_t()), true);
     return false;
   }
 
@@ -255,16 +254,6 @@ void client_t::impl_t::add_for_server(const std::string& m, bool is_extra_messag
 {
   helper::log("add_for_server: ", m);
   auto _1 = server_mess_t(m, is_extra_message);
-  if(is_extra_message)
-    { messages_for_server.insert(messages_for_server.begin(), _1); }
-  else
-    { messages_for_server.push_back(_1); }
-}
-
-void client_t::impl_t::add_for_server(const messages::MESSAGE r_mes, bool is_extra_message)
-{
-  helper::log("add_for_server messages::MESSAGE: ", r_mes);
-  auto _1 = server_mess_t(std::to_string(r_mes), is_extra_message);
   if(is_extra_message)
     { messages_for_server.insert(messages_for_server.begin(), _1); }
   else
@@ -291,8 +280,8 @@ void client_t::impl_t::is_message_received()
   {
     add_for_server(last_send_message, true);
 
-    if(last_send_message == messages::IS_CLIENT_LOST || num_of_restarts == 3)
-      { messages_for_logic.push_back(std::to_string(messages::CLIENT_LOST)); }
+    //if(last_send_message == msg::IS_CLIENT_LOST || num_of_restarts == 3) //!!!
+      //{ messages_for_logic.push_back(std::to_string(msg::CLIENT_LOST)); }
 
     ++num_of_restarts;
     start_response_timer();
@@ -301,7 +290,7 @@ void client_t::impl_t::is_message_received()
 
 void client_t::impl_t::connection_timer_timeout()
 {
-  add_for_server(messages::IS_CLIENT_LOST);
+  add_for_server(msg::prepare_for_send(msg::is_client_lost_t()));
 }
 
 std::string client_t::impl_t::add_serial_num(const std::string& data, const int num) const

@@ -46,18 +46,17 @@ int main() try
 
       if(c->is_message_for_logic_append())
       {
-        auto _1 = c->pull_for_logic();
-        sr::helper::log("message_from_logic: ", _1);
-        const auto type = messages::cut_type(_1);
-        const auto message(std::move(_1));
+        const auto message = c->pull_for_logic();
+        sr::helper::log("message_from_logic: ", message);
+        const auto type = msg::get_msg_type(message);
 
-        if(type == messages::get_type<messages::login_t>::value)
+        if(type == msg::get_type<msg::login_t>::value)
         {
-          auto login = messages::init<messages::login_t> (message);
+          auto login = msg::init<msg::login_t> (message);
 
           if(clients.end() != std::find_if(clients.begin(), clients.end(),
                                            [&login](const auto& i){ return i->get_login() == login.login; }))
-            { c->push_for_send(std::to_string(messages::INCORRECT_LOG)); }//
+            { c->push_for_send(msg::prepare_for_send(msg::incorrect_log_t())); }//
           else
           {
             c->set_login(login.login);
@@ -85,50 +84,50 @@ int main() try
         {
           sr::helper::log("desk == desk.end()");
 
-          if(type == messages::OPPONENT_INF)
-            { c->push_for_send(sr::helper::get_str(messages::INF_REQUEST, " { \"data\": \"No opponent: no game in progress!\"}")); }
+          if(type == msg::get_type<msg::opponent_inf_t>::value)
+            { c->push_for_send(msg::prepare_for_send(msg::inf_request_t("No opponent: no game in progress!"))); }
 
           continue;
         }
 
         switch(type)
         {
-          //case messages::MESSAGE_RECEIVED: //in client
-          //case messages::IS_SERVER_LOST: // no need cause on this message already was sended responce
-          case messages::get_type<messages::opponent_inf_t>::value:
+          //case msg::MESSAGE_RECEIVED: //in client
+          //case msg::IS_SERVER_LOST: // no need cause on this message already was sended responce
+          case msg::get_type<msg::opponent_inf_t>::value:
           {
             auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
             c->push_for_send(get_person_inf(*opp));//
             break;
           }
-          case messages::get_type<messages::my_inf_t>::value:
+          case msg::get_type<msg::my_inf_t>::value:
             c->push_for_send(get_person_inf(c));//
             break;
-          case messages::get_type<messages::client_lost_t>::value:
+          case msg::get_type<msg::client_lost_t>::value:
           {
             auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
-            (*opp)->push_for_send(std::to_string(messages::OPPONENT_LOST));
+            (*opp)->push_for_send(msg::prepare_for_send(msg::opponent_lost_t()));
             break;
           }
           default:
             switch(type)
             {
-              case messages::get_type<messages::move_t>::value:
+              case msg::get_type<msg::move_t>::value:
               {
-                auto move = messages::init<messages::move_t> (message);
+                auto move = msg::init<msg::move_t> (message);
                 (*desk)->make_moves_from_str(move.data);
                 break;
               }
-              case messages::get_type<messages::back_move_t>::value:
+              case msg::get_type<msg::back_move_t>::value:
                 (*desk)->back_move();
                 break;
-              case messages::get_type<messages::go_to_history_t>::value:
+              case msg::get_type<msg::go_to_history_t>::value:
               {
-                auto gth = messages::init<messages::go_to_history_t> (message);
+                auto gth = msg::init<msg::go_to_history_t> (message);
                 (*desk)->go_to_history_index(gth.index);
                 break;
               }
-              case messages::get_type<messages::new_game_t>::value:
+              case msg::get_type<msg::new_game_t>::value:
                 (*desk)->start_new_game();
                 break;
               default:
@@ -158,12 +157,12 @@ catch(std::exception const& ex)
 
 std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d)
 {
-  messages::game_inf_t _1(d->get_board_mask(), d->get_moves_history(), d->is_mate(), d->get_move_num());
-  return messages::prepare_for_send(_1);
+  msg::game_inf_t _1(d->get_board_mask(), d->get_moves_history(), d->is_mate(), d->get_move_num());
+  return msg::prepare_for_send(_1);
 }
 
 std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c)
 {
-  return sr::helper::get_str(messages::INF_REQUEST, " {\"data\": \"Login: ", c->get_login()
-                             , "; Elo rating: ", c->get_rating(), "\" }");
+  return msg::prepare_for_send(msg::inf_request_t("Login: " + c->get_login() +
+                                                  "; Elo raing: " + std::to_string(c->get_rating())));
 }
