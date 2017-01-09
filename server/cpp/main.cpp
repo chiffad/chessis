@@ -95,11 +95,8 @@ int main() try
           //case msg::message_received_t: //in client
           //case msg::is_server_lost_t: // no need cause on this message already was sended responce
           case msg::get_type<msg::opponent_inf_t>::value:
-          {
-            auto opp = std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock());
-            c->push_for_send(get_person_inf(*opp));
+            c->push_for_send(get_person_inf(*std::find(clients.begin(), clients.end(), (*desk)->get_opponent(c).lock())));
             break;
-          }
           case msg::get_type<msg::my_inf_t>::value:
             c->push_for_send(get_person_inf(c));
             break;
@@ -113,20 +110,14 @@ int main() try
             switch(type)
             {
               case msg::get_type<msg::move_t>::value:
-              {
-                auto move = msg::init<msg::move_t> (message);
-                (*desk)->make_moves_from_str(move.data);
+                (*desk)->make_moves_from_str((msg::init<msg::move_t>(message)).data);
                 break;
-              }
               case msg::get_type<msg::back_move_t>::value:
                 (*desk)->back_move();
                 break;
               case msg::get_type<msg::go_to_history_t>::value:
-              {
-                auto gth = msg::init<msg::go_to_history_t> (message);
-                (*desk)->go_to_history_index(gth.index);
+                (*desk)->go_to_history_index((msg::init<msg::go_to_history_t>(message)).index);
                 break;
-              }
               case msg::get_type<msg::new_game_t>::value:
                 (*desk)->start_new_game();
                 break;
