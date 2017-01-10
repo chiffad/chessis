@@ -145,7 +145,7 @@ void client_t::impl_t::push_from_server(std::string m)
 
   const auto type = msg::get_msg_type(m);
 
-  if(type == msg::get_type<msg::message_received_t>::value)
+  if(type == msg::id<msg::message_received_t>())
   {
     is_received = true;
     return;
@@ -155,9 +155,9 @@ void client_t::impl_t::push_from_server(std::string m)
 
   switch(type)
   {
-    case msg::get_type<msg::is_server_lost_t>::value:
+    case msg::id<msg::is_server_lost_t>():
       break;
-    case msg::get_type<msg::hello_server_t>::value:
+    case msg::id<msg::hello_server_t>():
       add_for_server(msg::prepare_for_send(msg::get_login_t()));
       break;
     default:

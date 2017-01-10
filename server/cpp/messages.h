@@ -75,8 +75,12 @@ namespace msg
            message_types;
 
   template<typename m_type>
-  struct get_type
-    { enum { value = boost::mpl::find<message_types, m_type>::type::pos::value }; };
+  struct id
+  {
+    enum { value = boost::mpl::find<message_types, m_type>::type::pos::value };
+    constexpr operator int()
+    {return value;}
+  };
     
   template<typename struct_t>
   struct_t init(const std::string& str)
@@ -101,7 +105,7 @@ namespace msg
   {
     std::stringstream ss;
     boost::archive::text_oarchive oa(ss);
-    oa<<get_type<struct_t>::value;
+    oa<<id<struct_t>::value;
     oa<<s;
     
     return ss.str();
@@ -109,7 +113,7 @@ namespace msg
   
   template<typename struct_t>
   bool is_equal_types(const std::string& str)
-    { return (get_msg_type(str) == get_type<struct_t>::value); }
+    { return (get_msg_type(str) == id<struct_t>()); }
   
   template <typename Archive>
   void serialize(Archive& ar, game_inf_t& _1, const unsigned /*version*/)
