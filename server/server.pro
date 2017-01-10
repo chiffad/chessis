@@ -24,5 +24,4 @@ HEADERS += cpp/chess.h \
            cpp/coord.h \
            cpp/client.h \
            cpp/helper.h \
-           cpp/typelist.h \
 

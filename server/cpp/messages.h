@@ -5,8 +5,8 @@
 #include <boost/serialization/string.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
-
-#include "typelist.h"
+#include <boost/mpl/vector.hpp>
+#include <boost/mpl/find.hpp>
 
 
 namespace msg
@@ -69,15 +69,15 @@ namespace msg
   struct_proto(opponent_lost_t   );
   #undef struct_proto
   
-  typedef typelist_t<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t,
-                      my_inf_t, get_login_t, login_t, incorrect_log_t, move_t, back_move_t, go_to_history_t,
-                      new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t, game_inf_t>
+  typedef boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t,
+                             my_inf_t, get_login_t, login_t, incorrect_log_t, move_t, back_move_t, go_to_history_t,
+                             new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t, game_inf_t>
            message_types;
 
   template<typename m_type>
   struct get_type
-    { enum { value = my_tl::index_of<m_type, message_types>::value }; };
-  
+    { enum { value = boost::mpl::find<message_types, m_type>::type::pos::value }; };
+    
   template<typename struct_t>
   struct_t init(const std::string& str)
   {
@@ -100,10 +100,9 @@ namespace msg
   std::string prepare_for_send(const struct_t& s)
   {
     std::stringstream ss;
-    ss<<get_type<struct_t>::value;
     boost::archive::text_oarchive oa(ss);
-    oa <<get_type<struct_t>::value;
-    oa << s;
+    oa<<get_type<struct_t>::value;
+    oa<<s;
     
     return ss.str();
   }
