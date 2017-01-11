@@ -28,11 +28,17 @@ namespace msg
 
   struct move_t
   {
+    move_t() = default;
+    move_t(const std::string move) : data(move)
+    {}
     std::string data;
   };
 
   struct go_to_history_t
   {
+    go_to_history_t() = default;
+    go_to_history_t(const int ind) : index(ind)
+    {}
     int index;
   };
 
