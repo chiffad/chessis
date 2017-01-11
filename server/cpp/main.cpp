@@ -7,13 +7,14 @@
 #include "server.h"
 #include "messages.h"
 #include "helper.h"
+#include "handle_message.h"
 
 
 int main() try
 {
   boost::asio::io_service io_service;
   sr::server_t server(io_service);
-  msg::handle_message_t handler;
+  sr::handle_message_t handler;
 
   while(true)
   {

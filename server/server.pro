@@ -11,6 +11,7 @@ LIBS += -lboost_system\
 
 SOURCES += cpp/main.cpp \
            cpp/chess.cpp \
+           cpp/handle_message.cpp \
            cpp/desk.cpp \
            cpp/messages.cpp \
            cpp/server.cpp \
@@ -18,6 +19,7 @@ SOURCES += cpp/main.cpp \
 
 
 HEADERS += cpp/chess.h \
+           cpp/handle_message.h \
            cpp/desk.h \
            cpp/messages.h \
            cpp/server.h \

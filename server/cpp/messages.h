@@ -3,16 +3,12 @@
 
 #include <string>
 #include <vector>
-#include <memory>
-#include <typeinfo>
 #include <boost/serialization/string.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/find.hpp>
 
-#include "client.h"
-#include "desk.h"
 #include "helper.h"
 
 
@@ -159,44 +155,6 @@ namespace msg
   template<typename Archive>
   void serialize(Archive& ar, int& type, const unsigned /*version*/)
     { ar & type; }
-  
-
-  class handle_message_t
-  {
-  public:
-    handle_message_t() = default;
-    template<typename T>
-    void handle(const std::string& str, std::shared_ptr<sr::client_t>& client)
-      { std::cout<<"For type "<< typeid(T).name()<<" tactic isn't defined!"<<str<<std::endl; }
-    void board_updated(std::shared_ptr<sr::client_t>& client);
-    void new_message(boost::asio::io_service& io_service, const boost::asio::ip::udp::endpoint& addr, const std::string& message);
-    
-    std::vector<std::shared_ptr<sr::client_t>>::iterator begin() noexcept;
-    std::vector<std::shared_ptr<sr::client_t>>::iterator end() noexcept;
-    
-  public:
-    handle_message_t(const handle_message_t&) = delete;
-    handle_message_t& operator=(const handle_message_t&) = delete;
-    
-    
-  private:
-    std::vector<std::shared_ptr<logic::desk_t>>::iterator get_desk(const std::shared_ptr<sr::client_t>& client);
-    std::vector<std::shared_ptr<sr::client_t>>::iterator get_opponent(const std::shared_ptr<sr::client_t>& client);
-    
-    std::vector<std::shared_ptr<sr::client_t>> clients;
-    std::vector<std::shared_ptr<logic::desk_t>> desks;
-  };
-  
-  #define handle_macro(struct_type)  template<> void handle_message_t::handle<struct_type>(const std::string& str, std::shared_ptr<sr::client_t>& client);
-  handle_macro(login_t        );
-  handle_macro(opponent_inf_t );
-  handle_macro(my_inf_t       );
-  handle_macro(client_lost_t  );
-  handle_macro(move_t         );
-  handle_macro(back_move_t    );
-  handle_macro(go_to_history_t);
-  handle_macro(new_game_t     );
-  #undef handle_macro
   
 }
 
