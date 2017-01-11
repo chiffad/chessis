@@ -37,18 +37,18 @@ int main() try
         {
           //case msg::message_received_t: //in client
           //case msg::is_server_lost_t: // no need cause on this message already was sended responce
-          case msg::id<msg::login_t>():        handler.handle<msg::login_t>(message, c);        break;
+          case msg::id<msg::login_t       >(): handler.handle<msg::login_t       >(message, c); break;
           case msg::id<msg::opponent_inf_t>(): handler.handle<msg::opponent_inf_t>(message, c); break;
-          case msg::id<msg::my_inf_t>():       handler.handle<msg::my_inf_t>(message, c);       break;
-          case msg::id<msg::client_lost_t>():  handler.handle<msg::client_lost_t>(message, c);  break;
+          case msg::id<msg::my_inf_t      >(): handler.handle<msg::my_inf_t      >(message, c); break;
+          case msg::id<msg::client_lost_t >(): handler.handle<msg::client_lost_t >(message, c); break;
           default:
           {
             switch(type)
             {
-              case msg::id<msg::move_t>():          handler.handle<msg::move_t>(message, c);          break;
-              case msg::id<msg::back_move_t>():     handler.handle<msg::back_move_t>(message, c);     break;
+              case msg::id<msg::move_t         >(): handler.handle<msg::move_t         >(message, c); break;
+              case msg::id<msg::back_move_t    >(): handler.handle<msg::back_move_t    >(message, c); break;
               case msg::id<msg::go_to_history_t>(): handler.handle<msg::go_to_history_t>(message, c); break;
-              case msg::id<msg::new_game_t>():      handler.handle<msg::back_move_t>(message, c);     break;
+              case msg::id<msg::new_game_t     >(): handler.handle<msg::back_move_t    >(message, c); break;
               default:
                 sr::helper::throw_except("Unknown message type!: ", type);
             }
