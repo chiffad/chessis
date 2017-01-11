@@ -18,14 +18,13 @@ int msg::get_msg_type(const std::string& message)
 
 std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d)
 {
-  return msg::prepare_for_send(msg::game_inf_t(d->get_board_mask(), d->get_moves_history(),
-                                               d->is_mate(), d->get_move_num()));
+  return prepare_for_send(game_inf_t(d->get_board_mask(), d->get_moves_history(), d->is_mate(), d->get_move_num()));
 }
 
 std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c)
 {
-  return msg::prepare_for_send(msg::inf_request_t("Login: " + c->get_login() +
-                                                  "; Elo raing: " + std::to_string(c->get_rating())));
+  return prepare_for_send(inf_request_t("Login: " + c->get_login() +
+                                        "; Elo raing: " + std::to_string(c->get_rating())));
 }
 
 template<>
@@ -33,11 +32,11 @@ void handle_message_t::handle<login_t>(const std::string& message, std::shared_p
 {
   sr::helper::log("tactic for login_t ", message);
   
-  auto login = msg::init<msg::login_t>(message);
+  auto login = init<login_t>(message);
 
   if(clients.end() != std::find_if(clients.begin(), clients.end(),
                                    [&login](const auto& i){ return i->get_login() == login.login; }))
-    { client->push_for_send(msg::prepare_for_send(msg::incorrect_log_t())); }
+    { client->push_for_send(prepare_for_send(incorrect_log_t())); }
   else
   {
     client->set_login(login.login);
@@ -66,7 +65,7 @@ void handle_message_t::handle<opponent_inf_t>(const std::string& message, std::s
   if(desk == desks.end())
   {
     sr::helper::log("desk == desk.end()"); 
-    client->push_for_send(msg::prepare_for_send(msg::inf_request_t("No opponent: no game in progress!")));
+    client->push_for_send(prepare_for_send(inf_request_t("No opponent: no game in progress!")));
   }
   else
   {
@@ -86,7 +85,7 @@ void handle_message_t::handle<client_lost_t>(const std::string& message, std::sh
 {
   sr::helper::log("tactic for client_lost_t ", message);
   
-  (*get_opponent(client))->push_for_send(msg::prepare_for_send(msg::opponent_lost_t()));
+  (*get_opponent(client))->push_for_send(prepare_for_send(opponent_lost_t()));
 }
 
 template<>
@@ -94,7 +93,7 @@ void handle_message_t::handle<move_t>(const std::string& message, std::shared_pt
 {
   sr::helper::log("tactic for move_t ", message);
   
-  (*get_desk(client))->make_moves_from_str((msg::init<msg::move_t>(message)).data);
+  (*get_desk(client))->make_moves_from_str((init<move_t>(message)).data);
 }
 
 template<>
@@ -110,7 +109,7 @@ void handle_message_t::handle<go_to_history_t>(const std::string& message, std::
 {
   sr::helper::log("tactic for go_to_history_t ", message);
   
-  (*get_desk(client))->go_to_history_index((msg::init<msg::go_to_history_t>(message)).index);
+  (*get_desk(client))->go_to_history_index((init<go_to_history_t>(message)).index);
 }
 
 template<>
@@ -164,6 +163,6 @@ std::vector<std::shared_ptr<logic::desk_t>>::iterator handle_message_t::get_desk
 
 std::vector<std::shared_ptr<sr::client_t>>::iterator handle_message_t::get_opponent(const std::shared_ptr<sr::client_t>& client)
 {
-  return std::find(clients.begin(), clients.end(), (*get_desk(client))->get_opponent(client).lock());;
+  return std::find(clients.begin(), clients.end(), (*get_desk(client))->get_opponent(client).lock());
 }
 
