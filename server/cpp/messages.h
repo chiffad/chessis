@@ -9,8 +9,6 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/find.hpp>
 
-#include "helper.h"
-
 
 namespace msg
 {

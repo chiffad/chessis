@@ -132,10 +132,7 @@ void handle_message_t::new_message(boost::asio::io_service& io_service, const bo
     clients.push_back(std::make_shared<sr::client_t>(io_service, addr));
     c = clients.rend();
   }
-  else
-  {
-    (*c)->push_from_server(message);
-  }
+  (*c)->push_from_server(message);
 }
 
 std::vector<std::shared_ptr<sr::client_t>>::iterator handle_message_t::begin() noexcept
