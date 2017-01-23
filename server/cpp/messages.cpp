@@ -4,6 +4,7 @@ using namespace msg;
 
 namespace detail
 {
+
 struct message_t
 {
   int ser_num;
@@ -19,26 +20,26 @@ void serialize(Archive& ar, message_t& _1, const unsigned /*version*/)
 
 }// namespace detail
 
-int msg::get_ser_num(const std::string& message)
+template<typename T>
+T create_T_and_fill(const std::string& str)
 {
   std::stringstream ss;
-  ss.str(message);
-  detail::message_t m;
+  ss.str(str);
+  T m;
   boost::archive::text_iarchive ia(ss);
   ia>>m;
   
-  return m.ser_num;
+  return m;
+}
+
+int msg::get_ser_num(const std::string& message)
+{
+  return create_T_and_fill<detail::message_t>(message).ser_num;
 }
 
 std::string msg::get_msg_data(const std::string& message)
 {
-  std::stringstream ss;
-  ss.str(message);
-  detail::message_t m;
-  boost::archive::text_iarchive ia(ss);
-  ia>>m;
-  
-  return m.mess;
+  return create_T_and_fill<detail::message_t>(message).mess;
 }
 
 std::string msg::add_ser_num(const std::string& message, const int num)
@@ -56,11 +57,5 @@ std::string msg::add_ser_num(const std::string& message, const int num)
 
 int msg::get_msg_type(const std::string& message)
 {
-  std::stringstream ss;
-  ss.str(message);
-  int type;
-  boost::archive::text_iarchive ia(ss);
-  ia>>type;
-  
-  return type;
+  return create_T_and_fill<int>(message);
 }
