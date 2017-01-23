@@ -130,7 +130,7 @@ void handle_message_t::new_message(boost::asio::io_service& io_service, const bo
   {
     sr::helper::log("New client");
     clients.push_back(std::make_shared<sr::client_t>(io_service, addr));
-    c = clients.rend();
+    c = clients.rbegin();
   }
   (*c)->push_from_server(message);
 }
