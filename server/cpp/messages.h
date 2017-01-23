@@ -13,6 +13,9 @@
 namespace msg
 {
   int get_msg_type(const std::string& message);
+  int get_ser_num(const std::string& message);
+  std::string get_msg_data(const std::string& message);
+  std::string add_ser_num(const std::string& message, const int num);
 
   struct login_t
   {
@@ -153,7 +156,7 @@ namespace msg
   template<typename Archive>
   void serialize(Archive& ar, int& type, const unsigned /*version*/)
     { ar & type; }
-  
-}
+
+}// namespace msg
 
 #endif // __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD
