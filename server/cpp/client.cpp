@@ -14,7 +14,7 @@ typedef boost::asio::deadline_timer deadline_timer_t;
 struct client_t::impl_t
 {
   impl_t(io_service_t& io_serv, const endpoint_t& addr);
-  void push_from_server(std::string message);
+  void push_from_server(const std::string& message);
   void push_for_send(const std::string& message);
   bool is_message_for_server_append() const;
   bool is_message_for_logic_append() const;
@@ -27,13 +27,11 @@ struct client_t::impl_t
   void set_rating(const int rating);
   int get_rating() const;
 
-  bool check_ser_num(std::string& m);
+  bool check_ser_num(const std::string& m);
   void add_for_server(const std::string& message, bool is_extra_message = false);
   void is_message_received();
   void connection_timer_timeout();
   void begin_wait_receive(const std::string& message);
-  std::string add_serial_num(const std::string& data, const int num) const;
-  int cut_serial_num(std::string& data) const;
   void start_connection_timer();
   void start_response_timer();
 
@@ -133,7 +131,7 @@ client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
 {
 }
 
-void client_t::impl_t::push_from_server(std::string m)
+void client_t::impl_t::push_from_server(const std::string& m)
 {
   helper::log("push_from_server: ",m);
 
@@ -143,26 +141,23 @@ void client_t::impl_t::push_from_server(std::string m)
   ++received_serial_num;
   start_connection_timer();
 
-  const auto type = msg::get_msg_type(m);
+  const auto data = msg::get_msg_data(m);
 
-  if(type == msg::id<msg::message_received_t>())
+  switch(msg::get_msg_type(data))
   {
-    is_received = true;
-    return;
-  }
-
-  add_for_server(msg::prepare_for_send(msg::message_received_t()));
-
-  switch(type)
-  {
+    case msg::id<msg::message_received_t>():
+      is_received = true;
+      return;
     case msg::id<msg::is_server_lost_t>():
       break;
     case msg::id<msg::hello_server_t>():
       add_for_server(msg::prepare_for_send(msg::get_login_t()));
       break;
     default:
-      messages_for_logic.push_back(m);
+      messages_for_logic.push_back(data);
   }
+  
+  add_for_server(msg::prepare_for_send(msg::message_received_t()));
 }
 
 void client_t::impl_t::push_for_send(const std::string& m)
@@ -185,14 +180,13 @@ std::string client_t::impl_t::pull_for_server()
   helper::log("pull_for_server");
 
   const auto& _1 = messages_for_server.front();
-  const std::string m = add_serial_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
 
   if(msg::is_equal_types<msg::message_received_t>(_1.message))
     { begin_wait_receive(_1.message); }
 
   messages_for_server.erase(messages_for_server.begin());
 
-  return m;
+  return msg::add_ser_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
 }
 
 std::string client_t::impl_t::pull_for_logic()
@@ -230,11 +224,11 @@ int client_t::impl_t::get_rating() const
   return elo;
 }
 
-bool client_t::impl_t::check_ser_num(std::string& m)
+bool client_t::impl_t::check_ser_num(const std::string& m)
 {
-  const int serial_num = cut_serial_num(m);
+  const int serial_num = msg::get_ser_num(m);
 
-  if(serial_num == received_serial_num - 1 && msg::is_equal_types<msg::message_received_t>(m))
+  if(serial_num == received_serial_num - 1 && !msg::is_equal_types<msg::message_received_t>(msg::get_msg_data(m)))
   {
     start_connection_timer();
     add_for_server(msg::prepare_for_send(msg::message_received_t()), true);
@@ -291,19 +285,6 @@ void client_t::impl_t::is_message_received()
 void client_t::impl_t::connection_timer_timeout()
 {
   add_for_server(msg::prepare_for_send(msg::is_client_lost_t()));
-}
-
-std::string client_t::impl_t::add_serial_num(const std::string& data, const int num) const
-{
-  return std::string(std::to_string(num) + FREE_SPASE + data);
-}
-
-int client_t::impl_t::cut_serial_num(std::string& data) const
-{
-  std::string serial_num(data.begin(), (data.begin() + data.find(FREE_SPASE)));
-  data.erase(0, data.find(FREE_SPASE) + 1);
-
-  return std::stoi(serial_num);
 }
 
 void client_t::impl_t::start_connection_timer()
