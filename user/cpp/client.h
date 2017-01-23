@@ -1,8 +1,8 @@
 #ifndef __MY_CLIENT_H__GOVLIYVFTYUVFTYFDIKVGLUIHL
 #define __MY_CLIENT_H__GOVLIYVFTYUVFTYFDIKVGLUIHL
 
-#include <QByteArray>
 #include <memory>
+#include <string>
 
 
 namespace cl
@@ -13,8 +13,8 @@ class client_t
 public:
   client_t();
   ~client_t();
-  void send(const QByteArray& message);
-  QByteArray pull();
+  void send(const std::string& message);
+  std::string pull();
   bool is_message_append() const;
 
 public:

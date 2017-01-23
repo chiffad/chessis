@@ -48,26 +48,26 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
     "6.To view your information, print '" + SHOW_ME + "'");
   }
   else if(message == SHOW_OPPONENT)
-    { add_to_messages_for_server(messages::OPPONENT_INF); }
+    { add_to_messages_for_server(msg::prepare_for_send(msg::opponent_inf_t())); }
   else if(message == SHOW_ME)
-    { add_to_messages_for_server(messages::MY_INF); }
+    { add_to_messages_for_server(msg::prepare_for_send(msg::my_inf_t())); }
   else if(message == NEW_GAME)
-    { add_to_messages_for_server(messages::NEW_GAME); }
+    { add_to_messages_for_server(msg::prepare_for_send(msg::new_game_t())); }
   else if(message == BACK_MOVE)
-    { add_to_messages_for_server(messages::BACK_MOVE); }
+    { add_to_messages_for_server(msg::prepare_for_send(msg::back_move_t())); }
   else if(message == HISTORY)
   {
-    messages::go_to_history_t gtp;
-    gtp.index = x1+1;
-    add_to_messages_for_server(messages::GO_TO_HISTORY, QString::fromStdString(gtp.to_json()));
+    msg::go_to_history_t gth;
+    gth.index = x1+1;
+    add_to_messages_for_server(msg::prepare_for_send(gth));
     add_to_command_history("command: " + message + " " + QString::number(x1 + 1));
     return;
   }
   else if(message.contains(HISTORY))
   {
-    messages::go_to_history_t gtp;
-    gtp.index = message.mid(HISTORY.size() + 1).toInt();
-    add_to_messages_for_server(messages::GO_TO_HISTORY, QString::fromStdString(gtp.to_json()));
+    msg::go_to_history_t gth;
+    gth.index = message.mid(HISTORY.size() + 1).toInt();
+    add_to_messages_for_server(msg::prepare_for_send(gth));
   }
 
   else
@@ -77,16 +77,16 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
 
     if(command == MOVE_WORD)
     {
-      messages::move_t move;
+      msg::move_t move;
       if(!command_content.isEmpty())
       {
         move.data = command_content.toStdString();
-        add_to_messages_for_server(messages::MOVE, QString::fromStdString(move.to_json()));
+        add_to_messages_for_server(msg::prepare_for_send(move));
       }
       else if(x1 + x2 + y1 + y2 != 0)
       {
         move.data = coord_to_str(get_coord(x1, y1), get_coord(x2, y2)).toStdString();
-        add_to_messages_for_server(messages::MOVE, QString::fromStdString(move.to_json()));
+        add_to_messages_for_server(msg::prepare_for_send(move));
         add_to_command_history("command: " + message + " " + QString::fromStdString(move.data));
         return;
       }
@@ -181,9 +181,9 @@ const QString board_graphic_t::coord_to_str(const Coord& from, const Coord& to) 
           + " - " + QChar(a_LETTER + to.x) + QString::number(CELL_NUM - to.y));
 }
 
-void board_graphic_t::add_to_messages_for_server(const messages::MESSAGE mes_type, const QString& content)
+void board_graphic_t::add_to_messages_for_server(const std::string& msg)
 {
-  _messages_for_server.push_back(QString::number(mes_type) + FREE_SPACE + content);
+  _messages_for_server.push_back(QString::fromStdString(msg));
 }
 
 void board_graphic_t::update_hilight(const int move_num, const QString& history)
@@ -278,21 +278,21 @@ void board_graphic_t::read_moves_from_file(const QString& path)
 
   std::string data_from_file(std::istream_iterator<char>(from_file), (std::istream_iterator<char>()));
 
-  add_to_messages_for_server(messages::MOVE, QString::fromStdString(data_from_file));
+  add_to_messages_for_server(msg::prepare_for_send(msg::move_t(data_from_file)));
 }
 
 void board_graphic_t::set_connect_status(const int status)
 {
   switch(status)
   {
-    case messages::SERVER_HERE:
+    case msg::id<msg::server_here_t>():
       if(_udp_connection_status == "Disconnected")
         { _udp_connection_status = "Connect"; }
       break;
-    case messages::SERVER_LOST:
+    case msg::id<msg::server_lost_t>():
       _udp_connection_status = "Disconnected";
       break;
-    case messages::OPPONENT_LOST:
+    case msg::id<msg::opponent_lost_t>():
       _udp_connection_status = "Opponent disconnected";
       break;
     default:
@@ -310,9 +310,9 @@ bool board_graphic_t::set_login(const QString& login)
       { return false; }
   }
 
-  messages::login_t l;
+  msg::login_t l;
   l.login = login.toStdString();
-  add_to_messages_for_server(messages::LOGIN, QString::fromStdString(l.to_json()));
+  add_to_messages_for_server(msg::prepare_for_send(l));
   return true;
 }
 

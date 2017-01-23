@@ -15,7 +15,6 @@
 
 int main(int argc, char *argv[])
 {
-
   qmlRegisterType<graphic::fb_obj_t>("CubeRendering", 1, 0, "Cube");
 
   QGuiApplication app(argc, argv);
@@ -41,48 +40,46 @@ int main(int argc, char *argv[])
       {
         QByteArray m;
         m.append(board_graphic.pull());
-        client.send(m);
+        client.send(m.toStdString());
       }
 
       while(client.is_message_append())
       {
-        auto _1 = client.pull().toStdString();
-        const auto type = messages::cut_type(_1);
-        const auto message(std::move(_1));
+        auto _1 = client.pull();
+        const auto type = msg::get_msg_type(_1);
+        const auto message = msg::get_msg_data(_1);
 
-        if(type == messages::SERVER_LOST
-          || type == messages::SERVER_HERE
-          || type == messages::OPPONENT_LOST)
+        if(type == msg::id<msg::server_lost_t>()
+          || type == msg::id<msg::server_here_t>()
+          || type == msg::id<msg::opponent_lost_t>())
         {
-          type == messages::SERVER_LOST ? cl::helper::log("type == messages::SERVER_LOST") 
-                                        :  type == messages::SERVER_HERE ? cl::helper::log("type == messages::SERVER_HERE") 
-                                                                         : cl::helper::log("type == messages::OPPONENT_LOST");
+          type ==  msg::id<msg::server_lost_t>() ? cl::helper::log("type == messages::SERVER_LOST") 
+                                        :  type ==  msg::id<msg::server_here_t>() ? cl::helper::log("type == messages::SERVER_HERE") 
+                                                                                : cl::helper::log("type == messages::OPPONENT_LOST");
           board_graphic.set_connect_status(type);
           continue;
         }
 
-        else try
+        else
         {
           switch(type)
           {
-            case messages::INF_REQUEST:
+            case msg::id<msg::inf_request_t>():
             {
               cl::helper::log("messages::INF_REQUEST");
-              messages::inf_request_t inf;
-              inf.from_json(message);
+              auto inf = msg::init<msg::inf_request_t>(message);
 
               board_graphic.add_to_command_history(QString::fromStdString(inf.data));
               break;
             }
-            case messages::GAME_INF:
+            case msg::id<msg::game_inf_t>():
             {
               cl::helper::log("messages::GAME_INF");
-              messages::game_inf_t game_inf;
-              game_inf.from_json(message);
+              auto game_inf = msg::init<msg::game_inf_t>(message);
 
               board_graphic.set_board_mask(QString::fromStdString(game_inf.board_mask));
               board_graphic.set_move_color(game_inf.move_num);
-              board_graphic.set_connect_status(messages::SERVER_HERE);
+              board_graphic.set_connect_status(msg::id<msg::server_here_t>());
               board_graphic.set_moves_history(QString::fromStdString(game_inf.moves_history));
               board_graphic.update_hilight(game_inf.move_num, QString::fromStdString(game_inf.moves_history));
               board_graphic.redraw_board();
@@ -92,11 +89,11 @@ int main(int argc, char *argv[])
 
               break;
             }
-            case messages::GET_LOGIN:
+            case msg::id<msg::get_login_t>():
               cl::helper::log("messages::GET_LOGIN");
               board_graphic.get_login();
               break;
-            case messages::INCORRECT_LOG:
+            case msg::id<msg::incorrect_log_t>():
               cl::helper::log("messages::INCORRECT_LOG");
               board_graphic.get_login("This login already exist. Enter another login!");
               break;
@@ -104,8 +101,6 @@ int main(int argc, char *argv[])
               cl::helper::log("Warning! Unknown message type: ", type);
           }
         }
-        catch(const messages::my_except& e)
-          { cl::helper::log("Exception! ", e.what()); }
       }
     }
   }

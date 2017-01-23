@@ -8,6 +8,10 @@ QT += qml quick \
 
 CONFIG+=c++14
 
+LIBS += -lboost_system\
+        -lboost_serialization\
+        -L/home/dprokofiev/boost_1_63_0/stage/lib
+
 HEADERS += cpp/board_graphic.h \
            cpp/messages.h \
            cpp/client.h \
