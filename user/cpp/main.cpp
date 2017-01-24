@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
       while(client.is_message_append())
       {
         auto message = client.pull();
-        const auto type = msg::get_msg_type(message);
+        const auto type = msg::init<msg::some_datagramm_t>(message).type;
 
         if(type == msg::id<msg::server_lost_t>()
           || type == msg::id<msg::server_here_t>()

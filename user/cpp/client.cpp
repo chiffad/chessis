@@ -109,27 +109,29 @@ void client_t::impl_t::send(const std::string& message, bool is_prev_serial_need
 
 void client_t::impl_t::read()
 {
+  helper::log("here!!");
   QHostAddress sender_IP;
   quint16 sender_port;
 
   QByteArray message;
   message.resize(socket.pendingDatagramSize());
   socket.readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
-
-  const int serial_num = msg::get_ser_num(message.toStdString());
-  const auto data = msg::get_msg_data(message.toStdString());
-
-  helper::log("read: ", data);
-  if(sender_IP != SERVER_IP || sender_port != server_port || sender_port == my_port)
+  
+  /*if(sender_IP != SERVER_IP || sender_port != server_port || sender_port == my_port)
   {
-    helper::log("Warning! in read_data: Wrong sender!", data);
+    helper::log("Warning! in read_data: Wrong sender!");
     return;
-  }
+  }*/
 
-  if(serial_num != ++received_serial_num)
+  
+  helper::log("read: ", message);
+  const auto datagramm = msg::init<msg::incoming_datagramm_t>(message.toStdString());
+  helper::log("read: ", datagramm.data);
+
+  if(datagramm.ser_num != ++received_serial_num)
   {
     --received_serial_num;
-    if(serial_num == received_serial_num && !msg::is_equal_types<msg::message_received_t>(data))
+    if(datagramm.ser_num == received_serial_num && !msg::is_equal_types<msg::message_received_t>(datagramm.data))
     {
       connection_checker.start(CHECK_CONNECT_TIME);
       send(msg::prepare_for_send(msg::message_received_t()), true);
@@ -138,11 +140,11 @@ void client_t::impl_t::read()
     return;
   }
 
-  if(!msg::is_equal_types<msg::message_received_t>(data))
+  if(!msg::is_equal_types<msg::message_received_t>(datagramm.data))
   {
     send(msg::prepare_for_send(msg::message_received_t()));
-    if(!msg::is_equal_types<msg::is_client_lost_t>(data))
-      { received_message_stack.push_back(data); }
+    if(!msg::is_equal_types<msg::is_client_lost_t>(datagramm.data))
+      { received_message_stack.push_back(datagramm.data); }
   }
   else
   {
@@ -187,7 +189,7 @@ bool client_t::impl_t::is_message_received()
   {
     response_checker.start(RESPONSE_WAIT_TIME);
 
-    const auto t = msg::get_msg_type(last_send_message);
+    const auto t = msg::init<msg::some_datagramm_t>(last_send_message).type;
     if(t == msg::id<msg::hello_server_t>())
     {
       ++server_port;
@@ -209,8 +211,5 @@ bool client_t::impl_t::is_message_received()
 
 std::string client_t::impl_t::add_serial_num(const std::string& data, bool is_prev_serial_need)
 {
-  if(!is_prev_serial_need)
-    { ++send_serial_num; }
-
-  return msg::add_ser_num(data, send_serial_num);
+  return msg::prepare_for_send(msg::incoming_datagramm_t(data, is_prev_serial_need ? send_serial_num : ++send_serial_num));
 }

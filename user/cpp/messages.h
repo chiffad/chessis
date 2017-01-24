@@ -9,13 +9,11 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/find.hpp>
 
+#include <iostream>
 
 namespace msg
 {
-  int get_msg_type(const std::string& message);
-  int get_ser_num(const std::string& message);
-  std::string get_msg_data(const std::string& message);
-  std::string add_ser_num(const std::string& message, const int num);
+//  int get_msg_type(const std::string& message);
 
   struct login_t
   {
@@ -62,7 +60,75 @@ namespace msg
     int move_num;
   };
   
-  #define struct_proto(name)   struct name { private: friend class boost::serialization::access; template <typename Archive> void serialize(Archive &/*ar*/, const unsigned /*version*/){} };
+  struct incoming_datagramm_t
+  {
+    incoming_datagramm_t() = default;
+    incoming_datagramm_t(const std::string& mess, const int num) : data(mess), ser_num(num)
+    {}
+
+    std::string data;
+    int ser_num;
+  };
+  
+  struct some_datagramm_t
+  {
+    some_datagramm_t() = default;
+    some_datagramm_t(const std::string& mess, const int mess_type) : data(mess), type(mess_type)
+    {}
+
+    std::string data;
+    int type;
+  };
+
+  
+  template <typename Archive>
+  void serialize(Archive& ar, game_inf_t& _1, const unsigned /*version*/)
+  {
+    ar & _1.board_mask;
+    ar & _1.moves_history;
+    ar & _1.is_mate;
+    ar & _1.move_num;
+  }
+  
+  template <typename Archive>
+  void serialize(Archive& ar, inf_request_t& _1, const unsigned /*version*/)
+  { ar & _1.data; }
+  
+  template <typename Archive>
+  void serialize(Archive& ar, go_to_history_t _1, const unsigned /*version*/)
+  { ar & _1.index; }
+  
+  template <typename Archive>
+  void serialize(Archive& ar, move_t& _1, const unsigned /*version*/)
+  { ar & _1.data; }
+
+  template <typename Archive>
+  void serialize(Archive& ar, login_t& _1, const unsigned /*version*/)
+  {
+    ar & _1.login;
+//    ar & _1.pwd;
+  }
+  
+  template<typename Archive>
+  void serialize(Archive& ar, incoming_datagramm_t& _1, const unsigned /*version*/)
+  {
+    ar & _1.data;
+    ar & _1.ser_num;
+  }
+  
+  template<typename Archive>
+  void serialize(Archive& ar, some_datagramm_t& _1, const unsigned /*version*/)
+  {
+    ar & _1.data;
+    ar & _1.type;
+  }
+
+
+//  template<typename Archive>
+//  void serialize(Archive& ar, int& type, const unsigned /*version*/)
+  //{ ar & type; }
+
+  #define struct_proto(name)   struct name { private: friend class boost::serialization::access; template <typename Archive> void serialize(Archive &/*ar*/, const unsigned /*version*/){  std::cout<<"13asd123"<<std::endl;} };
   struct_proto(hello_server_t    );
   struct_proto(message_received_t);
   struct_proto(is_server_lost_t  );
@@ -107,7 +173,7 @@ namespace msg
     std::stringstream ss;
     ss.str(str);
     boost::archive::text_iarchive ia(ss);
-    ia >> s;
+    ia>>s;
   }
   
   template<typename struct_t>
@@ -123,40 +189,11 @@ namespace msg
   
   template<typename struct_t>
   bool is_equal_types(const std::string& str)
-    { return (get_msg_type(str) == id<struct_t>()); }
-  
-  template <typename Archive>
-  void serialize(Archive& ar, game_inf_t& _1, const unsigned /*version*/)
   {
-    ar & _1.board_mask;
-    ar & _1.moves_history;
-    ar & _1.is_mate;
-    ar & _1.move_num;
+    auto _1 = init<some_datagramm_t>(str);
+    return (_1.type == id<struct_t>()); 
   }
   
-  template <typename Archive>
-  void serialize(Archive& ar, inf_request_t& _1, const unsigned /*version*/)
-  { ar & _1.data; }
-  
-  template <typename Archive>
-  void serialize(Archive& ar, go_to_history_t _1, const unsigned /*version*/)
-  { ar & _1.index; }
-  
-  template <typename Archive>
-  void serialize(Archive& ar, move_t& _1, const unsigned /*version*/)
-  { ar & _1.data; }
-
-  template <typename Archive>
-  void serialize(Archive& ar, login_t& _1, const unsigned /*version*/)
-  {
-    ar & _1.login;
-//    ar & _1.pwd;
-  }
-  
-  template<typename Archive>
-  void serialize(Archive& ar, int& type, const unsigned /*version*/)
-    { ar & type; }
-
 }// namespace msg
 
 #endif // __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD
