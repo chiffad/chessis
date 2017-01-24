@@ -27,7 +27,7 @@ struct client_t::impl_t
   void set_rating(const int rating);
   int get_rating() const;
 
-  bool check_ser_num(const std::string& m);
+  bool check_ser_num(const msg::incoming_datagramm_t& num);
   void add_for_server(const std::string& message, bool is_extra_message = false);
   void is_message_received();
   void connection_timer_timeout();
@@ -134,16 +134,16 @@ client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
 void client_t::impl_t::push_from_server(const std::string& m)
 {
   helper::log("push_from_server: ",m);
+  
+  const auto datagramm = msg::init<msg::incoming_datagramm_t>(m);
 
-  if(!check_ser_num(m))
+  if(!check_ser_num(datagramm))
     { return; }
 
   ++received_serial_num;
   start_connection_timer();
 
-  const auto data = msg::get_msg_data(m);
-
-  switch(msg::get_msg_type(data))
+  switch(msg::get_msg_type(datagramm.data))
   {
     case msg::id<msg::message_received_t>():
       is_received = true;
@@ -154,7 +154,7 @@ void client_t::impl_t::push_from_server(const std::string& m)
       add_for_server(msg::prepare_for_send(msg::get_login_t()));
       break;
     default:
-      messages_for_logic.push_back(data);
+      messages_for_logic.push_back(datagramm.data);
   }
   
   add_for_server(msg::prepare_for_send(msg::message_received_t()));
@@ -186,7 +186,7 @@ std::string client_t::impl_t::pull_for_server()
 
   messages_for_server.erase(messages_for_server.begin());
 
-  return msg::add_ser_num(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num);
+  return msg::prepare_for_send(msg::incoming_datagramm_t(_1.message, _1.is_extra ? send_serial_num : ++send_serial_num));
 }
 
 std::string client_t::impl_t::pull_for_logic()
@@ -224,18 +224,16 @@ int client_t::impl_t::get_rating() const
   return elo;
 }
 
-bool client_t::impl_t::check_ser_num(const std::string& m)
+bool client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& _1)
 {
-  const int serial_num = msg::get_ser_num(m);
-
-  if(serial_num == received_serial_num - 1 && !msg::is_equal_types<msg::message_received_t>(msg::get_msg_data(m)))
+  if(_1.ser_num == received_serial_num - 1 && !msg::is_equal_types<msg::message_received_t>(_1.data))
   {
     start_connection_timer();
     add_for_server(msg::prepare_for_send(msg::message_received_t()), true);
     return false;
   }
 
-  if(serial_num != received_serial_num)
+  if(_1.ser_num != received_serial_num)
   {
     helper::log("check_ser_num: Warning! Wrong serial number!");
     return false;

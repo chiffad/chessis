@@ -14,8 +14,6 @@ namespace msg
 {
   int get_msg_type(const std::string& message);
   int get_ser_num(const std::string& message);
-  std::string get_msg_data(const std::string& message);
-  std::string add_ser_num(const std::string& message, const int num);
 
   struct login_t
   {
@@ -83,6 +81,16 @@ namespace msg
                              my_inf_t, get_login_t, login_t, incorrect_log_t, move_t, back_move_t, go_to_history_t,
                              new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t, game_inf_t>
            message_types;
+
+  struct incoming_datagramm_t
+  {
+    incoming_datagramm_t() = default;
+    incoming_datagramm_t(const std::string& mess, const int num) : ser_num(num), data(mess)
+    {}
+
+    int ser_num;
+    std::string data;
+  };
 
   template<typename m_type>
   struct id
@@ -154,8 +162,15 @@ namespace msg
   }
   
   template<typename Archive>
+  void serialize(Archive& ar, incoming_datagramm_t& _1, const unsigned /*version*/)
+  {
+    ar & _1.ser_num;
+    ar & _1.data;
+  }
+
+  template<typename Archive>
   void serialize(Archive& ar, int& type, const unsigned /*version*/)
-    { ar & type; }
+  { ar & type; }
 
 }// namespace msg
 
