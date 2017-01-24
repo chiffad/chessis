@@ -45,9 +45,8 @@ int main(int argc, char *argv[])
 
       while(client.is_message_append())
       {
-        auto _1 = client.pull();
-        const auto type = msg::get_msg_type(_1);
-        const auto message = msg::get_msg_data(_1);
+        auto message = client.pull();
+        const auto type = msg::get_msg_type(message);
 
         if(type == msg::id<msg::server_lost_t>()
           || type == msg::id<msg::server_here_t>()
