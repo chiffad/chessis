@@ -9,11 +9,11 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/find.hpp>
 
+#include <iostream>
 
 namespace msg
 {
   int get_msg_type(const std::string& message);
-  int get_ser_num(const std::string& message);
 
   struct login_t
   {
@@ -60,28 +60,6 @@ namespace msg
     int move_num;
   };
   
-  #define struct_proto(name)   struct name { private: friend class boost::serialization::access; template <typename Archive> void serialize(Archive &/*ar*/, const unsigned /*version*/){} };
-  struct_proto(hello_server_t    );
-  struct_proto(message_received_t);
-  struct_proto(is_server_lost_t  );
-  struct_proto(is_client_lost_t  );
-  struct_proto(opponent_inf_t    );
-  struct_proto(my_inf_t          );
-  struct_proto(get_login_t       );
-  struct_proto(incorrect_log_t   );
-  struct_proto(back_move_t       );
-  struct_proto(new_game_t        );
-  struct_proto(server_lost_t     );
-  struct_proto(server_here_t     );
-  struct_proto(client_lost_t     );
-  struct_proto(opponent_lost_t   );
-  #undef struct_proto
-  
-  typedef boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t,
-                             my_inf_t, get_login_t, login_t, incorrect_log_t, move_t, back_move_t, go_to_history_t,
-                             new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t, game_inf_t>
-           message_types;
-
   struct incoming_datagramm_t
   {
     incoming_datagramm_t() = default;
@@ -91,47 +69,6 @@ namespace msg
     int ser_num;
     std::string data;
   };
-
-  template<typename m_type>
-  struct id
-  {
-    enum { value = boost::mpl::find<message_types, m_type>::type::pos::value };
-    constexpr operator int()
-    {return value;}
-  };
-    
-  template<typename struct_t>
-  struct_t init(const std::string& str)
-  {
-    struct_t my_struct;
-    update_struct(my_struct, str);
-    
-    return my_struct;
-  }
-  
-  template<typename struct_t>
-  void update_struct(struct_t& s, const std::string& str)
-  {
-    std::stringstream ss;
-    ss.str(str);
-    boost::archive::text_iarchive ia(ss);
-    ia >> s;
-  }
-  
-  template<typename struct_t>
-  std::string prepare_for_send(const struct_t& s)
-  {
-    std::stringstream ss;
-    boost::archive::text_oarchive oa(ss);
-    oa<<id<struct_t>::value;
-    oa<<s;
-    
-    return ss.str();
-  }
-  
-  template<typename struct_t>
-  bool is_equal_types(const std::string& str)
-    { return (get_msg_type(str) == id<struct_t>()); }
   
   template <typename Archive>
   void serialize(Archive& ar, game_inf_t& _1, const unsigned /*version*/)
@@ -172,6 +109,70 @@ namespace msg
   void serialize(Archive& ar, int& type, const unsigned /*version*/)
   { ar & type; }
 
+  
+  #define struct_proto(name)   struct name { private: friend class boost::serialization::access; template <typename Archive> void serialize(Archive &/*ar*/, const unsigned /*version*/){} };
+  struct_proto(hello_server_t    );
+  struct_proto(message_received_t);
+  struct_proto(is_server_lost_t  );
+  struct_proto(is_client_lost_t  );
+  struct_proto(opponent_inf_t    );
+  struct_proto(my_inf_t          );
+  struct_proto(get_login_t       );
+  struct_proto(incorrect_log_t   );
+  struct_proto(back_move_t       );
+  struct_proto(new_game_t        );
+  struct_proto(server_lost_t     );
+  struct_proto(server_here_t     );
+  struct_proto(client_lost_t     );
+  struct_proto(opponent_lost_t   );
+  #undef struct_proto
+  
+  typedef boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t,
+                             my_inf_t, get_login_t, login_t, incorrect_log_t, move_t, back_move_t, go_to_history_t,
+                             new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t, game_inf_t>
+           message_types;
+
+  template<typename m_type>
+  struct id
+  {
+    enum { value = boost::mpl::find<message_types, m_type>::type::pos::value };
+    constexpr operator int()
+    {return value;}
+  };
+    
+  template<typename struct_t>
+  struct_t init(const std::string& str)
+  {
+    struct_t my_struct;
+    update_struct(my_struct, str);
+    
+    return my_struct;
+  }
+  
+  template<typename struct_t>
+  void update_struct(struct_t& s, const std::string& str)
+  {
+    std::stringstream ss;
+    ss.str(str);
+    boost::archive::text_iarchive ia(ss);
+    ia>>s;
+  }
+  
+  template<typename struct_t>
+  std::string prepare_for_send(const struct_t& s)
+  {
+    std::stringstream ss;
+    boost::archive::text_oarchive oa(ss);
+    oa<<id<struct_t>::value;
+    oa<<s;
+    
+    return ss.str();
+  }
+  
+  template<typename struct_t>
+  bool is_equal_types(const std::string& str)
+    { return (get_msg_type(str) == id<struct_t>()); }
+  
 }// namespace msg
 
 #endif // __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD
