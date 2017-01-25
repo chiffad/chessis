@@ -143,7 +143,7 @@ void client_t::impl_t::push_from_server(const std::string& m)
   ++received_serial_num;
   start_connection_timer();
 
-  switch(msg::get_msg_type(datagramm.data))
+  switch(msg::init<msg::some_datagramm_t>(datagramm.data).type)
   {
     case msg::id<msg::message_received_t>():
       is_received = true;

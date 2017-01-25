@@ -1,6 +1,9 @@
 #ifndef __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD
 #define __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD
 
+#define BOOST_MPL_LIMIT_VECTOR_SIZE 30
+#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+
 #include <string>
 #include <vector>
 #include <boost/serialization/string.hpp>
@@ -9,11 +12,19 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/find.hpp>
 
-#include <iostream>
+#include "helper.h"
+
 
 namespace msg
 {
-//  int get_msg_type(const std::string& message);
+  struct my_archive_exception: public boost::archive::archive_exception
+  {
+    my_archive_exception(const std::string& ex) : boost::archive::archive_exception(boost::archive::archive_exception::input_stream_error), message(ex)
+    {}
+    virtual const char* what() const throw()
+      { return message.data(); }
+    std::string message;
+  };
 
   struct login_t
   {
@@ -26,6 +37,7 @@ namespace msg
     move_t() = default;
     move_t(const std::string move) : data(move)
     {}
+
     std::string data;
   };
 
@@ -34,6 +46,7 @@ namespace msg
     go_to_history_t() = default;
     go_to_history_t(const int ind) : index(ind)
     {}
+
     int index;
   };
 
@@ -43,7 +56,7 @@ namespace msg
     inf_request_t(const std::string& str)
         : data(str)
     {}
-    
+
     std::string data;
   };
 
@@ -63,24 +76,23 @@ namespace msg
   struct incoming_datagramm_t
   {
     incoming_datagramm_t() = default;
-    incoming_datagramm_t(const std::string& mess, const int num) : data(mess), ser_num(num)
+    incoming_datagramm_t(const std::string& mess, const int num) : ser_num(num), data(mess)
     {}
 
-    std::string data;
     int ser_num;
+    std::string data;
   };
   
   struct some_datagramm_t
   {
     some_datagramm_t() = default;
-    some_datagramm_t(const std::string& mess, const int mess_type) : data(mess), type(mess_type)
+    some_datagramm_t(const std::string& mess, const int mess_type) : type(mess_type), data(mess)
     {}
 
-    std::string data;
     int type;
+    std::string data;
   };
 
-  
   template <typename Archive>
   void serialize(Archive& ar, game_inf_t& _1, const unsigned /*version*/)
   {
@@ -112,23 +124,18 @@ namespace msg
   template<typename Archive>
   void serialize(Archive& ar, incoming_datagramm_t& _1, const unsigned /*version*/)
   {
-    ar & _1.data;
     ar & _1.ser_num;
+    ar & _1.data;
   }
   
   template<typename Archive>
   void serialize(Archive& ar, some_datagramm_t& _1, const unsigned /*version*/)
   {
-    ar & _1.data;
     ar & _1.type;
+    ar & _1.data;
   }
 
-
-//  template<typename Archive>
-//  void serialize(Archive& ar, int& type, const unsigned /*version*/)
-  //{ ar & type; }
-
-  #define struct_proto(name)   struct name { private: friend class boost::serialization::access; template <typename Archive> void serialize(Archive &/*ar*/, const unsigned /*version*/){  std::cout<<"13asd123"<<std::endl;} };
+  #define struct_proto(name)  struct name { private: friend class boost::serialization::access; template <typename Archive> void serialize(Archive &/*ar*/, const unsigned /*version*/){} };
   struct_proto(hello_server_t    );
   struct_proto(message_received_t);
   struct_proto(is_server_lost_t  );
@@ -147,7 +154,8 @@ namespace msg
   
   typedef boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t,
                              my_inf_t, get_login_t, login_t, incorrect_log_t, move_t, back_move_t, go_to_history_t,
-                             new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t, game_inf_t>
+                             new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t,
+                             game_inf_t, incoming_datagramm_t, some_datagramm_t>
            message_types;
 
   template<typename m_type>
@@ -159,15 +167,6 @@ namespace msg
   };
     
   template<typename struct_t>
-  struct_t init(const std::string& str)
-  {
-    struct_t my_struct;
-    update_struct(my_struct, str);
-    
-    return my_struct;
-  }
-  
-  template<typename struct_t>
   void update_struct(struct_t& s, const std::string& str)
   {
     std::stringstream ss;
@@ -177,23 +176,51 @@ namespace msg
   }
   
   template<typename struct_t>
+  struct_t init(const std::string& str)
+  {
+    some_datagramm_t _1;
+    try
+      { update_struct(_1, str); }
+
+    catch(const boost::archive::archive_exception& e)
+      { _1.data = str; }
+
+    if(id<struct_t>() == id<some_datagramm_t>())
+      { _1.data = str; }
+
+    else if(_1.type != id<struct_t>())
+      { throw my_archive_exception("wrong struct_t type for init!!"); }
+
+    struct_t my_struct;
+    update_struct(my_struct, _1.data);
+
+    return my_struct;
+  }
+
+  template<typename struct_t>
   std::string prepare_for_send(const struct_t& s)
   {
     std::stringstream ss;
     boost::archive::text_oarchive oa(ss);
-    oa<<id<struct_t>::value;
     oa<<s;
-    
+
+    if(id<struct_t>() != id<some_datagramm_t>())
+    {
+      some_datagramm_t _1(ss.str(), id<struct_t>::value);
+      return prepare_for_send(_1);
+    }
+
     return ss.str();
   }
-  
+
   template<typename struct_t>
   bool is_equal_types(const std::string& str)
-  {
-    auto _1 = init<some_datagramm_t>(str);
-    return (_1.type == id<struct_t>()); 
-  }
-  
+  { return init<some_datagramm_t>(str).type == id<struct_t>(); }
+
 }// namespace msg
+
+
+#undef BOOST_MPL_LIMIT_VECTOR_SIZE
+#undef BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
 
 #endif // __MY_ENUM_H__UILGBAWLIDBAWYGDTAGFDWTYAD

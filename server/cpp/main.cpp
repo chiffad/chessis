@@ -32,7 +32,7 @@ int main() try
       {
         const auto message = c->pull_for_logic();
         sr::helper::log("message_from_logic: ", message);
-        const auto type = msg::get_msg_type(message);
+        const auto type = msg::init<msg::some_datagramm_t>(message).type;
 
         switch(type)
         {

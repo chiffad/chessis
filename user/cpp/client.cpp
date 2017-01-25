@@ -109,24 +109,22 @@ void client_t::impl_t::send(const std::string& message, bool is_prev_serial_need
 
 void client_t::impl_t::read()
 {
-  helper::log("here!!");
   QHostAddress sender_IP;
   quint16 sender_port;
 
   QByteArray message;
   message.resize(socket.pendingDatagramSize());
   socket.readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
+
+  helper::log("read: ", message);
   
-  /*if(sender_IP != SERVER_IP || sender_port != server_port || sender_port == my_port)
+  if(sender_IP != SERVER_IP || sender_port != server_port || sender_port == my_port)
   {
     helper::log("Warning! in read_data: Wrong sender!");
     return;
-  }*/
+  }
 
-  
-  helper::log("read: ", message);
   const auto datagramm = msg::init<msg::incoming_datagramm_t>(message.toStdString());
-  helper::log("read: ", datagramm.data);
 
   if(datagramm.ser_num != ++received_serial_num)
   {

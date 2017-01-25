@@ -13,7 +13,6 @@ SOURCES += cpp/main.cpp \
            cpp/chess.cpp \
            cpp/handle_message.cpp \
            cpp/desk.cpp \
-           cpp/messages.cpp \
            cpp/server.cpp \
            cpp/client.cpp \
 
