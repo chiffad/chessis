@@ -181,7 +181,7 @@ std::string client_t::impl_t::pull_for_server()
 
   const auto& _1 = messages_for_server.front();
 
-  if(msg::is_equal_types<msg::message_received_t>(_1.message))
+  if(!msg::is_equal_types<msg::message_received_t>(_1.message))
     { begin_wait_receive(_1.message); }
 
   messages_for_server.erase(messages_for_server.begin());
