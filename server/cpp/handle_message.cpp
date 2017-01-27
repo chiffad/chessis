@@ -51,16 +51,14 @@ template<>
 void handle_message_t::handle<opponent_inf_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
   sr::helper::log("tactic for opponent_inf_t ", message);
-  auto desk = get_desk(client);
-  if(desk == desks.end())
+  auto opp = get_opponent(client);
+  if(opp == clients.end())
   {
-    sr::helper::log("desk == desk.end()"); 
+    sr::helper::log("opp == clients.end()");
     client->push_for_send(prepare_for_send(inf_request_t("No opponent: no game in progress!")));
   }
   else
-  {
-    client->push_for_send(get_person_inf(*get_opponent(client)));
-  }
+    { client->push_for_send(get_person_inf(*opp)); }
 }
 
 template<>
@@ -74,8 +72,9 @@ template<>
 void handle_message_t::handle<client_lost_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
   sr::helper::log("tactic for client_lost_t ", message);
-  
-  (*get_opponent(client))->push_for_send(prepare_for_send(opponent_lost_t()));
+  auto opp = get_opponent(client);
+  if(opp != clients.end())
+    { (*opp)->push_for_send(prepare_for_send(opponent_lost_t())); }
 }
 
 template<>
@@ -152,6 +151,10 @@ std::vector<std::shared_ptr<logic::desk_t>>::iterator handle_message_t::get_desk
 
 std::vector<std::shared_ptr<sr::client_t>>::iterator handle_message_t::get_opponent(const std::shared_ptr<sr::client_t>& client)
 {
-  return std::find(clients.begin(), clients.end(), (*get_desk(client))->get_opponent(client).lock());
+  const auto d = get_desk(client);
+  if(d == desks.end())
+    { return clients.end(); }//throw std::logic_error("In handle_message_t::get_opponent: No desk found!"); }
+
+  return std::find(clients.begin(), clients.end(), (*d)->get_opponent(client).lock());
 }
 

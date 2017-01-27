@@ -154,8 +154,8 @@ namespace msg
   
   typedef boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t,
                              my_inf_t, get_login_t, login_t, incorrect_log_t, move_t, back_move_t, go_to_history_t,
-                             new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t,
-                             game_inf_t, incoming_datagramm_t, some_datagramm_t>
+                             game_inf_t, new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t,
+                             incoming_datagramm_t, some_datagramm_t>
            message_types;
 
   template<typename m_type>
@@ -179,7 +179,7 @@ namespace msg
   struct_t init(const std::string& str)
   {
     some_datagramm_t _1;
-    try
+    try//need update!
       { update_struct(_1, str); }
 
     catch(const boost::archive::archive_exception& e)

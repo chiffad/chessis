@@ -53,14 +53,14 @@ int main() try
               default:
                 sr::helper::throw_except("Unknown message type!: ", type);
             }
-            
+
             handler.board_updated(c);
           }
         }
       }
     }
   }
-  
+
   return 0;
 }
 

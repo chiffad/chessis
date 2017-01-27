@@ -272,7 +272,7 @@ void client_t::impl_t::is_message_received()
   {
     add_for_server(last_send_message, true);
 
-    if(msg::is_equal_types<msg::is_client_lost_t>(last_send_message) || num_of_restarts == 3)
+    if(msg::is_equal_types<msg::is_client_lost_t>(last_send_message) && num_of_restarts == 3)
       { messages_for_logic.push_back(msg::prepare_for_send(msg::client_lost_t())); }
 
     ++num_of_restarts;
@@ -300,7 +300,7 @@ void client_t::impl_t::start_response_timer()
   response_timer.cancel();
   response_timer.expires_from_now(boost::posix_time::milliseconds(1500));
   response_timer.async_wait( [&](const boost::system::error_code& error)
-  { if(!error){ is_message_received(); } helper::log(">>>>response_timer<<<<", (error ? " error!" : ""));});
+  { helper::log(">>>>response_timer<<<<", (error ? " error!" : "")); if(!error){ is_message_received(); } });
   //response_timer.async_wait([&](auto /*e*/){sr::log(">>>>response_timer<<<<");});
 }
 
