@@ -59,7 +59,9 @@ public:
   void set_check_mate();
   void set_move_color(const int move_num);
   void set_board_mask(const QString& mask);
-  void set_connect_status(const int status);
+  void set_connected_status();
+  void set_disconnected_status();
+  void set_opponent_disconnected_status();
   bool is_message_appear() const;
   const QString pull();
   void set_moves_history(const QString& history);

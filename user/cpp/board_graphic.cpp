@@ -209,8 +209,8 @@ void board_graphic_t::update_hilight(const int move_num, const QString& history)
 
 void board_graphic_t::get_login(const QString& error_mess)
 {
-//  set_login("asdasd" + (error_mess.isEmpty() ? QString() : QString("111111111111111")));
-  emit enter_login(error_mess);
+  set_login("asdasd" + (error_mess.isEmpty() ? QString() : QString("111111111111111")));
+//  emit enter_login(error_mess);
 }
 
 void board_graphic_t::redraw_board()
@@ -281,24 +281,24 @@ void board_graphic_t::read_moves_from_file(const QString& path)
   add_to_messages_for_server(msg::prepare_for_send(msg::move_t(data_from_file)));
 }
 
-void board_graphic_t::set_connect_status(const int status)
+void board_graphic_t::set_connected_status()
 {
-  switch(status)
+  if(_udp_connection_status == "Disconnected")
   {
-    case msg::id<msg::server_here_t>():
-      if(_udp_connection_status == "Disconnected")
-        { _udp_connection_status = "Connect"; }
-      break;
-    case msg::id<msg::server_lost_t>():
-      _udp_connection_status = "Disconnected";
-      break;
-    case msg::id<msg::opponent_lost_t>():
-      _udp_connection_status = "Opponent disconnected";
-      break;
-    default:
-      cl::helper::log("Warning! in set_connect_status: Unknown status");
-      return;
+    _udp_connection_status = "Connect";
+    emit udp_connection_status_changed();
   }
+}
+
+void board_graphic_t::set_disconnected_status()
+{
+  _udp_connection_status = "Disconnected";
+  emit udp_connection_status_changed();
+}
+
+void board_graphic_t::set_opponent_disconnected_status()
+{
+  _udp_connection_status = "Opponent disconnected";
   emit udp_connection_status_changed();
 }
 
