@@ -28,7 +28,7 @@ void process(graphic::board_graphic_t& bg, const std::string& message, type_2_ty
   cl::helper::log("msg::game_inf_t");
   auto game_inf = msg::init<msg::game_inf_t>(message);
 
-  bg.set_connected_status();
+  bg.set_connect_status(msg::id<msg::server_here_t>());
   bg.set_board_mask(QString::fromStdString(game_inf.board_mask));
   bg.set_move_color(game_inf.move_num);
   bg.set_moves_history(QString::fromStdString(game_inf.moves_history));
@@ -57,21 +57,21 @@ template<>
 void process(graphic::board_graphic_t& bg, const std::string& /*message*/, type_2_type<msg::server_lost_t>)
 {
   cl::helper::log("type == msg::server_lost_t");
-  bg.set_disconnected_status();
+  bg.set_connect_status(msg::id<msg::server_lost_t>());
 }
 
 template<>
 void process(graphic::board_graphic_t& bg, const std::string& /*message*/, type_2_type<msg::server_here_t>)
 {
   cl::helper::log("type == msg::server_here_t");
-  bg.set_connected_status();
+  bg.set_connect_status(msg::id<msg::server_here_t>());
 }
 
 template<>
 void process(graphic::board_graphic_t& bg, const std::string& /*message*/, type_2_type<msg::opponent_lost_t>)
 {
   cl::helper::log("type == msg::opponent_lost_t");
-  bg.set_opponent_disconnected_status();
+  bg.set_connect_status(msg::id<msg::opponent_lost_t>());
 }
 
 } // namespace handle
