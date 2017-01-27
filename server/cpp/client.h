@@ -22,8 +22,9 @@ public:
   std::string pull_for_logic();
   boost::asio::ip::udp::endpoint get_address() const;
 
-  void set_login(const std::string& log);
+  void set_login_pwd(const std::string& log, const std::string& pwd);
   std::string get_login() const;
+  std::string get_pwd() const;
   void set_rating(const int rating);
   int get_rating() const;
 

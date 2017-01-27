@@ -28,8 +28,12 @@ namespace msg
 
   struct login_t
   {
+    login_t() = default;
+    login_t(const std::string& log, const std::string& password) : login(log), pwd(password)
+    {}
+
     std::string login;
-//    std::string pwd;
+    std::string pwd;
   };
 
   struct move_t
@@ -118,7 +122,7 @@ namespace msg
   void serialize(Archive& ar, login_t& _1, const unsigned /*version*/)
   {
     ar & _1.login;
-//    ar & _1.pwd;
+    ar & _1.pwd;
   }
   
   template<typename Archive>

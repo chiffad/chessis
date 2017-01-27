@@ -46,9 +46,9 @@ Window
     anchors.centerIn: parent
     z: _root.eNTER_LOGIN_Z
 
-    onLogin_entered:
+    onData_entered:
     {
-      if(login.length && FigureModel.set_login(login))
+      if(login.length && pwd.length && FigureModel.set_login(login, pwd))
       {
         _error_visible = false
         _login_input.visible = false
@@ -57,7 +57,7 @@ Window
       else
       {
         _error_visible = true
-        _error_text = "Wrong login!"
+        _error_text = "Wrong login/pwd!"
       }
     }
   }
@@ -73,7 +73,7 @@ Window
       _login_input._error_text = error_text
     }
   }
-
+    
   MenuLayout
   {
     id: _menu_layout

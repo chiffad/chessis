@@ -28,8 +28,12 @@ namespace msg
 
   struct login_t
   {
+    login_t() = default;
+    login_t(const std::string& log, const std::string& password) : login(log), pwd(password)
+    {}
+
     std::string login;
-//    std::string pwd;
+    std::string pwd;
   };
 
   struct move_t
@@ -118,7 +122,7 @@ namespace msg
   void serialize(Archive& ar, login_t& _1, const unsigned /*version*/)
   {
     ar & _1.login;
-//    ar & _1.pwd;
+    ar & _1.pwd;
   }
   
   template<typename Archive>
@@ -154,8 +158,8 @@ namespace msg
   
   typedef boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t,
                              my_inf_t, get_login_t, login_t, incorrect_log_t, move_t, back_move_t, go_to_history_t,
-                             new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t,
-                             game_inf_t, incoming_datagramm_t, some_datagramm_t>
+                             game_inf_t, new_game_t, inf_request_t, server_lost_t, server_here_t, client_lost_t, opponent_lost_t,
+                             incoming_datagramm_t, some_datagramm_t>
            message_types;
 
   template<typename m_type>

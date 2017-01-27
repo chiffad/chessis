@@ -302,17 +302,21 @@ void board_graphic_t::set_connect_status(const int status)
   emit udp_connection_status_changed();
 }
 
-bool board_graphic_t::set_login(const QString& login)
+bool board_graphic_t::set_login(const QString& login, const QString& pwd)
 {
   for(auto i : login)
   {
     if(!i.isLetterOrNumber())
       { return false; }
   }
+  
+  for(auto i : pwd)
+  {
+    if(!i.isLetterOrNumber())
+      { return false; }
+  }
 
-  msg::login_t l;
-  l.login = login.toStdString();
-  add_to_messages_for_server(msg::prepare_for_send(l));
+  add_to_messages_for_server(msg::prepare_for_send(msg::login_t(login.toStdString(), pwd.toStdString())));
   return true;
 }
 

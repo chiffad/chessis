@@ -22,8 +22,9 @@ struct client_t::impl_t
   std::string pull_for_logic();
   endpoint_t get_address() const;
 
-  void set_login(const std::string& log);
+  void set_login_pwd(const std::string& log, const std::string& pwd);
   std::string get_login() const;
+  std::string get_pwd() const;
   void set_rating(const int rating);
   int get_rating() const;
 
@@ -51,6 +52,7 @@ struct client_t::impl_t
   std::string last_send_message;
 
   std::string login;
+  std::string pwd;
   int elo = 1200;
 
   int received_serial_num;
@@ -106,14 +108,19 @@ endpoint_t client_t::get_address() const
   return impl->get_address();
 }
 
-void client_t::set_login(const std::string& log)
+void client_t::set_login_pwd(const std::string& log, const std::string& pwd)
 {
-  impl->set_login(log);
+  impl->set_login_pwd(log, pwd);
 }
 
 std::string client_t::get_login() const
 {
   return impl->get_login();
+}
+
+std::string client_t::get_pwd() const
+{
+  return impl->get_pwd();
 }
 
 void client_t::set_rating(const int rating)
@@ -210,14 +217,20 @@ endpoint_t client_t::impl_t::get_address() const
   return address;
 }
 
-void client_t::impl_t::set_login(const std::string& log)
+void client_t::impl_t::set_login_pwd(const std::string& log, const std::string& password)
 {
   login = log;
+  pwd = password;
 }
 
 std::string client_t::impl_t::get_login() const
 {
   return login;
+}
+
+std::string client_t::impl_t::get_pwd() const
+{
+  return pwd;
 }
 
 void client_t::impl_t::set_rating(const int rating)

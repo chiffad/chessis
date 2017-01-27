@@ -8,7 +8,7 @@ Item
 
   property alias _error_text : error_text.text
   property alias _error_visible : error_text.visible
-  signal login_entered(string login)
+  signal data_entered(string login, string pwd)
 
   height: parent.height/5
   width: parent.width/2
@@ -28,9 +28,12 @@ Item
 
     Rectangle
     {
-      id: input_rect
+      id: login_rect
 
-      anchors.centerIn: parent
+      anchors.top: parent.top
+      anchors.topMargin: parent.height / 5
+      anchors.horizontalCenter: parent.horizontalCenter
+
       height: parent.height / 5
       width: parent.width - (parent.width / 10)
 
@@ -41,7 +44,7 @@ Item
 
       TextInput
       {
-        id: _text_input
+        id: login_input
 
         visible: parent.visible
         focus: visible
@@ -62,8 +65,59 @@ Item
 
         onAccepted:
         {
-          _root.login_entered(_text_input.text);
-          text = ""
+          focus = false;
+          pwd_rect.login = login_input.text;
+          pwd_input.focus = true;
+        }
+      }
+    }
+    
+    Rectangle
+    {
+      id: pwd_rect
+
+      property string login
+      
+      anchors.top: login_rect.bottom
+      anchors.topMargin: parent.height / 5
+      anchors.horizontalCenter: parent.horizontalCenter
+
+      height: parent.height / 5
+      width: parent.width - (parent.width / 10)
+
+      border.color: "black"
+      border.width: 1
+      radius: 3
+      color: "white"
+
+      TextInput
+      {
+        id: pwd_input
+
+        visible: parent.visible
+        focus: false
+        wrapMode: TextInput.Wrap
+        color: "black"
+
+        font.pixelSize: parent.height - parent.height/3
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 2
+        anchors.rightMargin: 2
+        anchors.bottomMargin: 2
+        maximumLength: 20
+
+        clip: true
+
+        onAccepted:
+        {
+          _root.data_entered(pwd_rect.login, pwd_input.text);
+          focus = false
+          login_input.focus = true
+          text = "";
+          login_input.text = "";
         }
       }
     }

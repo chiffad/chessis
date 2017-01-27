@@ -25,11 +25,11 @@ void handle_message_t::handle<login_t>(const std::string& message, std::shared_p
   auto login = init<login_t>(message);
 
   if(clients.end() != std::find_if(clients.begin(), clients.end(),
-                                   [&login](const auto& i){ return i->get_login() == login.login; }))
+                                   [&login](const auto& i){ return i->get_login() == login.login && i->get_pwd() == login.pwd; }))
     { client->push_for_send(prepare_for_send(incorrect_log_t())); }
   else
   {
-    client->set_login(login.login);
+    client->set_login_pwd(login.login, login.pwd);
     for(const auto c2 : clients)
     {
       if(c2 == client)
