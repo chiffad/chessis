@@ -115,7 +115,7 @@ Item
         {
           _root.data_entered(pwd_rect.login, pwd_input.text);
           focus = false
-          login_input.focus = true
+          login_input.focus = _root.visible
           text = "";
           login_input.text = "";
         }
