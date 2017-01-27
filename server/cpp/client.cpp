@@ -142,22 +142,28 @@ void client_t::impl_t::push_from_server(const std::string& m)
 
   ++received_serial_num;
   start_connection_timer();
-
+  const auto t = msg::init<msg::some_datagramm_t>(datagramm.data).type;
+  
+  if(t != msg::id<msg::message_received_t>())
+    { add_for_server(msg::prepare_for_send(msg::message_received_t())); }
+  
   switch(msg::init<msg::some_datagramm_t>(datagramm.data).type)
   {
     case msg::id<msg::message_received_t>():
+      helper::log("msg::message_received_t");
       is_received = true;
-      return;
+      break;
     case msg::id<msg::is_server_lost_t>():
+      helper::log("msg::is_server_lost_t");
       break;
     case msg::id<msg::hello_server_t>():
+      helper::log("msg::hello_server_t");
       add_for_server(msg::prepare_for_send(msg::get_login_t()));
       break;
     default:
+      helper::log("push_from_server: default");
       messages_for_logic.push_back(datagramm.data);
   }
-  
-  add_for_server(msg::prepare_for_send(msg::message_received_t()));
 }
 
 void client_t::impl_t::push_for_send(const std::string& m)
@@ -179,7 +185,7 @@ std::string client_t::impl_t::pull_for_server()
 {
   helper::log("pull_for_server");
 
-  const auto& _1 = messages_for_server.front();
+  const auto _1 = messages_for_server.front();
 
   if(!msg::is_equal_types<msg::message_received_t>(_1.message))
     { begin_wait_receive(_1.message); }
@@ -246,10 +252,8 @@ void client_t::impl_t::add_for_server(const std::string& m, bool is_extra_messag
 {
   helper::log("add_for_server: ", m);
   auto _1 = server_mess_t(m, is_extra_message);
-  if(is_extra_message)
-    { messages_for_server.insert(messages_for_server.begin(), _1); }
-  else
-    { messages_for_server.push_back(_1); }
+  if(is_extra_message) { messages_for_server.insert(messages_for_server.begin(), _1); }
+  else { messages_for_server.push_back(_1); }
 }
 
 void client_t::impl_t::begin_wait_receive(const std::string& message)
