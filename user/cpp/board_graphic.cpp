@@ -292,8 +292,11 @@ void board_graphic_t::set_connected_status()
 
 void board_graphic_t::set_disconnected_status()
 {
-  _udp_connection_status = "Disconnected";
-  emit udp_connection_status_changed();
+  if(_udp_connection_status == "Disconnected")
+  {
+    _udp_connection_status = "Disconnected";
+    emit udp_connection_status_changed();
+  }
 }
 
 void board_graphic_t::set_opponent_disconnected_status()

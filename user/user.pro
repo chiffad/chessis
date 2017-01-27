@@ -20,6 +20,7 @@ HEADERS += cpp/board_graphic.h \
            cpp/coord.h \
            cpp/figure.h \
            cpp/helper.h \
+           cpp/handle_message.h \
 
 SOURCES += cpp/main.cpp\
            cpp/board_graphic.cpp \
