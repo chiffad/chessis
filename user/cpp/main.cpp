@@ -9,8 +9,6 @@
 #include "board_graphic.h"
 #include "client.h"
 #include "fb_obj.h"
-#include "messages.h"
-#include "helper.h"
 #include "handle_message.h"
 
 
