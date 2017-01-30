@@ -183,11 +183,7 @@ namespace msg
   struct_t init(const std::string& str)
   {
     some_datagramm_t _1;
-    try
-      { update_struct(_1, str); }
-
-    catch(const boost::archive::archive_exception& e)
-      { _1.data = str; }
+    update_struct(_1, str);
 
     if(id<struct_t>() == id<some_datagramm_t>())
       { _1.data = str; }

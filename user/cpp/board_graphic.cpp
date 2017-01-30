@@ -209,7 +209,7 @@ void board_graphic_t::update_hilight(const int move_num, const QString& history)
 
 void board_graphic_t::get_login(const QString& error_mess)
 {
-//  set_login("asdasd" + (error_mess.isEmpty() ? QString() : QString("111111111111111")));
+//  set_login("asdasd" + (error_mess.isEmpty() ? QString() : QString("111111111111111")), "asd23");
   emit enter_login(error_mess);
 }
 
