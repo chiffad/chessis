@@ -139,7 +139,7 @@ void handle_message_t::new_message(boost::asio::io_service& io_service, const bo
 }
 
 template<>
-void handle_message_t::do_something<boost::mpl::end<msg::message_types>::type>(const std::string& /*str*/, std::shared_ptr<sr::client_t>& /*client*/)
+void handle_message_t::process_mess<boost::mpl::end<msg::message_types>::type>(const std::string& /*str*/, std::shared_ptr<sr::client_t>& /*client*/)
 {
   sr::helper::log("no type found!!");
 }

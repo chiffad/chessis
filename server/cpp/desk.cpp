@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "client.h"
+
 
 using namespace logic;
 

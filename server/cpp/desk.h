@@ -5,7 +5,9 @@
 #include <string>
 
 #include "chess.h"
-#include "client.h"
+
+namespace sr
+{ class client_t; }
 
 
 namespace logic
