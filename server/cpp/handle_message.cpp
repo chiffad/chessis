@@ -18,7 +18,7 @@ std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c)
 }
 
 template<>
-void handle_message_t::handle<login_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
+void handle_message_t::handle_fn<login_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
   sr::helper::log("tactic for login_t ", message);
   
@@ -48,7 +48,7 @@ void handle_message_t::handle<login_t>(const std::string& message, std::shared_p
 }
   
 template<>
-void handle_message_t::handle<opponent_inf_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
+void handle_message_t::handle_fn<opponent_inf_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
   sr::helper::log("tactic for opponent_inf_t ", message);
   auto opp = get_opponent(client);
@@ -62,14 +62,14 @@ void handle_message_t::handle<opponent_inf_t>(const std::string& message, std::s
 }
 
 template<>
-void handle_message_t::handle<my_inf_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
+void handle_message_t::handle_fn<my_inf_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
   sr::helper::log("tactic for my_inf_t ", message);
   client->push_for_send(get_person_inf(client));
 }
 
 template<>
-void handle_message_t::handle<client_lost_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
+void handle_message_t::handle_fn<client_lost_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
   sr::helper::log("tactic for client_lost_t ", message);
   auto opp = get_opponent(client);
@@ -78,35 +78,39 @@ void handle_message_t::handle<client_lost_t>(const std::string& message, std::sh
 }
 
 template<>
-void handle_message_t::handle<move_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
+void handle_message_t::handle_fn<move_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
   sr::helper::log("tactic for move_t ", message);
   
   (*get_desk(client))->make_moves_from_str((init<move_t>(message)).data);
+  board_updated(client);
 }
 
 template<>
-void handle_message_t::handle<back_move_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
+void handle_message_t::handle_fn<back_move_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
   sr::helper::log("tactic for back_move_t ", message);
   
   (*get_desk(client))->back_move();
+  board_updated(client);
 }
 
 template<>
-void handle_message_t::handle<go_to_history_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
+void handle_message_t::handle_fn<go_to_history_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
   sr::helper::log("tactic for go_to_history_t ", message);
   
   (*get_desk(client))->go_to_history_index((init<go_to_history_t>(message)).index);
+  board_updated(client);
 }
 
 template<>
-void handle_message_t::handle<new_game_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
+void handle_message_t::handle_fn<new_game_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
   sr::helper::log("tactic for start_new_game_t ", message);
   
   (*get_desk(client))->start_new_game();
+  board_updated(client);
 }
 
 void handle_message_t::board_updated(std::shared_ptr<sr::client_t>& client)
@@ -132,6 +136,12 @@ void handle_message_t::new_message(boost::asio::io_service& io_service, const bo
     c = clients.rbegin();
   }
   (*c)->push_from_server(message);
+}
+
+template<>
+void handle_message_t::do_something<boost::mpl::end<msg::message_types>::type>(const std::string& /*str*/, std::shared_ptr<sr::client_t>& /*client*/)
+{
+  sr::helper::log("no type found!!");
 }
 
 std::vector<std::shared_ptr<sr::client_t>>::iterator handle_message_t::begin() noexcept

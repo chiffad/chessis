@@ -6,6 +6,7 @@
 #include <memory>
 #include <typeinfo>
 #include <boost/asio.hpp>
+#include <boost/mpl/begin_end.hpp>
 
 #include "client.h"
 #include "desk.h"
@@ -18,29 +19,43 @@ namespace sr
   {
   public:
     handle_message_t() = default;
-    template<typename T>
-    void handle(const std::string& str, std::shared_ptr<sr::client_t>& client)
-      { std::cout<<"For type "<< typeid(T).name()<<" tactic isn't defined!"<<str<<std::endl; }
-    void board_updated(std::shared_ptr<sr::client_t>& client);
+    #define handle(str, client) do_something<boost::mpl::begin<msg::message_types>::type>(str, client);
     void new_message(boost::asio::io_service& io_service, const boost::asio::ip::udp::endpoint& addr, const std::string& message);
-    
     std::vector<std::shared_ptr<sr::client_t>>::iterator begin() noexcept;
     std::vector<std::shared_ptr<sr::client_t>>::iterator end() noexcept;
-    
+
+    template<typename T>
+    void do_something(const std::string& str, std::shared_ptr<sr::client_t>& client)
+    {
+      try
+        { handle_fn<typename T::type>(str, client); }
+      catch(msg::my_archive_exception& e)
+        { do_something<typename boost::mpl::next<T>::type>(str, client); }
+    }
+
   public:
     handle_message_t(const handle_message_t&) = delete;
     handle_message_t& operator=(const handle_message_t&) = delete;
-    
-    
+
+
   private:
     std::vector<std::shared_ptr<logic::desk_t>>::iterator get_desk(const std::shared_ptr<sr::client_t>& client);
     std::vector<std::shared_ptr<sr::client_t>>::iterator get_opponent(const std::shared_ptr<sr::client_t>& client);
-    
+    void board_updated(std::shared_ptr<sr::client_t>& client);
+
+    template<typename T>
+    void handle_fn(const std::string& str, std::shared_ptr<sr::client_t>& /*client*/)
+      { std::cout<<"For type "<< typeid(T).name()<<" tactic isn't defined!"<<str<<std::endl; }
+
+
     std::vector<std::shared_ptr<sr::client_t>> clients;
     std::vector<std::shared_ptr<logic::desk_t>> desks;
   };
-  
-  #define handle_macro(struct_type)  template<> void handle_message_t::handle<struct_type>(const std::string& str, std::shared_ptr<sr::client_t>& client);
+
+  template<>
+  void handle_message_t::do_something<boost::mpl::end<msg::message_types>::type>(const std::string& /*str*/, std::shared_ptr<sr::client_t>& /*client*/);
+
+  #define handle_macro(struct_type)  template<> void handle_message_t::handle_fn<struct_type>(const std::string& str, std::shared_ptr<sr::client_t>& client);
   handle_macro(msg::login_t        );
   handle_macro(msg::opponent_inf_t );
   handle_macro(msg::my_inf_t       );
