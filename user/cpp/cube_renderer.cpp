@@ -134,7 +134,7 @@ void cube_renderer_t::impl_t::set_cube_updates(const QString& name, const int ti
 
 void cube_renderer_t::impl_t::load_correct_texture(const QString& name)
 {
-  const QString PATH_TO_IMG = "../res/img/";
+  const QString PATH_TO_IMG = ":/res/img/";
 
   QImage fase_im(PATH_TO_IMG + name + ".png");
   QImage side_im(PATH_TO_IMG + *name.begin() + ".png");

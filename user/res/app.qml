@@ -102,7 +102,7 @@ Window
     opacity: 0.3
     z: cHECK_MATE_IMG_Z
 
-    source: "img/checkMate.png"
+    source: "qrc:/img/checkMate.png"
 
     visible: FigureModel.is_check_mate
 

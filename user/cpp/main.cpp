@@ -14,6 +14,8 @@
 
 int main(int argc, char *argv[])
 {
+  QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+  
   qmlRegisterType<graphic::fb_obj_t>("CubeRendering", 1, 0, "Cube");
 
   QGuiApplication app(argc, argv);
@@ -21,7 +23,7 @@ int main(int argc, char *argv[])
   graphic::board_graphic_t board_graphic;
 
   engine.rootContext()->setContextProperty("FigureModel", &board_graphic);
-  engine.load(QUrl(QStringLiteral("../res/app.qml")));
+  engine.load(QUrl(QStringLiteral("qrc:/res/app.qml")));
 
   cl::client_t client;
   const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
