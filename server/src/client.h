@@ -1,13 +1,11 @@
 #ifndef __CLIENT_H__GOVLIYVFTYUVFTYFDIKVGLUIHL
 #define __CLIENT_H__GOVLIYVFTYUVFTYFDIKVGLUIHL
 
-#include <string>
-#include <memory>
 #include <boost/asio.hpp>
+#include <memory>
+#include <string>
 
-
-namespace sr
-{
+namespace sr {
 
 class client_t
 {
@@ -32,13 +30,11 @@ public:
   client_t(const client_t&) = delete;
   client_t& operator=(const client_t&) = delete;
 
-
 private:
   struct impl_t;
   std::unique_ptr<impl_t> impl;
 };
 
-} // namespace inet
+} // namespace sr
 
 #endif // __CLIENT_H__GOVLIYVFTYUVFTYFDIKVGLUIHL
-

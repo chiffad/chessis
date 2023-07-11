@@ -6,7 +6,6 @@
 
 #include "helper.h"
 
-
 using namespace sr;
 typedef boost::asio::io_service io_service_t;
 typedef boost::asio::ip::udp::endpoint endpoint_t;
@@ -29,18 +28,16 @@ struct server_t::impl_t
 };
 
 server_t::datagram_t::datagram_t(const endpoint_t& addr, const std::string& mess)
-    : address(addr), message(mess)
-{
-}
+  : address(addr)
+  , message(mess)
+{}
 
 server_t::server_t(io_service_t& io_serv)
-    : impl(std::make_unique<impl_t>(io_serv))
-{
-}
+  : impl(std::make_unique<impl_t>(io_serv))
+{}
 
 server_t::~server_t()
-{
-}
+{}
 
 void server_t::send(const std::string& message, const endpoint_t& destination)
 {
@@ -53,21 +50,31 @@ std::vector<server_t::datagram_t> server_t::pull()
 }
 
 server_t::impl_t::impl_t(io_service_t& io_serv)
-    : socket(io_serv)
+  : socket(io_serv)
 {
-  enum { FIRST_PORT = 49152, LAST_PORT = 49500 };
+  enum
+  {
+    FIRST_PORT = 49152,
+    LAST_PORT = 49500
+  };
 
-  while(!socket.is_open())
-    { socket.open(boost::asio::ip::udp::v4()); }
-  for(int i = 0; i + FIRST_PORT < LAST_PORT; ++i)
+  while (!socket.is_open())
+  {
+    socket.open(boost::asio::ip::udp::v4());
+  }
+  for (int i = 0; i + FIRST_PORT < LAST_PORT; ++i)
   {
     try
-      { socket.bind(endpoint_t(boost::asio::ip::address::from_string("127.0.0.1"), FIRST_PORT + i)); }
-    catch(const boost::system::system_error& ex)
+    {
+      socket.bind(endpoint_t(boost::asio::ip::address::from_string("127.0.0.1"), FIRST_PORT + i));
+    }
+    catch (const boost::system::system_error& ex)
     {
       helper::log("can not bind to: ", FIRST_PORT + i);
-      if(i + FIRST_PORT == LAST_PORT)
-        { i = -1; }
+      if (i + FIRST_PORT == LAST_PORT)
+      {
+        i = -1;
+      }
 
       continue;
     }
@@ -85,12 +92,12 @@ server_t::impl_t::~impl_t()
 void server_t::impl_t::send(const std::string& message, const endpoint_t& destination)
 {
   helper::log("send: ", message + " ;to: " + destination.address().to_string());
-  socket.async_send_to(boost::asio::buffer(message), destination, [](auto /*_1*/, auto /*_2*/){});
+  socket.async_send_to(boost::asio::buffer(message), destination, [](auto /*_1*/, auto /*_2*/) {});
 }
 
 void server_t::impl_t::handle_receive(const error_code_t& e, const size_t readed_size)
 {
-  if(!e || e == boost::asio::error::message_size)
+  if (!e || e == boost::asio::error::message_size)
   {
     std::string mess(incoming_message.begin(), incoming_message.begin() + readed_size);
     helper::log("read: ", mess);
@@ -99,15 +106,17 @@ void server_t::impl_t::handle_receive(const error_code_t& e, const size_t readed
     start_receive();
   }
   else
-  { helper::log("hendle error!!");}
+  {
+    helper::log("hendle error!!");
+  }
 }
 
 void server_t::impl_t::start_receive()
 {
   helper::log("start_receive()");
-  socket.async_receive_from(boost::asio::buffer(incoming_message), last_mess_sender,
-                            boost::bind(&server_t::impl_t::handle_receive, this,
-                                         boost::asio::placeholders::error,  boost::asio::placeholders::bytes_transferred));
+  socket.async_receive_from(
+    boost::asio::buffer(incoming_message), last_mess_sender,
+    boost::bind(&server_t::impl_t::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
 
 std::vector<server_t::datagram_t> server_t::impl_t::pull()
@@ -117,4 +126,3 @@ std::vector<server_t::datagram_t> server_t::impl_t::pull()
 
   return _1;
 }
-

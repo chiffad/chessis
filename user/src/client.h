@@ -4,9 +4,7 @@
 #include <memory>
 #include <string>
 
-
-namespace cl
-{
+namespace cl {
 
 class client_t
 {
@@ -21,13 +19,11 @@ public:
   client_t(const client_t&) = delete;
   client_t& operator=(const client_t&) = delete;
 
-
 private:
   struct impl_t;
   std::unique_ptr<impl_t> impl;
 };
 
-} // namespace inet
+} // namespace cl
 
 #endif // __MY_CLIENT_H__GOVLIYVFTYUVFTYFDIKVGLUIHL
-

@@ -1,22 +1,20 @@
 #ifndef __MY_BOARD_GRAPHIC_H__SDAWBNUIBMGYUIVGFKEYUVFYUFAPIECHARTH
 #define __MY_BOARD_GRAPHIC_H__SDAWBNUIBMGYUIVGFKEYUVFYUFAPIECHARTH
 
-#include <QtQuick/QQuickPaintedItem>
 #include <QAbstractListModel>
-#include <QString>
-#include <vector>
-#include <QVariant>
 #include <QHash>
 #include <QModelIndex>
+#include <QString>
 #include <QStringList>
+#include <QVariant>
+#include <QtQuick/QQuickPaintedItem>
+#include <vector>
 
-#include "figure.h"
 #include "coord.h"
+#include "figure.h"
 #include "messages.h"
 
-
-namespace graphic
-{
+namespace graphic {
 
 class board_graphic_t : public QAbstractListModel
 {
@@ -32,8 +30,8 @@ public:
   board_graphic_t();
   ~board_graphic_t() override;
 
-  int rowCount(const QModelIndex &parent = QModelIndex()) const;
-  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+  int rowCount(const QModelIndex& parent = QModelIndex()) const;
+  QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 
 protected:
   QHash<int, QByteArray> roleNames() const;
@@ -51,9 +49,8 @@ public:
 
   QString get_udp_connection_status() const;
 
-  Q_INVOKABLE void run_command(const QString &message,  const int x1 = 0, const int y1 = 0,
-                               const int x2 = 0, const int y2 = 0);
-  Q_INVOKABLE void path_to_file(QString &path, bool is_moves_from_file);
+  Q_INVOKABLE void run_command(const QString& message, const int x1 = 0, const int y1 = 0, const int x2 = 0, const int y2 = 0);
+  Q_INVOKABLE void path_to_file(QString& path, bool is_moves_from_file);
   Q_INVOKABLE bool set_login(const QString& login, const QString& pwd);
 
 public:
@@ -81,21 +78,27 @@ public:
   board_graphic_t(const board_graphic_t&) = delete;
   board_graphic_t& operator=(const board_graphic_t&) = delete;
 
-
 private:
-  enum FigureRoles {
-      NameRole = Qt::UserRole + 3,
-      XRole = Qt::UserRole + 2,
-      YRole = Qt::UserRole + 1,
-      VisibleRole = Qt::UserRole
+  enum FigureRoles
+  {
+    NameRole = Qt::UserRole + 3,
+    XRole = Qt::UserRole + 2,
+    YRole = Qt::UserRole + 1,
+    VisibleRole = Qt::UserRole
   };
-  enum { CELL_NUM = 8, CELL_SIZE_X = 56, CELL_SIZE_Y = 36, a_LETTER = 'a'};
+  enum
+  {
+    CELL_NUM = 8,
+    CELL_SIZE_X = 56,
+    CELL_SIZE_Y = 36,
+    a_LETTER = 'a'
+  };
   const QString MOVE_COLOR_W = "img/w_k.png";
   const QString MOVE_COLOR_B = "img/b_K.png";
   const char FREE_SPACE = ' ';
 
 private:
-  void addFigure(const figure_t &figure);
+  void addFigure(const figure_t& figure);
   void update_coordinates();
   Coord get_field_coord(const int i) const;
   void write_moves_to_file(const QString& path);

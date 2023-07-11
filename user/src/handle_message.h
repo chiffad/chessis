@@ -1,37 +1,45 @@
 #include <boost/mpl/begin_end.hpp>
 #include <typeinfo>
 
-#include "messages.h"
 #include "board_graphic.h"
 #include "helper.h"
+#include "messages.h"
 
-
-namespace handler
-{
+namespace handler {
 
 template<typename T>
 struct type_2_type
-{ typedef T original_t; };
+{
+  typedef T original_t;
+};
 
 template<typename T>
 void process_mess(const std::string& str, graphic::board_graphic_t& bg, type_2_type<T>)
 {
-  if(msg::is_equal_types<typename T::type>(str))
-    { process(bg, str, type_2_type<typename T::type>()); }
+  if (msg::is_equal_types<typename T::type>(str))
+  {
+    process(bg, str, type_2_type<typename T::type>());
+  }
   else
-    { process_mess<typename boost::mpl::next<T>::type>(str, bg, type_2_type<typename boost::mpl::next<T>::type>()); }
+  {
+    process_mess<typename boost::mpl::next<T>::type>(str, bg, type_2_type<typename boost::mpl::next<T>::type>());
+  }
 }
 
 template<>
 void process_mess(const std::string& /*str*/, graphic::board_graphic_t& /*bg*/, type_2_type<typename boost::mpl::end<msg::message_types>::type>)
-{ cl::helper::log("no type found!!"); }
+{
+  cl::helper::log("no type found!!");
+}
 
- #define handle(str, graphic) process_mess<boost::mpl::begin<msg::message_types>::type>(str, graphic, handler::type_2_type<typename boost::mpl::begin<msg::message_types>::type>());
-
+#define handle(str, graphic)                                                                                                                                   \
+  process_mess<boost::mpl::begin<msg::message_types>::type>(str, graphic, handler::type_2_type<typename boost::mpl::begin<msg::message_types>::type>());
 
 template<typename struct_t>
 void process(graphic::board_graphic_t& /*bg*/, const std::string& /*message*/, type_2_type<struct_t>)
-{  cl::helper::log("handle::process: No tactic for process ", typeid(struct_t).name()); }
+{
+  cl::helper::log("handle::process: No tactic for process ", typeid(struct_t).name());
+}
 
 template<>
 void process(graphic::board_graphic_t& bg, const std::string& message, type_2_type<msg::inf_request_t>)
@@ -55,8 +63,10 @@ void process(graphic::board_graphic_t& bg, const std::string& message, type_2_ty
   bg.update_hilight(game_inf.move_num, QString::fromStdString(game_inf.moves_history));
   bg.redraw_board();
 
-  if(game_inf.is_mate)
-    { bg.set_check_mate(); }
+  if (game_inf.is_mate)
+  {
+    bg.set_check_mate();
+  }
 }
 
 template<>
@@ -94,4 +104,4 @@ void process(graphic::board_graphic_t& bg, const std::string& /*message*/, type_
   bg.set_connect_status(msg::id<msg::opponent_lost_t>());
 }
 
-} // namespace handle
+} // namespace handler

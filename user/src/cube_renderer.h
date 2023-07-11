@@ -4,9 +4,7 @@
 #include <QString>
 #include <memory>
 
-
-namespace graphic
-{
+namespace graphic {
 
 class cube_renderer_t
 {
@@ -21,7 +19,6 @@ public:
 public:
   cube_renderer_t(const cube_renderer_t&) = delete;
   cube_renderer_t& operator=(const cube_renderer_t&) = delete;
-
 
 private:
   struct impl_t;

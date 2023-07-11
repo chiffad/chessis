@@ -3,9 +3,7 @@
 
 #include <QtQuick/QQuickFramebufferObject>
 
-
-namespace graphic
-{
+namespace graphic {
 
 class fb_obj_t : public QQuickFramebufferObject
 {
@@ -33,13 +31,12 @@ signals:
   void tilt_angle_changed();
   void cube_scale_changed();
 
-
 private:
   QString fig_type;
   int tilt_angle;
   float cube_scale;
 };
 
-} //namespace graphic
+} // namespace graphic
 
 #endif // __MY_FB_OBJ_H__VGYUKYFIUYVULBVUYFKLBYUFUYBYUKF

@@ -1,11 +1,11 @@
 #include "helper.h"
 
-std::ostream& operator <<(std::ostream& os, const QString& str)
+std::ostream& operator<<(std::ostream& os, const QString& str)
 {
-  return os<<str.toStdString();
+  return os << str.toStdString();
 }
 
-std::ostream& operator <<(std::ostream& os, const QByteArray& str)
+std::ostream& operator<<(std::ostream& os, const QByteArray& str)
 {
-  return os<<str.toStdString();
+  return os << str.toStdString();
 }
