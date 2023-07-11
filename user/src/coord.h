@@ -1,5 +1,4 @@
-#ifndef __MY_COORD_H__BHJVCFCFGVAGKSBDVLNWWADVGVAUSKH
-#define __MY_COORD_H__BHJVCFCFGVAGKSBDVLNWWADVGVAUSKH
+#pragma once
 
 namespace graphic {
 
@@ -17,5 +16,3 @@ struct Coord
 };
 
 } // namespace graphic
-
-#endif //__MY_COORD_H__BHJVCFCFGVAGKSBDVLNWWADVGVAUSKH

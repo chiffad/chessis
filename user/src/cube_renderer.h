@@ -1,5 +1,4 @@
-#ifndef __MY_CUBE_RENDERER_H__HUIOGTYFYIKUBHLNJMOKISUIDGATYWVDOLA
-#define __MY_CUBE_RENDERER_H__HUIOGTYFYIKUBHLNJMOKISUIDGATYWVDOLA
+#pragma once
 
 #include <QString>
 #include <memory>
@@ -26,5 +25,3 @@ private:
 };
 
 } // namespace graphic
-
-#endif //__MY_CUBE_RENDERER_H__HUIOGTYFYIKUBHLNJMOKISUIDGATYWVDOLA

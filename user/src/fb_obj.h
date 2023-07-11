@@ -1,5 +1,4 @@
-#ifndef __MY_FB_OBJ_H__VGYUKYFIUYVULBVUYFKLBYUFUYBYUKF
-#define __MY_FB_OBJ_H__VGYUKYFIUYVULBVUYFKLBYUFUYBYUKF
+#pragma once
 
 #include <QtQuick/QQuickFramebufferObject>
 
@@ -38,5 +37,3 @@ private:
 };
 
 } // namespace graphic
-
-#endif // __MY_FB_OBJ_H__VGYUKYFIUYVULBVUYFKLBYUFUYBYUKF

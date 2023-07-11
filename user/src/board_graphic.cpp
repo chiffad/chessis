@@ -15,9 +15,9 @@ namespace graphic {
 
 board_graphic_t::board_graphic_t()
   : QAbstractListModel(nullptr)
-  , _move_color(MOVE_COLOR_W)
-  , _udp_connection_status("Disconnected")
-  , _is_check_mate(false)
+  , move_color_(MOVE_COLOR_W)
+  , udp_connection_status_("Disconnected")
+  , check_mate_(false)
 {
   enum
   {
@@ -128,13 +128,13 @@ void board_graphic_t::update_coordinates()
 {
   const auto FREE_FIELD = '.';
 
-  auto f_it = _field.begin();
-  for (auto& fig_mod : _figures_model)
+  auto f_it = field_.begin();
+  for (auto& fig_mod : figures_model_)
   {
-    f_it = std::find_if(f_it, _field.end(), [&FREE_FIELD](auto const& i) { return i != FREE_FIELD; });
-    if (f_it != _field.end())
+    f_it = std::find_if(f_it, field_.end(), [&FREE_FIELD](auto const& i) { return i != FREE_FIELD; });
+    if (f_it != field_.end())
     {
-      fig_mod.set_coord(get_field_coord(_field.indexOf(*f_it, (f_it - _field.begin()))));
+      fig_mod.set_coord(get_field_coord(field_.indexOf(*f_it, (f_it - field_.begin()))));
       fig_mod.set_name(QString(f_it->isLower() ? "w_" : "b_") + *f_it);
       fig_mod.set_visible(true);
       ++f_it;
@@ -156,15 +156,15 @@ void board_graphic_t::set_board_mask(const QString& mask)
     return;
   }
 
-  _field.clear();
-  _field = mask;
+  field_.clear();
+  field_ = mask;
 
   update_coordinates();
 }
 
 void board_graphic_t::set_moves_history(const QString& history)
 {
-  _str_moves_history.clear();
+  str_moves_history_.clear();
 
   const int NEED_SIMB_TO_MOVE = 4;
 
@@ -176,7 +176,7 @@ void board_graphic_t::set_moves_history(const QString& history)
     if (move.size() == NEED_SIMB_TO_MOVE)
     {
       move.insert(2, " - ");
-      _str_moves_history.append(move);
+      str_moves_history_.append(move);
       move.clear();
     }
   }
@@ -186,7 +186,7 @@ void board_graphic_t::set_moves_history(const QString& history)
 
 void board_graphic_t::set_move_color(const int move_num)
 {
-  _move_color = (move_num % 2 == 0) ? MOVE_COLOR_W : MOVE_COLOR_B;
+  move_color_ = (move_num % 2 == 0) ? MOVE_COLOR_W : MOVE_COLOR_B;
   emit move_turn_color_changed();
 }
 
@@ -197,7 +197,7 @@ const QString board_graphic_t::coord_to_str(const Coord& from, const Coord& to) 
 
 void board_graphic_t::add_to_messages_for_server(const std::string& msg)
 {
-  _messages_for_server.push_back(QString::fromStdString(msg));
+  messages_for_server_.push_back(QString::fromStdString(msg));
 }
 
 void board_graphic_t::update_hilight(const int move_num, const QString& history)
@@ -219,8 +219,8 @@ void board_graphic_t::update_hilight(const int move_num, const QString& history)
       c.x = (*(simb++)).unicode() - a_LETTER;
       c.y = CELL_NUM - (*(simb++)).digitValue();
       HILIGHT ind = (i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT;
-      _figures_model[ind].set_visible(true);
-      _figures_model[ind].set_coord(c);
+      figures_model_[ind].set_visible(true);
+      figures_model_[ind].set_coord(c);
     }
   }
 }
@@ -234,24 +234,24 @@ void board_graphic_t::get_login(const QString& error_mess)
 void board_graphic_t::redraw_board()
 {
   QModelIndex topLeft = index(0, 0);
-  QModelIndex bottomRight = index(_figures_model.size() - 1, 0);
+  QModelIndex bottomRight = index(figures_model_.size() - 1, 0);
   emit dataChanged(topLeft, bottomRight);
 }
 
 bool board_graphic_t::is_check_mate() const
 {
-  return _is_check_mate;
+  return check_mate_;
 }
 
 void board_graphic_t::set_check_mate()
 {
-  _is_check_mate = true;
+  check_mate_ = true;
   emit check_mate();
 }
 
 void board_graphic_t::add_to_command_history(const QString& str)
 {
-  _commands_history.append(str);
+  commands_history_.append(str);
   emit commands_hist_changed();
 }
 
@@ -281,7 +281,7 @@ void board_graphic_t::write_moves_to_file(const QString& path)
     cl::helper::log("Warning! in write_moves_to_file: Couldn't open file.");
     return;
   }
-  for (auto& s : _str_moves_history)
+  for (auto& s : str_moves_history_)
   {
     in_file << s.toStdString();
     in_file << FREE_SPACE;
@@ -308,13 +308,13 @@ void board_graphic_t::set_connect_status(const int status)
   switch (status)
   {
     case msg::id<msg::server_here_t>():
-      if (_udp_connection_status == "Disconnected")
+      if (udp_connection_status_ == "Disconnected")
       {
-        _udp_connection_status = "Connect";
+        udp_connection_status_ = "Connect";
       }
       break;
-    case msg::id<msg::server_lost_t>(): _udp_connection_status = "Disconnected"; break;
-    case msg::id<msg::opponent_lost_t>(): _udp_connection_status = "Opponent disconnected"; break;
+    case msg::id<msg::server_lost_t>(): udp_connection_status_ = "Disconnected"; break;
+    case msg::id<msg::opponent_lost_t>(): udp_connection_status_ = "Opponent disconnected"; break;
     default: cl::helper::log("Warning! in set_connect_status: Unknown status"); return;
   }
   emit udp_connection_status_changed();
@@ -344,62 +344,62 @@ bool board_graphic_t::set_login(const QString& login, const QString& pwd)
 
 bool board_graphic_t::is_message_appear() const
 {
-  return !_messages_for_server.empty();
+  return !messages_for_server_.empty();
 }
 
 const QString board_graphic_t::pull()
 {
-  QString command(_messages_for_server.front());
-  _messages_for_server.erase(_messages_for_server.begin());
+  QString command(messages_for_server_.front());
+  messages_for_server_.erase(messages_for_server_.begin());
   return command;
 }
 
 QStringList board_graphic_t::get_moves_history() const
 {
-  return _str_moves_history;
+  return str_moves_history_;
 }
 
 QStringList board_graphic_t::get_commands_hist() const
 {
-  return _commands_history;
+  return commands_history_;
 }
 
 int board_graphic_t::get_last_command_hist_ind() const
 {
-  return _commands_history.size() - 1;
+  return commands_history_.size() - 1;
 }
 
 QString board_graphic_t::get_move_turn_color() const
 {
-  return _move_color;
+  return move_color_;
 }
 
 QString board_graphic_t::get_udp_connection_status() const
 {
-  return _udp_connection_status;
+  return udp_connection_status_;
 }
 
 void board_graphic_t::addFigure(const figure_t& figure)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());
-  _figures_model << figure;
+  figures_model_ << figure;
   endInsertRows();
 }
 
 int board_graphic_t::rowCount(const QModelIndex& parent) const
 {
   Q_UNUSED(parent);
-  return _figures_model.count();
+  return figures_model_.count();
 }
 
 QVariant board_graphic_t::data(const QModelIndex& index, int role) const
 {
-  if (index.row() < 0 || index.row() >= _figures_model.count())
+  if (index.row() < 0 || index.row() >= figures_model_.count())
   {
     return QVariant();
   }
 
-  const figure_t& figure = _figures_model[index.row()];
+  const figure_t& figure = figures_model_[index.row()];
   if (role == NameRole)
   {
     return figure.name();

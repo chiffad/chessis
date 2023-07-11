@@ -1,5 +1,4 @@
-#ifndef __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
-#define __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
+#pragma once
 
 #include <QByteArray>
 #include <QString>
@@ -9,9 +8,9 @@
 #include <stdexcept>
 #include <string>
 
-namespace cl {
-namespace helper {
+namespace cl::helper {
 namespace detail {
+
 template<typename OS, typename T>
 void get1(OS& ostream, const T& _1)
 {
@@ -53,13 +52,10 @@ std::string get_str(const Args&... args)
   return detail::get(args...);
 }
 
-#define throw_exception(...) exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
+//#define throw_exception(...) ::cl::helper::exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
 #define log(...) log_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
 
-} // namespace helper
-} // namespace cl
+} // namespace cl::helper
 
 std::ostream& operator<<(std::ostream& os, const QString& str);
 std::ostream& operator<<(std::ostream& os, const QByteArray& str);
-
-#endif // __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__

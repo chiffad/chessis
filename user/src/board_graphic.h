@@ -1,5 +1,4 @@
-#ifndef __MY_BOARD_GRAPHIC_H__SDAWBNUIBMGYUIVGFKEYUVFYUFAPIECHARTH
-#define __MY_BOARD_GRAPHIC_H__SDAWBNUIBMGYUIVGFKEYUVFYUFAPIECHARTH
+#pragma once
 
 #include <QAbstractListModel>
 #include <QHash>
@@ -108,16 +107,14 @@ private:
   void add_to_messages_for_server(const std::string& msg);
 
 private:
-  QString _move_color;
-  QString _udp_connection_status;
-  bool _is_check_mate;
-  QStringList _str_moves_history;
-  QStringList _commands_history;
-  QList<figure_t> _figures_model;
-  std::vector<QString> _messages_for_server;
-  QString _field;
+  QString move_color_;
+  QString udp_connection_status_;
+  bool check_mate_;
+  QStringList str_moves_history_;
+  QStringList commands_history_;
+  QList<figure_t> figures_model_;
+  std::vector<QString> messages_for_server_;
+  QString field_;
 };
 
 } // namespace graphic
-
-#endif // __MY_BOARD_GRAPHIC_H__SDAWBNUIBMGYUIVGFKEYUVFYUFAPIECHARTH

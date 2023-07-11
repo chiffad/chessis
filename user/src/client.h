@@ -1,5 +1,4 @@
-#ifndef __MY_CLIENT_H__GOVLIYVFTYUVFTYFDIKVGLUIHL
-#define __MY_CLIENT_H__GOVLIYVFTYUVFTYFDIKVGLUIHL
+#pragma once
 
 #include <memory>
 #include <string>
@@ -25,5 +24,3 @@ private:
 };
 
 } // namespace cl
-
-#endif // __MY_CLIENT_H__GOVLIYVFTYUVFTYFDIKVGLUIHL
