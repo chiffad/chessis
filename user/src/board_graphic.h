@@ -21,9 +21,16 @@ namespace graphic
 class board_graphic_t : public QAbstractListModel
 {
   Q_OBJECT
+  Q_PROPERTY(QString get_move_turn_color READ get_move_turn_color NOTIFY move_turn_color_changed)
+  Q_PROPERTY(QStringList get_moves_history READ get_moves_history NOTIFY moves_history_changed)
+  Q_PROPERTY(QStringList get_commands_hist READ get_commands_hist NOTIFY commands_hist_changed)
+  Q_PROPERTY(int get_last_command_hist_ind READ get_last_command_hist_ind NOTIFY commands_hist_changed)
+  Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
+  Q_PROPERTY(QString get_udp_connection_status READ get_udp_connection_status NOTIFY udp_connection_status_changed)
 
 public:
   board_graphic_t();
+  ~board_graphic_t() override;
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
@@ -32,22 +39,16 @@ protected:
   QHash<int, QByteArray> roleNames() const;
 
 public:
-  Q_PROPERTY(QString get_move_turn_color READ get_move_turn_color NOTIFY move_turn_color_changed)
   QString get_move_turn_color() const;
 
-  Q_PROPERTY(QStringList get_moves_history READ get_moves_history NOTIFY moves_history_changed)
   QStringList get_moves_history() const;
 
-  Q_PROPERTY(QStringList get_commands_hist READ get_commands_hist NOTIFY commands_hist_changed)
   QStringList get_commands_hist() const;
 
-  Q_PROPERTY(int get_last_command_hist_ind READ get_last_command_hist_ind NOTIFY commands_hist_changed)
   int get_last_command_hist_ind() const;
 
-  Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
   bool is_check_mate() const;
 
-  Q_PROPERTY(QString get_udp_connection_status READ get_udp_connection_status NOTIFY udp_connection_status_changed)
   QString get_udp_connection_status() const;
 
   Q_INVOKABLE void run_command(const QString &message,  const int x1 = 0, const int y1 = 0,

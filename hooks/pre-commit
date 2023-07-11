@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "apply clang-format for:"
+for FILE in $(git diff --cached --name-only --diff-filter=ACM)
+do
+    if [[ "${FILE}" =~ \.(c|h|hpp|cpp|cc)$ ]]
+    then
+        echo "  ${FILE}"
+        clang-format -i -style=file ${FILE}
+        git add $FILE
+    fi
+done
+

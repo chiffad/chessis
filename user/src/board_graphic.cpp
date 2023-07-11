@@ -12,7 +12,7 @@
 #include "helper.h"
 
 
-using namespace graphic;
+namespace graphic {
 
 board_graphic_t::board_graphic_t()
     : QAbstractListModel(nullptr), _move_color(MOVE_COLOR_W),
@@ -23,6 +23,10 @@ board_graphic_t::board_graphic_t()
 
   for(int i = 0; i < FIGURES_NUMBER + HILIGHT_CELLS; ++i)
     { addFigure(figure_t(HILIGHT_IM, 0, 0, false)); }
+}
+
+board_graphic_t::~board_graphic_t()
+{
 }
 
 void board_graphic_t::run_command(const QString& message, const int x1, const int y1, const int x2, const int y2)
@@ -395,4 +399,6 @@ QHash<int, QByteArray> board_graphic_t::roleNames() const
   roles[YRole] = "y_coord";
   roles[VisibleRole] = "figure_visible";
   return roles;
+}
+
 }
