@@ -11,6 +11,7 @@ find_package(${QT_PACKAGE} REQUIRED COMPONENTS Core Widgets Quick Qml QuickCompi
 find_package(Boost 1.82.0 REQUIRED COMPONENTS system serialization) 
 
 qt5_add_resources(QML_QRC_PATH res.qrc)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -48,7 +49,8 @@ add_executable(${TARGET_NAME}
 
 set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 target_include_directories(${TARGET_NAME} PUBLIC src .)
-target_link_libraries(${TARGET_NAME} PRIVATE 
+target_link_libraries(${TARGET_NAME} 
+  PRIVATE 
   Boost::system 
   Boost::serialization 
   ${QT_PACKAGE}::Core 

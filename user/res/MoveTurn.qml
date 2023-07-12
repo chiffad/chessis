@@ -1,42 +1,31 @@
-import QtQuick 2.5
+import QtQuick 2.12
 
-Rectangle
-{
-  property alias im_source: _image.source
+Rectangle {
+  id: root
+  property alias im_source: move_turn_image.source
 
   anchors.topMargin: border.width
-
   border.color: "black"
-  radius: rADIUS
 
-  Item
-  {
-    id: _text
+  Text {
+    id: text
+
     anchors.left: parent.left
-    anchors.top: parent.top
-    anchors.leftMargin: parent.border.width
+    anchors.leftMargin: root.border.width
     anchors.verticalCenter: parent.verticalCenter
-    width: parent.width - cELL_SIZE_X - parent.width/10
+    font.family: "Helvetica"
+    font.pointSize: 14
+    color: "black"
 
-    Text
-    {
-      anchors.left: parent.left
-      anchors.verticalCenter: parent.verticalCenter
-      font.family: "Helvetica"
-      font.pointSize: 14
-      color: "black"
-
-      text: "Move turn: "
-    }
+    text: "Move turn: "
   }
 
-  Image
-  {
-    id: _image
-    anchors.left: _text.right
+  Image {
+    id: move_turn_image
     anchors.verticalCenter: parent.verticalCenter
+    anchors.left: text.right
 
-    width: cELL_SIZE_X
-    height: width
+    width: height
+    height: root.height
   }
 }

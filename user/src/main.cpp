@@ -15,6 +15,8 @@ int main(int argc, char* argv[])
 {
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
+  qmlRegisterSingletonType(QUrl("qrc:/res/Constants.qml"), "Constants", 1, 0, "Constants");
+
   qmlRegisterType<graphic::fb_obj_t>("CubeRendering", 1, 0, "Cube");
 
   QGuiApplication app(argc, argv);

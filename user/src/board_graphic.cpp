@@ -115,13 +115,13 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
 
 Coord board_graphic_t::get_coord(const int x, const int y)
 {
-  if (x < 0 || y < 0 || x > (CELL_SIZE_X * CELL_NUM) || y > (CELL_SIZE_Y * CELL_NUM))
+  if (x < 0 || y < 0 || x > (cell_width_ * CELL_NUM) || y > (cell_height_ * CELL_NUM))
   {
     cl::helper::log("Warning! in get_coord: Incorrect coord");
     return Coord(x, y);
   }
 
-  return Coord((x + (CELL_SIZE_X / 2)) / CELL_SIZE_X, (y + (CELL_SIZE_Y / 2)) / CELL_SIZE_Y);
+  return Coord((x + (cell_width_ / 2)) / cell_width_, (y + (cell_height_ / 2)) / cell_height_);
 }
 
 void board_graphic_t::update_coordinates()
@@ -340,6 +340,13 @@ bool board_graphic_t::set_login(const QString& login, const QString& pwd)
 
   add_to_messages_for_server(msg::prepare_for_send(msg::login_t(login.toStdString(), pwd.toStdString())));
   return true;
+}
+
+void board_graphic_t::set_cell_size(const int width, const int height)
+{
+  cl::helper::log("Cell size: width=", width, "; height=", height);
+  cell_width_ = width;
+  cell_height_ = height;
 }
 
 bool board_graphic_t::is_message_appear() const

@@ -19,11 +19,15 @@
         <file>res/img/checkMate.png</file>
         <file>res/img/hilight.png</file>
         <file>res/app.qml</file>
+        <file>res/BoardLayout.qml</file>
+        <file>res/Board.qml</file>
+        <file>res/Figure.qml</file> 
         <file>res/ConnectionStatus.qml</file>
         <file>res/MenuLayout.qml</file>
         <file>res/MoveTurn.qml</file>
         <file>res/MoveOutput.qml</file>
         <file>res/CommandField.qml</file>
         <file>res/Login_input.qml</file>
+        <file>res/Constants.qml</file>
     </qresource>
 </RCC>

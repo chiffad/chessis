@@ -51,6 +51,7 @@ public:
   Q_INVOKABLE void run_command(const QString& message, const int x1 = 0, const int y1 = 0, const int x2 = 0, const int y2 = 0);
   Q_INVOKABLE void path_to_file(QString& path, bool is_moves_from_file);
   Q_INVOKABLE bool set_login(const QString& login, const QString& pwd);
+  Q_INVOKABLE void set_cell_size(int width, int height);
 
 public:
   void set_check_mate();
@@ -88,8 +89,6 @@ private:
   enum
   {
     CELL_NUM = 8,
-    CELL_SIZE_X = 56,
-    CELL_SIZE_Y = 36,
     a_LETTER = 'a'
   };
   const QString MOVE_COLOR_W = "img/w_k.png";
@@ -115,6 +114,9 @@ private:
   QList<figure_t> figures_model_;
   std::vector<QString> messages_for_server_;
   QString field_;
+
+  unsigned cell_width_ = 0;
+  unsigned cell_height_ = 0;
 };
 
 } // namespace graphic
