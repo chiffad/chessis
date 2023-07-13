@@ -9,6 +9,7 @@ set(QT_PACKAGE Qt5)
 
 find_package(${QT_PACKAGE} REQUIRED COMPONENTS Core Widgets Quick Qml QuickCompiler OpenGL)
 find_package(Boost 1.82.0 REQUIRED COMPONENTS system serialization) 
+find_package(spdlog REQUIRED)
 
 qt5_add_resources(QML_QRC_PATH res.qrc)
 
@@ -44,6 +45,8 @@ add_executable(${TARGET_NAME}
   src/helper.cpp
   src/handle_message.h
   src/main.cpp
+  src/logger.hpp 
+  src/logger.cpp 
   ${QML_QRC_PATH}  
 )
 
@@ -51,6 +54,7 @@ set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE
 target_include_directories(${TARGET_NAME} PUBLIC src .)
 target_link_libraries(${TARGET_NAME} 
   PRIVATE 
+  spdlog::spdlog
   Boost::system 
   Boost::serialization 
   ${QT_PACKAGE}::Core 

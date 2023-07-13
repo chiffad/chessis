@@ -8,6 +8,7 @@
 
 #include "helper.h"
 #include "messages.h"
+#include <spdlog/spdlog.h>
 
 using namespace cl;
 
@@ -85,7 +86,7 @@ client_t::impl_t::impl_t()
     if (socket.bind(SERVER_IP, FIRST_PORT + i))
     {
       my_port = FIRST_PORT + i;
-      helper::log("bind: ", FIRST_PORT + i);
+      SPDLOG_INFO("bind to {}", FIRST_PORT + i);
       break;
     }
     if (i + FIRST_PORT == LAST_PORT)
@@ -109,7 +110,7 @@ void client_t::impl_t::send(const std::string& message, bool is_prev_serial_need
     begin_wait_receive(message);
   }
 
-  helper::log("send: ", message);
+  SPDLOG_TRACE("sent={}", message);
 
   socket.writeDatagram(QByteArray::fromStdString(add_serial_num(message, is_prev_serial_need)), SERVER_IP, server_port);
 }
@@ -123,11 +124,11 @@ void client_t::impl_t::read()
   message.resize(socket.pendingDatagramSize());
   socket.readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
 
-  helper::log("read: ", message);
+  SPDLOG_TRACE("Read=", message);
 
   if (sender_IP != SERVER_IP || sender_port != server_port || sender_port == my_port)
   {
-    helper::log("Warning! in read_data: Wrong sender!");
+    SPDLOG_WARN("Wrong sender id={}, port={}!", sender_IP.toString(), sender_port);
     return;
   }
 
@@ -141,7 +142,7 @@ void client_t::impl_t::read()
       connection_checker.start(CHECK_CONNECT_TIME);
       send(msg::prepare_for_send(msg::message_received_t()), true);
     }
-    helper::log("Warning! in read_data: Wrong serial number!");
+    SPDLOG_WARN("Wrong serial number!");
     return;
   }
 

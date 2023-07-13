@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/mpl/begin_end.hpp>
+#include <spdlog/spdlog.h>
 #include <typeinfo>
 
 #include "board_graphic.h"
@@ -31,7 +32,7 @@ void process_mess(const std::string& str, graphic::board_graphic_t& bg, type_2_t
 template<>
 void process_mess(const std::string& /*str*/, graphic::board_graphic_t& /*bg*/, type_2_type<typename boost::mpl::end<msg::message_types>::type>)
 {
-  cl::helper::log("no type found!!");
+  SPDLOG_ERROR("no type found!!");
 }
 
 #define handle(str, graphic)                                                                                                                                   \
@@ -40,13 +41,13 @@ void process_mess(const std::string& /*str*/, graphic::board_graphic_t& /*bg*/, 
 template<typename struct_t>
 void process(graphic::board_graphic_t& /*bg*/, const std::string& /*message*/, type_2_type<struct_t>)
 {
-  cl::helper::log("handle::process: No tactic for process ", typeid(struct_t).name());
+  SPDLOG_ERROR("No tactic for process {}", typeid(struct_t).name());
 }
 
 template<>
 void process(graphic::board_graphic_t& bg, const std::string& message, type_2_type<msg::inf_request_t>)
 {
-  cl::helper::log("msg::inf_request_t");
+  SPDLOG_DEBUG("msg::inf_request_t");
   auto inf = msg::init<msg::inf_request_t>(message);
 
   bg.add_to_command_history(QString::fromStdString(inf.data));
@@ -55,7 +56,7 @@ void process(graphic::board_graphic_t& bg, const std::string& message, type_2_ty
 template<>
 void process(graphic::board_graphic_t& bg, const std::string& message, type_2_type<msg::game_inf_t>)
 {
-  cl::helper::log("msg::game_inf_t");
+  SPDLOG_DEBUG("msg::game_inf_t");
   auto game_inf = msg::init<msg::game_inf_t>(message);
 
   bg.set_connect_status(msg::id<msg::server_here_t>());
@@ -74,35 +75,35 @@ void process(graphic::board_graphic_t& bg, const std::string& message, type_2_ty
 template<>
 void process(graphic::board_graphic_t& bg, const std::string& /*message*/, type_2_type<msg::get_login_t>)
 {
-  cl::helper::log("msg::get_login_t");
+  SPDLOG_DEBUG("msg::get_login_t");
   bg.get_login();
 }
 
 template<>
 void process(graphic::board_graphic_t& bg, const std::string& /*message*/, type_2_type<msg::incorrect_log_t>)
 {
-  cl::helper::log("msg::incorrect_log_t");
+  SPDLOG_DEBUG("msg::incorrect_log_t");
   bg.get_login("This login already exist. Enter another login!");
 }
 
 template<>
 void process(graphic::board_graphic_t& bg, const std::string& /*message*/, type_2_type<msg::server_lost_t>)
 {
-  cl::helper::log("type == msg::server_lost_t");
+  SPDLOG_DEBUG("type == msg::server_lost_t");
   bg.set_connect_status(msg::id<msg::server_lost_t>());
 }
 
 template<>
 void process(graphic::board_graphic_t& bg, const std::string& /*message*/, type_2_type<msg::server_here_t>)
 {
-  cl::helper::log("type == msg::server_here_t");
+  SPDLOG_DEBUG("type == msg::server_here_t");
   bg.set_connect_status(msg::id<msg::server_here_t>());
 }
 
 template<>
 void process(graphic::board_graphic_t& bg, const std::string& /*message*/, type_2_type<msg::opponent_lost_t>)
 {
-  cl::helper::log("type == msg::opponent_lost_t");
+  SPDLOG_DEBUG("type == msg::opponent_lost_t");
   bg.set_connect_status(msg::id<msg::opponent_lost_t>());
 }
 

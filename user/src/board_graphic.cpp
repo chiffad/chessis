@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <fstream>
 #include <iostream>
+#include <spdlog/spdlog.h>
 #include <sstream>
 
 #include "helper.h"
@@ -45,11 +46,11 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
   const QString HISTORY = "to history";
   const QString SHOW_OPPONENT = "show opponent";
 
-  cl::helper::log("board_graphic_t::run_command: ", message, " x1: ", x1, "; y1: ", y1, "; x2: ", x2, "; y2: ", y2);
+  SPDLOG_DEBUG("run command={}; x1={}; y1={}; x1={}; y2={}", message, x1, y1, x2, y2);
 
   if (message == HELP_WORD)
   {
-    cl::helper::log("run_comman: dhelp_word");
+    SPDLOG_DEBUG("run comman=dhelp_word");
     add_to_command_history("1.For move, type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4)" + "\n" + "2.For back move, type '" +
                            BACK_MOVE + "'" + "\n" + "3.For start new game, type '" + NEW_GAME + "'" + "\n" + "4.For go to history index, type '" + HISTORY +
                            "' and index" + "\n" + "5.To view opponent information, print '" + SHOW_OPPONENT + "'" + "\n" +
@@ -117,7 +118,7 @@ Coord board_graphic_t::get_coord(const int x, const int y)
 {
   if (x < 0 || y < 0 || x > (cell_width_ * CELL_NUM) || y > (cell_height_ * CELL_NUM))
   {
-    cl::helper::log("Warning! in get_coord: Incorrect coord");
+    SPDLOG_ERROR("Incorrect coord x={}; y={}", x, y);
     return Coord(x, y);
   }
 
@@ -152,7 +153,7 @@ void board_graphic_t::set_board_mask(const QString& mask)
 {
   if (mask.size() != CELL_NUM * CELL_NUM)
   {
-    cl::helper::log("Warning! in set_board_mask: Wrong board mask size");
+    SPDLOG_ERROR("Wrong board mask size");
     return;
   }
 
@@ -278,7 +279,7 @@ void board_graphic_t::write_moves_to_file(const QString& path)
   std::ofstream in_file(path.toStdString());
   if (!in_file.is_open())
   {
-    cl::helper::log("Warning! in write_moves_to_file: Couldn't open file.");
+    SPDLOG_ERROR("Couldn't open file.");
     return;
   }
   for (auto& s : str_moves_history_)
@@ -294,7 +295,7 @@ void board_graphic_t::read_moves_from_file(const QString& path)
   std::ifstream from_file(path.toStdString());
   if (!from_file.is_open())
   {
-    cl::helper::log("Warning! read_moves_from_file: Couldn't open file.");
+    SPDLOG_ERROR("Couldn't open file={}", path);
     return;
   }
 
@@ -315,7 +316,7 @@ void board_graphic_t::set_connect_status(const int status)
       break;
     case msg::id<msg::server_lost_t>(): udp_connection_status_ = "Disconnected"; break;
     case msg::id<msg::opponent_lost_t>(): udp_connection_status_ = "Opponent disconnected"; break;
-    default: cl::helper::log("Warning! in set_connect_status: Unknown status"); return;
+    default: SPDLOG_ERROR("Unknown status={}", status); return;
   }
   emit udp_connection_status_changed();
 }
@@ -344,7 +345,7 @@ bool board_graphic_t::set_login(const QString& login, const QString& pwd)
 
 void board_graphic_t::set_cell_size(const int width, const int height)
 {
-  cl::helper::log("Cell size: width=", width, "; height=", height);
+  SPDLOG_INFO("Cell size: width={}; height={}", width, height);
   cell_width_ = width;
   cell_height_ = height;
 }

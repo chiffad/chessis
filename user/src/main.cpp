@@ -6,6 +6,9 @@
 #include <ctime>
 #include <exception>
 
+#include "logger.hpp"
+#include <spdlog/spdlog.h>
+
 #include "board_graphic.h"
 #include "client.h"
 #include "fb_obj.h"
@@ -13,6 +16,8 @@
 
 int main(int argc, char* argv[])
 {
+  logger::logger_t::get().init();
+
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
   qmlRegisterSingletonType(QUrl("qrc:/res/Constants.qml"), "Constants", 1, 0, "Constants");
