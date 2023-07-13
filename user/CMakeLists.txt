@@ -35,10 +35,6 @@ add_executable(${TARGET_NAME}
   src/messages.h
   src/client.h
   src/client.cpp
-  src/fb_obj.h
-  src/fb_obj.cpp
-  src/cube_renderer.h
-  src/cube_renderer.cpp
   src/coord.h
   src/figure.h
   src/helper.h
