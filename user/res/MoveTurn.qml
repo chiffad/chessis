@@ -2,7 +2,7 @@ import QtQuick 2.12
 
 Rectangle {
   id: root
-  property alias im_source: move_turn_image.source
+  property alias img_source: move_turn_image.source
 
   anchors.topMargin: border.width
   border.color: "black"
@@ -10,7 +10,7 @@ Rectangle {
   Text {
     id: text
 
-    anchors.left: parent.left
+    anchors.left: root.left
     anchors.leftMargin: root.border.width
     anchors.verticalCenter: parent.verticalCenter
     font.family: "Helvetica"

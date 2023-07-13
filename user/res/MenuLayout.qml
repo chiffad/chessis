@@ -1,4 +1,4 @@
-import QtQuick 2.5
+import QtQuick 2.12
 import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.2
 import Constants 1.0
@@ -6,12 +6,12 @@ import Constants 1.0
 Rectangle {
   id: root
 
-  property alias _move_output_model: move_output.model
-  property alias _move_turn_im_source: move_turn.im_source
-  property alias _connection_status_text: connection_status.text
-  property alias _command_field_current_ind: command_field.currentIndex
-  property alias _command_field_model: command_field.model
-  property alias _text_inp: command_field.text_inp
+  property alias move_output_model: move_output.model
+  property alias move_turn_img_source: move_turn.img_source
+  property alias connection_status_text: connection_status.text
+  property alias command_field_current_ind: command_field.currentIndex
+  property alias command_field_model: command_field.model
+  property alias text_inp: command_field.text_inp
 
   signal run_command(string command, int num)
   signal work_with_file(string path_to_file, bool is_from_file)
@@ -34,7 +34,7 @@ Rectangle {
     border.width: root.border_width
     radius: Constants.radius
 
-    delegate:  Rectangle {
+    delegate: Rectangle {
       id: move_number
 
       width: parent.width / 2

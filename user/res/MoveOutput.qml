@@ -1,10 +1,9 @@
-import QtQuick 2.5
+import QtQuick 2.12
 import QtQml.Models 2.2
 
-Rectangle
-{
-  property alias model: _grid.model
-  property alias delegate: _grid.delegate
+Rectangle {
+  property alias model: grid.model
+  property alias delegate: grid.delegate
 
   readonly property int eLEMENT_HEIGHT: 20
 
@@ -12,9 +11,8 @@ Rectangle
 
   border.color: "black"
 
-  GridView
-  {
-    id: _grid
+  GridView {
+    id: grid
 
     anchors.fill: parent
     anchors.margins: parent.border.width

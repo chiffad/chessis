@@ -22,7 +22,7 @@ Item {
       delegate: Figure {
         id: figure
 
-        imgType: figure_name
+        img_type: figure_name
         width: board.cell_size
         height: width
         x: x_coord * board.cell_size

@@ -1,20 +1,18 @@
-import QtQuick 2.5
+import QtQuick 2.12
 import QtQuick.Controls 1.4
 import QtGraphicalEffects 1.0
 
-Item
-{
-  id: _root
+Item {
+  id: root
 
-  property alias _error_text : error_text.text
-  property alias _error_visible : error_text.visible
+  property alias error_text: error_text_field.text
+  property alias error_visible: error_text_field.visible
   signal data_entered(string login, string pwd)
 
   height: parent.height/5
   width: parent.width/2
 
-  Rectangle
-  {
+  Rectangle {
     id: root_rect
 
     height: parent.height
@@ -26,8 +24,7 @@ Item
     border.width: 2
     radius: 5
 
-    Rectangle
-    {
+    Rectangle {
       id: login_rect
 
       anchors.top: parent.top
@@ -42,8 +39,7 @@ Item
       radius: 3
       color: "white"
 
-      TextInput
-      {
+      TextInput {
         id: login_input
 
         visible: parent.visible
@@ -63,8 +59,7 @@ Item
 
         clip: true
 
-        onAccepted:
-        {
+        onAccepted: {
           focus = false;
           pwd_rect.login = login_input.text;
           pwd_input.focus = true;
@@ -72,8 +67,7 @@ Item
       }
     }
     
-    Rectangle
-    {
+    Rectangle {
       id: pwd_rect
 
       property string login
@@ -90,8 +84,7 @@ Item
       radius: 3
       color: "white"
 
-      TextInput
-      {
+      TextInput {
         id: pwd_input
 
         visible: parent.visible
@@ -111,20 +104,18 @@ Item
 
         clip: true
 
-        onAccepted:
-        {
-          _root.data_entered(pwd_rect.login, pwd_input.text);
+        onAccepted: {
+          root.data_entered(pwd_rect.login, pwd_input.text);
           focus = false
-          login_input.focus = _root.visible
+          login_input.focus = root.visible
           text = "";
           login_input.text = "";
         }
       }
     }
 
-    Text
-    {
-      id: error_text
+    Text {
+      id: error_text_field
       visible: parent.visible
 
       anchors.bottom: parent.bottom
@@ -137,8 +128,7 @@ Item
     }
   }
 
-  DropShadow
-  {
+  DropShadow {
     anchors.fill: root_rect
     horizontalOffset: 7
     verticalOffset: 7
