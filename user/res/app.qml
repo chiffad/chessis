@@ -48,10 +48,10 @@ Window {
       if(login.length && pwd.length && FigureModel.set_login(login, pwd)) {
         error_visible = false
         login_input.visible = false
-        menu_layout._text_inp.focus = true
+        menu_layout.text_inp.focus = true
       }
       else {
-       _error_visible = true
+        error_visible = true
         error_text = "Wrong login/pwd!"
       }
     }

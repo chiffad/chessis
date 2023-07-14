@@ -5,8 +5,8 @@
 #include <typeinfo>
 
 #include "board_graphic.h"
+#include "client/messages.h"
 #include "helper.h"
-#include "messages.h"
 
 namespace handler {
 

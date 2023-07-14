@@ -2,6 +2,8 @@
 
 #include <QByteArray>
 #include <QString>
+#include <functional>
+#include <string>
 
 #include "spdlog/fmt/ostr.h"
 #include "spdlog/spdlog.h"

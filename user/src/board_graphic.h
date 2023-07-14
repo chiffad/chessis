@@ -7,11 +7,12 @@
 #include <QStringList>
 #include <QVariant>
 #include <QtQuick/QQuickPaintedItem>
+#include <functional>
 #include <vector>
 
+#include "client/messages.h"
 #include "coord.h"
 #include "figure.h"
-#include "messages.h"
 
 namespace graphic {
 
@@ -26,7 +27,10 @@ class board_graphic_t : public QAbstractListModel
   Q_PROPERTY(QString get_udp_connection_status READ get_udp_connection_status NOTIFY udp_connection_status_changed)
 
 public:
-  board_graphic_t();
+  using command_requested_callback_t = std::function<void(std::string)>;
+
+public:
+  explicit board_graphic_t(const command_requested_callback_t& callback);
   ~board_graphic_t() override;
 
   int rowCount(const QModelIndex& parent = QModelIndex()) const;
@@ -58,8 +62,6 @@ public:
   void set_move_color(const int move_num);
   void set_board_mask(const QString& mask);
   void set_connect_status(const int status);
-  bool is_message_appear() const;
-  const QString pull();
   void set_moves_history(const QString& history);
   void add_to_command_history(const QString& str);
   void update_hilight(const int move_num, const QString& history);
@@ -103,7 +105,12 @@ private:
   void read_moves_from_file(const QString& path);
   const QString coord_to_str(const Coord& from, const Coord& to) const;
   Coord get_coord(const int x, const int y);
-  void add_to_messages_for_server(const std::string& msg);
+
+  template<typename T>
+  inline void command_requested(T&& command)
+  {
+    command_requested_callback_(msg::prepare_for_send(std::forward<T>(command)));
+  }
 
 private:
   QString move_color_;
@@ -112,11 +119,11 @@ private:
   QStringList str_moves_history_;
   QStringList commands_history_;
   QList<figure_t> figures_model_;
-  std::vector<QString> messages_for_server_;
   QString field_;
-
   unsigned cell_width_ = 0;
   unsigned cell_height_ = 0;
+
+  command_requested_callback_t command_requested_callback_;
 };
 
 } // namespace graphic

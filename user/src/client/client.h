@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -8,11 +9,12 @@ namespace cl {
 class client_t
 {
 public:
-  client_t();
+  using message_received_callback_t = std::function<void(std::string)>;
+
+public:
+  explicit client_t(const message_received_callback_t& callback);
   ~client_t();
   void send(const std::string& message);
-  std::string pull();
-  bool is_message_append() const;
 
 public:
   client_t(const client_t&) = delete;

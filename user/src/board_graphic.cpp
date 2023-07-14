@@ -14,11 +14,12 @@
 
 namespace graphic {
 
-board_graphic_t::board_graphic_t()
+board_graphic_t::board_graphic_t(const command_requested_callback_t& callback)
   : QAbstractListModel(nullptr)
   , move_color_(MOVE_COLOR_W)
   , udp_connection_status_("Disconnected")
   , check_mate_(false)
+  , command_requested_callback_(callback)
 {
   enum
   {
@@ -58,25 +59,25 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
   }
   else if (message == SHOW_OPPONENT)
   {
-    add_to_messages_for_server(msg::prepare_for_send(msg::opponent_inf_t()));
+    command_requested(msg::opponent_inf_t());
   }
   else if (message == SHOW_ME)
   {
-    add_to_messages_for_server(msg::prepare_for_send(msg::my_inf_t()));
+    command_requested(msg::my_inf_t());
   }
   else if (message == NEW_GAME)
   {
-    add_to_messages_for_server(msg::prepare_for_send(msg::new_game_t()));
+    command_requested(msg::new_game_t());
   }
   else if (message == BACK_MOVE)
   {
-    add_to_messages_for_server(msg::prepare_for_send(msg::back_move_t()));
+    command_requested(msg::back_move_t());
   }
   else if (message == HISTORY)
   {
     msg::go_to_history_t gth;
     gth.index = x1 + 1;
-    add_to_messages_for_server(msg::prepare_for_send(gth));
+    command_requested(gth);
     add_to_command_history("command: " + message + " " + QString::number(x1 + 1));
     return;
   }
@@ -84,7 +85,7 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
   {
     msg::go_to_history_t gth;
     gth.index = message.mid(HISTORY.size() + 1).toInt();
-    add_to_messages_for_server(msg::prepare_for_send(gth));
+    command_requested(gth);
   }
 
   else
@@ -98,12 +99,12 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
       if (!command_content.isEmpty())
       {
         move.data = command_content.toStdString();
-        add_to_messages_for_server(msg::prepare_for_send(move));
+        command_requested(move);
       }
       else if (x1 + x2 + y1 + y2 != 0)
       {
         move.data = coord_to_str(get_coord(x1, y1), get_coord(x2, y2)).toStdString();
-        add_to_messages_for_server(msg::prepare_for_send(move));
+        command_requested(move);
         add_to_command_history("command: " + message + " " + QString::fromStdString(move.data));
         return;
       }
@@ -194,11 +195,6 @@ void board_graphic_t::set_move_color(const int move_num)
 const QString board_graphic_t::coord_to_str(const Coord& from, const Coord& to) const
 {
   return (QChar(a_LETTER + from.x) + QString::number(CELL_NUM - from.y) + " - " + QChar(a_LETTER + to.x) + QString::number(CELL_NUM - to.y));
-}
-
-void board_graphic_t::add_to_messages_for_server(const std::string& msg)
-{
-  messages_for_server_.push_back(QString::fromStdString(msg));
 }
 
 void board_graphic_t::update_hilight(const int move_num, const QString& history)
@@ -301,7 +297,7 @@ void board_graphic_t::read_moves_from_file(const QString& path)
 
   std::string data_from_file(std::istream_iterator<char>(from_file), (std::istream_iterator<char>()));
 
-  add_to_messages_for_server(msg::prepare_for_send(msg::move_t(data_from_file)));
+  command_requested(msg::move_t(data_from_file));
 }
 
 void board_graphic_t::set_connect_status(const int status)
@@ -339,7 +335,7 @@ bool board_graphic_t::set_login(const QString& login, const QString& pwd)
     }
   }
 
-  add_to_messages_for_server(msg::prepare_for_send(msg::login_t(login.toStdString(), pwd.toStdString())));
+  command_requested(msg::login_t(login.toStdString(), pwd.toStdString()));
   return true;
 }
 
@@ -348,18 +344,6 @@ void board_graphic_t::set_cell_size(const int width, const int height)
   SPDLOG_INFO("Cell size: width={}; height={}", width, height);
   cell_width_ = width;
   cell_height_ = height;
-}
-
-bool board_graphic_t::is_message_appear() const
-{
-  return !messages_for_server_.empty();
-}
-
-const QString board_graphic_t::pull()
-{
-  QString command(messages_for_server_.front());
-  messages_for_server_.erase(messages_for_server_.begin());
-  return command;
 }
 
 QStringList board_graphic_t::get_moves_history() const

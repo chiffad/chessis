@@ -4,19 +4,19 @@
 #include <QObject>
 #include <QTimer>
 #include <QUdpSocket>
+#include <functional>
 #include <vector>
 
+#include "client/messages.h"
 #include "helper.h"
-#include "messages.h"
 #include <spdlog/spdlog.h>
 
 using namespace cl;
 
 struct client_t::impl_t
 {
-  impl_t();
+  explicit impl_t(const client_t::message_received_callback_t& callback);
   void send(const std::string& message, bool is_prev_serial_need = false);
-  std::string pull();
   void read();
   bool is_message_received();
   bool is_message_append() const;
@@ -29,7 +29,6 @@ struct client_t::impl_t
 
   std::string last_send_message;
   std::vector<std::string> send_message_stack;
-  std::vector<std::string> received_message_stack;
   int received_serial_num;
   int send_serial_num;
   bool is_received;
@@ -37,6 +36,8 @@ struct client_t::impl_t
   quint16 my_port;
   quint16 server_port;
   const QHostAddress SERVER_IP;
+
+  client_t::message_received_callback_t message_received_callback_;
 
   enum
   {
@@ -48,8 +49,8 @@ struct client_t::impl_t
   const char FREE_SPASE = ' ';
 };
 
-client_t::client_t()
-  : impl(std::make_unique<impl_t>())
+client_t::client_t(const message_received_callback_t& callback)
+  : impl(std::make_unique<impl_t>(callback))
 {}
 
 client_t::~client_t()
@@ -60,22 +61,13 @@ void client_t::send(const std::string& message)
   impl->send(message);
 }
 
-std::string client_t::pull()
-{
-  return impl->pull();
-}
-
-bool client_t::is_message_append() const
-{
-  return impl->is_message_append();
-}
-
-client_t::impl_t::impl_t()
+client_t::impl_t::impl_t(const client_t::message_received_callback_t& callback)
   : received_serial_num(0)
   , send_serial_num(0)
   , is_received(true)
   , server_port(FIRST_PORT)
   , SERVER_IP(QHostAddress::LocalHost)
+  , message_received_callback_(callback)
 {
   QObject::connect(&socket, &QUdpSocket::readyRead, [&]() { read(); });
   QObject::connect(&response_checker, &QTimer::timeout, [&]() { is_message_received(); });
@@ -151,7 +143,7 @@ void client_t::impl_t::read()
     send(msg::prepare_for_send(msg::message_received_t()));
     if (!msg::is_equal_types<msg::is_client_lost_t>(datagramm.data))
     {
-      received_message_stack.push_back(datagramm.data);
+      message_received_callback_(datagramm.data);
     }
   }
   else
@@ -162,22 +154,9 @@ void client_t::impl_t::read()
     }
 
     is_received = true;
-    received_message_stack.push_back(msg::prepare_for_send(msg::server_here_t()));
+    message_received_callback_(msg::prepare_for_send(msg::server_here_t()));
   }
   connection_checker.start(CHECK_CONNECT_TIME);
-}
-
-std::string client_t::impl_t::pull()
-{
-  std::string m(received_message_stack.front());
-  received_message_stack.erase(received_message_stack.begin());
-
-  return m;
-}
-
-bool client_t::impl_t::is_message_append() const
-{
-  return !received_message_stack.empty();
 }
 
 void client_t::impl_t::begin_wait_receive(const std::string& message)
@@ -215,7 +194,7 @@ bool client_t::impl_t::is_message_received()
 
     if (msg::id<msg::is_server_lost_t>() == t || num_of_restarts == 5)
     {
-      received_message_stack.push_back(msg::prepare_for_send(msg::server_lost_t()));
+      message_received_callback_(msg::prepare_for_send(msg::server_lost_t()));
     }
 
     ++num_of_restarts;

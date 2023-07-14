@@ -30,16 +30,16 @@ set(COMPILE_WARNINGS
 )
 
 add_executable(${TARGET_NAME}  
+  src/client/messages.h
+  src/client/client.h
+  src/client/client.cpp
+  src/client/handle_message.h
   src/board_graphic.cpp
   src/board_graphic.h
-  src/messages.h
-  src/client.h
-  src/client.cpp
   src/coord.h
   src/figure.h
   src/helper.h
   src/helper.cpp
-  src/handle_message.h
   src/main.cpp
   src/logger.hpp 
   src/logger.cpp 
