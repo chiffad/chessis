@@ -1,4 +1,4 @@
-#include "board_graphic.h"
+#include "controller/board_graphic.h"
 
 #include <QChar>
 #include <QModelIndex>
@@ -12,7 +12,7 @@
 
 #include "helper.h"
 
-namespace graphic {
+namespace controller {
 
 board_graphic_t::board_graphic_t(const command_requested_callback_t& callback)
   : QAbstractListModel(nullptr)
@@ -115,15 +115,15 @@ void board_graphic_t::run_command(const QString& message, const int x1, const in
   add_to_command_history("command: " + message);
 }
 
-Coord board_graphic_t::get_coord(const int x, const int y)
+coord_t board_graphic_t::get_coord(const int x, const int y)
 {
   if (x < 0 || y < 0 || x > (cell_width_ * CELL_NUM) || y > (cell_height_ * CELL_NUM))
   {
     SPDLOG_ERROR("Incorrect coord x={}; y={}", x, y);
-    return Coord(x, y);
+    return coord_t(x, y);
   }
 
-  return Coord((x + (cell_width_ / 2)) / cell_width_, (y + (cell_height_ / 2)) / cell_height_);
+  return coord_t((x + (cell_width_ / 2)) / cell_width_, (y + (cell_height_ / 2)) / cell_height_);
 }
 
 void board_graphic_t::update_coordinates()
@@ -145,9 +145,9 @@ void board_graphic_t::update_coordinates()
   }
 }
 
-Coord board_graphic_t::get_field_coord(const int i) const
+coord_t board_graphic_t::get_field_coord(const int i) const
 {
-  return Coord(i % CELL_NUM, i / CELL_NUM);
+  return coord_t(i % CELL_NUM, i / CELL_NUM);
 }
 
 void board_graphic_t::set_board_mask(const QString& mask)
@@ -192,7 +192,7 @@ void board_graphic_t::set_move_color(const int move_num)
   emit move_turn_color_changed();
 }
 
-const QString board_graphic_t::coord_to_str(const Coord& from, const Coord& to) const
+const QString board_graphic_t::coord_to_str(const coord_t& from, const coord_t& to) const
 {
   return (QChar(a_LETTER + from.x) + QString::number(CELL_NUM - from.y) + " - " + QChar(a_LETTER + to.x) + QString::number(CELL_NUM - to.y));
 }
@@ -210,7 +210,7 @@ void board_graphic_t::update_hilight(const int move_num, const QString& history)
   {
     auto simb = history.begin();
     simb += (move_num - 1) * CHAR_IN_MOVE;
-    Coord c;
+    coord_t c;
     for (int i = 0; i < 2; ++i)
     {
       c.x = (*(simb++)).unicode() - a_LETTER;
@@ -421,4 +421,4 @@ QHash<int, QByteArray> board_graphic_t::roleNames() const
   return roles;
 }
 
-} // namespace graphic
+} // namespace controller

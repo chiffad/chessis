@@ -10,9 +10,9 @@
 #include "logger.hpp"
 #include <spdlog/spdlog.h>
 
-#include "board_graphic.h"
 #include "client/client.h"
 #include "client/handle_message.h"
+#include "controller/board_graphic.h"
 
 using messages_deque_t = std::deque<std::string>;
 
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 
   QGuiApplication app(argc, argv);
   QQmlApplicationEngine engine;
-  graphic::board_graphic_t board_graphic{[&](std::string str) { messages_to_send.push_back(std::move(str)); }};
+  controller::board_graphic_t board_graphic{[&](std::string str) { messages_to_send.push_back(std::move(str)); }};
 
   engine.rootContext()->setContextProperty("FigureModel", &board_graphic);
   engine.load(QUrl(QStringLiteral("qrc:/res/app.qml")));

@@ -34,8 +34,8 @@ add_executable(${TARGET_NAME}
   src/client/client.h
   src/client/client.cpp
   src/client/handle_message.h
-  src/board_graphic.cpp
-  src/board_graphic.h
+  src/controller/board_graphic.cpp
+  src/controller/board_graphic.h
   src/coord.h
   src/figure.h
   src/helper.h

@@ -4,8 +4,6 @@
 
 #include "coord.h"
 
-namespace graphic {
-
 class figure_t
 {
 public:
@@ -23,7 +21,7 @@ public:
 
   inline void set_name(const QString& new_name) { name_ = new_name; }
   inline void set_visible(const bool new_visible) { visible_ = new_visible; }
-  inline void set_coord(const Coord& new_coord)
+  inline void set_coord(const coord_t& new_coord)
   {
     x_ = new_coord.x;
     y_ = new_coord.y;
@@ -37,5 +35,3 @@ private:
   int y_;
   bool visible_;
 };
-
-} // namespace graphic

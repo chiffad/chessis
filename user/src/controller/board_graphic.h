@@ -14,7 +14,7 @@
 #include "coord.h"
 #include "figure.h"
 
-namespace graphic {
+namespace controller {
 
 class board_graphic_t : public QAbstractListModel
 {
@@ -100,11 +100,11 @@ private:
 private:
   void addFigure(const figure_t& figure);
   void update_coordinates();
-  Coord get_field_coord(const int i) const;
+  coord_t get_field_coord(const int i) const;
   void write_moves_to_file(const QString& path);
   void read_moves_from_file(const QString& path);
-  const QString coord_to_str(const Coord& from, const Coord& to) const;
-  Coord get_coord(const int x, const int y);
+  const QString coord_to_str(const coord_t& from, const coord_t& to) const;
+  coord_t get_coord(const int x, const int y);
 
   template<typename T>
   inline void command_requested(T&& command)
@@ -126,4 +126,4 @@ private:
   command_requested_callback_t command_requested_callback_;
 };
 
-} // namespace graphic
+} // namespace controller
