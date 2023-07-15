@@ -54,7 +54,6 @@ public:
 
   Q_INVOKABLE void run_command(const QString& message, const int x1 = 0, const int y1 = 0, const int x2 = 0, const int y2 = 0);
   Q_INVOKABLE void path_to_file(QString& path, bool is_moves_from_file);
-  Q_INVOKABLE bool set_login(const QString& login, const QString& pwd);
   Q_INVOKABLE void set_cell_size(int width, int height);
 
 public:
@@ -65,7 +64,6 @@ public:
   void set_moves_history(const QString& history);
   void add_to_command_history(const QString& str);
   void update_hilight(const int move_num, const QString& history);
-  void get_login(const QString& error_message = QString());
   void redraw_board();
 
 signals:
@@ -74,7 +72,6 @@ signals:
   void commands_hist_changed();
   void move_turn_color_changed();
   void udp_connection_status_changed();
-  void enter_login(const QString& error_text);
 
 public:
   board_graphic_t(const board_graphic_t&) = delete;
@@ -88,14 +85,6 @@ private:
     YRole = Qt::UserRole + 1,
     VisibleRole = Qt::UserRole
   };
-  enum
-  {
-    CELL_NUM = 8,
-    a_LETTER = 'a'
-  };
-  const QString MOVE_COLOR_W = "img/w_k.png";
-  const QString MOVE_COLOR_B = "img/b_K.png";
-  const char FREE_SPACE = ' ';
 
 private:
   void addFigure(const figure_t& figure);

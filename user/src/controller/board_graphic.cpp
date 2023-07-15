@@ -12,6 +12,14 @@
 
 #include "helper.h"
 
+namespace {
+const int CELL_NUM = 8;
+const char LETTER_a = 'a';
+constexpr const char* const MOVE_COLOR_W = "img/w_k.png";
+constexpr const char* const MOVE_COLOR_B = "img/b_K.png";
+const char FREE_SPACE = ' ';
+} // namespace
+
 namespace controller {
 
 board_graphic_t::board_graphic_t(const command_requested_callback_t& callback)
@@ -194,7 +202,7 @@ void board_graphic_t::set_move_color(const int move_num)
 
 const QString board_graphic_t::coord_to_str(const coord_t& from, const coord_t& to) const
 {
-  return (QChar(a_LETTER + from.x) + QString::number(CELL_NUM - from.y) + " - " + QChar(a_LETTER + to.x) + QString::number(CELL_NUM - to.y));
+  return (QChar(LETTER_a + from.x) + QString::number(CELL_NUM - from.y) + " - " + QChar(LETTER_a + to.x) + QString::number(CELL_NUM - to.y));
 }
 
 void board_graphic_t::update_hilight(const int move_num, const QString& history)
@@ -213,19 +221,13 @@ void board_graphic_t::update_hilight(const int move_num, const QString& history)
     coord_t c;
     for (int i = 0; i < 2; ++i)
     {
-      c.x = (*(simb++)).unicode() - a_LETTER;
+      c.x = (*(simb++)).unicode() - LETTER_a;
       c.y = CELL_NUM - (*(simb++)).digitValue();
       HILIGHT ind = (i == 0) ? SECOND_HILIGHT : FIRST_HILIGHT;
       figures_model_[ind].set_visible(true);
       figures_model_[ind].set_coord(c);
     }
   }
-}
-
-void board_graphic_t::get_login(const QString& error_mess)
-{
-  //  set_login("asdasd" + (error_mess.isEmpty() ? QString() : QString("111111111111111")), "asd23");
-  emit enter_login(error_mess);
 }
 
 void board_graphic_t::redraw_board()
@@ -315,28 +317,6 @@ void board_graphic_t::set_connect_status(const int status)
     default: SPDLOG_ERROR("Unknown status={}", status); return;
   }
   emit udp_connection_status_changed();
-}
-
-bool board_graphic_t::set_login(const QString& login, const QString& pwd)
-{
-  for (auto i : login)
-  {
-    if (!i.isLetterOrNumber())
-    {
-      return false;
-    }
-  }
-
-  for (auto i : pwd)
-  {
-    if (!i.isLetterOrNumber())
-    {
-      return false;
-    }
-  }
-
-  command_requested(msg::login_t(login.toStdString(), pwd.toStdString()));
-  return true;
 }
 
 void board_graphic_t::set_cell_size(const int width, const int height)

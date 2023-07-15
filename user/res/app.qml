@@ -16,6 +16,12 @@ Window {
   maximumWidth: width
   minimumWidth: width
 
+  BoardLayout {
+    id: board    
+
+    //anchors.left: parent.left
+  }
+
   MenuLayout {
     id: menu_layout
 
@@ -33,37 +39,17 @@ Window {
     onWork_with_file: FigureModel.path_to_file(path_to_file, is_from_file);
   }
 
-  BoardLayout {
-    id: board    
-  }
-
   LoginInput {
     id: login_input
 
-    visible: false
     anchors.centerIn: parent
-    z: root.Constants.enter_login_z
+    height: root.height/5
+    width: root.width/2
+    z: Constants.enter_login_z
 
-    onData_entered: {
-      if(login.length && pwd.length && FigureModel.set_login(login, pwd)) {
-        error_visible = false
-        login_input.visible = false
-        menu_layout.text_inp.focus = true
-      }
-      else {
-        error_visible = true
-        error_text = "Wrong login/pwd!"
-      }
-    }
-  }
-
-  Connections {
-    target: FigureModel
-
-    function onEnter_login(error_text) {
-      login_input.visible = true
-      login_input.error_visible = true
-      login_input.error_text = error_text
+    onVisibleChanged: {
+      if(login_input.visible == false) menu_layout.text_inp.focus = true
+      else login_input.focus = true
     }
   }
 }

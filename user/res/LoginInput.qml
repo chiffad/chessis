@@ -7,10 +7,30 @@ Item {
 
   property alias error_text: error_text_field.text
   property alias error_visible: error_text_field.visible
-  signal data_entered(string login, string pwd)
 
-  height: parent.height/5
-  width: parent.width/2
+  visible: false
+
+  function data_entered(login, pwd) {
+    if(login.length && pwd.length && LoginInputController.set_login(login, pwd)) {
+      root.error_visible = false
+      root.visible = false
+    }
+    else {
+      root.error_visible = true
+      root.error_text = "Wrong login/pwd!"
+    }
+  }
+
+  Connections {
+    target: LoginInputController
+
+    function onEnter_login(error_text) {
+      root.visible = true
+      root.error_visible = true
+      root.error_text = error_text
+    }
+  }
+
 
   Rectangle {
     id: root_rect

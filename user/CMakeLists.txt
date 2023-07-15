@@ -36,6 +36,12 @@ add_executable(${TARGET_NAME}
   src/client/handle_message.h
   src/controller/board_graphic.cpp
   src/controller/board_graphic.h
+  src/controller/login_input.hpp
+  src/controller/login_input.cpp
+  src/controller/message_processor.hpp 
+  src/controller/message_processor.cpp 
+  src/controller/app.hpp 
+  src/controller/app.cpp
   src/coord.h
   src/figure.h
   src/helper.h

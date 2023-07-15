@@ -11,8 +11,7 @@
 #include <spdlog/spdlog.h>
 
 #include "client/client.h"
-#include "client/handle_message.h"
-#include "controller/board_graphic.h"
+#include "controller/app.hpp"
 
 using messages_deque_t = std::deque<std::string>;
 
@@ -29,9 +28,8 @@ int main(int argc, char* argv[])
 
   QGuiApplication app(argc, argv);
   QQmlApplicationEngine engine;
-  controller::board_graphic_t board_graphic{[&](std::string str) { messages_to_send.push_back(std::move(str)); }};
+  controller::app_t app_controller(engine, [&](std::string str) { messages_to_send.push_back(std::move(str)); });
 
-  engine.rootContext()->setContextProperty("FigureModel", &board_graphic);
   engine.load(QUrl(QStringLiteral("qrc:/res/app.qml")));
 
   cl::client_t client{[&](std::string str) { received_messages.push_back(std::move(str)); }};
@@ -54,7 +52,7 @@ int main(int argc, char* argv[])
 
       while (!received_messages.empty())
       {
-        handler::handle(received_messages.front(), board_graphic);
+        app_controller.process(received_messages.front());
         received_messages.pop_front();
       }
     }
