@@ -13,67 +13,19 @@ inline void set_if_not_eq(T1& to_set, T2&& new_val, Fn&& call_if_set)
   call_if_set();
 }
 
-constexpr const char* const START_ERROR_MESSAGE = "Enter login/password";
+constexpr const char* const ONLY_LETTER_AND_NUMS_ACCEPTER_ERR = "Only letters and numbers accepted!";
+constexpr const char* const EMPTY_ERR = "PWD and login should not be empty!";
+constexpr const char* const NO_ERROR = "";
 } // namespace
 
 namespace controller {
 
 login_input_t::login_input_t(const login_entered_callback_t& callback)
-  : login_{}
-  , pwd_{}
-  , login_valid_{false}
-  , pwd_valid_{false}
-  , error_message_{START_ERROR_MESSAGE}
+  : error_message_{}
   , login_entered_callback_{callback}
 {}
 
 login_input_t::~login_input_t() = default;
-
-QString login_input_t::login() const
-{
-  return login_;
-}
-
-void login_input_t::set_login(const QString& l)
-{
-  set_if_not_eq(login_, l, [&]() {
-    SPDLOG_INFO("New login={}", login_);
-    emit login_changed();
-  });
-}
-
-QString login_input_t::pwd() const
-{
-  return pwd_;
-}
-
-void login_input_t::set_pwd(const QString& pwd)
-{
-  set_if_not_eq(pwd_, pwd, [&]() {
-    SPDLOG_INFO("New pwd={}", pwd_);
-    emit pwd_changed();
-  });
-}
-
-bool login_input_t::login_valid() const
-{
-  return login_valid_;
-}
-
-void login_input_t::set_login_valid(const bool valid)
-{
-  set_if_not_eq(login_valid_, valid, [&]() { emit login_valid_changed(); });
-}
-
-bool login_input_t::pwd_valid() const
-{
-  return pwd_valid_;
-}
-
-void login_input_t::set_pwd_valid(const bool valid)
-{
-  set_if_not_eq(pwd_valid_, valid, [&]() { emit pwd_valid_changed(); });
-}
 
 QString login_input_t::error_message() const
 {
@@ -87,10 +39,17 @@ void login_input_t::set_error_message(const QString& str)
 
 bool login_input_t::set_login(const QString& login, const QString& pwd)
 {
+  if (login.isEmpty() || pwd.isEmpty())
+  {
+    get_login(EMPTY_ERR);
+    return false;
+  }
+
   for (auto i : login)
   {
     if (!i.isLetterOrNumber())
     {
+      get_login(ONLY_LETTER_AND_NUMS_ACCEPTER_ERR);
       return false;
     }
   }
@@ -99,11 +58,21 @@ bool login_input_t::set_login(const QString& login, const QString& pwd)
   {
     if (!i.isLetterOrNumber())
     {
+      get_login(ONLY_LETTER_AND_NUMS_ACCEPTER_ERR);
       return false;
     }
   }
 
+  set_error_message(NO_ERROR);
   login_entered_callback_(login.toStdString(), pwd.toStdString());
+
   return true;
 }
+
+void login_input_t::get_login(const QString& error_mess)
+{
+  set_error_message(error_mess);
+  emit enter_login();
+}
+
 } // namespace controller

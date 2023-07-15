@@ -43,7 +43,7 @@ Window {
     id: login_input
 
     anchors.centerIn: parent
-    height: root.height/5
+    height: root.height/3
     width: root.width/2
     z: Constants.enter_login_z
 
