@@ -27,15 +27,11 @@ int main(int argc, char* argv[])
   messages_deque_t messages_to_send;
 
   QGuiApplication app(argc, argv);
-  QQmlApplicationEngine engine;
-  controller::app_t app_controller(engine, [&](std::string str) { messages_to_send.push_back(std::move(str)); });
-
-  engine.load(QUrl(QStringLiteral("qrc:/res/app.qml")));
-
+  controller::app_t app_controller([&](std::string str) { messages_to_send.push_back(std::move(str)); });
   cl::client_t client{[&](std::string str) { received_messages.push_back(std::move(str)); }};
+
   const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();
-
   while (!app.allWindows().isEmpty() && app.allWindows().last()->visibility())
   {
     app.processEvents();

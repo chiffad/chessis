@@ -7,13 +7,15 @@
 
 namespace controller {
 
-app_t::app_t(QQmlApplicationEngine& engine, const board_graphic_t::command_requested_callback_t& callback)
+app_t::app_t(const board_graphic_t::command_requested_callback_t& callback)
   : board_{callback}
   , login_input_{[callback](const std::string& login, const std::string& pwd) { callback(msg::prepare_for_send(msg::login_t(login, pwd))); }}
   , message_processor_{board_, login_input_}
+  , engine_{}
 {
-  engine.rootContext()->setContextProperty("FigureModel", &board_);
-  engine.rootContext()->setContextProperty("LoginInputController", &login_input_);
+  engine_.rootContext()->setContextProperty("FigureModel", &board_);
+  engine_.rootContext()->setContextProperty("LoginInputController", &login_input_);
+  engine_.load(QUrl(QStringLiteral("qrc:/res/app.qml")));
 }
 
 app_t::~app_t() = default;
