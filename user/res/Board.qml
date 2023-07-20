@@ -12,7 +12,6 @@ Image {
 
   width: root.size
   height: width
-  z: Constants.board_z
   source: "qrc:/res/img/board.png"
 
   Repeater {

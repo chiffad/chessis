@@ -4,6 +4,9 @@ import QtQuick.Window 2.2
 
 import Constants 1.0
 
+import "login"
+import "menu_layout"
+
 Window {
   id: root
 
@@ -18,8 +21,7 @@ Window {
 
   BoardLayout {
     id: board    
-
-    //anchors.left: parent.left
+    anchors.left: parent.left
   }
 
   MenuLayout {
@@ -28,6 +30,7 @@ Window {
     height: parent.height
     anchors.left: board.right
     anchors.right: parent.right
+    focus: !login_input.visible 
 
     move_output_model: FigureModel.get_moves_history
     move_turn_img_source: FigureModel.get_move_turn_color
@@ -44,12 +47,6 @@ Window {
 
     anchors.centerIn: parent
     height: root.height/3
-    width: root.width/2
-    z: Constants.enter_login_z
-
-    onVisibleChanged: {
-      if(login_input.visible == false) menu_layout.text_inp.focus = true
-      else login_input.focus = true
-    }
+    width: root.width/2    
   }
 }

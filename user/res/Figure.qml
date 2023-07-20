@@ -4,8 +4,8 @@ import Constants 1.0
 Image {
   id: root
   property string img_type
+  property alias size: root.width
 
-  width: cELL_SIZE
   height: width
   z: root.img_type === "hilight" ? Constants.cell_hilight_z : Constants.passive_figure_z
   opacity: root.img_type === "hilight" ? 0.5 : 1.0

@@ -3,12 +3,11 @@ import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.15
 
-import "login"
-
 Dialog {        	
   id: root
   
   modal: true
+  focus: root.visible
   closePolicy: Popup.NoAutoClose	
   
   Connections {

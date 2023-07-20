@@ -23,8 +23,7 @@ Item {
         id: figure
 
         img_type: figure_name
-        width: board.cell_size
-        height: width
+        size: board.cell_size
         x: x_coord * board.cell_size
         y: y_coord * board.cell_size
         visible: figure_visible
@@ -52,7 +51,6 @@ Item {
 
           onReleased: {
             figure.z = Constants.passive_figure_z
-            console.log("@@@@move: x1=" + x1 + "; y1=" + x1 + "; parent.x="+ parent.x + "; parent.y="+parent.y)
             FigureModel.run_command("move", x1, y1, parent.x, parent.y)
           }
         }
@@ -67,7 +65,6 @@ Item {
     height: board.height / 2
     anchors.centerIn: parent
     opacity: 0.3
-    z: Constants.check_mate_img_z
 
     source: "qrc:/res/img/checkMate.png"
 

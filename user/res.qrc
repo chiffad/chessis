@@ -22,13 +22,13 @@
         <file>res/BoardLayout.qml</file>
         <file>res/Board.qml</file>
         <file>res/Figure.qml</file> 
-        <file>res/ConnectionStatus.qml</file>
-        <file>res/MenuLayout.qml</file>
-        <file>res/MoveTurn.qml</file>
-        <file>res/MoveOutput.qml</file>
-        <file>res/CommandField.qml</file>
-        <file>res/LoginInput.qml</file>
         <file>res/Constants.qml</file>
+        <file>res/menu_layout/ConnectionStatus.qml</file>
+        <file>res/menu_layout/MenuLayout.qml</file>
+        <file>res/menu_layout/MoveTurn.qml</file>
+        <file>res/menu_layout/MoveOutput.qml</file>
+        <file>res/menu_layout/CommandField.qml</file>
+        <file>res/login/LoginInput.qml</file>
         <file>res/login/TextInputBox.qml</file>
     </qresource>
 </RCC>
