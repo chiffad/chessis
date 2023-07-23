@@ -1,7 +1,9 @@
 import QtQuick 2.12
 import QtQuick.Controls 1.4
 
-Rectangle {
+import Constants 1.0
+
+Item {
   id: root
 
   property alias currentIndex: list_view.currentIndex
@@ -9,54 +11,64 @@ Rectangle {
   property alias text_inp: text_input
   signal text_inp_accepted(string text)
 
-  border.color: "white"
-  color: "blue"
-  visible: false
+  Text {
+    width: root.width
+    color: "black"
+    wrapMode: Text.Wrap
+    text: "Press F1 to open Commands Field"
+  }
 
-  ListView {
-    id: list_view
+  Rectangle {
+    id: command_field
+    anchors.fill: parent
+    border.color: "black"
+    //color: "write"
+    radius: Constants.radius
+    visible: false
 
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.leftMargin: 2
-    anchors.rightMargin: 2
-    anchors.top: parent.top
-    anchors.bottom: text_input.top
+    ListView {
+      id: list_view
 
-    clip:true
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.leftMargin: 2
+      anchors.rightMargin: 2
+      anchors.top: parent.top
+      anchors.bottom: text_input.top
 
-    delegate:
-      Text {
+      clip:true
+
+      delegate: Text {
         width: root.width
-        color: "yellow"
+        color: "black"
         wrapMode: Text.Wrap
         text: modelData
       }
-  }
+    }
 
-  TextInput {
-    id: text_input
+    TextInput {
+      id: text_input
 
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.bottom: parent.bottom
-    anchors.leftMargin: 2
-    anchors.rightMargin: 2
-    anchors.bottomMargin: 2
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
+      anchors.leftMargin: 2
+      anchors.rightMargin: 2
+      anchors.bottomMargin: 2
 
-    visible: parent.visible
-    clip: true
-    wrapMode: TextInput.Wrap
-    color: "white"
+      clip: true
+      wrapMode: TextInput.Wrap
+      color: "white"
 
-    onAccepted: {
-      root.text_inp_accepted(text_input.text);
-      text_input.text = "";
+      onAccepted: {
+        root.text_inp_accepted(text_input.text);
+        text_input.text = "";
+      }
     }
   }
 
   Keys.onPressed: {
-    if(event.key === Qt.Key_F1) root.visible = true;
-    if(event.key === Qt.Key_Escape) root.visible = false;
+    if(event.key === Qt.Key_F1) command_field.visible = true;
+    if(event.key === Qt.Key_Escape) command_field.visible = false;
   }
 }

@@ -2,6 +2,7 @@
 
 #include "controller/board_graphic.h"
 #include "controller/login_input.hpp"
+#include "controller/menu_layout.hpp"
 #include "controller/message_processor.hpp"
 
 #include <QQmlApplicationEngine>
@@ -16,6 +17,7 @@ public:
   void process(const std::string& server_message);
 
 private:
+  menu_layout_t menu_layout_;
   board_graphic_t board_;
   login_input_t login_input_;
   message_processor_t message_processor_;

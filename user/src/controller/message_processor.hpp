@@ -3,6 +3,7 @@
 #include "client/messages.h"
 #include "controller/board_graphic.h"
 #include "controller/login_input.hpp"
+#include "controller/menu_layout.hpp"
 
 #include <string>
 
@@ -11,7 +12,7 @@ namespace controller {
 class message_processor_t
 {
 public:
-  message_processor_t(board_graphic_t& board, login_input_t& login_input);
+  message_processor_t(menu_layout_t& menu_layout, board_graphic_t& board, login_input_t& login_input);
 
   void process_server_message(const std::string& server_message);
   void process(msg::inf_request_t info_request);
@@ -23,6 +24,7 @@ public:
   void process(msg::opponent_lost_t opp_lst);
 
 private:
+  menu_layout_t& menu_layout_;
   board_graphic_t& board_;
   login_input_t& login_input_;
 };

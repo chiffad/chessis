@@ -19,63 +19,34 @@ namespace controller {
 class board_graphic_t : public QAbstractListModel
 {
   Q_OBJECT
-  Q_PROPERTY(QString get_move_turn_color READ get_move_turn_color NOTIFY move_turn_color_changed)
-  Q_PROPERTY(QStringList get_moves_history READ get_moves_history NOTIFY moves_history_changed)
-  Q_PROPERTY(QStringList get_commands_hist READ get_commands_hist NOTIFY commands_hist_changed)
-  Q_PROPERTY(int get_last_command_hist_ind READ get_last_command_hist_ind NOTIFY commands_hist_changed)
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
-  Q_PROPERTY(QString get_udp_connection_status READ get_udp_connection_status NOTIFY udp_connection_status_changed)
 
 public:
   using command_requested_callback_t = std::function<void(std::string)>;
 
 public:
   explicit board_graphic_t(const command_requested_callback_t& callback);
+  board_graphic_t(const board_graphic_t&) = delete;
+  board_graphic_t& operator=(const board_graphic_t&) = delete;
   ~board_graphic_t() override;
 
   int rowCount(const QModelIndex& parent = QModelIndex()) const;
   QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 
-protected:
-  QHash<int, QByteArray> roleNames() const;
-
-public:
-  QString get_move_turn_color() const;
-
-  QStringList get_moves_history() const;
-
-  QStringList get_commands_hist() const;
-
-  int get_last_command_hist_ind() const;
-
   bool is_check_mate() const;
-
-  QString get_udp_connection_status() const;
-
-  Q_INVOKABLE void run_command(const QString& message, const int x1 = 0, const int y1 = 0, const int x2 = 0, const int y2 = 0);
-  Q_INVOKABLE void path_to_file(QString& path, bool is_moves_from_file);
-  Q_INVOKABLE void set_cell_size(int width, int height);
-
-public:
   void set_check_mate();
-  void set_move_color(const int move_num);
-  void set_board_mask(const QString& mask);
-  void set_connect_status(const int status);
-  void set_moves_history(const QString& history);
-  void add_to_command_history(const QString& str);
   void update_hilight(const int move_num, const QString& history);
   void redraw_board();
+  void set_board_mask(const QString& mask);
+
+  Q_INVOKABLE void run_command(const QString& message, const int x1 = 0, const int y1 = 0, const int x2 = 0, const int y2 = 0);
+  Q_INVOKABLE void set_cell_size(int width, int height);
 
 signals:
   void check_mate();
-  void moves_history_changed();
-  void commands_hist_changed();
-  void move_turn_color_changed();
-  void udp_connection_status_changed();
 
-public:
-  board_graphic_t(const board_graphic_t&) = delete;
-  board_graphic_t& operator=(const board_graphic_t&) = delete;
+protected:
+  QHash<int, QByteArray> roleNames() const;
 
 private:
   enum FigureRoles
@@ -90,8 +61,6 @@ private:
   void addFigure(const figure_t& figure);
   void update_coordinates();
   coord_t get_field_coord(const int i) const;
-  void write_moves_to_file(const QString& path);
-  void read_moves_from_file(const QString& path);
   const QString coord_to_str(const coord_t& from, const coord_t& to) const;
   coord_t get_coord(const int x, const int y);
 
@@ -102,11 +71,7 @@ private:
   }
 
 private:
-  QString move_color_;
-  QString udp_connection_status_;
   bool check_mate_;
-  QStringList str_moves_history_;
-  QStringList commands_history_;
   QList<figure_t> figures_model_;
   QString field_;
   unsigned cell_width_ = 0;

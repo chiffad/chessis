@@ -32,14 +32,14 @@ Window {
     anchors.right: parent.right
     focus: !login_input.visible 
 
-    move_output_model: FigureModel.get_moves_history
-    move_turn_img_source: FigureModel.get_move_turn_color
-    command_field_model: FigureModel.get_commands_hist
-    command_field_current_ind: FigureModel.get_last_command_hist_ind
-    connection_status_text: FigureModel.get_udp_connection_status
+    move_output_model: MenuLayoutController.moves_history
+    move_turn_img_source: MenuLayoutController.move_turn_color
+    command_field_model: MenuLayoutController.commands_hist
+    command_field_current_ind: MenuLayoutController.last_command_hist_ind
+    connection_status_text: MenuLayoutController.connection_status
 
-    onRun_command: FigureModel.run_command(command, num)
-    onWork_with_file: FigureModel.path_to_file(path_to_file, is_from_file);
+    onRun_command: MenuLayoutController.run_command(command, num)
+    onWork_with_file: MenuLayoutController.path_to_file(path_to_file, is_from_file);
   }
 
   LoginInput {
