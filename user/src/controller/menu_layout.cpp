@@ -40,34 +40,33 @@ void menu_layout_t::run_command(const QString& message, const int x)
 
   if (message == HELP_WORD)
   {
-    SPDLOG_DEBUG("run comman=dhelp_word");
     add_to_command_history("1.For move, type '" + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4)" + "\n" + "2.For back move, type '" +
                            BACK_MOVE + "'" + "\n" + "3.For start new game, type '" + NEW_GAME + "'" + "\n" + "4.For go to history index, type '" + HISTORY +
                            "' and index" + "\n" + "5.To view opponent information, print '" + SHOW_OPPONENT + "'" + "\n" +
                            "6.To view your information, print '" + SHOW_ME + "'");
   }
-  else if (message == SHOW_OPPONENT)
+  else if (message == SHOW_OPPONENT) command_requested(msg::opponent_inf_t{});
+  else if (message == SHOW_ME) command_requested(msg::my_inf_t{});
+  else if (message == NEW_GAME) command_requested(msg::new_game_t{});
+  else if (message == BACK_MOVE) command_requested(msg::back_move_t{});
+  else if (message.contains(MOVE_WORD))
   {
-    command_requested(msg::opponent_inf_t());
-  }
-  else if (message == SHOW_ME)
-  {
-    command_requested(msg::my_inf_t());
-  }
-  else if (message == NEW_GAME)
-  {
-    command_requested(msg::new_game_t());
-  }
-  else if (message == BACK_MOVE)
-  {
-    command_requested(msg::back_move_t());
+    const QString command(message.mid(0, message.indexOf(FREE_SPACE)));
+    const QString command_content(message.mid(command.size()));
+    if (!command_content.isEmpty())
+    {
+      msg::move_t move;
+      move.data = command_content.toStdString();
+      command_requested(std::move(move));
+    }
+    else add_to_command_history("Unknown command '" + message + "' (type '" + HELP_WORD + "' for help).");
   }
   else if (message == HISTORY)
   {
     msg::go_to_history_t gth;
     gth.index = x + 1;
     command_requested(gth);
-    add_to_command_history("command: " + message + " " + QString::number(x + 1));
+    add_to_command_history("Command: " + message + " " + QString::number(x + 1));
     return;
   }
   else if (message.contains(HISTORY))
@@ -76,9 +75,12 @@ void menu_layout_t::run_command(const QString& message, const int x)
     gth.index = message.mid(HISTORY.size() + 1).toInt();
     command_requested(gth);
   }
-  else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
-
-  add_to_command_history("command: " + message);
+  else
+  {
+    add_to_command_history("Unknown command '" + message + "' (type '" + HELP_WORD + "' for help).");
+    return;
+  }
+  add_to_command_history("Command: " + message);
 }
 
 void menu_layout_t::set_moves_history(const QString& history)

@@ -22,10 +22,10 @@ class board_graphic_t : public QAbstractListModel
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
 
 public:
-  using command_requested_callback_t = std::function<void(std::string)>;
+  using move_requested_callback_t = std::function<void(msg::move_t)>;
 
 public:
-  explicit board_graphic_t(const command_requested_callback_t& callback);
+  explicit board_graphic_t(const move_requested_callback_t& callback);
   board_graphic_t(const board_graphic_t&) = delete;
   board_graphic_t& operator=(const board_graphic_t&) = delete;
   ~board_graphic_t() override;
@@ -39,7 +39,7 @@ public:
   void redraw_board();
   void set_board_mask(const QString& mask);
 
-  Q_INVOKABLE void run_command(const QString& message, const int x1 = 0, const int y1 = 0, const int x2 = 0, const int y2 = 0);
+  Q_INVOKABLE void move(const int x1, const int y1, const int x2, const int y2);
   Q_INVOKABLE void set_cell_size(int width, int height);
 
 signals:
@@ -64,12 +64,6 @@ private:
   const QString coord_to_str(const coord_t& from, const coord_t& to) const;
   coord_t get_coord(const int x, const int y);
 
-  template<typename T>
-  inline void command_requested(T&& command)
-  {
-    command_requested_callback_(msg::prepare_for_send(std::forward<T>(command)));
-  }
-
 private:
   bool check_mate_;
   QList<figure_t> figures_model_;
@@ -77,7 +71,7 @@ private:
   unsigned cell_width_ = 0;
   unsigned cell_height_ = 0;
 
-  command_requested_callback_t command_requested_callback_;
+  move_requested_callback_t move_requested_callback_;
 };
 
 } // namespace controller

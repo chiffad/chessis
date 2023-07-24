@@ -15,15 +15,14 @@
 namespace {
 const int CELL_NUM = 8;
 const char LETTER_a = 'a';
-const char FREE_SPACE = ' ';
 } // namespace
 
 namespace controller {
 
-board_graphic_t::board_graphic_t(const command_requested_callback_t& callback)
+board_graphic_t::board_graphic_t(const move_requested_callback_t& callback)
   : QAbstractListModel(nullptr)
   , check_mate_(false)
-  , command_requested_callback_(callback)
+  , move_requested_callback_(callback)
 {
   enum
   {
@@ -40,34 +39,12 @@ board_graphic_t::board_graphic_t(const command_requested_callback_t& callback)
 
 board_graphic_t::~board_graphic_t() = default;
 
-void board_graphic_t::run_command(const QString& message, const int x1, const int y1, const int x2, const int y2)
+void board_graphic_t::move(const int x1, const int y1, const int x2, const int y2)
 {
-  const QString HELP_WORD = "help";
-  const QString MOVE_WORD = "move";
-
-  SPDLOG_DEBUG("run command={}; x1={}; y1={}; x1={}; y2={}", message, x1, y1, x2, y2);
-
-  const QString command(message.mid(0, message.indexOf(FREE_SPACE)));
-  const QString command_content(message.mid(command.size()));
-
-  if (command == MOVE_WORD)
-  {
-    msg::move_t move;
-    if (!command_content.isEmpty())
-    {
-      move.data = command_content.toStdString();
-      command_requested(move);
-    }
-    else if (x1 + x2 + y1 + y2 != 0)
-    {
-      move.data = coord_to_str(get_coord(x1, y1), get_coord(x2, y2)).toStdString();
-      command_requested(move);
-      // add_to_command_history("command: " + message + " " + QString::fromStdString(move.data));
-      return;
-    }
-    // else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
-  }
-  // else add_to_command_history("Unknown command (type '" + HELP_WORD + "' for help).");
+  SPDLOG_DEBUG("move requested: x1={}; y1={}; x1={}; y2={}", x1, y1, x2, y2);
+  msg::move_t move_msg;
+  move_msg.data = coord_to_str(get_coord(x1, y1), get_coord(x2, y2)).toStdString();
+  move_requested_callback_(std::move(move_msg));
 }
 
 coord_t board_graphic_t::get_coord(const int x, const int y)

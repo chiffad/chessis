@@ -12,7 +12,10 @@ namespace controller {
 class app_t
 {
 public:
-  explicit app_t(const board_graphic_t::command_requested_callback_t& callback);
+  using command_requested_callback_t = std::function<void(std::string)>;
+
+public:
+  explicit app_t(const command_requested_callback_t& callback);
   ~app_t();
   void process(const std::string& server_message);
 

@@ -7,9 +7,12 @@
 
 namespace controller {
 
-app_t::app_t(const board_graphic_t::command_requested_callback_t& callback)
+app_t::app_t(const command_requested_callback_t& callback)
   : menu_layout_{callback}
-  , board_{callback}
+  , board_{[callback, this](msg::move_t move_msg) {
+    menu_layout_.add_to_command_history("Command: move " + QString::fromStdString(move_msg.data));
+    callback(msg::prepare_for_send(std::move(move_msg)));
+  }}
   , login_input_{[callback](const std::string& login, const std::string& pwd) { callback(msg::prepare_for_send(msg::login_t(login, pwd))); }}
   , message_processor_{menu_layout_, board_, login_input_}
   , engine_{}
