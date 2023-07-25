@@ -40,5 +40,5 @@ Image {
     }
   }
 
-  Component.onCompleted: FigureModel.set_cell_size(root.cell_size, root.cell_size)
+  Component.onCompleted: BoardController.set_cell_size(root.cell_size, root.cell_size)
 }

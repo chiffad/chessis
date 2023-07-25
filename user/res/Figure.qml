@@ -27,7 +27,7 @@ Image {
       drag_area.x1 = parent.x
       drag_area.y1 = parent.y
     }
-    onReleased: FigureModel.move(x1, y1, parent.x, parent.y)
+    onReleased: BoardController.move(x1, y1, parent.x, parent.y)
   }
 
   states: [ 

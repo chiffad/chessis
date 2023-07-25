@@ -17,7 +17,7 @@ Item {
     Repeater {
       id: board_obj
 
-      model: FigureModel
+      model: FiguresModel
 
       delegate: Figure {
         id: figure
@@ -25,8 +25,8 @@ Item {
         hilight_type: figure_name === "hilight"
         img_type: figure_name
         size: board.cell_size
-        x: x_coord * board.cell_size
-        y: y_coord * board.cell_size
+        x: figure_x * board.cell_size
+        y: figure_y * board.cell_size
         visible: figure_visible
       }
     }
@@ -42,7 +42,7 @@ Item {
 
     source: "qrc:/res/img/checkMate.png"
 
-    visible: FigureModel.is_check_mate
+    visible: BoardController.is_check_mate
 
     MouseArea {
       anchors.fill: parent

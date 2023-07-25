@@ -7,31 +7,26 @@
 class figure_t
 {
 public:
-  figure_t(const QString& name, const int x, const int y, const bool visible)
-    : name_(name)
-    , x_(x)
-    , y_(y)
-    , visible_(visible)
+  explicit figure_t() = default;
+
+  figure_t(const QString& name, const coord_t& coord, const bool visible)
+    : name_{name}
+    , coord_{coord}
+    , visible_{visible}
   {}
 
-  inline int x() const { return x_; }
-  inline int y() const { return y_; }
+  inline const coord_t& coord() const { return coord_; }
   inline QString name() const { return name_; }
   inline bool visible() const { return visible_; }
 
   inline void set_name(const QString& new_name) { name_ = new_name; }
   inline void set_visible(const bool new_visible) { visible_ = new_visible; }
-  inline void set_coord(const coord_t& new_coord)
-  {
-    x_ = new_coord.x;
-    y_ = new_coord.y;
-  }
+  inline void set_coord(const coord_t& new_coord) { coord_ = new_coord; }
 
-  bool operator==(const figure_t& rhs) { return (name() == rhs.name() && x() == rhs.x() && y() == rhs.y() && visible() == rhs.visible()); }
+  bool operator==(const figure_t& rhs) { return (name() == rhs.name() && coord() == rhs.coord() && visible() == rhs.visible()); }
 
 private:
-  QString name_;
-  int x_;
-  int y_;
-  bool visible_;
+  QString name_{};
+  coord_t coord_{};
+  bool visible_{};
 };

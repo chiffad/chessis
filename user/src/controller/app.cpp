@@ -18,8 +18,11 @@ app_t::app_t(const command_requested_callback_t& callback)
   , engine_{}
 {
   engine_.rootContext()->setContextProperty("MenuLayoutController", &menu_layout_);
-  engine_.rootContext()->setContextProperty("FigureModel", &board_);
+  engine_.rootContext()->setContextProperty("BoardController", &board_);
   engine_.rootContext()->setContextProperty("LoginInputController", &login_input_);
+
+  board_.set_context_properties(engine_);
+
   engine_.load(QUrl(QStringLiteral("qrc:/res/app.qml")));
 }
 

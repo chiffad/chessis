@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QString>
+#include <functional>
 
 namespace controller {
 
@@ -11,10 +12,7 @@ class login_input_t : public QObject
   Q_PROPERTY(QString error_message READ error_message NOTIFY error_message_changed)
 
 public:
-  Q_INVOKABLE bool set_login(const QString& login, const QString& pwd);
-
-public:
-  using login_entered_callback_t = std::function<void(const std::string&, const std::string& pwd)>;
+  using login_entered_callback_t = std::function<void(const std::string& login, const std::string& pwd)>;
 
 public:
   explicit login_input_t(const login_entered_callback_t& callback);
@@ -22,8 +20,9 @@ public:
 
   QString error_message() const;
   void set_error_message(const QString& str);
+  void get_login(const QString& error_mess = "");
 
-  void get_login(const QString& error_mess = QString());
+  Q_INVOKABLE bool set_login(const QString& login, const QString& pwd);
 
 signals:
   void error_message_changed();
@@ -31,7 +30,6 @@ signals:
 
 private:
   QString error_message_;
-
   login_entered_callback_t login_entered_callback_;
 };
 

@@ -1,22 +1,17 @@
 #pragma once
 
-#include <QAbstractListModel>
-#include <QHash>
-#include <QModelIndex>
+#include "client/messages.h"
+#include "controller/figures_model.hpp"
+#include "coord.h"
+
+#include <QQmlApplicationEngine>
 #include <QString>
 #include <QStringList>
-#include <QVariant>
-#include <QtQuick/QQuickPaintedItem>
 #include <functional>
-#include <vector>
-
-#include "client/messages.h"
-#include "coord.h"
-#include "figure.h"
 
 namespace controller {
 
-class board_graphic_t : public QAbstractListModel
+class board_graphic_t : public QObject
 {
   Q_OBJECT
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
@@ -30,47 +25,28 @@ public:
   board_graphic_t& operator=(const board_graphic_t&) = delete;
   ~board_graphic_t() override;
 
-  int rowCount(const QModelIndex& parent = QModelIndex()) const;
-  QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
-
   bool is_check_mate() const;
   void set_check_mate();
-  void update_hilight(const int move_num, const QString& history);
-  void redraw_board();
+  void update_hilight(int move_num, const QString& history);
   void set_board_mask(const QString& mask);
+  void set_context_properties(QQmlApplicationEngine& engine);
 
-  Q_INVOKABLE void move(const int x1, const int y1, const int x2, const int y2);
+  Q_INVOKABLE void move(int x1, int y1, int x2, int y2);
   Q_INVOKABLE void set_cell_size(int width, int height);
 
 signals:
   void check_mate();
 
-protected:
-  QHash<int, QByteArray> roleNames() const;
+private:
+  void update_figures();
+  coord_t get_coord(int x, int y) const;
 
 private:
-  enum FigureRoles
-  {
-    NameRole = Qt::UserRole + 3,
-    XRole = Qt::UserRole + 2,
-    YRole = Qt::UserRole + 1,
-    VisibleRole = Qt::UserRole
-  };
-
-private:
-  void addFigure(const figure_t& figure);
-  void update_coordinates();
-  coord_t get_field_coord(const int i) const;
-  const QString coord_to_str(const coord_t& from, const coord_t& to) const;
-  coord_t get_coord(const int x, const int y);
-
-private:
+  figures_model_t figures_model_;
   bool check_mate_;
-  QList<figure_t> figures_model_;
   QString field_;
-  unsigned cell_width_ = 0;
-  unsigned cell_height_ = 0;
-
+  unsigned cell_width_;
+  unsigned cell_height_;
   move_requested_callback_t move_requested_callback_;
 };
 

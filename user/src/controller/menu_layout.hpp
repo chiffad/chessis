@@ -43,7 +43,7 @@ public:
   QString connection_status() const;
 
   Q_INVOKABLE void path_to_file(QString& path, bool is_moves_from_file);
-  Q_INVOKABLE void run_command(const QString& message, const int x);
+  Q_INVOKABLE void run_command(const QString& message, int x);
 
 signals:
   void moves_history_changed();
