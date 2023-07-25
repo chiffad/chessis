@@ -10,6 +10,8 @@
 
 #include "client/messages.h"
 
+#include <spdlog/spdlog.h>
+
 namespace controller {
 
 class menu_layout_t : public QObject

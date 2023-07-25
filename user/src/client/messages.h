@@ -53,7 +53,7 @@ struct go_to_history_t
     : index(ind)
   {}
 
-  int index;
+  int index{};
 };
 
 struct inf_request_t
@@ -78,8 +78,8 @@ struct game_inf_t
 
   std::string board_mask;
   std::string moves_history;
-  bool is_mate;
-  int move_num;
+  bool is_mate{};
+  int move_num{};
 };
 
 struct incoming_datagramm_t
@@ -90,7 +90,7 @@ struct incoming_datagramm_t
     , data(mess)
   {}
 
-  int ser_num;
+  int ser_num{};
   std::string data;
 };
 
@@ -102,7 +102,7 @@ struct some_datagramm_t
     , data(mess)
   {}
 
-  int type;
+  int type{};
   std::string data;
 };
 
@@ -122,7 +122,7 @@ void serialize(Archive& ar, inf_request_t& _1, const unsigned /*version*/)
 }
 
 template<typename Archive>
-void serialize(Archive& ar, go_to_history_t _1, const unsigned /*version*/)
+void serialize(Archive& ar, go_to_history_t& _1, const unsigned /*version*/)
 {
   ar& _1.index;
 }
