@@ -22,7 +22,6 @@ Item {
     id: command_field
     anchors.fill: parent
     border.color: "black"
-    //color: "write"
     radius: Constants.radius
     visible: false
 

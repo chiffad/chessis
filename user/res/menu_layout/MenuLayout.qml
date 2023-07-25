@@ -12,7 +12,6 @@ FocusScope {
   property alias command_field_model: command_field.model
   property alias text_inp: command_field.text_inp
 
-  signal run_command(string command, int num)
   signal work_with_file(string path_to_file, bool is_from_file)
 
   Rectangle {
@@ -59,7 +58,7 @@ FocusScope {
           anchors.fill: parent
           onPressed: {
             parent.color = "lightskyblue"
-            root.run_command("to history", index)
+            MenuLayoutController.go_to_history(index)
           }
           onReleased: parent.color = (index % 2) == 1 ? "navajowhite" : "lightyellow"
         }
@@ -90,7 +89,7 @@ FocusScope {
 
       text: "Back move"
 
-      onClicked: root.run_command("back",0);
+      onClicked: MenuLayoutController.back_move()
     }
 
     Button {
@@ -106,7 +105,7 @@ FocusScope {
 
       text: "New game"
 
-      onClicked: root.run_command("new game", 0)
+      onClicked: MenuLayoutController.new_game()
     }
 
     Button {
@@ -177,7 +176,7 @@ FocusScope {
 
       onText_inp_accepted: {
         if(text.length)
-          root.run_command(text,0)
+          MenuLayoutController.run_command(text)
       }
     }
 

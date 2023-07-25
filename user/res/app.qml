@@ -38,7 +38,6 @@ Window {
     command_field_current_ind: MenuLayoutController.last_command_hist_ind
     connection_status_text: MenuLayoutController.connection_status
 
-    onRun_command: MenuLayoutController.run_command(command, num)
     onWork_with_file: MenuLayoutController.path_to_file(path_to_file, is_from_file);
   }
 

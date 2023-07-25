@@ -30,9 +30,9 @@ public:
   menu_layout_t& operator=(const menu_layout_t&) = delete;
   ~menu_layout_t();
 
-  void set_move_color(const int move_num);
+  void set_move_color(int move_num);
   void set_board_mask(const QString& mask);
-  void set_connect_status(const int status);
+  void set_connect_status(int status);
   void set_moves_history(const QString& history);
   void add_to_command_history(const QString& str);
 
@@ -43,7 +43,10 @@ public:
   QString connection_status() const;
 
   Q_INVOKABLE void path_to_file(QString& path, bool is_moves_from_file);
-  Q_INVOKABLE void run_command(const QString& message, int x);
+  Q_INVOKABLE void run_command(const QString& message);
+  Q_INVOKABLE void new_game();
+  Q_INVOKABLE void back_move();
+  Q_INVOKABLE void go_to_history(int hist_i);
 
 signals:
   void moves_history_changed();
@@ -67,7 +70,6 @@ private:
   QStringList str_moves_history_;
   QStringList commands_history_;
   QString field_;
-
   command_requested_callback_t command_requested_callback_;
 };
 
