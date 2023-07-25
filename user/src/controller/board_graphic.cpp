@@ -1,4 +1,4 @@
-#include "controller/board_graphic.h"
+#include "controller/board_graphic.hpp"
 
 #include "figure.h"
 #include "helper.h"

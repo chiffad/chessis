@@ -1,6 +1,6 @@
 #pragma once
 
-#include "controller/board_graphic.h"
+#include "controller/board_graphic.hpp"
 #include "controller/login_input.hpp"
 #include "controller/menu_layout.hpp"
 #include "controller/message_processor.hpp"
