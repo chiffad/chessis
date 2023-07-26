@@ -8,7 +8,7 @@
 #include <functional>
 #include <vector>
 
-#include "client/messages.h"
+#include <messages/messages.hpp>
 
 #include <spdlog/spdlog.h>
 

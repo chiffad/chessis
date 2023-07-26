@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "helper.h"
-#include "messages.h"
+#include "messages/messages.hpp"
 
 using namespace sr;
 typedef boost::asio::io_service io_service_t;
@@ -154,19 +154,19 @@ void client_t::impl_t::push_from_server(const std::string& m)
   start_connection_timer();
   const auto t = msg::init<msg::some_datagramm_t>(datagramm.data).type;
 
-  if (t != msg::id<msg::message_received_t>())
+  if (t != msg::id_v<msg::message_received_t>)
   {
     add_for_server(msg::prepare_for_send(msg::message_received_t()));
   }
 
   switch (msg::init<msg::some_datagramm_t>(datagramm.data).type)
   {
-    case msg::id<msg::message_received_t>():
+    case msg::id_v<msg::message_received_t>:
       helper::log("msg::message_received_t");
       is_received = true;
       break;
-    case msg::id<msg::is_server_lost_t>(): helper::log("msg::is_server_lost_t"); break;
-    case msg::id<msg::hello_server_t>():
+    case msg::id_v<msg::is_server_lost_t>: helper::log("msg::is_server_lost_t"); break;
+    case msg::id_v<msg::hello_server_t>:
       helper::log("msg::hello_server_t");
       add_for_server(msg::prepare_for_send(msg::get_login_t()));
       break;

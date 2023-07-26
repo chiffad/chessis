@@ -11,8 +11,6 @@
 #include <string>
 #include <vector>
 
-#include "helper.h"
-
 namespace msg {
 struct my_archive_exception : public boost::archive::archive_exception
 {
@@ -184,15 +182,8 @@ typedef boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t,
                            client_lost_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>
   message_types;
 
-template<typename m_type>
-struct id
-{
-  enum
-  {
-    value = boost::mpl::find<message_types, m_type>::type::pos::value
-  };
-  constexpr operator int() { return value; }
-};
+template<typename T>
+inline constexpr int id_v = boost::mpl::find<message_types, T>::type::pos::value;
 
 template<typename struct_t>
 void update_struct(struct_t& s, const std::string& str)
@@ -209,12 +200,12 @@ struct_t init(const std::string& str)
   some_datagramm_t _1;
   update_struct(_1, str);
 
-  if (id<struct_t>() == id<some_datagramm_t>())
+  if (id_v<struct_t> == id_v<some_datagramm_t>)
   {
     _1.data = str;
   }
 
-  else if (_1.type != id<struct_t>())
+  else if (_1.type != id_v<struct_t>)
   {
     throw my_archive_exception("wrong struct_t type for init!!");
   }
@@ -232,9 +223,9 @@ std::string prepare_for_send(const struct_t& s)
   boost::archive::text_oarchive oa(ss);
   oa << s;
 
-  if (id<struct_t>() != id<some_datagramm_t>())
+  if (id_v<struct_t> != id_v<some_datagramm_t>)
   {
-    some_datagramm_t _1(ss.str(), id<struct_t>::value);
+    some_datagramm_t _1(ss.str(), id_v<struct_t>);
     return prepare_for_send(_1);
   }
 
@@ -244,7 +235,7 @@ std::string prepare_for_send(const struct_t& s)
 template<typename struct_t>
 bool is_equal_types(const std::string& str)
 {
-  return init<some_datagramm_t>(str).type == id<struct_t>();
+  return init<some_datagramm_t>(str).type == id_v<struct_t>;
 }
 
 } // namespace msg

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "client/messages.h"
 #include "controller/board_graphic.hpp"
 #include "controller/login_input.hpp"
 #include "controller/menu_layout.hpp"
+#include <messages/messages.hpp>
 
 #include <string>
 

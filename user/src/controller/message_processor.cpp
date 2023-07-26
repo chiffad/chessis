@@ -25,7 +25,7 @@ void message_processor_t::process(const msg::game_inf_t game_info)
 {
   SPDLOG_DEBUG("Process msg::game_inf_t");
 
-  menu_layout_.set_connect_status(msg::id<msg::server_here_t>());
+  menu_layout_.set_connect_status(msg::id_v<msg::server_here_t>);
   menu_layout_.set_move_color(game_info.move_num);
   menu_layout_.set_moves_history(QString::fromStdString(game_info.moves_history));
 
@@ -53,19 +53,19 @@ void message_processor_t::process(const msg::incorrect_log_t /*incorrect_log*/)
 void message_processor_t::process(const msg::server_lost_t /*server_lost*/)
 {
   SPDLOG_DEBUG("Process msg::server_lost_t");
-  menu_layout_.set_connect_status(msg::id<msg::server_lost_t>());
+  menu_layout_.set_connect_status(msg::id_v<msg::server_lost_t>);
 }
 
 void message_processor_t::process(const msg::server_here_t /*server_here*/)
 {
   SPDLOG_DEBUG("Process msg::server_here_t");
-  menu_layout_.set_connect_status(msg::id<msg::server_here_t>());
+  menu_layout_.set_connect_status(msg::id_v<msg::server_here_t>);
 }
 
 void message_processor_t::process(const msg::opponent_lost_t /*opp_lst*/)
 {
   SPDLOG_DEBUG("Process msg::opponent_lost_t");
-  menu_layout_.set_connect_status(msg::id<msg::opponent_lost_t>());
+  menu_layout_.set_connect_status(msg::id_v<msg::opponent_lost_t>);
 }
 
 } // namespace controller

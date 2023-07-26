@@ -1,8 +1,8 @@
 #pragma once
 
-#include "client/messages.h"
 #include "controller/figures_model.hpp"
 #include "coord.h"
+#include "messages/messages.hpp"
 
 #include <QQmlApplicationEngine>
 #include <QString>

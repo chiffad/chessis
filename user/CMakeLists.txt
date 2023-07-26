@@ -1,5 +1,5 @@
-project(chess_user LANGUAGES CXX)
 cmake_minimum_required(VERSION 3.13)
+project(user LANGUAGES CXX)
 set(TARGET_NAME ${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
@@ -8,8 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(QT_PACKAGE Qt5) 
 
 find_package(${QT_PACKAGE} REQUIRED COMPONENTS Core Widgets Quick Qml QuickCompiler OpenGL)
-find_package(Boost 1.82.0 REQUIRED COMPONENTS system serialization) 
-find_package(spdlog REQUIRED)
 
 qt5_add_resources(QML_QRC_PATH res.qrc)
 
@@ -17,20 +15,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(COMPILE_WARNINGS
-  -Werror
-  -Wpedantic
-  -Wformat
-  -Wuninitialized
-  -Wnull-dereference
-  -Wmissing-field-initializers
-  -Wpointer-arith
-  -Wcast-align
-  -Wfloat-equal
-)
-
 add_executable(${TARGET_NAME}  
-  src/client/messages.h
   src/client/client.h
   src/client/client.cpp
   src/client/handle_message.h
@@ -62,7 +47,8 @@ target_link_libraries(${TARGET_NAME}
   PRIVATE 
   spdlog::spdlog
   Boost::system 
-  Boost::serialization 
+  Boost::serialization
+  messages
   ${QT_PACKAGE}::Core 
   ${QT_PACKAGE}::Widgets
   ${QT_PACKAGE}::Quick 

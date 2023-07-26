@@ -194,14 +194,14 @@ void menu_layout_t::set_connect_status(const int status)
 {
   switch (status)
   {
-    case msg::id<msg::server_here_t>():
+    case msg::id_v<msg::server_here_t>:
       if (connection_status_ == "Disconnected")
       {
         connection_status_ = "Connect";
       }
       break;
-    case msg::id<msg::server_lost_t>(): connection_status_ = "Disconnected"; break;
-    case msg::id<msg::opponent_lost_t>(): connection_status_ = "Opponent disconnected"; break;
+    case msg::id_v<msg::server_lost_t>: connection_status_ = "Disconnected"; break;
+    case msg::id_v<msg::opponent_lost_t>: connection_status_ = "Opponent disconnected"; break;
     default: SPDLOG_ERROR("Unknown status={}", status); return;
   }
   emit connection_status_changed();

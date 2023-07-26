@@ -11,7 +11,7 @@
 #include "client.h"
 #include "desk.h"
 #include "helper.h"
-#include "messages.h"
+#include "messages/messages.hpp"
 
 namespace sr {
 class handle_message_t

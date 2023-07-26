@@ -1,5 +1,5 @@
 #include "controller/app.hpp"
-#include "client/messages.h"
+#include <messages/messages.hpp>
 
 #include <QQmlContext>
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "client/messages.h"
 #include "controller/message_processor.hpp"
 #include "helper.h"
+#include <messages/messages.hpp>
 
 #include <boost/mpl/begin_end.hpp>
 #include <spdlog/spdlog.h>
