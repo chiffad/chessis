@@ -10,18 +10,13 @@ Item {
 
   Board {
     id: board
-
     anchors.centerIn: root
     size: root.width * 0.8 
 
     Repeater {
       id: board_obj
-
       model: FiguresModel
-
-      delegate: Figure {
-        id: figure
-
+      delegate: Figure {            
         hilight_type: figure_name === "hilight"
         img_type: figure_name
         size: board.cell_size

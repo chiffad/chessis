@@ -1,16 +1,25 @@
 import QtQuick 2.12
 import Constants 1.0
 
-Image {
+Item {
   id: root
-  property string img_type
+  property string img_type: ""
   property alias size: root.width
   property bool hilight_type: false
-
-  height: width
-  source: "qrc:/res/img/" + root.img_type + ".png"
-
+  
+  height: width  
   Drag.active: drag_area.drag.active 
+
+  Loader {
+    id: loader
+    active: root.visible && root.img_type
+    anchors.fill: parent
+    sourceComponent: Image {
+      anchors.fill: parent
+      source: "qrc:/res/img/" + root.img_type + ".png"
+      Drag.active: drag_area.drag.active 
+    }
+  }
 
   MouseArea {
     id: drag_area
@@ -21,7 +30,7 @@ Image {
     anchors.fill: parent
     drag.minimumX: 0
     drag.minimumY: 0
-    drag.target: parent
+    drag.target: root
 
     onPressed: {
       drag_area.x1 = parent.x
@@ -36,7 +45,7 @@ Image {
       PropertyChanges { 
         target: root
         opacity: 1 
-        z: drag_area.drag.active || drag_area.pressed ? Constants.active_figure_z : Constants.passive_figure_z
+        z: drag_area.drag.active ? Constants.active_figure_z : Constants.passive_figure_z
       }
       PropertyChanges { target: drag_area; enabled: true }
     },
