@@ -16,6 +16,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 add_executable(${TARGET_NAME}  
+  src/client/socket.cpp 
+  src/client/socket.hpp 
   src/client/client.h
   src/client/client.cpp
   src/client/handle_message.h

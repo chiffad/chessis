@@ -9,6 +9,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Boost 1.82.0 REQUIRED COMPONENTS system serialization) 
 find_package(spdlog REQUIRED)
 
+add_definitions(-DSPDLOG_ACTIVE_LEVEL=0)
+
 set(COMPILE_WARNINGS
   -Werror
   -Wpedantic

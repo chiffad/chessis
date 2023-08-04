@@ -1,4 +1,5 @@
 #include "client.h"
+#include "client/socket.hpp"
 
 #include <QByteArray>
 #include <QObject>
@@ -14,193 +15,241 @@
 using namespace cl;
 
 namespace {
-const int RESPONSE_WAIT_TIME = 1000;
+const int RESPONSE_WAIT_TIME = 500;
 const int CHECK_CONNECT_TIME = 5000;
+const int RESEND_HELLO_SERVER_TIME = 40;
 const int FIRST_PORT = 49152;
-const int LAST_PORT = 49500;
+const int LAST_PORT = 49300;
 const char FREE_SPASE = ' ';
+
 } // namespace
 
 struct client_t::impl_t
 {
-  explicit impl_t(const client_t::message_received_callback_t& callback);
-  void send(const std::string& message, bool prev_serial_need = false);
-  void read();
-  bool is_message_received();
-  bool is_message_append() const;
-  std::string add_serial_num(const std::string& data, bool prev_serial_need = false);
-  void begin_wait_receive(const std::string& message);
+  struct state_t : public std::enable_shared_from_this<state_t>
+  {
+    explicit state_t(client_t::impl_t& client);
+    virtual ~state_t() = default;
+    virtual void send(const std::string& data, bool prev_serial_needed) = 0;
+    virtual void read() = 0;
 
-  QUdpSocket socket_;
-  QTimer response_checker_;
-  QTimer connection_checker_;
+    client_t::impl_t& client_;
+  };
+
+  struct connect_state_t : public state_t
+  {
+    explicit connect_state_t(client_t::impl_t& client);
+    void establish_connection(const bool prev_serial_needed);
+    void send(const std::string& data, const bool prev_serial_needed) override;
+    void read() override;
+    QTimer resend_hello_server_timer_;
+  };
+
+  struct connected_state_t : public state_t
+  {
+    explicit connected_state_t(client_t::impl_t& client);
+    void send(const std::string& data, const bool prev_serial_needed) override;
+    void read() override;
+  };
+
+  explicit impl_t(const client_t::message_received_callback_t& callback);
+  void resend_prev_message();
+  std::string add_serial_num(const std::string& data, bool prev_serial_needed = false);
+  void begin_wait_receive(const std::string& data);
+  bool validate_serial_num(const msg::incoming_datagramm_t& data);
+  inline void send(const std::string& data, bool prev_serial_needed = false) { state_->send(data, prev_serial_needed); }
+  inline void set_new_state(std::shared_ptr<state_t> s) { state_ = std::move(s); }
+  void write_datagram(const std::string& data, bool prev_serial_needed);
+
+  udp_socket_t socket_;
+  QTimer response_checker_timer_;
+  QTimer server_alive_timer_;
 
   std::string last_send_message_;
-  std::vector<std::string> send_message_stack_;
+  std::vector<std::string> messages_to_send_;
   int received_serial_num_;
   int send_serial_num_;
-  bool received_;
-
-  quint16 my_port_;
-  quint16 server_port_;
-  const QHostAddress SERVER_IP;
-
+  bool prev_message_sent_;
+  endpoint_t endpoint_;
   client_t::message_received_callback_t message_received_callback_;
+  std::shared_ptr<state_t> state_;
 };
 
 client_t::client_t(const message_received_callback_t& callback)
   : impl_(std::make_unique<impl_t>(callback))
 {}
 
-client_t::~client_t()
-{}
+client_t::~client_t() = default;
 
-void client_t::send(const std::string& message)
+void client_t::send(const std::string& data)
 {
-  impl_->send(message);
+  impl_->send(data);
 }
 
 client_t::impl_t::impl_t(const client_t::message_received_callback_t& callback)
-  : received_serial_num_(0)
+  : socket_{[this]() { state_->read(); }}
+  , received_serial_num_(0)
   , send_serial_num_(0)
-  , received_(true)
-  , server_port_(FIRST_PORT)
-  , SERVER_IP(QHostAddress::LocalHost)
+  , prev_message_sent_(true)
+  , endpoint_{"127.0.0.1", FIRST_PORT - 1}
   , message_received_callback_(callback)
 {
-  QObject::connect(&socket_, &QUdpSocket::readyRead, [&]() { read(); });
-  QObject::connect(&response_checker_, &QTimer::timeout, [&]() { is_message_received(); });
-  QObject::connect(&connection_checker_, &QTimer::timeout, [&]() { send(msg::prepare_for_send(msg::is_server_lost_t())); });
+  QObject::connect(&response_checker_timer_, &QTimer::timeout, [&]() { resend_prev_message(); });
+  QObject::connect(&server_alive_timer_, &QTimer::timeout, [&]() { send(msg::prepare_for_send(msg::is_server_lost_t{})); });
 
-  for (unsigned i = 0; i + FIRST_PORT < LAST_PORT; ++i)
-  {
-    if (socket_.bind(SERVER_IP, FIRST_PORT + i))
-    {
-      my_port_ = FIRST_PORT + i;
-      SPDLOG_INFO("bind to {}", FIRST_PORT + i);
-      break;
-    }
-    if (i + FIRST_PORT == LAST_PORT)
-    {
-      i = -1;
-    }
-  }
-
-  send(msg::prepare_for_send(msg::hello_server_t()));
+  state_ = std::make_shared<connect_state_t>(*this);
 }
 
-void client_t::impl_t::send(const std::string& message, const bool prev_serial_need)
+void client_t::impl_t::begin_wait_receive(const std::string& data)
 {
-  if (!msg::is_equal_types<msg::message_received_t>(message))
-  {
-    if (!is_message_received())
-    {
-      send_message_stack_.push_back(message);
-      return;
-    }
-    begin_wait_receive(message);
-  }
-
-  SPDLOG_TRACE("sent={}", message);
-  socket_.writeDatagram(QByteArray::fromStdString(add_serial_num(message, prev_serial_need)), SERVER_IP, server_port_);
+  prev_message_sent_ = false;
+  last_send_message_ = data;
+  response_checker_timer_.start(RESPONSE_WAIT_TIME);
 }
 
-void client_t::impl_t::read()
-{
-  QHostAddress sender_IP;
-  quint16 sender_port;
-
-  QByteArray message;
-  message.resize(socket_.pendingDatagramSize());
-  socket_.readDatagram(message.data(), message.size(), &sender_IP, &sender_port);
-
-  SPDLOG_TRACE("Read=", message);
-
-  if (sender_IP != SERVER_IP || sender_port != server_port_ || sender_port == my_port_)
-  {
-    SPDLOG_WARN("Wrong sender id={}, port={}!", sender_IP.toString(), sender_port);
-    return;
-  }
-
-  const auto datagramm = msg::init<msg::incoming_datagramm_t>(message.toStdString());
-
-  if (datagramm.ser_num != ++received_serial_num_)
-  {
-    --received_serial_num_;
-    if (datagramm.ser_num == received_serial_num_ && !msg::is_equal_types<msg::message_received_t>(datagramm.data))
-    {
-      connection_checker_.start(CHECK_CONNECT_TIME);
-      send(msg::prepare_for_send(msg::message_received_t()), true);
-    }
-    SPDLOG_WARN("Wrong serial number!");
-    return;
-  }
-
-  if (!msg::is_equal_types<msg::message_received_t>(datagramm.data))
-  {
-    send(msg::prepare_for_send(msg::message_received_t()));
-    if (!msg::is_equal_types<msg::is_client_lost_t>(datagramm.data))
-    {
-      message_received_callback_(datagramm.data);
-    }
-  }
-  else
-  {
-    if (msg::is_equal_types<msg::hello_server_t>(last_send_message_))
-    {
-      server_port_ = sender_port;
-    }
-
-    received_ = true;
-    message_received_callback_(msg::prepare_for_send(msg::server_here_t()));
-  }
-  connection_checker_.start(CHECK_CONNECT_TIME);
-}
-
-void client_t::impl_t::begin_wait_receive(const std::string& message)
-{
-  received_ = false;
-  last_send_message_ = message;
-  response_checker_.start(RESPONSE_WAIT_TIME);
-}
-
-bool client_t::impl_t::is_message_received()
+void client_t::impl_t::resend_prev_message()
 {
   static int num_of_restarts = 0;
-  if (received_)
+  if (prev_message_sent_)
   {
-    response_checker_.stop();
+    response_checker_timer_.stop();
     num_of_restarts = 0;
+    return;
   }
-  else
+
+  write_datagram(last_send_message_, true);
+
+  if (++num_of_restarts == 5 || msg::id_v<msg::is_server_lost_t> == msg::init<msg::some_datagramm_t>(last_send_message_).type)
   {
-    response_checker_.start(RESPONSE_WAIT_TIME);
-
-    const auto t = msg::init<msg::some_datagramm_t>(last_send_message_).type;
-    if (t == msg::id_v<msg::hello_server_t>)
-    {
-      ++server_port_;
-      if (server_port_ == LAST_PORT)
-      {
-        server_port_ = FIRST_PORT;
-      }
-
-      response_checker_.start(RESPONSE_WAIT_TIME / 10);
-    }
-
-    socket_.writeDatagram(QByteArray::fromStdString(add_serial_num(last_send_message_, true)), SERVER_IP, server_port_);
-
-    if (msg::id_v<msg::is_server_lost_t> == t || num_of_restarts == 5)
-    {
-      message_received_callback_(msg::prepare_for_send(msg::server_lost_t()));
-    }
-
-    ++num_of_restarts;
+    message_received_callback_(msg::prepare_for_send(msg::server_lost_t()));
   }
-  return received_;
 }
 
-std::string client_t::impl_t::add_serial_num(const std::string& data, const bool prev_serial_need)
+std::string client_t::impl_t::add_serial_num(const std::string& data, const bool prev_serial_needed)
 {
-  return msg::prepare_for_send(msg::incoming_datagramm_t(data, prev_serial_need ? send_serial_num_ : ++send_serial_num_));
+  return msg::prepare_for_send(msg::incoming_datagramm_t(data, prev_serial_needed ? send_serial_num_ : ++send_serial_num_));
+}
+
+bool client_t::impl_t::validate_serial_num(const msg::incoming_datagramm_t& datagramm)
+{
+  if (datagramm.ser_num == ++received_serial_num_) return true;
+
+  SPDLOG_WARN("Wrong serial number! ex={}; received={}", received_serial_num_, datagramm.ser_num);
+  --received_serial_num_;
+  if (datagramm.ser_num == received_serial_num_ && !msg::is_equal_types<msg::message_received_t>(datagramm.data))
+  {
+    send(msg::prepare_for_send(msg::message_received_t()), true);
+  }
+
+  return false;
+}
+
+void client_t::impl_t::write_datagram(const std::string& data, const bool prev_serial_needed)
+{
+  SPDLOG_TRACE("Send data={}; to {}", data, endpoint_);
+  socket_.write({endpoint_, add_serial_num(data, prev_serial_needed)});
+}
+
+//============================ state_t ============================
+
+client_t::impl_t::state_t::state_t(client_t::impl_t& client)
+  : client_{client}
+{}
+
+//============================ connect_state_t ============================
+
+client_t::impl_t::connect_state_t::connect_state_t(client_t::impl_t& client)
+  : state_t{client}
+{
+  QObject::connect(&resend_hello_server_timer_, &QTimer::timeout, [&]() { establish_connection(true); });
+
+  client_.socket_.bind();
+  SPDLOG_DEBUG("Trying to connect to the server");
+  establish_connection(false);
+  resend_hello_server_timer_.start(RESEND_HELLO_SERVER_TIME);
+}
+
+void client_t::impl_t::connect_state_t::establish_connection(const bool prev_serial_needed)
+{
+  if (++client_.endpoint_.port == LAST_PORT) client_.endpoint_.port = FIRST_PORT;
+  client_.write_datagram(msg::prepare_for_send(msg::hello_server_t{}), prev_serial_needed);
+}
+
+void client_t::impl_t::connect_state_t::send(const std::string& data, const bool prev_serial_needed)
+{
+  client_.messages_to_send_.push_back(data);
+}
+
+void client_t::impl_t::connect_state_t::read()
+{
+  const auto data = client_.socket_.read();
+  SPDLOG_TRACE("Read data={}", data);
+
+  if (data.endpoint == client_.socket_.endpoint()) return;
+
+  const auto datagramm = msg::init<msg::incoming_datagramm_t>(data.data);
+  if (!client_.validate_serial_num(datagramm)) return;
+  if (!msg::is_equal_types<msg::message_received_t>(datagramm.data)) return;
+
+  SPDLOG_INFO("Server found on {}", data.endpoint);
+  client_.endpoint_.port = data.endpoint.port;
+  resend_hello_server_timer_.stop();
+
+  client_.message_received_callback_(msg::prepare_for_send(msg::server_here_t()));
+
+  auto self = shared_from_this(); // set_new_state will change current state on new one
+  client_.set_new_state(std::make_shared<connected_state_t>(client_));
+}
+
+//============================ connected_state_t ============================
+
+client_t::impl_t::connected_state_t::connected_state_t(client_t::impl_t& client)
+  : state_t{client}
+{}
+
+void client_t::impl_t::connected_state_t::send(const std::string& data, const bool prev_serial_needed)
+{
+  if (!msg::is_equal_types<msg::message_received_t>(data))
+  {
+    if (!client_.prev_message_sent_)
+    {
+      client_.messages_to_send_.push_back(data);
+      return;
+    }
+    client_.begin_wait_receive(data);
+  }
+
+  client_.write_datagram(data, prev_serial_needed);
+}
+
+void client_t::impl_t::connected_state_t::read()
+{
+  const auto data = client_.socket_.read();
+  SPDLOG_TRACE("Read={}", data.data);
+
+  if (data.endpoint.port == client_.socket_.endpoint().port) return;
+
+  if (!(data.endpoint == client_.endpoint_))
+  {
+    SPDLOG_WARN("Wrong sender {}! Expected {}", data.endpoint, client_.endpoint_);
+    return;
+  }
+
+  client_.server_alive_timer_.start(CHECK_CONNECT_TIME);
+
+  const auto datagramm = msg::init<msg::incoming_datagramm_t>(data.data);
+  if (!client_.validate_serial_num(datagramm)) return;
+
+  if (msg::is_equal_types<msg::message_received_t>(datagramm.data))
+  {
+    client_.prev_message_sent_ = true;
+    client_.message_received_callback_(msg::prepare_for_send(msg::server_here_t()));
+    return;
+  }
+
+  client_.send(msg::prepare_for_send(msg::message_received_t()));
+  if (!msg::is_equal_types<msg::is_client_lost_t>(datagramm.data))
+  {
+    client_.message_received_callback_(datagramm.data);
+  }
 }

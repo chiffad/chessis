@@ -55,7 +55,7 @@ server_t::impl_t::impl_t(io_service_t& io_serv)
   enum
   {
     FIRST_PORT = 49152,
-    LAST_PORT = 49500
+    LAST_PORT = 49300
   };
 
   while (!socket.is_open())
