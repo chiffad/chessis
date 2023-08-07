@@ -35,7 +35,7 @@ Image {
 
       font.bold: true
       font.pointSize: root.cell_numeration_size
-      text: "a" + index
+      text: String.fromCharCode(97 + index) //'a' + index
       opacity: 0.3
     }
   }
