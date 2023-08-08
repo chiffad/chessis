@@ -10,8 +10,6 @@
 #include "helper.h"
 
 namespace {
-constexpr const char* const MOVE_COLOR_W = "img/w_k.png";
-constexpr const char* const MOVE_COLOR_B = "img/b_K.png";
 const char FREE_SPACE = ' ';
 
 constexpr const char* const HELP_WORD = "help";
@@ -28,7 +26,7 @@ namespace controller {
 
 menu_layout_t::menu_layout_t(const command_requested_callback_t& callback)
   : QObject()
-  , move_color_(MOVE_COLOR_W)
+  , white_move_turn_(true)
   , connection_status_("Disconnected")
   , command_requested_callback_(callback)
 {}
@@ -130,10 +128,10 @@ void menu_layout_t::set_moves_history(const QString& history)
   emit moves_history_changed();
 }
 
-void menu_layout_t::set_move_color(const int move_num)
+void menu_layout_t::set_move_turn(const int move_num)
 {
-  move_color_ = (move_num % 2 == 0) ? MOVE_COLOR_W : MOVE_COLOR_B;
-  emit move_turn_color_changed();
+  white_move_turn_ = move_num % 2 == 0;
+  emit white_move_turn_changed();
 }
 
 void menu_layout_t::add_to_command_history(const QString& str)
@@ -222,9 +220,9 @@ int menu_layout_t::last_command_hist_ind() const
   return commands_history_.size() - 1;
 }
 
-QString menu_layout_t::move_turn_color() const
+bool menu_layout_t::white_move_turn() const
 {
-  return move_color_;
+  return white_move_turn_;
 }
 
 QString menu_layout_t::connection_status() const

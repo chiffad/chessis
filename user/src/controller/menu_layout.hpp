@@ -17,7 +17,7 @@ namespace controller {
 class menu_layout_t : public QObject
 {
   Q_OBJECT
-  Q_PROPERTY(QString move_turn_color READ move_turn_color NOTIFY move_turn_color_changed)
+  Q_PROPERTY(bool white_move_turn READ white_move_turn NOTIFY white_move_turn_changed)
   Q_PROPERTY(QStringList moves_history READ moves_history NOTIFY moves_history_changed)
   Q_PROPERTY(QStringList commands_hist READ commands_hist NOTIFY commands_hist_changed)
   Q_PROPERTY(int last_command_hist_ind READ last_command_hist_ind NOTIFY commands_hist_changed)
@@ -32,13 +32,13 @@ public:
   menu_layout_t& operator=(const menu_layout_t&) = delete;
   ~menu_layout_t();
 
-  void set_move_color(int move_num);
+  void set_move_turn(int move_num);
   void set_board_mask(const QString& mask);
   void set_connect_status(int status);
   void set_moves_history(const QString& history);
   void add_to_command_history(const QString& str);
 
-  QString move_turn_color() const;
+  bool white_move_turn() const;
   QStringList moves_history() const;
   QStringList commands_hist() const;
   int last_command_hist_ind() const;
@@ -53,7 +53,7 @@ public:
 signals:
   void moves_history_changed();
   void commands_hist_changed();
-  void move_turn_color_changed();
+  void white_move_turn_changed();
   void connection_status_changed();
 
 private:
@@ -67,7 +67,7 @@ private:
   }
 
 private:
-  QString move_color_;
+  bool white_move_turn_;
   QString connection_status_;
   QStringList str_moves_history_;
   QStringList commands_history_;

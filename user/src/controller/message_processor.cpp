@@ -26,7 +26,7 @@ void message_processor_t::process(const msg::game_inf_t game_info)
   SPDLOG_DEBUG("Process msg::game_inf_t");
 
   menu_layout_.set_connect_status(msg::id_v<msg::server_here_t>);
-  menu_layout_.set_move_color(game_info.move_num);
+  menu_layout_.set_move_turn(game_info.move_num);
   menu_layout_.set_moves_history(QString::fromStdString(game_info.moves_history));
 
   board_.set_board_mask(QString::fromStdString(game_info.board_mask));

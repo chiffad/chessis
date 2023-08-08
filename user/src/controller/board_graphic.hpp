@@ -15,6 +15,7 @@ class board_graphic_t : public QObject
 {
   Q_OBJECT
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
+  Q_PROPERTY(bool playing_white READ playing_white NOTIFY playing_white_changed)
 
 public:
   using move_requested_callback_t = std::function<void(msg::move_t)>;
@@ -25,6 +26,8 @@ public:
   board_graphic_t& operator=(const board_graphic_t&) = delete;
   ~board_graphic_t() override;
 
+  void set_playing_white(bool playing_white);
+  bool playing_white() const;
   bool is_check_mate() const;
   void set_check_mate();
   void update_hilight(int move_num, const QString& history);
@@ -36,6 +39,7 @@ public:
 
 signals:
   void check_mate();
+  void playing_white_changed();
 
 private:
   void update_figures();
@@ -43,6 +47,7 @@ private:
 
 private:
   figures_model_t figures_model_;
+  bool playing_white_;
   bool check_mate_;
   QString field_;
   unsigned cell_width_;

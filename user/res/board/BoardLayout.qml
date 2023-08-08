@@ -8,7 +8,7 @@ Item {
   width: Constants.board_layout_size
   height: width
 
-  Board {
+  BoardWithFigures {
     id: board
     anchors.centerIn: root
     size: root.width * 0.8 

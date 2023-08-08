@@ -24,8 +24,8 @@ Item {
       y: root.cell_size * index
       font.bold: true
       font.pointSize: root.cell_numeration_size
-      text: root.cells_count - index
       opacity: 0.3
+      text: BoardController.playing_white ? root.cells_count - index : index + 1        
     }
   }
 
@@ -38,21 +38,9 @@ Item {
 
       font.bold: true
       font.pointSize: root.cell_numeration_size
-      text: String.fromCharCode(97 + index) //'a' + index
       opacity: 0.3
-    }
-  }
-
-  Repeater {
-    id: board_obj
-    model: FiguresModel
-    delegate: Figure {            
-      hilight_type: figure_name === "hilight"
-      img_type: figure_name
-      size: board.cell_size
-      x: figure_x * board.cell_size
-      y: figure_y * board.cell_size
-      visible: figure_visible
+      text: String.fromCharCode(BoardController.playing_white ? 97 + index : 104 - index) //'a' + index or 'h' - index
+                                          
     }
   }
 

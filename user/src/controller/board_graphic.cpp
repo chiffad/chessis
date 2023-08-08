@@ -39,6 +39,7 @@ namespace controller {
 board_graphic_t::board_graphic_t(const move_requested_callback_t& callback)
   : QObject(nullptr)
   , figures_model_{this}
+  , playing_white_{true}
   , check_mate_{false}
   , field_{}
   , cell_width_{0}
@@ -130,6 +131,17 @@ void board_graphic_t::set_check_mate()
 {
   check_mate_ = true;
   emit check_mate();
+}
+
+bool board_graphic_t::playing_white() const
+{
+  return playing_white_;
+}
+
+void board_graphic_t::set_playing_white(bool playing_white)
+{
+  playing_white_ = playing_white;
+  emit playing_white_changed();
 }
 
 void board_graphic_t::set_cell_size(const int width, const int height)
