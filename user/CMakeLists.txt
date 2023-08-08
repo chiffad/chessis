@@ -25,8 +25,8 @@ add_executable(${TARGET_NAME}
   src/controller/menu_layout.cpp 
   src/controller/figures_model.hpp
   src/controller/figures_model.cpp 
-  src/controller/board_graphic.cpp
-  src/controller/board_graphic.hpp
+  src/controller/board.cpp
+  src/controller/board.hpp
   src/controller/login_input.hpp
   src/controller/login_input.cpp
   src/controller/message_processor.hpp 

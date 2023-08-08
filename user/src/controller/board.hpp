@@ -11,7 +11,7 @@
 
 namespace controller {
 
-class board_graphic_t : public QObject
+class board_t : public QObject
 {
   Q_OBJECT
   Q_PROPERTY(bool is_check_mate READ is_check_mate NOTIFY check_mate)
@@ -21,10 +21,10 @@ public:
   using move_requested_callback_t = std::function<void(msg::move_t)>;
 
 public:
-  explicit board_graphic_t(const move_requested_callback_t& callback);
-  board_graphic_t(const board_graphic_t&) = delete;
-  board_graphic_t& operator=(const board_graphic_t&) = delete;
-  ~board_graphic_t() override;
+  explicit board_t(const move_requested_callback_t& callback);
+  board_t(const board_t&) = delete;
+  board_t& operator=(const board_t&) = delete;
+  ~board_t() override;
 
   void set_playing_white(bool playing_white);
   bool playing_white() const;

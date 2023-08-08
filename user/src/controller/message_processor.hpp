@@ -1,6 +1,6 @@
 #pragma once
 
-#include "controller/board_graphic.hpp"
+#include "controller/board.hpp"
 #include "controller/login_input.hpp"
 #include "controller/menu_layout.hpp"
 #include <messages/messages.hpp>
@@ -12,7 +12,7 @@ namespace controller {
 class message_processor_t
 {
 public:
-  message_processor_t(menu_layout_t& menu_layout, board_graphic_t& board, login_input_t& login_input);
+  message_processor_t(menu_layout_t& menu_layout, board_t& board, login_input_t& login_input);
 
   void process_server_message(const std::string& server_message);
   void process(msg::inf_request_t info_request);
@@ -25,7 +25,7 @@ public:
 
 private:
   menu_layout_t& menu_layout_;
-  board_graphic_t& board_;
+  board_t& board_;
   login_input_t& login_input_;
 };
 

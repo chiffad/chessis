@@ -4,7 +4,7 @@
 
 namespace controller {
 
-message_processor_t::message_processor_t(menu_layout_t& menu_layout, board_graphic_t& board, login_input_t& login_input)
+message_processor_t::message_processor_t(menu_layout_t& menu_layout, board_t& board, login_input_t& login_input)
   : menu_layout_{menu_layout}
   , board_{board}
   , login_input_{login_input}

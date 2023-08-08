@@ -1,4 +1,4 @@
-#include "controller/board_graphic.hpp"
+#include "controller/board.hpp"
 
 #include "figure.h"
 #include "helper.h"
@@ -36,7 +36,7 @@ inline coord_t get_field_coord(const int i)
 
 namespace controller {
 
-board_graphic_t::board_graphic_t(const move_requested_callback_t& callback)
+board_t::board_t(const move_requested_callback_t& callback)
   : QObject(nullptr)
   , figures_model_{this}
   , playing_white_{true}
@@ -52,14 +52,14 @@ board_graphic_t::board_graphic_t(const move_requested_callback_t& callback)
   }
 }
 
-board_graphic_t::~board_graphic_t() = default;
+board_t::~board_t() = default;
 
-void board_graphic_t::set_context_properties(QQmlApplicationEngine& engine)
+void board_t::set_context_properties(QQmlApplicationEngine& engine)
 {
   engine.rootContext()->setContextProperty("FiguresModel", &figures_model_);
 }
 
-void board_graphic_t::move(const int x1, const int y1, const int x2, const int y2)
+void board_t::move(const int x1, const int y1, const int x2, const int y2)
 {
   SPDLOG_DEBUG("move requested: x1={}; y1={}; x1={}; y2={}", x1, y1, x2, y2);
   msg::move_t move_msg;
@@ -67,7 +67,7 @@ void board_graphic_t::move(const int x1, const int y1, const int x2, const int y
   move_requested_callback_(std::move(move_msg));
 }
 
-void board_graphic_t::set_board_mask(const QString& mask)
+void board_t::set_board_mask(const QString& mask)
 {
   if (mask.size() != CELL_NUM * CELL_NUM)
   {
@@ -79,7 +79,7 @@ void board_graphic_t::set_board_mask(const QString& mask)
   update_figures();
 }
 
-void board_graphic_t::update_figures()
+void board_t::update_figures()
 {
   auto f_it = field_.begin();
   for (size_t i = 0; i < FIGURES_NUMBER; ++i)
@@ -99,7 +99,7 @@ void board_graphic_t::update_figures()
   }
 }
 
-void board_graphic_t::update_hilight(const int move_num, const QString& history)
+void board_t::update_hilight(const int move_num, const QString& history)
 {
   if (move_num == 0)
   {
@@ -122,36 +122,36 @@ void board_graphic_t::update_hilight(const int move_num, const QString& history)
   }
 }
 
-bool board_graphic_t::is_check_mate() const
+bool board_t::is_check_mate() const
 {
   return check_mate_;
 }
 
-void board_graphic_t::set_check_mate()
+void board_t::set_check_mate()
 {
   check_mate_ = true;
   emit check_mate();
 }
 
-bool board_graphic_t::playing_white() const
+bool board_t::playing_white() const
 {
   return playing_white_;
 }
 
-void board_graphic_t::set_playing_white(bool playing_white)
+void board_t::set_playing_white(bool playing_white)
 {
   playing_white_ = playing_white;
   emit playing_white_changed();
 }
 
-void board_graphic_t::set_cell_size(const int width, const int height)
+void board_t::set_cell_size(const int width, const int height)
 {
   SPDLOG_INFO("Cell size: width={}; height={}", width, height);
   cell_width_ = width;
   cell_height_ = height;
 }
 
-coord_t board_graphic_t::get_coord(const int x, const int y) const
+coord_t board_t::get_coord(const int x, const int y) const
 {
   if (x < 0 || y < 0 || x > (cell_width_ * CELL_NUM) || y > (cell_height_ * CELL_NUM))
   {
