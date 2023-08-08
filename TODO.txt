@@ -1,0 +1,6 @@
+[user]
+* give color side to the user (i.e. white player or black player)
+* rotate board according to color side
+
+[server]
+* refactor
