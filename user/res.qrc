@@ -19,9 +19,9 @@
         <file>res/img/checkMate.png</file>
         <file>res/img/hilight.png</file>
         <file>res/app.qml</file>
-        <file>res/BoardLayout.qml</file>
-        <file>res/Board.qml</file>
-        <file>res/Figure.qml</file> 
+        <file>res/board/BoardLayout.qml</file>
+        <file>res/board/Board.qml</file>
+        <file>res/board/Figure.qml</file> 
         <file>res/Constants.qml</file>
         <file>res/menu_layout/ConnectionStatus.qml</file>
         <file>res/menu_layout/MenuLayout.qml</file>

@@ -2,17 +2,20 @@ import QtQuick 2.12
 
 import Constants 1.0
 
-Image {
+Item {
   id: root
-
   property int size
   readonly property double cell_size: root.size / root.cells_count
   readonly property int cell_numeration_size: 12
   readonly property int cells_count: 8
-
   width: root.size
   height: width
-  source: "qrc:/res/img/board.png"
+
+  Image {
+    id: board_img
+    anchors.fill: parent
+    source: "qrc:/res/img/board.png"
+  }
 
   Repeater {
     model: root.cells_count
@@ -37,6 +40,19 @@ Image {
       font.pointSize: root.cell_numeration_size
       text: String.fromCharCode(97 + index) //'a' + index
       opacity: 0.3
+    }
+  }
+
+  Repeater {
+    id: board_obj
+    model: FiguresModel
+    delegate: Figure {            
+      hilight_type: figure_name === "hilight"
+      img_type: figure_name
+      size: board.cell_size
+      x: figure_x * board.cell_size
+      y: figure_y * board.cell_size
+      visible: figure_visible
     }
   }
 

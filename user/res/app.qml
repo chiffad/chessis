@@ -6,6 +6,7 @@ import Constants 1.0
 
 import "login"
 import "menu_layout"
+import "board"
 
 Window {
   id: root

@@ -146,7 +146,7 @@ bool client_t::impl_t::validate_serial_num(const msg::incoming_datagramm_t& data
 
 void client_t::impl_t::write_datagram(const std::string& data, const bool prev_serial_needed)
 {
-  SPDLOG_TRACE("Send data={}; to {}", data, endpoint_);
+  // SPDLOG_TRACE("Send data={}; to {}", data, endpoint_);
   socket_.write({endpoint_, add_serial_num(data, prev_serial_needed)});
 }
 
