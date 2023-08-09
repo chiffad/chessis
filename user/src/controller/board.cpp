@@ -81,15 +81,18 @@ void board_t::set_board_mask(const QString& mask)
 
 void board_t::update_figures()
 {
-  auto f_it = field_.begin();
+  QString field_according_to_color = field_;
+  if (!playing_white_) std::reverse(field_according_to_color.begin(), field_according_to_color.end());
+
+  auto f_it = field_according_to_color.begin();
   for (size_t i = 0; i < FIGURES_NUMBER; ++i)
   {
-    f_it = std::find_if(f_it, field_.end(), [](auto const& i) { return i != FREE_FIELD; });
+    f_it = std::find_if(f_it, field_according_to_color.end(), [](auto const& i) { return i != FREE_FIELD; });
     figure_t f;
-    if (f_it == field_.end()) f.set_visible(false);
+    if (f_it == field_according_to_color.end()) f.set_visible(false);
     else
     {
-      f.set_coord(get_field_coord(field_.indexOf(*f_it, (f_it - field_.begin()))));
+      f.set_coord(get_field_coord(field_according_to_color.indexOf(*f_it, (f_it - field_according_to_color.begin()))));
       f.set_name(QString(f_it->isLower() ? "w_" : "b_") + *f_it);
       f.set_visible(true);
       ++f_it;
@@ -109,16 +112,15 @@ void board_t::update_hilight(const int move_num, const QString& history)
   }
 
   const int CHAR_IN_MOVE = 4;
-  if (history.size() >= move_num * CHAR_IN_MOVE)
+  if (history.size() < move_num * CHAR_IN_MOVE) return;
+
+  auto simb = history.begin() + (move_num - 1) * CHAR_IN_MOVE;
+  coord_t c;
+  for (size_t i = 0; i < HILIGHT_CELLS_NUM; ++i)
   {
-    auto simb = history.begin() + (move_num - 1) * CHAR_IN_MOVE;
-    coord_t c;
-    for (size_t i = 0; i < HILIGHT_CELLS_NUM; ++i)
-    {
-      c.x = (*(simb++)).unicode() - LETTER_a;
-      c.y = CELL_NUM - (*(simb++)).digitValue();
-      figures_model_.update_figure(figure_t{HILIGHT_IM, c, true}, i == 0 ? SECOND_HILIGHT_I : FIRST_HILIGHT_I);
-    }
+    c.x = (simb++)->unicode() - LETTER_a;
+    c.y = CELL_NUM - (simb++)->digitValue();
+    figures_model_.update_figure(figure_t{HILIGHT_IM, according_to_side(c), true}, i == 0 ? SECOND_HILIGHT_I : FIRST_HILIGHT_I);
   }
 }
 
@@ -159,7 +161,13 @@ coord_t board_t::get_coord(const int x, const int y) const
     return coord_t(x, y);
   }
 
-  return coord_t((x + (cell_width_ / 2)) / cell_width_, (y + (cell_height_ / 2)) / cell_height_);
+  const coord_t res{(x + (cell_width_ / 2)) / cell_width_, (y + (cell_height_ / 2)) / cell_height_};
+  return according_to_side(res);
+}
+
+coord_t board_t::according_to_side(const coord_t& c) const
+{
+  return playing_white_ ? c : coord_t{CELL_NUM - 1 - c.x, CELL_NUM - 1 - c.y};
 }
 
 } // namespace controller

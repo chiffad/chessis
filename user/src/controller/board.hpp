@@ -44,6 +44,7 @@ signals:
 private:
   void update_figures();
   coord_t get_coord(int x, int y) const;
+  coord_t according_to_side(const coord_t& c) const;
 
 private:
   figures_model_t figures_model_;

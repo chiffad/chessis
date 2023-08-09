@@ -34,7 +34,7 @@ Window {
     focus: !login_input.visible 
 
     move_output_model: MenuLayoutController.moves_history
-    move_turn_img_source: MenuLayoutController.white_move_turn ? "img/w_k.png" : "img/b_k.png"
+    move_turn_img_source: MenuLayoutController.white_move_turn ? "qrc:/res/img/w_k.png" : "qrc:/res/img/b_K.png"
     command_field_model: MenuLayoutController.commands_hist
     command_field_current_ind: MenuLayoutController.last_command_hist_ind
     connection_status_text: MenuLayoutController.connection_status
