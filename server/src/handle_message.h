@@ -44,6 +44,7 @@ private:
   std::vector<std::shared_ptr<logic::desk_t>>::iterator get_desk(const std::shared_ptr<sr::client_t>& client);
   std::vector<std::shared_ptr<sr::client_t>>::iterator get_opponent(const std::shared_ptr<sr::client_t>& client);
   void board_updated(std::shared_ptr<sr::client_t>& client);
+  void start_new_game(std::shared_ptr<sr::client_t>& client);
 
   template<typename T>
   void handle_fn(const std::string& str, std::shared_ptr<sr::client_t>& /*client*/)

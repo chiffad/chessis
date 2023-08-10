@@ -25,6 +25,8 @@ public:
   std::string get_pwd() const;
   void set_rating(const int rating);
   int get_rating() const;
+  bool playing_white() const;
+  void set_playing_white(bool playing_white);
 
 public:
   client_t(const client_t&) = delete;

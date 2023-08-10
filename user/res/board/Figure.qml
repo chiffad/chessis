@@ -6,7 +6,7 @@ Item {
   property string img_type: ""
   property alias size: root.width
   property bool hilight_type: false
-  
+
   height: width  
   Drag.active: drag_area.drag.active 
 
@@ -28,9 +28,7 @@ Item {
     property int y1
 
     anchors.fill: parent
-    drag.minimumX: 0
-    drag.minimumY: 0
-    drag.target: root
+    drag.target: parent
 
     onPressed: {
       drag_area.x1 = parent.x

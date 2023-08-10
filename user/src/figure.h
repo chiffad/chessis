@@ -28,5 +28,5 @@ public:
 private:
   QString name_{};
   coord_t coord_{};
-  bool visible_{};
+  bool visible_{false};
 };

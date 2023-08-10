@@ -5,6 +5,7 @@
 #include <spdlog/spdlog.h>
 
 #include <QQmlContext>
+#include <QString>
 #include <algorithm>
 #include <ctype.h>
 #include <fstream>
@@ -15,6 +16,7 @@ namespace {
 const int CELL_NUM = 8;
 const char FREE_FIELD = '.';
 const char LETTER_a = 'a';
+const char ASCII_0 = '0';
 const size_t FIGURES_NUMBER = 32;
 
 const size_t HILIGHT_CELLS_NUM = 2;
@@ -30,6 +32,14 @@ inline std::string to_str(const coord_t& c)
 inline coord_t get_field_coord(const int i)
 {
   return coord_t(i % CELL_NUM, i / CELL_NUM);
+}
+
+QString figure_from_field_mask(const char figure_symbol)
+{
+  static const QString white_prefix = "w_";
+  static const QString black_prefix = "b_";
+
+  return (std::islower(figure_symbol) ? white_prefix : black_prefix) + figure_symbol;
 }
 
 } // namespace
@@ -59,6 +69,18 @@ void board_t::set_context_properties(QQmlApplicationEngine& engine)
   engine.rootContext()->setContextProperty("FiguresModel", &figures_model_);
 }
 
+void board_t::update_game_info(const msg::game_inf_t& game_info)
+{
+  set_playing_white(game_info.playing_white);
+  set_board_mask(game_info.board_mask);
+  update_hilight(game_info.move_num, game_info.moves_history);
+
+  if (game_info.is_mate)
+  {
+    set_check_mate();
+  }
+}
+
 void board_t::move(const int x1, const int y1, const int x2, const int y2)
 {
   SPDLOG_DEBUG("move requested: x1={}; y1={}; x1={}; y2={}", x1, y1, x2, y2);
@@ -67,7 +89,7 @@ void board_t::move(const int x1, const int y1, const int x2, const int y2)
   move_requested_callback_(std::move(move_msg));
 }
 
-void board_t::set_board_mask(const QString& mask)
+void board_t::set_board_mask(const std::string& mask)
 {
   if (mask.size() != CELL_NUM * CELL_NUM)
   {
@@ -81,19 +103,18 @@ void board_t::set_board_mask(const QString& mask)
 
 void board_t::update_figures()
 {
-  QString field_according_to_color = field_;
+  std::string field_according_to_color = field_;
   if (!playing_white_) std::reverse(field_according_to_color.begin(), field_according_to_color.end());
 
   auto f_it = field_according_to_color.begin();
   for (size_t i = 0; i < FIGURES_NUMBER; ++i)
   {
     f_it = std::find_if(f_it, field_according_to_color.end(), [](auto const& i) { return i != FREE_FIELD; });
-    figure_t f;
-    if (f_it == field_according_to_color.end()) f.set_visible(false);
-    else
+    figure_t f{"", {}, false};
+    if (f_it != field_according_to_color.end())
     {
-      f.set_coord(get_field_coord(field_according_to_color.indexOf(*f_it, (f_it - field_according_to_color.begin()))));
-      f.set_name(QString(f_it->isLower() ? "w_" : "b_") + *f_it);
+      f.set_coord(get_field_coord(std::distance(field_according_to_color.begin(), f_it)));
+      f.set_name(figure_from_field_mask(*f_it));
       f.set_visible(true);
       ++f_it;
     }
@@ -102,7 +123,7 @@ void board_t::update_figures()
   }
 }
 
-void board_t::update_hilight(const int move_num, const QString& history)
+void board_t::update_hilight(const int move_num, const std::string& history)
 {
   if (move_num == 0)
   {
@@ -118,8 +139,8 @@ void board_t::update_hilight(const int move_num, const QString& history)
   coord_t c;
   for (size_t i = 0; i < HILIGHT_CELLS_NUM; ++i)
   {
-    c.x = (simb++)->unicode() - LETTER_a;
-    c.y = CELL_NUM - (simb++)->digitValue();
+    c.x = *(simb++) - LETTER_a;
+    c.y = CELL_NUM - (*(simb++) - ASCII_0);
     figures_model_.update_figure(figure_t{HILIGHT_IM, according_to_side(c), true}, i == 0 ? SECOND_HILIGHT_I : FIRST_HILIGHT_I);
   }
 }

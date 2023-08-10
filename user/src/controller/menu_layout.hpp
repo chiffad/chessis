@@ -32,10 +32,8 @@ public:
   menu_layout_t& operator=(const menu_layout_t&) = delete;
   ~menu_layout_t();
 
-  void set_move_turn(int move_num);
-  void set_board_mask(const QString& mask);
-  void set_connect_status(int status);
-  void set_moves_history(const QString& history);
+  void update_game_info(const msg::game_inf_t& game_info);
+  void set_connect_status(int status); // TODO: use enum
   void add_to_command_history(const QString& str);
 
   bool white_move_turn() const;
@@ -57,6 +55,9 @@ signals:
   void connection_status_changed();
 
 private:
+  void set_moves_history(const QString& history);
+  void set_move_turn(int move_num);
+
   void write_moves_to_file(const QString& path);
   void read_moves_from_file(const QString& path);
 

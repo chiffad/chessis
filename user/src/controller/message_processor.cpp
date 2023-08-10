@@ -26,16 +26,8 @@ void message_processor_t::process(const msg::game_inf_t game_info)
   SPDLOG_DEBUG("Process msg::game_inf_t");
 
   menu_layout_.set_connect_status(msg::id_v<msg::server_here_t>);
-  menu_layout_.set_move_turn(game_info.move_num);
-  menu_layout_.set_moves_history(QString::fromStdString(game_info.moves_history));
-
-  board_.set_board_mask(QString::fromStdString(game_info.board_mask));
-  board_.update_hilight(game_info.move_num, QString::fromStdString(game_info.moves_history));
-
-  if (game_info.is_mate)
-  {
-    board_.set_check_mate();
-  }
+  menu_layout_.update_game_info(game_info);
+  board_.update_game_info(game_info);
 }
 
 void message_processor_t::process(const msg::get_login_t /*get_login*/)

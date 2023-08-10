@@ -33,6 +33,12 @@ menu_layout_t::menu_layout_t(const command_requested_callback_t& callback)
 
 menu_layout_t::~menu_layout_t() = default;
 
+void menu_layout_t::update_game_info(const msg::game_inf_t& game_info)
+{
+  set_move_turn(game_info.move_num);
+  set_moves_history(QString::fromStdString(game_info.moves_history));
+}
+
 void menu_layout_t::new_game()
 {
   command_requested(msg::new_game_t{});

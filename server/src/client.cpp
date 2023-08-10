@@ -10,6 +10,10 @@ typedef boost::asio::io_service io_service_t;
 typedef boost::asio::ip::udp::endpoint endpoint_t;
 typedef boost::asio::deadline_timer deadline_timer_t;
 
+namespace {
+const char FREE_SPASE = ' ';
+}
+
 struct client_t::impl_t
 {
   impl_t(io_service_t& io_serv, const endpoint_t& addr);
@@ -24,7 +28,7 @@ struct client_t::impl_t
   void set_login_pwd(const std::string& log, const std::string& pwd);
   std::string get_login() const;
   std::string get_pwd() const;
-  void set_rating(const int rating);
+  void set_rating(int rating);
   int get_rating() const;
 
   bool check_ser_num(const msg::incoming_datagramm_t& num);
@@ -37,7 +41,7 @@ struct client_t::impl_t
 
   struct server_mess_t
   {
-    server_mess_t(const std::string& m, const bool is_extra);
+    server_mess_t(const std::string& m, bool is_extra);
     server_mess_t() = default;
     std::string message;
     bool is_extra;
@@ -52,23 +56,20 @@ struct client_t::impl_t
 
   std::string login;
   std::string pwd;
-  int elo = 1200;
+  int elo;
+  bool playing_white_;
 
   int received_serial_num;
   int send_serial_num;
   bool is_received;
-
   endpoint_t address;
-
-  const char FREE_SPASE = ' ';
 };
 
 client_t::client_t(io_service_t& io_serv, const endpoint_t& addr)
   : impl(std::make_unique<impl_t>(io_serv, addr))
 {}
 
-client_t::~client_t()
-{}
+client_t::~client_t() = default;
 
 void client_t::push_from_server(const std::string& message)
 {
@@ -130,9 +131,21 @@ int client_t::get_rating() const
   return impl->get_rating();
 }
 
+bool client_t::playing_white() const
+{
+  return impl->playing_white_;
+}
+
+void client_t::set_playing_white(bool playing_white)
+{
+  impl->playing_white_ = playing_white;
+}
+
 client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
   : response_timer(io_serv)
   , connection_timer(io_serv)
+  , elo{1200}
+  , playing_white_{true}
   , received_serial_num(1)
   , send_serial_num(0)
   , is_received(true)

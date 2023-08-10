@@ -67,17 +67,19 @@ struct inf_request_t
 struct game_inf_t
 {
   game_inf_t() = default;
-  game_inf_t(const std::string& b_mask, const std::string& m_hist, const bool mate, const int move_number)
+  game_inf_t(const std::string& b_mask, const std::string& m_hist, const bool mate, const int move_number, const bool playing_white)
     : board_mask(b_mask)
     , moves_history(m_hist)
     , is_mate(mate)
     , move_num(move_number)
+    , playing_white{playing_white}
   {}
 
   std::string board_mask;
   std::string moves_history;
   bool is_mate{};
   int move_num{};
+  bool playing_white{};
 };
 
 struct incoming_datagramm_t
@@ -111,6 +113,7 @@ void serialize(Archive& ar, game_inf_t& _1, const unsigned /*version*/)
   ar& _1.moves_history;
   ar& _1.is_mate;
   ar& _1.move_num;
+  ar& _1.playing_white;
 }
 
 template<typename Archive>

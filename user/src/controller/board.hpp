@@ -5,8 +5,6 @@
 #include "messages/messages.hpp"
 
 #include <QQmlApplicationEngine>
-#include <QString>
-#include <QStringList>
 #include <functional>
 
 namespace controller {
@@ -26,13 +24,10 @@ public:
   board_t& operator=(const board_t&) = delete;
   ~board_t() override;
 
-  void set_playing_white(bool playing_white);
+  void set_context_properties(QQmlApplicationEngine& engine);
+  void update_game_info(const msg::game_inf_t& game_info);
   bool playing_white() const;
   bool is_check_mate() const;
-  void set_check_mate();
-  void update_hilight(int move_num, const QString& history);
-  void set_board_mask(const QString& mask);
-  void set_context_properties(QQmlApplicationEngine& engine);
 
   Q_INVOKABLE void move(int x1, int y1, int x2, int y2);
   Q_INVOKABLE void set_cell_size(int width, int height);
@@ -42,6 +37,10 @@ signals:
   void playing_white_changed();
 
 private:
+  void set_playing_white(bool playing_white);
+  void set_check_mate();
+  void update_hilight(int move_num, const std::string& history);
+  void set_board_mask(const std::string& mask);
   void update_figures();
   coord_t get_coord(int x, int y) const;
   coord_t according_to_side(const coord_t& c) const;
@@ -50,7 +49,7 @@ private:
   figures_model_t figures_model_;
   bool playing_white_;
   bool check_mate_;
-  QString field_;
+  std::string field_;
   unsigned cell_width_;
   unsigned cell_height_;
   move_requested_callback_t move_requested_callback_;
