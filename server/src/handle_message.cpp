@@ -1,6 +1,7 @@
 #include "handle_message.h"
 
 #include "helper.h"
+#include <spdlog/spdlog.h>
 
 using namespace sr;
 using namespace msg;
@@ -21,7 +22,7 @@ inline std::string get_person_inf(const std::shared_ptr<const sr::client_t>& c)
 template<>
 void handle_message_t::handle_fn<login_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
-  sr::helper::log("tactic for login_t ", message);
+  SPDLOG_DEBUG("tactic for login_t; msg={}", message);
 
   auto login = init<login_t>(message);
 
@@ -47,11 +48,10 @@ void handle_message_t::handle_fn<login_t>(const std::string& message, std::share
 template<>
 void handle_message_t::handle_fn<opponent_inf_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
-  sr::helper::log("tactic for opponent_inf_t ", message);
+  SPDLOG_DEBUG("tactic for opponent_inf_t; msg={}", message);
   auto opp = get_opponent(client);
   if (opp == clients.end())
   {
-    sr::helper::log("opp == clients.end()");
     client->push_for_send(prepare_for_send(inf_request_t("No opponent: no game in progress!")));
   }
   else
@@ -63,14 +63,15 @@ void handle_message_t::handle_fn<opponent_inf_t>(const std::string& message, std
 template<>
 void handle_message_t::handle_fn<my_inf_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
-  sr::helper::log("tactic for my_inf_t ", message);
+  SPDLOG_DEBUG("tactic for my_inf_t; msg={}", message);
   client->push_for_send(get_person_inf(client));
 }
 
 template<>
 void handle_message_t::handle_fn<client_lost_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
-  sr::helper::log("tactic for client_lost_t ", message);
+  SPDLOG_DEBUG("tactic for client_lost_t; msg={}", message);
+
   auto opp = get_opponent(client);
   if (opp != clients.end())
   {
@@ -81,7 +82,7 @@ void handle_message_t::handle_fn<client_lost_t>(const std::string& message, std:
 template<>
 void handle_message_t::handle_fn<move_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
-  sr::helper::log("tactic for move_t ", message);
+  SPDLOG_DEBUG("tactic for move_t; msg={}", message);
 
   (*get_desk(client))->make_moves_from_str((init<move_t>(message)).data);
   board_updated(client);
@@ -90,7 +91,7 @@ void handle_message_t::handle_fn<move_t>(const std::string& message, std::shared
 template<>
 void handle_message_t::handle_fn<back_move_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
-  sr::helper::log("tactic for back_move_t ", message);
+  SPDLOG_DEBUG("tactic for back_move_t; msg={}", message);
 
   (*get_desk(client))->back_move();
   board_updated(client);
@@ -99,7 +100,7 @@ void handle_message_t::handle_fn<back_move_t>(const std::string& message, std::s
 template<>
 void handle_message_t::handle_fn<go_to_history_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
-  sr::helper::log("tactic for go_to_history_t ", message);
+  SPDLOG_DEBUG("tactic for go_to_history_t; msg={}", message);
 
   (*get_desk(client))->go_to_history_index((init<go_to_history_t>(message)).index);
   board_updated(client);
@@ -108,7 +109,7 @@ void handle_message_t::handle_fn<go_to_history_t>(const std::string& message, st
 template<>
 void handle_message_t::handle_fn<new_game_t>(const std::string& message, std::shared_ptr<sr::client_t>& client)
 {
-  sr::helper::log("tactic for start_new_game_t ", message);
+  SPDLOG_DEBUG("tactic for start_new_game_t; msg={}", message);
   start_new_game(client);
 }
 
@@ -131,7 +132,7 @@ void handle_message_t::new_message(boost::asio::io_service& io_service, const bo
 
   if (c == clients.rend())
   {
-    sr::helper::log("New client");
+    SPDLOG_INFO("New client! addr={}", addr);
     clients.push_back(std::make_shared<sr::client_t>(io_service, addr));
     c = clients.rbegin();
   }
@@ -141,7 +142,7 @@ void handle_message_t::new_message(boost::asio::io_service& io_service, const bo
 template<>
 void handle_message_t::process_mess<boost::mpl::end<msg::message_types>::type>(const std::string& /*str*/, std::shared_ptr<sr::client_t>& /*client*/)
 {
-  sr::helper::log("no type found!!");
+  SPDLOG_ERROR("no type found");
 }
 
 std::vector<std::shared_ptr<sr::client_t>>::iterator handle_message_t::begin() noexcept

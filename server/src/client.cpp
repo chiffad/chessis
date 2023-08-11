@@ -4,6 +4,7 @@
 
 #include "helper.h"
 #include "messages/messages.hpp"
+#include <spdlog/spdlog.h>
 
 using namespace sr;
 typedef boost::asio::io_service io_service_t;
@@ -154,7 +155,7 @@ client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
 
 void client_t::impl_t::push_from_server(const std::string& m)
 {
-  helper::log("push_from_server: ", m);
+  SPDLOG_INFO("push_from_server: ", m);
 
   const auto datagramm = msg::init<msg::incoming_datagramm_t>(m);
 
@@ -175,15 +176,15 @@ void client_t::impl_t::push_from_server(const std::string& m)
   switch (msg::init<msg::some_datagramm_t>(datagramm.data).type)
   {
     case msg::id_v<msg::message_received_t>:
-      helper::log("msg::message_received_t");
+      SPDLOG_DEBUG("msg::message_received_t");
       is_received = true;
       break;
-    case msg::id_v<msg::is_server_lost_t>: helper::log("msg::is_server_lost_t"); break;
+    case msg::id_v<msg::is_server_lost_t>: SPDLOG_DEBUG("msg::is_server_lost_t"); break;
     case msg::id_v<msg::hello_server_t>:
-      helper::log("msg::hello_server_t");
+      SPDLOG_DEBUG("msg::hello_server_t");
       add_for_server(msg::prepare_for_send(msg::get_login_t()));
       break;
-    default: helper::log("push_from_server: default"); messages_for_logic.push_back(datagramm.data);
+    default: SPDLOG_ERROR("push_from_server: default"); messages_for_logic.push_back(datagramm.data);
   }
 }
 
@@ -204,7 +205,7 @@ bool client_t::impl_t::is_message_for_logic_append() const
 
 std::string client_t::impl_t::pull_for_server()
 {
-  helper::log("pull_for_server");
+  SPDLOG_DEBUG("pull_for_server");
 
   const auto _1 = messages_for_server.front();
 
@@ -220,7 +221,7 @@ std::string client_t::impl_t::pull_for_server()
 
 std::string client_t::impl_t::pull_for_logic()
 {
-  helper::log("pull_for_logic");
+  SPDLOG_DEBUG("pull_for_logic");
 
   const std::string m = messages_for_logic.front();
   messages_for_logic.erase(messages_for_logic.begin());
@@ -270,7 +271,7 @@ bool client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& _1)
 
   if (_1.ser_num != received_serial_num)
   {
-    helper::log("check_ser_num: Warning! Wrong serial number!");
+    SPDLOG_WARN("Warning! Wrong serial number!");
     return false;
   }
 
@@ -279,7 +280,7 @@ bool client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& _1)
 
 void client_t::impl_t::add_for_server(const std::string& m, bool is_extra_message)
 {
-  helper::log("add_for_server: ", m);
+  SPDLOG_DEBUG("add message={}", m);
   auto _1 = server_mess_t(m, is_extra_message);
   if (is_extra_message)
   {
@@ -300,7 +301,7 @@ void client_t::impl_t::begin_wait_receive(const std::string& message)
 
 void client_t::impl_t::is_message_received()
 {
-  helper::log("is_message_received");
+  SPDLOG_TRACE("is message received");
   static int num_of_restarts = 0;
   if (is_received)
   {
@@ -328,7 +329,7 @@ void client_t::impl_t::connection_timer_timeout()
 
 void client_t::impl_t::start_connection_timer()
 {
-  helper::log("start_connection_timer();");
+  SPDLOG_TRACE("start_connection_timer();");
   connection_timer.cancel();
   connection_timer.expires_from_now(boost::posix_time::milliseconds(7000));
   connection_timer.async_wait([&](const boost::system::error_code& error) {
@@ -336,18 +337,18 @@ void client_t::impl_t::start_connection_timer()
     {
       connection_timer_timeout();
     }
-    helper::log(">>>>connection_timer<<<<", (error ? " error!" : ""));
+    SPDLOG_DEBUG(">>>>connection_timer<<<< {}", error.message());
   });
   //  connection_timer.async_wait([&](auto /*e*/){sr::log(">>>>connection_timer<<<<");});
 }
 
 void client_t::impl_t::start_response_timer()
 {
-  helper::log("start_response_timer();");
+  SPDLOG_TRACE("start_response_timer();");
   response_timer.cancel();
   response_timer.expires_from_now(boost::posix_time::milliseconds(1500));
   response_timer.async_wait([&](const boost::system::error_code& error) {
-    helper::log(">>>>response_timer<<<<", (error ? " error!" : ""));
+    SPDLOG_DEBUG(">>>>response_timer<<<< {}", error.message());
     if (!error)
     {
       is_message_received();

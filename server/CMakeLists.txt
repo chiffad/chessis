@@ -20,12 +20,15 @@ add_executable(${TARGET_NAME}
   src/coord.h
   src/client.h
   src/helper.h
+  src/logger.hpp 
+  src/logger.cpp 
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 target_include_directories(${TARGET_NAME} PRIVATE src .)
 target_link_libraries(${TARGET_NAME} PRIVATE 
   messages
+  spdlog::spdlog
   Boost::system 
   Boost::serialization 
 )

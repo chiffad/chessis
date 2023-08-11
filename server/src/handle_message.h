@@ -12,6 +12,7 @@
 #include "desk.h"
 #include "helper.h"
 #include "messages/messages.hpp"
+#include <spdlog/spdlog.h>
 
 namespace sr {
 class handle_message_t
@@ -49,7 +50,7 @@ private:
   template<typename T>
   void handle_fn(const std::string& str, std::shared_ptr<sr::client_t>& /*client*/)
   {
-    sr::helper::log("For type ", typeid(T).name(), " tactic isn't defined!", str);
+    SPDLOG_ERROR("For type={} tactic isn't defined! msg={}", typeid(T).name(), str);
   }
 
   std::vector<std::shared_ptr<sr::client_t>> clients;

@@ -2,9 +2,11 @@
 #define __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
 
 #include <exception>
-#include <iostream>
 #include <sstream>
 #include <string>
+
+#include "spdlog/fmt/ostr.h"
+#include "spdlog/spdlog.h"
 
 namespace sr {
 namespace helper {
@@ -39,19 +41,12 @@ void exception_fn(const Args&... args)
 }
 
 template<typename... Args>
-void log_fn(const Args&... args)
-{
-  std::cout << detail::get(args...) << std::endl;
-}
-
-template<typename... Args>
 std::string get_str(const Args&... args)
 {
   return detail::get(args...);
 }
 
 #define throw_except(...) exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
-#define log(...) log_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
 
 } // namespace helper
 } // namespace sr

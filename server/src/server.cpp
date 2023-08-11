@@ -2,7 +2,8 @@
 
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
-#include <iostream>
+
+#include <spdlog/spdlog.h>
 
 #include "helper.h"
 
@@ -62,24 +63,18 @@ server_t::impl_t::impl_t(io_service_t& io_serv)
   {
     socket.open(boost::asio::ip::udp::v4());
   }
-  for (int i = 0; i + FIRST_PORT < LAST_PORT; ++i)
+  for (int i = FIRST_PORT; i < LAST_PORT; i = i >= LAST_PORT ? FIRST_PORT : i + 1)
   {
     try
     {
-      socket.bind(endpoint_t(boost::asio::ip::address::from_string("127.0.0.1"), FIRST_PORT + i));
+      socket.bind(endpoint_t(boost::asio::ip::address::from_string("127.0.0.1"), i));
+      SPDLOG_INFO("server bind to port={}", i);
+      break;
     }
     catch (const boost::system::system_error& ex)
     {
-      helper::log("can not bind to: ", FIRST_PORT + i);
-      if (i + FIRST_PORT == LAST_PORT)
-      {
-        i = -1;
-      }
-
-      continue;
+      SPDLOG_INFO("can not bind to port={}", i);
     }
-    helper::log("server bind: ", FIRST_PORT + i);
-    break;
   }
   start_receive();
 }
@@ -91,7 +86,7 @@ server_t::impl_t::~impl_t()
 
 void server_t::impl_t::send(const std::string& message, const endpoint_t& destination)
 {
-  helper::log("send: ", message + " ;to: " + destination.address().to_string());
+  SPDLOG_INFO("send={}; to={}", message, destination.address().to_string());
   socket.async_send_to(boost::asio::buffer(message), destination, [](auto /*_1*/, auto /*_2*/) {});
 }
 
@@ -100,20 +95,20 @@ void server_t::impl_t::handle_receive(const error_code_t& e, const size_t readed
   if (!e || e == boost::asio::error::message_size)
   {
     std::string mess(incoming_message.begin(), incoming_message.begin() + readed_size);
-    helper::log("read: ", mess);
+    SPDLOG_INFO("read={}", mess);
 
     messages.push_back(datagram_t(last_mess_sender, mess));
     start_receive();
   }
   else
   {
-    helper::log("hendle error!!");
+    SPDLOG_ERROR("hendle error!!");
   }
 }
 
 void server_t::impl_t::start_receive()
 {
-  helper::log("start_receive()");
+  SPDLOG_INFO("start_receive()");
   socket.async_receive_from(
     boost::asio::buffer(incoming_message), last_mess_sender,
     boost::bind(&server_t::impl_t::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));

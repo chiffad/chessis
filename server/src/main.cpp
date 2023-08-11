@@ -6,11 +6,14 @@
 
 #include "handle_message.h"
 #include "helper.h"
+#include "logger.hpp"
 #include "server.h"
 
 int main()
 try
 {
+  logger::logger_t::get().init();
+
   boost::asio::io_service io_service;
   sr::server_t server(io_service);
   sr::handle_message_t handler;
@@ -34,8 +37,7 @@ try
       if (c->is_message_for_logic_append())
       {
         const auto message = c->pull_for_logic();
-        sr::helper::log("message_from_logic: ", message);
-
+        SPDLOG_TRACE("message_from_logic={}", message);
         handler.handle(message, c);
       }
     }
@@ -43,8 +45,7 @@ try
 
   return 0;
 }
-
 catch (std::exception const& ex)
 {
-  std::cout << "Exception! " << ex.what() << std::endl;
+  SPDLOG_CRITICAL("Exception! ", ex.what());
 }
