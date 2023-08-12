@@ -4,10 +4,10 @@
 #include <memory>
 #include <string>
 
-#include "handle_message.h"
 #include "helper.h"
 #include "logger.hpp"
-#include "server.h"
+#include "server/handle_message.hpp"
+#include "server/server.hpp"
 
 int main()
 try

@@ -13,12 +13,12 @@ add_executable(${TARGET_NAME}
   src/logic/desk.cpp
   src/logic/desk.hpp
   src/logic/coord.hpp
-  src/handle_message.cpp  
-  src/server.cpp
-  src/client.cpp
-  src/client.h
-  src/handle_message.h  
-  src/server.h    
+  src/server/handle_message.cpp  
+  src/server/handle_message.hpp
+  src/server/server.hpp    
+  src/server/server.cpp
+  src/server/client.cpp
+  src/server/client.hpp
   src/helper.h
   src/logger.hpp 
   src/logger.cpp 
