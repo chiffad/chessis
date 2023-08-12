@@ -1,19 +1,15 @@
 #include "client.h"
 
-#include <vector>
-
 #include "helper.h"
 #include "messages/messages.hpp"
 #include <spdlog/spdlog.h>
-
-using namespace sr;
-typedef boost::asio::io_service io_service_t;
-typedef boost::asio::ip::udp::endpoint endpoint_t;
-typedef boost::asio::deadline_timer deadline_timer_t;
+#include <vector>
 
 namespace {
 const char FREE_SPASE = ' ';
 }
+
+namespace server {
 
 struct client_t::impl_t
 {
@@ -339,7 +335,7 @@ void client_t::impl_t::start_connection_timer()
     }
     SPDLOG_DEBUG(">>>>connection_timer<<<< {}", error.message());
   });
-  //  connection_timer.async_wait([&](auto /*e*/){sr::log(">>>>connection_timer<<<<");});
+  //  connection_timer.async_wait([&](auto /*e*/){log(">>>>connection_timer<<<<");});
 }
 
 void client_t::impl_t::start_response_timer()
@@ -354,10 +350,12 @@ void client_t::impl_t::start_response_timer()
       is_message_received();
     }
   });
-  // response_timer.async_wait([&](auto /*e*/){sr::log(">>>>response_timer<<<<");});
+  // response_timer.async_wait([&](auto /*e*/){log(">>>>response_timer<<<<");});
 }
 
 client_t::impl_t::server_mess_t::server_mess_t(const std::string& m, const bool is_extra_message)
   : message(m)
   , is_extra(is_extra_message)
 {}
+
+} // namespace server

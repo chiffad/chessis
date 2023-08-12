@@ -1,5 +1,4 @@
-#ifndef __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
-#define __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
+#pragma once
 
 #include <exception>
 #include <sstream>
@@ -8,8 +7,12 @@
 #include "spdlog/fmt/ostr.h"
 #include "spdlog/spdlog.h"
 
-namespace sr {
-namespace helper {
+using io_service_t = boost::asio::io_service;
+using endpoint_t = boost::asio::ip::udp::endpoint;
+using error_code_t = boost::system::error_code;
+using deadline_timer_t = boost::asio::deadline_timer;
+
+namespace server::helper {
 namespace detail {
 template<typename OS, typename T>
 void get1(OS& ostream, const T& _1)
@@ -40,15 +43,6 @@ void exception_fn(const Args&... args)
   throw std::logic_error(detail::get(args...));
 }
 
-template<typename... Args>
-std::string get_str(const Args&... args)
-{
-  return detail::get(args...);
-}
-
 #define throw_except(...) exception_fn(__FILE__, "(", __LINE__, "): ", __VA_ARGS__)
 
-} // namespace helper
-} // namespace sr
-
-#endif // __MY_LOG_H__KAJSHDJKAHWJKEJKNASJKDJKASHDJKAHSOIOAWJDKASJDWJEOQIJEOQIWJ__
+} // namespace server::helper

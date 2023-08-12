@@ -1,12 +1,11 @@
-#ifndef __MY_DESK_H__BVGTYVFYTKUBLIUBHIYFRTDVGFABDJUIWOMJ
-#define __MY_DESK_H__BVGTYVFYTKUBLIUBHIYFRTDVGFABDJUIWOMJ
+#pragma once
+
+#include "chess.h"
 
 #include <memory>
 #include <string>
 
-#include "chess.h"
-
-namespace sr {
+namespace server {
 class client_t;
 }
 
@@ -15,11 +14,11 @@ namespace logic {
 class desk_t : public board_t
 {
 public:
-  desk_t(const std::weak_ptr<const sr::client_t> _1, const std::weak_ptr<const sr::client_t> _2);
+  desk_t(const std::weak_ptr<const server::client_t> _1, const std::weak_ptr<const server::client_t> _2);
   ~desk_t();
   void make_moves_from_str(const std::string& str);
-  bool is_contain_player(const std::weak_ptr<sr::client_t>& _1) const;
-  const std::weak_ptr<const sr::client_t> get_opponent(const std::shared_ptr<const sr::client_t>& _1) const;
+  bool is_contain_player(const std::weak_ptr<server::client_t>& _1) const;
+  const std::weak_ptr<const server::client_t> get_opponent(const std::shared_ptr<const server::client_t>& _1) const;
 
   void load_moves_from_file(const std::string& path);
   void write_moves_to_file(const std::string& path) const;
@@ -34,5 +33,3 @@ private:
 };
 
 } // namespace logic
-
-#endif // __MY_DESK_H__BVGTYVFYTKUBLIUBHIYFRTDVGFABDJUIWOMJ

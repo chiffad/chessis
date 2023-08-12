@@ -1,4 +1,3 @@
-
 #include "logger.hpp"
 #include <spdlog/async.h>
 #include <spdlog/async_logger.h>

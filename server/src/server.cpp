@@ -1,17 +1,13 @@
 #include "server.h"
 
+#include "helper.h"
+
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
 
 #include <spdlog/spdlog.h>
 
-#include "helper.h"
-
-using namespace sr;
-typedef boost::asio::io_service io_service_t;
-typedef boost::asio::ip::udp::endpoint endpoint_t;
-typedef boost::system::error_code error_code_t;
-
+namespace server {
 struct server_t::impl_t
 {
   impl_t(io_service_t& io_serv);
@@ -121,3 +117,5 @@ std::vector<server_t::datagram_t> server_t::impl_t::pull()
 
   return _1;
 }
+
+} // namespace server

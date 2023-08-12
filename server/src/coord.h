@@ -1,6 +1,4 @@
-#ifndef __MY_COORD_H__BHJVCFCFGVAGKSBDVLNWWADVGVAUSKH
-#define __MY_COORD_H__BHJVCFCFGVAGKSBDVLNWWADVGVAUSKH
-
+#pragma once
 namespace logic {
 
 struct coord_t
@@ -17,5 +15,3 @@ struct coord_t
 };
 
 } // namespace logic
-
-#endif //__MY_COORD_H__BHJVCFCFGVAGKSBDVLNWWADVGVAUSKH

@@ -15,8 +15,8 @@ try
   logger::logger_t::get().init();
 
   boost::asio::io_service io_service;
-  sr::server_t server(io_service);
-  sr::handle_message_t handler;
+  server::server_t server(io_service);
+  server::handle_message_t handler;
 
   while (true)
   {

@@ -1,30 +1,30 @@
 #include "desk.h"
 
+#include "client.h"
+
 #include <fstream>
 #include <sstream>
 #include <vector>
 
-#include "client.h"
-
-using namespace logic;
+namespace logic {
 
 struct desk_t::impl_t
 {
-  impl_t(const std::weak_ptr<const sr::client_t> _1, const std::weak_ptr<const sr::client_t> _2, board_t* par);
+  impl_t(const std::weak_ptr<const server::client_t> _1, const std::weak_ptr<const server::client_t> _2, board_t* par);
   void make_moves_from_str(const std::string& str);
-  bool is_contain_player(const std::weak_ptr<sr::client_t>& _1) const;
-  const std::weak_ptr<const sr::client_t> get_opponent(const std::shared_ptr<const sr::client_t>& _1) const;
+  bool is_contain_player(const std::weak_ptr<server::client_t>& _1) const;
+  const std::weak_ptr<const server::client_t> get_opponent(const std::shared_ptr<const server::client_t>& _1) const;
 
   void load_moves_from_file(const std::string& path);
   void write_moves_to_file(const std::string& path) const;
 
-  const std::weak_ptr<const sr::client_t> first_player;
-  const std::weak_ptr<const sr::client_t> second_player;
+  const std::weak_ptr<const server::client_t> first_player;
+  const std::weak_ptr<const server::client_t> second_player;
 
   board_t* parent;
 };
 
-desk_t::desk_t(const std::weak_ptr<const sr::client_t> _1, const std::weak_ptr<const sr::client_t> _2)
+desk_t::desk_t(const std::weak_ptr<const server::client_t> _1, const std::weak_ptr<const server::client_t> _2)
   : board_t()
   , impl(std::make_unique<impl_t>(_1, _2, this))
 {}
@@ -37,12 +37,12 @@ void desk_t::make_moves_from_str(const std::string& str)
   impl->make_moves_from_str(str);
 }
 
-bool desk_t::is_contain_player(const std::weak_ptr<sr::client_t>& _1) const
+bool desk_t::is_contain_player(const std::weak_ptr<server::client_t>& _1) const
 {
   return impl->is_contain_player(_1);
 }
 
-const std::weak_ptr<const sr::client_t> desk_t::get_opponent(const std::shared_ptr<const sr::client_t>& _1) const
+const std::weak_ptr<const server::client_t> desk_t::get_opponent(const std::shared_ptr<const server::client_t>& _1) const
 {
   return impl->get_opponent(_1);
 }
@@ -57,7 +57,7 @@ void desk_t::write_moves_to_file(const std::string& path) const
   impl->write_moves_to_file(path);
 }
 
-desk_t::impl_t::impl_t(const std::weak_ptr<const sr::client_t> _1, const std::weak_ptr<const sr::client_t> _2, board_t* par)
+desk_t::impl_t::impl_t(const std::weak_ptr<const server::client_t> _1, const std::weak_ptr<const server::client_t> _2, board_t* par)
   : first_player(_1)
   , second_player(_2)
   , parent(par)
@@ -96,12 +96,12 @@ void desk_t::impl_t::make_moves_from_str(const std::string& str)
   }
 }
 
-bool desk_t::impl_t::is_contain_player(const std::weak_ptr<sr::client_t>& _1) const
+bool desk_t::impl_t::is_contain_player(const std::weak_ptr<server::client_t>& _1) const
 {
   return (_1.lock() == first_player.lock() || _1.lock() == second_player.lock());
 }
 
-const std::weak_ptr<const sr::client_t> desk_t::impl_t::get_opponent(const std::shared_ptr<const sr::client_t>& _1) const
+const std::weak_ptr<const server::client_t> desk_t::impl_t::get_opponent(const std::shared_ptr<const server::client_t>& _1) const
 {
   return (_1 == first_player.lock() ? second_player : first_player);
 }
@@ -135,3 +135,5 @@ void desk_t::impl_t::load_moves_from_file(const std::string& path)
   parent->start_new_game();
   make_moves_from_str(data_from_file);
 }
+
+} // namespace logic

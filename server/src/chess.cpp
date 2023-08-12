@@ -7,8 +7,7 @@
 #include <iterator>
 #include <stdlib.h>
 
-using namespace logic;
-
+namespace logic {
 struct board_t::impl_t
 {
   impl_t();
@@ -590,3 +589,5 @@ unsigned board_t::impl_t::get_field_index(const coord_t& c) const
   }
   return i;
 }
+
+} // namespace logic

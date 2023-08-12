@@ -1,12 +1,11 @@
-#ifndef __SERVER_H__BVGHVJHBDCWFDVAKYUVLWBALIGDVGSADW
-#define __SERVER_H__BVGHVJHBDCWFDVAKYUVLWBALIGDVGSADW
+#pragma once
 
 #include <boost/asio.hpp>
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace sr {
+namespace server {
 
 class server_t
 {
@@ -32,6 +31,4 @@ private:
   std::unique_ptr<impl_t> impl;
 };
 
-} // namespace sr
-
-#endif // __SERVER_H__BVGHVJHBDCWFDVAKYUVLWBALIGDVGSADW
+} // namespace server

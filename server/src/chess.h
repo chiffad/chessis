@@ -1,5 +1,4 @@
-#ifndef __MY_BOARD_H__VILVIVYVKCKYVLVUYFDKYUFYTF
-#define __MY_BOARD_H__VILVIVYVKCKYVLVUYFDKYUFYTF
+#pragma once
 
 #include <iostream>
 #include <memory>
@@ -35,5 +34,3 @@ private:
 };
 
 } // namespace logic
-
-#endif // __MY_BOARD_H__VILVIVYVKCKYVLVUYFDKYUFYTF
