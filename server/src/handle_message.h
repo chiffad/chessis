@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "client.h"
-#include "desk.h"
 #include "helper.h"
+#include "logic/desk.hpp"
 #include "messages/messages.hpp"
 #include <spdlog/spdlog.h>
 

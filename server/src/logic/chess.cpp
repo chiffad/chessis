@@ -1,4 +1,4 @@
-#include "chess.h"
+#include "logic/chess.hpp"
 
 #include <algorithm>
 #include <cctype>

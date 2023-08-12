@@ -8,17 +8,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(${TARGET_NAME}  
   src/main.cpp
-  src/chess.cpp
-  src/handle_message.cpp
-  src/desk.cpp
+  src/logic/chess.cpp
+  src/logic/chess.hpp
+  src/logic/desk.cpp
+  src/logic/desk.hpp
+  src/logic/coord.hpp
+  src/handle_message.cpp  
   src/server.cpp
   src/client.cpp
-  src/chess.h
-  src/handle_message.h
-  src/desk.h
-  src/server.h
-  src/coord.h
   src/client.h
+  src/handle_message.h  
+  src/server.h    
   src/helper.h
   src/logger.hpp 
   src/logger.cpp 

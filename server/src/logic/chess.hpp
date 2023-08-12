@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "coord.h"
+#include "logic/coord.hpp"
 
 namespace logic {
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "chess.h"
+#include "logic/chess.hpp"
 
 #include <memory>
 #include <string>
