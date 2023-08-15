@@ -1,19 +1,17 @@
 #pragma once
 
-#include <iostream>
+#include "logic/coord.hpp"
+
 #include <memory>
 #include <string>
-#include <vector>
-
-#include "logic/coord.hpp"
 
 namespace logic {
 
-class board_t
+class board_logic_t
 {
 public:
-  explicit board_t();
-  virtual ~board_t();
+  explicit board_logic_t();
+  virtual ~board_logic_t();
   bool move(const coord_t& from, const coord_t& to);
   bool back_move();
   void start_new_game();
@@ -25,8 +23,8 @@ public:
   std::string get_board_mask() const;
 
 public:
-  board_t(const board_t&) = delete;
-  board_t& operator=(const board_t&) = delete;
+  board_logic_t(const board_logic_t&) = delete;
+  board_logic_t& operator=(const board_logic_t&) = delete;
 
 private:
   struct impl_t;

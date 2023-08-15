@@ -8,8 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(${TARGET_NAME}  
   src/main.cpp
-  src/logic/chess.cpp
-  src/logic/chess.hpp
+  src/logic/board_logic.hpp
+  src/logic/board_logic.cpp 
   src/logic/desk.cpp
   src/logic/desk.hpp
   src/logic/coord.hpp

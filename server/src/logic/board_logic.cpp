@@ -1,5 +1,8 @@
-#include "logic/chess.hpp"
+#include "logic/board_logic.hpp"
 
+#include <spdlog/spdlog.h>
+
+#include <vector>
 #include <algorithm>
 #include <cctype>
 #include <cmath>
@@ -8,7 +11,54 @@
 #include <stdlib.h>
 
 namespace logic {
-struct board_t::impl_t
+
+const auto BOARD_SIDE = 8;
+const auto FIGURES_NUMBER = 32;
+const auto BOARD_SIZE = BOARD_SIDE * BOARD_SIDE;
+
+enum COLOR
+{
+  NONE,
+  WHITE,
+  BLACK
+};
+enum FIGURE
+{
+  B_QUEEN = 'Q',
+  B_KING = 'K',
+  B_ROOK = 'R',
+  B_ELEPHANT = 'E',
+  B_HORSE = 'H',
+  B_PAWN = 'P',
+  W_QUEEN = 'q',
+  W_KING = 'k',
+  W_ROOK = 'r',
+  W_ELEPHANT = 'e',
+  W_HORSE = 'h',
+  W_PAWN = 'p',
+  FREE_FIELD = '.'
+};
+enum COLORLESS_FIG
+{
+  NOT_FIGURE = FREE_FIELD,
+  QUEEN = B_QUEEN + W_QUEEN,
+  KING = W_KING + B_KING,
+  ROOK = W_ROOK + B_ROOK,
+  PAWN = W_PAWN + B_PAWN,
+  ELEPHANT = W_ELEPHANT + B_ELEPHANT,
+  HORSE = W_HORSE + B_HORSE
+};
+
+enum MOVE_TYPE
+{
+  USUAL,
+  CASTLING,
+  EN_PASSANT,
+  PAWN_TRANSFORM
+};
+
+
+struct board_logic_t::impl_t
 {
   impl_t();
   bool move(const coord_t& from, const coord_t& to);
@@ -19,52 +69,6 @@ struct board_t::impl_t
   std::string get_moves_history() const;
   unsigned get_move_num() const;
   std::string get_board_mask() const;
-
-  enum COLOR
-  {
-    NONE,
-    WHITE,
-    BLACK
-  };
-  enum FIGURE
-  {
-    B_QUEEN = 'Q',
-    B_KING = 'K',
-    B_ROOK = 'R',
-    B_ELEPHANT = 'E',
-    B_HORSE = 'H',
-    B_PAWN = 'P',
-    W_QUEEN = 'q',
-    W_KING = 'k',
-    W_ROOK = 'r',
-    W_ELEPHANT = 'e',
-    W_HORSE = 'h',
-    W_PAWN = 'p',
-    FREE_FIELD = '.'
-  };
-  enum COLORLESS_FIG
-  {
-    NOT_FIGURE = FREE_FIELD,
-    QUEEN = B_QUEEN + W_QUEEN,
-    KING = W_KING + B_KING,
-    ROOK = W_ROOK + B_ROOK,
-    PAWN = W_PAWN + B_PAWN,
-    ELEPHANT = W_ELEPHANT + B_ELEPHANT,
-    HORSE = W_HORSE + B_HORSE
-  };
-  enum
-  {
-    BOARD_SIDE = 8,
-    FIGURES_NUMBER = 32,
-    BOARD_SIZE = BOARD_SIDE * BOARD_SIDE
-  };
-  enum MOVE_TYPE
-  {
-    USUAL,
-    CASTLING,
-    EN_PASSANT,
-    PAWN_TRANSFORM
-  };
 
   COLOR get_color(const coord_t& c) const;
   COLOR get_move_color() const;
@@ -106,53 +110,53 @@ struct board_t::impl_t
   bool mate_;
 };
 
-board_t::board_t()
+board_logic_t::board_logic_t()
   : impl_(std::make_unique<impl_t>())
 {}
 
-board_t::~board_t() = default;
+board_logic_t::~board_logic_t() = default;
 
-bool board_t::move(const coord_t& from, const coord_t& to)
+bool board_logic_t::move(const coord_t& from, const coord_t& to)
 {
   return impl_->move(from, to);
 }
 
-bool board_t::back_move()
+bool board_logic_t::back_move()
 {
   return impl_->back_move();
 }
 
-void board_t::start_new_game()
+void board_logic_t::start_new_game()
 {
   impl_->start_new_game();
 }
 
-void board_t::go_to_history(size_t i)
+void board_logic_t::go_to_history(size_t i)
 {
   impl_->go_to_history(i);
 }
 
-bool board_t::mate() const
+bool board_logic_t::mate() const
 {
   return impl_->mate();
 }
 
-std::string board_t::get_moves_history() const
+std::string board_logic_t::get_moves_history() const
 {
   return impl_->get_moves_history();
 }
 
-unsigned board_t::get_move_num() const
+unsigned board_logic_t::get_move_num() const
 {
   return impl_->get_move_num();
 }
 
-std::string board_t::get_board_mask() const
+std::string board_logic_t::get_board_mask() const
 {
   return impl_->get_board_mask();
 }
 
-board_t::impl_t::impl_t()
+board_logic_t::impl_t::impl_t()
   : go_to_history_running_(false)
   , mate_(false)
 {
@@ -166,7 +170,7 @@ board_t::impl_t::impl_t()
   field_.insert(field_.end(), eight_row.begin(), eight_row.end());
 }
 
-bool board_t::impl_t::move(const coord_t& from, const coord_t& to)
+bool board_logic_t::impl_t::move(const coord_t& from, const coord_t& to)
 {
   if (from == to)
   {
@@ -188,7 +192,7 @@ bool board_t::impl_t::move(const coord_t& from, const coord_t& to)
   return false;
 }
 
-void board_t::impl_t::finish_move(const coord_t& from, const coord_t& to)
+void board_logic_t::impl_t::finish_move(const coord_t& from, const coord_t& to)
 {
   actual_move_.type = USUAL;
   if (get_colorless_fig(to) == PAWN)
@@ -206,7 +210,7 @@ void board_t::impl_t::finish_move(const coord_t& from, const coord_t& to)
   next_move(from, to);
 }
 
-bool board_t::impl_t::is_can_move(const coord_t& fr, const coord_t& to) const
+bool board_logic_t::impl_t::is_can_move(const coord_t& fr, const coord_t& to) const
 {
   const int dx = abs(diff(to.x, fr.x));
   const int dy = abs(diff(to.y, fr.y));
@@ -257,7 +261,7 @@ bool board_t::impl_t::is_can_move(const coord_t& fr, const coord_t& to) const
   return true;
 }
 
-bool board_t::impl_t::is_en_passant(const coord_t& fr, const coord_t& to) const
+bool board_logic_t::impl_t::is_en_passant(const coord_t& fr, const coord_t& to) const
 {
   const auto& m = moves_.back();
   bool is_cross = (abs(diff(to.x, fr.x) * diff(to.y, fr.y)) == 1);
@@ -268,14 +272,14 @@ bool board_t::impl_t::is_en_passant(const coord_t& fr, const coord_t& to) const
   return false;
 }
 
-void board_t::impl_t::en_passant()
+void board_logic_t::impl_t::en_passant()
 {
   actual_move_.type = EN_PASSANT;
   const auto ind = get_field_index(moves_.back().to);
   field_[ind] = FREE_FIELD;
 }
 
-bool board_t::impl_t::is_pawn_reach_other_side(const coord_t& c) const
+bool board_logic_t::impl_t::is_pawn_reach_other_side(const coord_t& c) const
 {
   enum
   {
@@ -285,7 +289,7 @@ bool board_t::impl_t::is_pawn_reach_other_side(const coord_t& c) const
   return (c.y == LAST_LINE || c.y == FIRST_LINE);
 }
 
-void board_t::impl_t::pawn_transform(const coord_t& c)
+void board_logic_t::impl_t::pawn_transform(const coord_t& c)
 {
   actual_move_.type = PAWN_TRANSFORM;
   auto& f = field_[get_field_index(c)];
@@ -296,7 +300,7 @@ void board_t::impl_t::pawn_transform(const coord_t& c)
   else f = B_QUEEN;
 }
 
-void board_t::impl_t::if_castling(const coord_t& fr, const coord_t& to)
+void board_logic_t::impl_t::if_castling(const coord_t& fr, const coord_t& to)
 {
   const int dx = abs(diff(to.x, fr.x));
   const int X_UNIT_VEC = dx == 0 ? 0 : diff(to.x, fr.x) / dx;
@@ -321,7 +325,7 @@ void board_t::impl_t::if_castling(const coord_t& fr, const coord_t& to)
   }
 }
 
-bool board_t::impl_t::is_castling(const coord_t& fr, const coord_t& to) const
+bool board_logic_t::impl_t::is_castling(const coord_t& fr, const coord_t& to) const
 {
   const int dx = abs(diff(to.x, fr.x));
   const int dy = abs(diff(to.y, fr.y));
@@ -341,7 +345,7 @@ bool board_t::impl_t::is_castling(const coord_t& fr, const coord_t& to) const
   return false;
 }
 
-bool board_t::impl_t::is_check(const COLOR color) const
+bool board_logic_t::impl_t::is_check(const COLOR color) const
 {
   if (color == NONE)
   {
@@ -370,7 +374,7 @@ bool board_t::impl_t::is_check(const COLOR color) const
   return false;
 }
 
-void board_t::impl_t::test_on_mate()
+void board_logic_t::impl_t::test_on_mate()
 {
   coord_t f, t;
   for (f.x = 0; f.x < BOARD_SIDE; ++f.x)
@@ -400,19 +404,19 @@ void board_t::impl_t::test_on_mate()
   mate_ = true;
 }
 
-bool board_t::impl_t::mate() const
+bool board_logic_t::impl_t::mate() const
 {
   return mate_;
 }
 
-void board_t::impl_t::start_new_game()
+void board_logic_t::impl_t::start_new_game()
 {
   while (back_move())
     ;
   moves_copy_.clear();
 }
 
-bool board_t::impl_t::back_move()
+bool board_logic_t::impl_t::back_move()
 {
   if (!get_move_num())
   {
@@ -441,7 +445,7 @@ bool board_t::impl_t::back_move()
   return true;
 }
 
-void board_t::impl_t::re_en_passant()
+void board_logic_t::impl_t::re_en_passant()
 {
   const auto ind = get_field_index(moves_[moves_.size() - 2].to);
   if (get_color(moves_.back().from) == BLACK)
@@ -451,12 +455,12 @@ void board_t::impl_t::re_en_passant()
   else field_[ind] = B_PAWN;
 }
 
-void board_t::impl_t::pawn_re_transform()
+void board_logic_t::impl_t::pawn_re_transform()
 {
   field_[get_field_index(moves_.back().from)] = (get_move_color() == BLACK) ? W_PAWN : B_PAWN;
 }
 
-void board_t::impl_t::go_to_history(const size_t history_i)
+void board_logic_t::impl_t::go_to_history(const size_t history_i)
 {
   go_to_history_running_ = true;
 
@@ -478,12 +482,12 @@ void board_t::impl_t::go_to_history(const size_t history_i)
   go_to_history_running_ = false;
 }
 
-std::string board_t::impl_t::get_board_mask() const
+std::string board_logic_t::impl_t::get_board_mask() const
 {
   return std::string(field_.begin(), field_.end());
 }
 
-std::string board_t::impl_t::get_moves_history() const
+std::string board_logic_t::impl_t::get_moves_history() const
 {
   enum
   {
@@ -501,7 +505,7 @@ std::string board_t::impl_t::get_moves_history() const
   return history;
 }
 
-void board_t::impl_t::next_move(const coord_t& from, const coord_t& to)
+void board_logic_t::impl_t::next_move(const coord_t& from, const coord_t& to)
 {
   actual_move_.to = to;
   actual_move_.from = from;
@@ -518,39 +522,39 @@ void board_t::impl_t::next_move(const coord_t& from, const coord_t& to)
   }
 }
 
-unsigned board_t::impl_t::get_move_num() const
+unsigned board_logic_t::impl_t::get_move_num() const
 {
   return moves_.size();
 }
 
-unsigned board_t::impl_t::get_move_num_from_0() const
+unsigned board_logic_t::impl_t::get_move_num_from_0() const
 {
   return get_move_num() ? get_move_num() - 1 : 0;
 }
 
-board_t::impl_t::FIGURE board_t::impl_t::get_figure(const coord_t& c) const
+FIGURE board_logic_t::impl_t::get_figure(const coord_t& c) const
 {
   return field_[get_field_index(c)];
 }
 
-board_t::impl_t::FIGURE board_t::impl_t::get_figure(const unsigned x, const unsigned y) const
+FIGURE board_logic_t::impl_t::get_figure(const unsigned x, const unsigned y) const
 {
   coord_t c(x, y);
   return field_[get_field_index(c)];
 }
 
-board_t::impl_t::COLORLESS_FIG board_t::impl_t::get_colorless_fig(const coord_t& c) const
+COLORLESS_FIG board_logic_t::impl_t::get_colorless_fig(const coord_t& c) const
 {
   const auto& f = field_[get_field_index(c)];
   return COLORLESS_FIG(tolower(f) + toupper(f));
 }
 
-board_t::impl_t::COLOR board_t::impl_t::get_move_color() const
+COLOR board_logic_t::impl_t::get_move_color() const
 {
   return get_move_num() % 2 ? BLACK : WHITE;
 }
 
-void board_t::impl_t::set_field(const coord_t& lhs, const coord_t& rhs, const FIGURE& fig)
+void board_logic_t::impl_t::set_field(const coord_t& lhs, const coord_t& rhs, const FIGURE& fig)
 {
   if (fig == FREE_FIELD && lhs == rhs)
   {
@@ -562,7 +566,7 @@ void board_t::impl_t::set_field(const coord_t& lhs, const coord_t& rhs, const FI
   f = fig;
 }
 
-board_t::impl_t::COLOR board_t::impl_t::get_color(const coord_t& c) const
+COLOR board_logic_t::impl_t::get_color(const coord_t& c) const
 {
   const auto& f = field_[get_field_index(c)];
   if (f == FREE_FIELD)
@@ -573,18 +577,18 @@ board_t::impl_t::COLOR board_t::impl_t::get_color(const coord_t& c) const
   return islower(f) ? WHITE : BLACK;
 }
 
-int board_t::impl_t::diff(const int _1, const int _2) const
+int board_logic_t::impl_t::diff(const int _1, const int _2) const
 {
   return (_1 - _2);
 }
 
-unsigned board_t::impl_t::get_field_index(const coord_t& c) const
+unsigned board_logic_t::impl_t::get_field_index(const coord_t& c) const
 {
   const auto i = c.y * BOARD_SIDE + c.x;
 
   if (i >= field_.size())
   {
-    std::cout << "Warning! in Board::get_field_index: Index out of range!" << std::endl;
+    SPDLOG_WARN("Index={} out of range!", i);
     return 0;
   }
   return i;

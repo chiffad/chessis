@@ -83,7 +83,7 @@ void handle_message_t::handle_fn<msg::move_t>(const std::string& message, std::s
 {
   SPDLOG_DEBUG("tactic for move_t; msg={}", message);
 
-  (*get_desk(client))->make_moves_from_str((msg::init<msg::move_t>(message)).data);
+  logic::make_moves_from_str((msg::init<msg::move_t>(message)).data, *(*get_desk(client)));
   board_updated(client);
 }
 
@@ -156,7 +156,7 @@ std::vector<std::shared_ptr<client_t>>::iterator handle_message_t::end() noexcep
 
 std::vector<std::shared_ptr<logic::desk_t>>::iterator handle_message_t::get_desk(const std::shared_ptr<client_t>& client)
 {
-  return std::find_if(desks_.begin(), desks_.end(), [&client](const auto& d) { return d->is_contain_player(client); });
+  return std::find_if(desks_.begin(), desks_.end(), [&client](const auto& d) { return d->contains_player(client); });
 }
 
 std::vector<std::shared_ptr<client_t>>::iterator handle_message_t::get_opponent(const std::shared_ptr<client_t>& client)
