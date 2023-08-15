@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/asio.hpp>
+#include <boost/mpl/begin_end.hpp>
 #include <exception>
 #include <sstream>
 #include <string>

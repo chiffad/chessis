@@ -10,8 +10,6 @@
 
 namespace logic {
 
-using player_ptr = std::weak_ptr<const server::client_t>;
-
 struct desk_t::impl_t
 {
   impl_t(const player_ptr first_player, const player_ptr second_player)
@@ -19,8 +17,8 @@ struct desk_t::impl_t
     , second_player_(second_player)
   {}
 
-  const player_ptr first_player_;
-  const player_ptr second_player_;
+  const desk_t::player_ptr first_player_;
+  const desk_t::player_ptr second_player_;
 };
 
 desk_t::desk_t(const player_ptr _1, const player_ptr _2)
@@ -36,7 +34,7 @@ bool desk_t::contains_player(const std::weak_ptr<server::client_t>& _1) const
 }
 
 // TODO: better to have players() fn instead
-player_ptr desk_t::get_opponent(const std::shared_ptr<const server::client_t>& player) const
+desk_t::player_ptr desk_t::get_opponent(const std::shared_ptr<const server::client_t>& player) const
 {
   return player == impl_->first_player_.lock() ? impl_->second_player_ : impl_->first_player_;
 }
@@ -57,14 +55,14 @@ void make_moves_from_str(const std::string& str, board_logic_t& desk)
   };
 
   std::vector<int> coord_str;
-  for (auto res : str)
+  for (const auto ch : str)
   {
-    if (!((res >= a_LETTER && res <= h_LETTER) || (res >= ONE_ch && res <= EIGHT_ch)))
+    if (!((ch >= a_LETTER && ch <= h_LETTER) || (ch >= ONE_ch && ch <= EIGHT_ch)))
     {
       continue;
     }
 
-    coord_str.push_back(isalpha(res) ? res - a_LETTER : EIGHT_ch - res);
+    coord_str.push_back(isalpha(ch) ? ch - a_LETTER : EIGHT_ch - ch);
 
     if (coord_str.size() == COORD_NEED_TO_MOVE)
     {

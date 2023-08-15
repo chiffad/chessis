@@ -14,14 +14,17 @@ namespace logic {
 class desk_t : public board_logic_t
 {
 public:
-  desk_t(const std::weak_ptr<const server::client_t> _1, const std::weak_ptr<const server::client_t> _2);
+  using player_ptr = std::weak_ptr<const server::client_t>;
+
+public:
+  desk_t(const player_ptr player_1, const player_ptr player_2);
   ~desk_t() override;
 
   desk_t(const desk_t&) = delete;
   desk_t& operator=(const desk_t&) = delete;
 
-  bool contains_player(const std::weak_ptr<server::client_t>& _1) const;
-  std::weak_ptr<const server::client_t> get_opponent(const std::shared_ptr<const server::client_t>& _1) const;
+  bool contains_player(const std::weak_ptr<server::client_t>& player) const;
+  player_ptr get_opponent(const std::shared_ptr<const server::client_t>& player) const;
 
 private:
   struct impl_t;
