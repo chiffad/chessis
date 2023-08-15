@@ -28,7 +28,7 @@ public:
 
 private:
   struct impl_t;
-  std::unique_ptr<impl_t> impl;
+  std::unique_ptr<impl_t> impl_;
 };
 
 } // namespace server

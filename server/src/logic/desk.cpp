@@ -18,15 +18,15 @@ struct desk_t::impl_t
   void load_moves_from_file(const std::string& path);
   void write_moves_to_file(const std::string& path) const;
 
-  const std::weak_ptr<const server::client_t> first_player;
-  const std::weak_ptr<const server::client_t> second_player;
+  const std::weak_ptr<const server::client_t> first_player_;
+  const std::weak_ptr<const server::client_t> second_player_;
 
-  board_t* parent;
+  board_t* parent_;
 };
 
 desk_t::desk_t(const std::weak_ptr<const server::client_t> _1, const std::weak_ptr<const server::client_t> _2)
   : board_t()
-  , impl(std::make_unique<impl_t>(_1, _2, this))
+  , impl_(std::make_unique<impl_t>(_1, _2, this))
 {}
 
 desk_t::~desk_t()
@@ -34,33 +34,33 @@ desk_t::~desk_t()
 
 void desk_t::make_moves_from_str(const std::string& str)
 {
-  impl->make_moves_from_str(str);
+  impl_->make_moves_from_str(str);
 }
 
 bool desk_t::is_contain_player(const std::weak_ptr<server::client_t>& _1) const
 {
-  return impl->is_contain_player(_1);
+  return impl_->is_contain_player(_1);
 }
 
 const std::weak_ptr<const server::client_t> desk_t::get_opponent(const std::shared_ptr<const server::client_t>& _1) const
 {
-  return impl->get_opponent(_1);
+  return impl_->get_opponent(_1);
 }
 
 void desk_t::load_moves_from_file(const std::string& path)
 {
-  impl->load_moves_from_file(path);
+  impl_->load_moves_from_file(path);
 }
 
 void desk_t::write_moves_to_file(const std::string& path) const
 {
-  impl->write_moves_to_file(path);
+  impl_->write_moves_to_file(path);
 }
 
 desk_t::impl_t::impl_t(const std::weak_ptr<const server::client_t> _1, const std::weak_ptr<const server::client_t> _2, board_t* par)
-  : first_player(_1)
-  , second_player(_2)
-  , parent(par)
+  : first_player_(_1)
+  , second_player_(_2)
+  , parent_(par)
 {}
 
 void desk_t::impl_t::make_moves_from_str(const std::string& str)
@@ -90,7 +90,7 @@ void desk_t::impl_t::make_moves_from_str(const std::string& str)
 
     if (coord_str.size() == COORD_NEED_TO_MOVE)
     {
-      parent->move(coord_t(coord_str[FROM_X], coord_str[FROM_Y]), coord_t(coord_str[TO_X], coord_str[TO_Y]));
+      parent_->move(coord_t(coord_str[FROM_X], coord_str[FROM_Y]), coord_t(coord_str[TO_X], coord_str[TO_Y]));
       coord_str.clear();
     }
   }
@@ -98,12 +98,12 @@ void desk_t::impl_t::make_moves_from_str(const std::string& str)
 
 bool desk_t::impl_t::is_contain_player(const std::weak_ptr<server::client_t>& _1) const
 {
-  return (_1.lock() == first_player.lock() || _1.lock() == second_player.lock());
+  return (_1.lock() == first_player_.lock() || _1.lock() == second_player_.lock());
 }
 
 const std::weak_ptr<const server::client_t> desk_t::impl_t::get_opponent(const std::shared_ptr<const server::client_t>& _1) const
 {
-  return (_1 == first_player.lock() ? second_player : first_player);
+  return (_1 == first_player_.lock() ? second_player_ : first_player_);
 }
 
 void desk_t::impl_t::write_moves_to_file(const std::string& path) const
@@ -116,7 +116,7 @@ void desk_t::impl_t::write_moves_to_file(const std::string& path) const
     return;
   }
 
-  std::string history = parent->get_moves_history();
+  std::string history = parent_->get_moves_history();
   std::copy(history.begin(), history.end(), std::ostreambuf_iterator<char>(in_file));
 }
 
@@ -132,7 +132,7 @@ void desk_t::impl_t::load_moves_from_file(const std::string& path)
 
   std::string data_from_file(std::istreambuf_iterator<char>(from_file), (std::istreambuf_iterator<char>()));
 
-  parent->start_new_game();
+  parent_->start_new_game();
   make_moves_from_str(data_from_file);
 }
 

@@ -8,7 +8,7 @@ namespace server {
 namespace {
 inline std::string get_board_state(const std::shared_ptr<const logic::desk_t>& d, const bool playing_white)
 {
-  return prepare_for_send(msg::game_inf_t(d->get_board_mask(), d->get_moves_history(), d->is_mate(), d->get_move_num(), playing_white));
+  return prepare_for_send(msg::game_inf_t(d->get_board_mask(), d->get_moves_history(), d->mate(), d->get_move_num(), playing_white));
 }
 
 inline std::string get_person_inf(const std::shared_ptr<const client_t>& c)
@@ -25,20 +25,20 @@ void handle_message_t::handle_fn<msg::login_t>(const std::string& message, std::
 
   auto login = msg::init<msg::login_t>(message);
 
-  if (clients.end() !=
-      std::find_if(clients.begin(), clients.end(), [&login](const auto& i) { return i->get_login() == login.login && i->get_pwd() == login.pwd; }))
+  if (clients_.end() !=
+      std::find_if(clients_.begin(), clients_.end(), [&login](const auto& i) { return i->get_login() == login.login && i->get_pwd() == login.pwd; }))
   {
     client->push_for_send(prepare_for_send(msg::incorrect_log_t()));
   }
   else
   {
     client->set_login_pwd(login.login, login.pwd);
-    for (const auto c2 : clients)
+    for (const auto c2 : clients_)
     {
       if (c2 == client) continue;
-      if (desks.end() != get_desk(c2)) continue;
+      if (desks_.end() != get_desk(c2)) continue;
 
-      desks.push_back(std::make_shared<logic::desk_t>(client, c2));
+      desks_.push_back(std::make_shared<logic::desk_t>(client, c2));
       start_new_game(client);
     }
   }
@@ -49,7 +49,7 @@ void handle_message_t::handle_fn<msg::opponent_inf_t>(const std::string& message
 {
   SPDLOG_DEBUG("tactic for opponent_inf_t; msg={}", message);
   auto opp = get_opponent(client);
-  if (opp == clients.end())
+  if (opp == clients_.end())
   {
     client->push_for_send(prepare_for_send(msg::inf_request_t("No opponent: no game in progress!")));
   }
@@ -72,7 +72,7 @@ void handle_message_t::handle_fn<msg::client_lost_t>(const std::string& message,
   SPDLOG_DEBUG("tactic for client_lost_t; msg={}", message);
 
   auto opp = get_opponent(client);
-  if (opp != clients.end())
+  if (opp != clients_.end())
   {
     (*opp)->push_for_send(prepare_for_send(msg::opponent_lost_t()));
   }
@@ -101,7 +101,7 @@ void handle_message_t::handle_fn<msg::go_to_history_t>(const std::string& messag
 {
   SPDLOG_DEBUG("tactic for go_to_history_t; msg={}", message);
 
-  (*get_desk(client))->go_to_history_index(msg::init<msg::go_to_history_t>(message).index);
+  (*get_desk(client))->go_to_history(msg::init<msg::go_to_history_t>(message).index);
   board_updated(client);
 }
 
@@ -115,7 +115,7 @@ void handle_message_t::handle_fn<msg::new_game_t>(const std::string& message, st
 void handle_message_t::board_updated(std::shared_ptr<client_t>& client)
 {
   auto opponent = get_opponent(client);
-  if (opponent == clients.end())
+  if (opponent == clients_.end())
   {
     helper::throw_except("opponent == client.end()");
   }
@@ -127,13 +127,13 @@ void handle_message_t::board_updated(std::shared_ptr<client_t>& client)
 
 void handle_message_t::new_message(boost::asio::io_service& io_service, const boost::asio::ip::udp::endpoint& addr, const std::string& message)
 {
-  auto c = std::find_if(clients.rbegin(), clients.rend(), [&addr](const auto& i) { return (i->get_address() == addr); });
+  auto c = std::find_if(clients_.rbegin(), clients_.rend(), [&addr](const auto& i) { return (i->get_address() == addr); });
 
-  if (c == clients.rend())
+  if (c == clients_.rend())
   {
     SPDLOG_INFO("New client! addr={}", addr);
-    clients.push_back(std::make_shared<client_t>(io_service, addr));
-    c = clients.rbegin();
+    clients_.push_back(std::make_shared<client_t>(io_service, addr));
+    c = clients_.rbegin();
   }
   (*c)->push_from_server(message);
 }
@@ -146,28 +146,28 @@ void handle_message_t::process_mess<boost::mpl::end<msg::message_types>::type>(c
 
 std::vector<std::shared_ptr<client_t>>::iterator handle_message_t::begin() noexcept
 {
-  return clients.begin();
+  return clients_.begin();
 }
 
 std::vector<std::shared_ptr<client_t>>::iterator handle_message_t::end() noexcept
 {
-  return clients.end();
+  return clients_.end();
 }
 
 std::vector<std::shared_ptr<logic::desk_t>>::iterator handle_message_t::get_desk(const std::shared_ptr<client_t>& client)
 {
-  return std::find_if(desks.begin(), desks.end(), [&client](const auto& d) { return d->is_contain_player(client); });
+  return std::find_if(desks_.begin(), desks_.end(), [&client](const auto& d) { return d->is_contain_player(client); });
 }
 
 std::vector<std::shared_ptr<client_t>>::iterator handle_message_t::get_opponent(const std::shared_ptr<client_t>& client)
 {
   const auto d = get_desk(client);
-  if (d == desks.end())
+  if (d == desks_.end())
   {
-    return clients.end();
+    return clients_.end();
   } // throw std::logic_error("In handle_message_t::get_opponent: No desk found!"); }
 
-  return std::find(clients.begin(), clients.end(), (*d)->get_opponent(client).lock());
+  return std::find(clients_.begin(), clients_.end(), (*d)->get_opponent(client).lock());
 }
 
 void handle_message_t::start_new_game(std::shared_ptr<client_t>& client)

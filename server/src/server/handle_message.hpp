@@ -7,10 +7,10 @@
 #include <typeinfo>
 #include <vector>
 
-#include "server/client.hpp"
 #include "helper.h"
 #include "logic/desk.hpp"
 #include "messages/messages.hpp"
+#include "server/client.hpp"
 #include <spdlog/spdlog.h>
 
 namespace server {
@@ -52,8 +52,8 @@ private:
     SPDLOG_ERROR("For type={} tactic isn't defined! msg={}", typeid(T).name(), str);
   }
 
-  std::vector<std::shared_ptr<server::client_t>> clients;
-  std::vector<std::shared_ptr<logic::desk_t>> desks;
+  std::vector<std::shared_ptr<server::client_t>> clients_;
+  std::vector<std::shared_ptr<logic::desk_t>> desks_;
 };
 
 template<>

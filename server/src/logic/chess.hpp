@@ -12,13 +12,13 @@ namespace logic {
 class board_t
 {
 public:
-  board_t();
+  explicit board_t();
   virtual ~board_t();
   bool move(const coord_t& from, const coord_t& to);
   bool back_move();
   void start_new_game();
-  void go_to_history_index(const unsigned index);
-  bool is_mate() const;
+  void go_to_history(size_t i);
+  bool mate() const;
 
   std::string get_moves_history() const;
   unsigned get_move_num() const;
@@ -30,7 +30,7 @@ public:
 
 private:
   struct impl_t;
-  std::unique_ptr<impl_t> impl;
+  std::unique_ptr<impl_t> impl_;
 };
 
 } // namespace logic
