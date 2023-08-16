@@ -19,6 +19,8 @@ add_executable(${TARGET_NAME}
   src/server/server.cpp
   src/server/client.cpp
   src/server/client.hpp
+  src/server/clients_holder.hpp
+  src/server/clients_holder.cpp 
   src/helper.h
   src/logger.hpp 
   src/logger.cpp 

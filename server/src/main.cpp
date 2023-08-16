@@ -15,8 +15,10 @@ try
   logger::logger_t::get().init();
 
   boost::asio::io_service io_service;
-  server::server_t server(io_service);
-  server::handle_message_t handler;
+  server::server_t server{io_service};
+  server::clients_holder_t clients{io_service};
+
+  server::handle_message_t handler{clients};
 
   while (true)
   {
@@ -27,7 +29,7 @@ try
       handler.new_message(io_service, data.address, data.message);
     }
 
-    for (auto c : handler)
+    for (auto c : clients)
     {
       if (c->is_message_for_server_append())
       {

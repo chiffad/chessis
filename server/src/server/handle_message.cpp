@@ -18,29 +18,30 @@ inline std::string get_person_inf(const client_t& c)
 
 } // namespace
 
+handle_message_t::handle_message_t(clients_holder_t& cl)
+  : clients_(cl)
+{}
+
 template<>
 void handle_message_t::handle_fn<msg::login_t>(const std::string& message, std::shared_ptr<client_t>& client)
 {
   SPDLOG_DEBUG("tactic for login_t; msg={}", message);
-
   auto login = msg::init<msg::login_t>(message);
 
-  if (clients_.end() !=
-      std::find_if(clients_.begin(), clients_.end(), [&login](const auto& i) { return i->get_login() == login.login && i->get_pwd() == login.pwd; }))
+  if (clients_.end() != clients_.get(login.login))
   {
     client->push_for_send(prepare_for_send(msg::incorrect_log_t()));
+    return;
   }
-  else
-  {
-    client->set_login_pwd(login.login, login.pwd);
-    for (const auto c2 : clients_)
-    {
-      if (c2 == client) continue;
-      if (desks_.end() != get_desk(c2)) continue;
 
-      desks_.emplace_back(client, c2);
-      start_new_game(client);
-    }
+  client->set_login_pwd(login.login, login.pwd);
+  for (const auto c2 : clients_)
+  {
+    if (c2 == client) continue;
+    if (desks_.end() != get_desk(c2)) continue;
+
+    desks_.emplace_back(client, c2);
+    start_new_game(client);
   }
 }
 
@@ -128,15 +129,16 @@ void handle_message_t::board_updated(std::shared_ptr<client_t>& client)
 
 void handle_message_t::new_message(boost::asio::io_service& io_service, const boost::asio::ip::udp::endpoint& addr, const std::string& message)
 {
-  auto c = std::find_if(clients_.rbegin(), clients_.rend(), [&addr](const auto& i) { return (i->get_address() == addr); });
-
-  if (c == clients_.rend())
+  auto c = clients_.get(addr);
+  if (c != clients_.end())
   {
-    SPDLOG_INFO("New client! addr={}", addr);
-    clients_.push_back(std::make_shared<client_t>(io_service, addr));
-    c = clients_.rbegin();
+    (*c)->push_from_server(message);
+    return;
   }
-  (*c)->push_from_server(message);
+
+  SPDLOG_INFO("New client! addr={}", addr);
+  clients_.add(addr).push_from_server(message);
+  ;
 }
 
 template<>
@@ -145,22 +147,12 @@ void handle_message_t::process_mess<boost::mpl::end<msg::message_types>::type>(c
   SPDLOG_ERROR("no type found");
 }
 
-handle_message_t::clients_arr_t::iterator handle_message_t::begin() noexcept
-{
-  return clients_.begin();
-}
-
-handle_message_t::clients_arr_t::iterator handle_message_t::end() noexcept
-{
-  return clients_.end();
-}
-
 handle_message_t::desks_arr_t::iterator handle_message_t::get_desk(const std::shared_ptr<client_t>& client)
 {
   return std::find_if(desks_.begin(), desks_.end(), [&client](const auto& d) { return d.contains_player(client); });
 }
 
-handle_message_t::clients_arr_t::iterator handle_message_t::get_opponent(const std::shared_ptr<client_t>& client)
+clients_arr_t::iterator handle_message_t::get_opponent(const std::shared_ptr<client_t>& client)
 {
   const auto d = get_desk(client);
   if (d == desks_.end())

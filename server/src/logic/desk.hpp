@@ -33,6 +33,6 @@ private:
 
 void make_moves_from_str(const std::string& str, board_logic_t& desk);
 void load_moves_from_file(const std::string& path, board_logic_t& desk);
-void write_moves_to_file(const std::string& path, const desk_t& desk);
+void write_moves_to_file(const std::string& path, board_logic_t& desk);
 
 } // namespace logic

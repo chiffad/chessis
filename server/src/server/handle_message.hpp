@@ -3,7 +3,7 @@
 #include "helper.h"
 #include "logic/desk.hpp"
 #include "messages/messages.hpp"
-#include "server/client.hpp"
+#include "server/clients_holder.hpp"
 #include <spdlog/spdlog.h>
 
 #include <boost/asio.hpp>
@@ -19,10 +19,10 @@ class handle_message_t
 {
 public:
   using desks_arr_t = std::list<logic::desk_t>;
-  using clients_arr_t = std::vector<std::shared_ptr<client_t>>;
 
 public:
-  handle_message_t() = default;
+  explicit handle_message_t(clients_holder_t&);
+
 #define handle(str, client) process_mess<boost::mpl::begin<msg::message_types>::type>(str, client);
   void new_message(boost::asio::io_service& io_service, const boost::asio::ip::udp::endpoint& addr, const std::string& message);
   clients_arr_t::iterator begin() noexcept;
@@ -57,7 +57,7 @@ private:
     SPDLOG_ERROR("For type={} tactic isn't defined! msg={}", typeid(T).name(), str);
   }
 
-  clients_arr_t clients_;
+  clients_holder_t& clients_;
   desks_arr_t desks_;
 };
 
