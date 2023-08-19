@@ -1,6 +1,6 @@
 #include "server/handle_message.hpp"
 
-#include "helper.h"
+#include "common/helper.hpp"
 #include <spdlog/spdlog.h>
 
 namespace server {
@@ -18,8 +18,9 @@ inline std::string get_person_inf(const client_t& c)
 
 } // namespace
 
-handle_message_t::handle_message_t(clients_holder_t& cl)
-  : clients_(cl)
+handle_message_t::handle_message_t(clients_holder_t& cl, logic::boards_holder_t& desks)
+  : clients_{cl}
+  , desks_{desks}
 {}
 
 template<>
@@ -40,7 +41,9 @@ void handle_message_t::handle_fn<msg::login_t>(const std::string& message, std::
     if (c2 == client) continue;
     if (desks_.end() != get_desk(c2)) continue;
 
-    desks_.emplace_back(client, c2);
+    // desks_.emplace_back(client, c2);
+    desks_.add();
+
     start_new_game(client);
   }
 }
@@ -127,7 +130,7 @@ void handle_message_t::board_updated(std::shared_ptr<client_t>& client)
   (*opponent)->push_for_send(get_board_state(desk, (*opponent)->playing_white()));
 }
 
-void handle_message_t::new_message(boost::asio::io_service& io_service, const boost::asio::ip::udp::endpoint& addr, const std::string& message)
+void handle_message_t::new_message(io_service_t& io_service, const endpoint_t& addr, const std::string& message)
 {
   auto c = clients_.get(addr);
   if (c != clients_.end())

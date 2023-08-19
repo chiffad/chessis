@@ -4,8 +4,9 @@
 #include <memory>
 #include <string>
 
-#include "helper.h"
-#include "logger.hpp"
+#include "common/helper.hpp"
+#include "common/logger.hpp"
+#include "logic/boards_holder.hpp"
 #include "server/handle_message.hpp"
 #include "server/server.hpp"
 
@@ -17,8 +18,9 @@ try
   boost::asio::io_service io_service;
   server::server_t server{io_service};
   server::clients_holder_t clients{io_service};
+  logic::boards_holder_t boards_holder;
 
-  server::handle_message_t handler{clients};
+  server::handle_message_t handler{clients, boards_holder};
 
   while (true)
   {

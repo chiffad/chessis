@@ -1,6 +1,7 @@
 #pragma once
 
-#include "helper.h"
+#include "common/helper.hpp"
+#include "logic/boards_holder.hpp"
 #include "logic/desk.hpp"
 #include "messages/messages.hpp"
 #include "server/clients_holder.hpp"
@@ -8,23 +9,18 @@
 
 #include <boost/asio.hpp>
 #include <boost/mpl/begin_end.hpp>
-#include <list>
 #include <memory>
 #include <string>
 #include <typeinfo>
-#include <vector>
 
 namespace server {
 class handle_message_t
 {
 public:
-  using desks_arr_t = std::list<logic::desk_t>;
-
-public:
-  explicit handle_message_t(clients_holder_t&);
+  explicit handle_message_t(clients_holder_t&, logic::boards_holder_t&);
 
 #define handle(str, client) process_mess<boost::mpl::begin<msg::message_types>::type>(str, client);
-  void new_message(boost::asio::io_service& io_service, const boost::asio::ip::udp::endpoint& addr, const std::string& message);
+  void new_message(io_service_t& io_service, const endpoint_t& addr, const std::string& message);
   clients_arr_t::iterator begin() noexcept;
   clients_arr_t::iterator end() noexcept;
 
@@ -58,7 +54,7 @@ private:
   }
 
   clients_holder_t& clients_;
-  desks_arr_t desks_;
+  logic::boards_holder_t& desks_;
 };
 
 template<>

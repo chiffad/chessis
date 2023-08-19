@@ -1,7 +1,5 @@
 #include "server/server.hpp"
 
-#include "helper.h"
-
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
 

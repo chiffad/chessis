@@ -13,6 +13,8 @@ add_executable(${TARGET_NAME}
   src/logic/desk.cpp
   src/logic/desk.hpp
   src/logic/coord.hpp
+  src/logic/boards_holder.hpp 
+  src/logic/boards_holder.cpp 
   src/server/handle_message.cpp  
   src/server/handle_message.hpp
   src/server/server.hpp    
@@ -21,9 +23,9 @@ add_executable(${TARGET_NAME}
   src/server/client.hpp
   src/server/clients_holder.hpp
   src/server/clients_holder.cpp 
-  src/helper.h
-  src/logger.hpp 
-  src/logger.cpp 
+  src/common/helper.hpp
+  src/common/logger.hpp 
+  src/common/logger.cpp 
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
