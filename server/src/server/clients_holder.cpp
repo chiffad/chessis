@@ -17,7 +17,7 @@ client_t::uuid_t clients_holder_t::add(const endpoint_t& addr)
 
 clients_arr_t::iterator clients_holder_t::find(const endpoint_t& addr)
 {
-  return std::find_if(begin(), end(), [&addr](const auto& cl) { return cl.second.get_address() == addr; });
+  return std::find_if(begin(), end(), [&addr](const auto& cl) { return cl.second.address() == addr; });
 }
 
 clients_arr_t::iterator clients_holder_t::find(const std::string& login)

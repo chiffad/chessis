@@ -13,7 +13,7 @@ inline std::string get_board_state(const logic::board_logic_t& d, const bool pla
 
 inline std::string get_person_inf(const client_t& c)
 {
-  return prepare_for_send(msg::inf_request_t("Login: " + c.credentials().login + "; Elo rating: " + std::to_string(c.get_rating())));
+  return prepare_for_send(msg::inf_request_t("Login: " + c.credentials().login + "; Elo rating: " + std::to_string(c.rating())));
 }
 
 } // namespace
@@ -27,13 +27,13 @@ void handle_message_t::process_server_message(const endpoint_t& addr, const std:
   auto c = games_manager_.client(addr);
   if (c)
   {
-    c.value()->push_from_server(message);
+    c.value()->message_received(message);
     return;
   }
 
   SPDLOG_INFO("New client! addr={}", addr);
   const auto uuid = games_manager_.add_client(addr);
-  games_manager_.client(uuid).push_from_server(message);
+  games_manager_.client(uuid).message_received(message);
 }
 
 template<>

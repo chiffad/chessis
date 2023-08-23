@@ -15,8 +15,7 @@ namespace server {
 struct client_t::impl_t
 {
   impl_t(io_service_t& io_serv, const endpoint_t& addr, const uuid_t& uuid);
-  void push_from_server(const std::string& message);
-  void push_for_send(const std::string& message);
+  void message_received(const std::string& message);
   bool is_message_for_server_append() const;
   bool is_message_for_logic_append() const;
   std::string pull_for_server();
@@ -62,14 +61,14 @@ client_t::client_t(io_service_t& io_serv, const endpoint_t& addr, const uuid_t& 
 
 client_t::~client_t() = default;
 
-void client_t::push_from_server(const std::string& message)
+void client_t::message_received(const std::string& message)
 {
-  impl_->push_from_server(message);
+  impl_->message_received(message);
 }
 
-void client_t::push_for_send(const std::string& message)
+void client_t::push_for_send(const std::string& m)
 {
-  impl_->push_for_send(message);
+  impl_->messages_for_server_.push_back(server_mess_t(m, false));
 }
 
 bool client_t::is_message_for_server_append() const
@@ -92,7 +91,7 @@ std::string client_t::pull_for_logic()
   return impl_->pull_for_logic();
 }
 
-const endpoint_t& client_t::get_address() const
+const endpoint_t& client_t::address() const
 {
   return impl_->address_;
 }
@@ -117,7 +116,7 @@ void client_t::set_rating(const int rating)
   impl_->elo_ = rating;
 }
 
-int client_t::get_rating() const
+int client_t::rating() const
 {
   return impl_->elo_;
 }
@@ -144,9 +143,9 @@ client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr, const uu
   , uuid_{uuid}
 {}
 
-void client_t::impl_t::push_from_server(const std::string& m)
+void client_t::impl_t::message_received(const std::string& m)
 {
-  SPDLOG_INFO("push_from_server: ", m);
+  SPDLOG_INFO("message={}", m);
 
   const auto datagramm = msg::init<msg::incoming_datagramm_t>(m);
 
@@ -175,13 +174,8 @@ void client_t::impl_t::push_from_server(const std::string& m)
       SPDLOG_DEBUG("msg::hello_server_t");
       add_for_server(msg::prepare_for_send(msg::get_login_t()));
       break;
-    default: SPDLOG_ERROR("push_from_server: default"); messages_for_logic_.push_back(datagramm.data);
+    default: SPDLOG_ERROR("default"); messages_for_logic_.push_back(datagramm.data);
   }
-}
-
-void client_t::impl_t::push_for_send(const std::string& m)
-{
-  messages_for_server_.push_back(server_mess_t(m, false));
 }
 
 bool client_t::impl_t::is_message_for_server_append() const
@@ -325,7 +319,7 @@ client_t::impl_t::server_mess_t::server_mess_t(const std::string& m, const bool 
 
 std::ostream& operator<<(std::ostream& os, const client_t& c)
 {
-  return os << "Client{ uuid=" << boost::uuids::to_string(c.uuid()) << "; creds=" << c.credentials() << "; address" << c.get_address() << " }";
+  return os << "Client{ uuid=" << boost::uuids::to_string(c.uuid()) << "; creds=" << c.credentials() << "; address" << c.address() << " }";
 }
 
 bool operator==(const client_t& lhs, const client_t& rhs)
