@@ -2,6 +2,7 @@
 
 #include "messages/messages.hpp"
 
+#include <boost/uuid/uuid_io.hpp>
 #include <spdlog/spdlog.h>
 #include <vector>
 
@@ -13,7 +14,7 @@ namespace server {
 
 struct client_t::impl_t
 {
-  impl_t(io_service_t& io_serv, const endpoint_t& addr);
+  impl_t(io_service_t& io_serv, const endpoint_t& addr, const uuid_t& uuid);
   void push_from_server(const std::string& message);
   void push_for_send(const std::string& message);
   bool is_message_for_server_append() const;
@@ -55,6 +56,7 @@ struct client_t::impl_t
   std::string pwd_;
   int elo_;
   bool playing_white_;
+  const uuid_t uuid_;
 
   int received_serial_num_;
   int send_serial_num_;
@@ -62,8 +64,8 @@ struct client_t::impl_t
   endpoint_t address_;
 };
 
-client_t::client_t(io_service_t& io_serv, const endpoint_t& addr)
-  : impl_(std::make_unique<impl_t>(io_serv, addr))
+client_t::client_t(io_service_t& io_serv, const endpoint_t& addr, const uuid_t& uuid)
+  : impl_(std::make_unique<impl_t>(io_serv, addr, uuid))
 {}
 
 client_t::~client_t() = default;
@@ -103,6 +105,11 @@ endpoint_t client_t::get_address() const
   return impl_->get_address();
 }
 
+const client_t::uuid_t& client_t::uuid() const
+{
+  return impl_->uuid_;
+}
+
 void client_t::set_login_pwd(const std::string& log, const std::string& pwd)
 {
   impl_->set_login_pwd(log, pwd);
@@ -138,7 +145,7 @@ void client_t::set_playing_white(bool playing_white)
   impl_->playing_white_ = playing_white;
 }
 
-client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
+client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr, const uuid_t& uuid)
   : response_timer_(io_serv)
   , connection_timer_(io_serv)
   , elo_{1200}
@@ -147,6 +154,7 @@ client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
   , send_serial_num_(0)
   , prev_message_received_(true)
   , address_(addr)
+  , uuid_{uuid}
 {}
 
 void client_t::impl_t::push_from_server(const std::string& m)
@@ -358,5 +366,15 @@ client_t::impl_t::server_mess_t::server_mess_t(const std::string& m, const bool 
   : message(m)
   , is_extra(is_extra_message)
 {}
+
+std::ostream& operator<<(std::ostream& os, const client_t& c)
+{
+  return os << "Client{ uuid=" << boost::uuids::to_string(c.uuid()) << "; login=" << c.get_login() << "; address" << c.get_address() << " }";
+}
+
+bool operator==(const client_t& lhs, const client_t& rhs)
+{
+  return lhs.uuid() == rhs.uuid();
+}
 
 } // namespace server

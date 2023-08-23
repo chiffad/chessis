@@ -2,13 +2,15 @@
 
 #include <spdlog/spdlog.h>
 
-#include <vector>
 #include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
+#include <fstream>
 #include <iterator>
+#include <sstream>
 #include <stdlib.h>
+#include <vector>
 
 namespace logic {
 
@@ -57,10 +59,9 @@ enum MOVE_TYPE
   PAWN_TRANSFORM
 };
 
-
 struct board_logic_t::impl_t
 {
-  impl_t();
+  explicit impl_t(const uuid_t& uuid);
   bool move(const coord_t& from, const coord_t& to);
   bool back_move();
   void start_new_game();
@@ -108,10 +109,11 @@ struct board_logic_t::impl_t
   std::vector<FIGURE> field_;
   bool go_to_history_running_;
   bool mate_;
+  const uuid_t uuid_;
 };
 
-board_logic_t::board_logic_t()
-  : impl_(std::make_unique<impl_t>())
+board_logic_t::board_logic_t(const uuid_t& uuid)
+  : impl_(std::make_unique<impl_t>(uuid))
 {}
 
 board_logic_t::~board_logic_t() = default;
@@ -156,9 +158,10 @@ std::string board_logic_t::get_board_mask() const
   return impl_->get_board_mask();
 }
 
-board_logic_t::impl_t::impl_t()
+board_logic_t::impl_t::impl_t(const uuid_t& uuid)
   : go_to_history_running_(false)
   , mate_(false)
+  , uuid_(uuid)
 {
   field_.resize(BOARD_SIZE);
   field_ = {B_ROOK, B_HORSE, B_ELEPHANT, B_QUEEN, B_KING, B_ELEPHANT, B_HORSE, B_ROOK};
@@ -404,6 +407,11 @@ void board_logic_t::impl_t::test_on_mate()
   mate_ = true;
 }
 
+const board_logic_t::uuid_t& board_logic_t::uuid() const
+{
+  return impl_->uuid_;
+}
+
 bool board_logic_t::impl_t::mate() const
 {
   return mate_;
@@ -592,6 +600,69 @@ unsigned board_logic_t::impl_t::get_field_index(const coord_t& c) const
     return 0;
   }
   return i;
+}
+
+void make_moves_from_str(const std::string& str, board_logic_t& desk)
+{
+  enum
+  {
+    FROM_X = 0,
+    FROM_Y = 1,
+    TO_X = 2,
+    TO_Y = 3,
+    COORD_NEED_TO_MOVE = 4,
+    a_LETTER = 'a',
+    h_LETTER = 'h',
+    ONE_ch = '1',
+    EIGHT_ch = '8'
+  };
+
+  std::vector<int> coord_str;
+  for (const auto ch : str)
+  {
+    if (!((ch >= a_LETTER && ch <= h_LETTER) || (ch >= ONE_ch && ch <= EIGHT_ch)))
+    {
+      continue;
+    }
+
+    coord_str.push_back(isalpha(ch) ? ch - a_LETTER : EIGHT_ch - ch);
+
+    if (coord_str.size() == COORD_NEED_TO_MOVE)
+    {
+      desk.move(coord_t(coord_str[FROM_X], coord_str[FROM_Y]), coord_t(coord_str[TO_X], coord_str[TO_Y]));
+      coord_str.clear();
+    }
+  }
+}
+
+void load_moves_from_file(const std::string& path, board_logic_t& desk)
+{
+  std::ifstream from_file(path);
+
+  if (!from_file.is_open())
+  {
+    SPDLOG_WARN("Couldn't open file path={}", path);
+    return;
+  }
+
+  desk.start_new_game();
+
+  const std::string data_from_file(std::istreambuf_iterator<char>(from_file), (std::istreambuf_iterator<char>()));
+  make_moves_from_str(data_from_file, desk);
+}
+
+void write_moves_to_file(const std::string& path, board_logic_t& desk)
+{
+  std::ofstream in_file(path);
+
+  if (!in_file.is_open())
+  {
+    SPDLOG_WARN("Couldn't open file path={}", path);
+    return;
+  }
+
+  const std::string history = desk.get_moves_history();
+  std::copy(history.begin(), history.end(), std::ostreambuf_iterator<char>(in_file));
 }
 
 } // namespace logic

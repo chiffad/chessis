@@ -6,20 +6,23 @@ clients_holder_t::clients_holder_t(io_service_t& io_service)
   : io_service_(io_service)
 {}
 
-client_t& clients_holder_t::add(const endpoint_t& addr)
+client_t::uuid_t clients_holder_t::add(const endpoint_t& addr)
 {
-  push_back(std::make_shared<client_t>(io_service_, addr));
-  return *back();
+  const auto uuid = uuid_generator_.new_uuid();
+
+  emplace(std::piecewise_construct, std::forward_as_tuple(uuid), std::forward_as_tuple(io_service_, addr, uuid));
+
+  return uuid;
 }
 
-clients_arr_t::iterator clients_holder_t::get(const endpoint_t& addr)
+clients_arr_t::iterator clients_holder_t::find(const endpoint_t& addr)
 {
-  return std::find_if(begin(), end(), [&addr](const auto& cl) { return cl->get_address() == addr; });
+  return std::find_if(begin(), end(), [&addr](const auto& cl) { return cl.second.get_address() == addr; });
 }
 
-clients_arr_t::iterator clients_holder_t::get(const std::string& login)
+clients_arr_t::iterator clients_holder_t::find(const std::string& login)
 {
-  return std::find_if(begin(), end(), [&login](const auto& cl) { return cl->get_login() == login; });
+  return std::find_if(begin(), end(), [&login](const auto& cl) { return cl.second.get_login() == login; });
 }
 
 } // namespace server
