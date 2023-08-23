@@ -10,6 +10,8 @@ find_package(Boost 1.82.0 REQUIRED COMPONENTS system serialization)
 find_package(spdlog REQUIRED)
 
 add_definitions(-DSPDLOG_ACTIVE_LEVEL=0)
+add_definitions(-DBOOST_MPL_LIMIT_VECTOR_SIZE=30)
+add_definitions(-DBOOST_MPL_CFG_NO_PREPROCESSED_HEADERS)
 
 set(COMPILE_WARNINGS
   -Werror

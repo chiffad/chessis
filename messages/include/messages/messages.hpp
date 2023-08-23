@@ -1,8 +1,5 @@
 #pragma once
 
-#define BOOST_MPL_LIMIT_VECTOR_SIZE 30
-#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/mpl/find.hpp>
