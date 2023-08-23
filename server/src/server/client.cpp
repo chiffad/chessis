@@ -21,13 +21,6 @@ struct client_t::impl_t
   bool is_message_for_logic_append() const;
   std::string pull_for_server();
   std::string pull_for_logic();
-  endpoint_t get_address() const;
-
-  void set_login_pwd(const std::string& log, const std::string& pwd);
-  std::string get_login() const;
-  std::string get_pwd() const;
-  void set_rating(int rating);
-  int get_rating() const;
 
   bool check_ser_num(const msg::incoming_datagramm_t& num);
   void add_for_server(const std::string& message, bool is_extra_message = false);
@@ -52,8 +45,7 @@ struct client_t::impl_t
   std::vector<std::string> messages_for_logic_;
   std::string last_send_message_;
 
-  std::string login_;
-  std::string pwd_;
+  credentials_t creds_;
   int elo_;
   bool playing_white_;
   const uuid_t uuid_;
@@ -100,9 +92,9 @@ std::string client_t::pull_for_logic()
   return impl_->pull_for_logic();
 }
 
-endpoint_t client_t::get_address() const
+const endpoint_t& client_t::get_address() const
 {
-  return impl_->get_address();
+  return impl_->address_;
 }
 
 const client_t::uuid_t& client_t::uuid() const
@@ -110,29 +102,24 @@ const client_t::uuid_t& client_t::uuid() const
   return impl_->uuid_;
 }
 
-void client_t::set_login_pwd(const std::string& log, const std::string& pwd)
+void client_t::set_credentials(const credentials_t& creds)
 {
-  impl_->set_login_pwd(log, pwd);
+  impl_->creds_ = creds;
 }
 
-std::string client_t::get_login() const
+const credentials_t& client_t::credentials() const
 {
-  return impl_->get_login();
-}
-
-std::string client_t::get_pwd() const
-{
-  return impl_->get_pwd();
+  return impl_->creds_;
 }
 
 void client_t::set_rating(const int rating)
 {
-  impl_->set_rating(rating);
+  impl_->elo_ = rating;
 }
 
 int client_t::get_rating() const
 {
-  return impl_->get_rating();
+  return impl_->elo_;
 }
 
 bool client_t::playing_white() const
@@ -232,37 +219,6 @@ std::string client_t::impl_t::pull_for_logic()
   messages_for_logic_.erase(messages_for_logic_.begin());
 
   return m;
-}
-
-endpoint_t client_t::impl_t::get_address() const
-{
-  return address_;
-}
-
-void client_t::impl_t::set_login_pwd(const std::string& log, const std::string& password)
-{
-  login_ = log;
-  pwd_ = password;
-}
-
-std::string client_t::impl_t::get_login() const
-{
-  return login_;
-}
-
-std::string client_t::impl_t::get_pwd() const
-{
-  return pwd_;
-}
-
-void client_t::impl_t::set_rating(const int rating)
-{
-  elo_ = rating;
-}
-
-int client_t::impl_t::get_rating() const
-{
-  return elo_;
 }
 
 bool client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& _1)
@@ -369,12 +325,27 @@ client_t::impl_t::server_mess_t::server_mess_t(const std::string& m, const bool 
 
 std::ostream& operator<<(std::ostream& os, const client_t& c)
 {
-  return os << "Client{ uuid=" << boost::uuids::to_string(c.uuid()) << "; login=" << c.get_login() << "; address" << c.get_address() << " }";
+  return os << "Client{ uuid=" << boost::uuids::to_string(c.uuid()) << "; creds=" << c.credentials() << "; address" << c.get_address() << " }";
 }
 
 bool operator==(const client_t& lhs, const client_t& rhs)
 {
   return lhs.uuid() == rhs.uuid();
+}
+
+std::ostream& operator<<(std::ostream& os, const credentials_t& c)
+{
+  return os << "Credentials{ login=" << c.login << "; pwd=" << c.pwd << " }";
+}
+
+bool operator==(const credentials_t& lhs, const credentials_t& rhs)
+{
+  return lhs.login == rhs.login && lhs.pwd == rhs.pwd;
+}
+
+bool operator!=(const credentials_t& lhs, const credentials_t& rhs)
+{
+  return !(lhs == rhs);
 }
 
 } // namespace server

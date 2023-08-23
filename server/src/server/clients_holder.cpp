@@ -22,7 +22,7 @@ clients_arr_t::iterator clients_holder_t::find(const endpoint_t& addr)
 
 clients_arr_t::iterator clients_holder_t::find(const std::string& login)
 {
-  return std::find_if(begin(), end(), [&login](const auto& cl) { return cl.second.get_login() == login; });
+  return std::find_if(begin(), end(), [&login](const auto& cl) { return cl.second.credentials().login == login; });
 }
 
 } // namespace server

@@ -13,7 +13,7 @@ inline std::string get_board_state(const logic::board_logic_t& d, const bool pla
 
 inline std::string get_person_inf(const client_t& c)
 {
-  return prepare_for_send(msg::inf_request_t("Login: " + c.get_login() + "; Elo rating: " + std::to_string(c.get_rating())));
+  return prepare_for_send(msg::inf_request_t("Login: " + c.credentials().login + "; Elo rating: " + std::to_string(c.get_rating())));
 }
 
 } // namespace
@@ -42,14 +42,14 @@ void handle_message_t::handle_fn<msg::login_t>(const std::string& message, clien
   SPDLOG_DEBUG("tactic for login_t; msg={}", message);
   auto login = msg::init<msg::login_t>(message);
 
-  if (!client.get_login().empty() && (client.get_login() != login.login || client.get_pwd() != login.pwd))
+  if (!client.credentials().login.empty() && client.credentials() != credentials_t{login.login, login.pwd})
   {
     SPDLOG_INFO("attempt to login to the client={} with incorrect credentials login={}; pwd={}", client, login.login, login.pwd);
     client.push_for_send(prepare_for_send(msg::incorrect_log_t()));
     return;
   }
 
-  client.set_login_pwd(login.login, login.pwd);
+  client.set_credentials(credentials_t{login.login, login.pwd});
   // TODO check is there game in progress for this client update board?
   start_new_game(client);
 }

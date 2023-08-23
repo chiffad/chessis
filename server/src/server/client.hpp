@@ -11,6 +11,12 @@
 
 namespace server {
 
+struct credentials_t
+{
+  std::string login;
+  std::string pwd;
+};
+
 class client_t
 {
 public:
@@ -24,12 +30,11 @@ public:
   bool is_message_for_logic_append() const;
   std::string pull_for_server();
   std::string pull_for_logic();
-  endpoint_t get_address() const;
-  const uuid_t& uuid() const;
 
-  void set_login_pwd(const std::string& log, const std::string& pwd);
-  std::string get_login() const;
-  std::string get_pwd() const;
+  const endpoint_t& get_address() const;
+  const uuid_t& uuid() const;
+  void set_credentials(const credentials_t& cred);
+  const credentials_t& credentials() const;
   void set_rating(const int rating);
   int get_rating() const;
   bool playing_white() const;
@@ -48,5 +53,9 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const client_t& c);
 bool operator==(const client_t& lhs, const client_t& rhs);
+
+std::ostream& operator<<(std::ostream& os, const credentials_t& c);
+bool operator==(const credentials_t& lhs, const credentials_t& rhs);
+bool operator!=(const credentials_t& lhs, const credentials_t& rhs);
 
 } // namespace server
