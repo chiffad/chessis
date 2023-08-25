@@ -22,57 +22,27 @@ struct my_archive_exception : public boost::archive::archive_exception
 
 struct login_t
 {
-  login_t() = default;
-  login_t(const std::string& log, const std::string& password)
-    : login(log)
-    , pwd(password)
-  {}
-
   std::string login;
   std::string pwd;
 };
 
 struct move_t
 {
-  move_t() = default;
-  move_t(const std::string move)
-    : data(move)
-  {}
-
   std::string data;
 };
 
 struct go_to_history_t
 {
-  go_to_history_t() = default;
-  go_to_history_t(const int ind)
-    : index(ind)
-  {}
-
   int index{};
 };
 
 struct inf_request_t
 {
-  inf_request_t() = default;
-  inf_request_t(const std::string& str)
-    : data(str)
-  {}
-
   std::string data;
 };
 
 struct game_inf_t
 {
-  game_inf_t() = default;
-  game_inf_t(const std::string& b_mask, const std::string& m_hist, const bool mate, const int move_number, const bool playing_white)
-    : board_mask(b_mask)
-    , moves_history(m_hist)
-    , is_mate(mate)
-    , move_num(move_number)
-    , playing_white{playing_white}
-  {}
-
   std::string board_mask;
   std::string moves_history;
   bool is_mate{};
@@ -82,26 +52,14 @@ struct game_inf_t
 
 struct incoming_datagramm_t
 {
-  incoming_datagramm_t() = default;
-  incoming_datagramm_t(const std::string& mess, const int num)
-    : ser_num(num)
-    , data(mess)
-  {}
-
-  int ser_num{};
   std::string data;
+  int ser_num{};
 };
 
 struct some_datagramm_t
 {
-  some_datagramm_t() = default;
-  some_datagramm_t(const std::string& mess, const int mess_type)
-    : type(mess_type)
-    , data(mess)
-  {}
-
-  int type{};
   std::string data;
+  int type{};
 };
 
 template<typename Archive>
@@ -247,6 +205,3 @@ bool is_equal_types(const std::string& str)
 }
 
 } // namespace msg
-
-#undef BOOST_MPL_LIMIT_VECTOR_SIZE
-#undef BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
