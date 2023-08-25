@@ -3,7 +3,6 @@
 #include "common/helper.hpp"
 #include "logic/boards_holder.hpp"
 #include "logic/players_holder.hpp"
-#include "server/datagram.hpp"
 
 #include <list>
 #include <map>
@@ -29,7 +28,6 @@ public:
   std::optional<player_t::uuid_t> free_client(const player_t& not_this) const;
   std::optional<board_logic_t::uuid_t> board(const player_t& player) const;
 
-  std::vector<server::datagram_t> messages_to_send();
   std::optional<player_t::uuid_t> free_player(const player_t& not_this) const;
 
 private:

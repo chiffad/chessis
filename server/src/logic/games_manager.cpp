@@ -116,17 +116,4 @@ void games_manager_t::clear_mapping(const player_t::uuid_t& player)
   }
 }
 
-std::vector<server::datagram_t> games_manager_t::messages_to_send()
-{
-  std::vector<server::datagram_t> res;
-  for (auto& player : players_)
-  {
-    while (player.second.message_for_server_append())
-    {
-      res.push_back(server::datagram_t{player.second.address(), player.second.pull_for_server()});
-    }
-  }
-  return res;
-}
-
 } // namespace logic

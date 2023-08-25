@@ -1,25 +1,28 @@
 #include "server/handle_message.hpp"
 
+#include "messages/messages.hpp"
+
 #include "common/helper.hpp"
 #include <spdlog/spdlog.h>
 
 namespace server {
 
 namespace {
-inline std::string get_board_state(const logic::board_logic_t& d, const bool playing_white)
+inline msg::game_inf_t get_board_state(const logic::board_logic_t& d, const bool playing_white)
 {
-  return prepare_for_send(msg::game_inf_t(d.get_board_mask(), d.get_moves_history(), d.mate(), d.get_move_num(), playing_white));
+  return {d.get_board_mask(), d.get_moves_history(), d.mate(), static_cast<int>(d.get_move_num()), playing_white};
 }
 
-inline std::string get_person_inf(const logic::player_t& player)
+inline msg::inf_request_t get_person_inf(const logic::player_t& player)
 {
-  return prepare_for_send(msg::inf_request_t("Login: " + player.credentials().login + "; Elo rating: " + std::to_string(player.rating())));
+  return {"Login: " + player.credentials().login + "; Elo rating: " + std::to_string(player.rating())};
 }
 
 } // namespace
 
-handle_message_t::handle_message_t(logic::games_manager_t& games_manager)
+handle_message_t::handle_message_t(logic::games_manager_t& games_manager, server_t& server)
   : games_manager_{games_manager}
+  , server_{server}
 {}
 
 void handle_message_t::process_server_message(const endpoint_t& addr, const std::string& message)
@@ -45,7 +48,7 @@ void handle_message_t::handle_fn<msg::login_t>(const std::string& message, logic
   if (!player.credentials().login.empty() && player.credentials() != logic::credentials_t{login.login, login.pwd})
   {
     SPDLOG_INFO("attempt to login to the player={} with incorrect credentials login={}; pwd={}", player, login.login, login.pwd);
-    player.push_for_send(prepare_for_send(msg::incorrect_log_t()));
+    server_.send(msg::incorrect_log_t(), player.address());
     return;
   }
 
@@ -61,18 +64,18 @@ void handle_message_t::handle_fn<msg::opponent_inf_t>(const std::string& message
   const auto opp_uuid = games_manager_.opponent(player.uuid());
   if (!opp_uuid)
   {
-    player.push_for_send(prepare_for_send(msg::inf_request_t("No opponent: no game in progress!")));
+    server_.send(msg::inf_request_t("No opponent: no game in progress!"), player.address());
     return;
   }
 
-  player.push_for_send(get_person_inf(games_manager_.player(opp_uuid.value())));
+  server_.send(get_person_inf(games_manager_.player(opp_uuid.value())), player.address());
 }
 
 template<>
 void handle_message_t::handle_fn<msg::my_inf_t>(const std::string& message, logic::player_t& player)
 {
   SPDLOG_DEBUG("tactic for my_inf_t; msg={}", message);
-  player.push_for_send(get_person_inf(player));
+  server_.send(get_person_inf(player), player.address());
 }
 
 template<>
@@ -83,7 +86,7 @@ void handle_message_t::handle_fn<msg::client_lost_t>(const std::string& message,
   const auto opp_uuid = games_manager_.opponent(player.uuid());
   if (opp_uuid.has_value())
   {
-    games_manager_.player(opp_uuid.value()).push_for_send(prepare_for_send(msg::opponent_lost_t()));
+    server_.send(msg::opponent_lost_t(), games_manager_.player(opp_uuid.value()).address());
   }
 }
 
@@ -171,7 +174,7 @@ void handle_message_t::board_updated(logic::player_t& player)
   }
 
   const auto& board = games_manager_.board(board_uuid.value());
-  player.push_for_send(get_board_state(board, player.playing_white()));
+  server_.send(get_board_state(board, player.playing_white()), player.address());
 
   const auto opp_uuid = games_manager_.opponent(player.uuid());
   if (!opp_uuid)
@@ -179,7 +182,8 @@ void handle_message_t::board_updated(logic::player_t& player)
     SPDLOG_INFO("No opponent found for player={}", player);
     return;
   }
-  games_manager_.player(opp_uuid.value()).push_for_send(get_board_state(board, !player.playing_white()));
+
+  server_.send(get_board_state(board, !player.playing_white()), games_manager_.player(opp_uuid.value()).address());
 }
 
 } // namespace server

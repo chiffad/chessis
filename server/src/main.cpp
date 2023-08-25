@@ -17,21 +17,16 @@ try
 
   io_service_t io_service;
   server::server_t server{io_service};
-  logic::games_manager_t games_manager_{io_service};
-  server::handle_message_t handler{games_manager_};
+  logic::games_manager_t games_manager{io_service};
+  server::handle_message_t handler{games_manager, server};
 
   while (true)
   {
     io_service.run_one();
 
-    for (const auto& data : server.pull())
+    for (const auto& data : server.read())
     {
       handler.process_server_message(data.address, data.message);
-    }
-
-    for (const auto& data : games_manager_.messages_to_send())
-    {
-      server.send(data.message, data.address);
     }
 
     server.process();

@@ -19,9 +19,6 @@ public:
 
   player_t(const endpoint_t& addr, const uuid_t& uuid);
   ~player_t();
-  void push_for_send(const std::string& message);
-  bool message_for_server_append() const;
-  std::string pull_for_server();
 
   const endpoint_t& address() const;
   const uuid_t& uuid() const;

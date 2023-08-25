@@ -48,7 +48,7 @@ void server_t::process()
   }
 }
 
-std::vector<datagram_t> server_t::pull()
+std::vector<datagram_t> server_t::read()
 {
   return impl_->clients_holder_.datagrams_to_process();
 }

@@ -2,11 +2,6 @@
 
 #include <boost/uuid/uuid_io.hpp>
 #include <spdlog/spdlog.h>
-#include <vector>
-
-namespace {
-const char FREE_SPASE = ' ';
-}
 
 namespace logic {
 
@@ -24,7 +19,6 @@ struct player_t::impl_t
   bool playing_white_;
   const uuid_t uuid_;
   endpoint_t address_;
-  std::vector<std::string> messages_for_server_;
 };
 
 player_t::player_t(const endpoint_t& addr, const uuid_t& uuid)
@@ -32,24 +26,6 @@ player_t::player_t(const endpoint_t& addr, const uuid_t& uuid)
 {}
 
 player_t::~player_t() = default;
-
-void player_t::push_for_send(const std::string& m)
-{
-  impl_->messages_for_server_.push_back(m);
-}
-
-bool player_t::message_for_server_append() const
-{
-  return !impl_->messages_for_server_.empty();
-}
-
-std::string player_t::pull_for_server()
-{
-  SPDLOG_DEBUG("pull_for_server");
-  const auto _1 = impl_->messages_for_server_.front();
-  impl_->messages_for_server_.erase(impl_->messages_for_server_.begin());
-  return _1;
-}
 
 const endpoint_t& player_t::address() const
 {
@@ -93,7 +69,7 @@ void player_t::set_playing_white(bool playing_white)
 
 std::ostream& operator<<(std::ostream& os, const player_t& c)
 {
-  return os << "Client{ uuid=" << boost::uuids::to_string(c.uuid()) << "; creds=" << c.credentials() << "; address" << c.address() << " }";
+  return os << "Player{ uuid=" << boost::uuids::to_string(c.uuid()) << "; creds=" << c.credentials() << "; address" << c.address() << " }";
 }
 
 bool operator==(const player_t& lhs, const player_t& rhs)

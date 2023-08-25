@@ -3,6 +3,7 @@
 #include "common/helper.hpp"
 #include "logic/games_manager.hpp"
 #include "messages/messages.hpp"
+#include "server/server.hpp"
 
 #include <spdlog/spdlog.h>
 
@@ -15,11 +16,11 @@ namespace server {
 class handle_message_t
 {
 public:
-  explicit handle_message_t(logic::games_manager_t&);
+  explicit handle_message_t(logic::games_manager_t&, server_t&);
 
   void process_server_message(const endpoint_t& addr, const std::string& message);
 
-  // TODO: not needed as private
+  // TODO: not needed as public
 #define handle(str, player) process_mess<boost::mpl::begin<msg::message_types>::type>(str, player);
 
   template<typename T>
@@ -52,6 +53,7 @@ private:
   }
 
   logic::games_manager_t& games_manager_;
+  server_t& server_;
 };
 
 template<>
