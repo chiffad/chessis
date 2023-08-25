@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 3.13)
 project(server LANGUAGES CXX)
 set(TARGET_NAME ${PROJECT_NAME})
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 add_executable(${TARGET_NAME}  
   src/main.cpp
   src/logic/games_manager.hpp

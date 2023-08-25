@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.13)
 project(user LANGUAGES CXX)
 set(TARGET_NAME ${PROJECT_NAME})
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(QT_PACKAGE Qt5) 
 
 find_package(${QT_PACKAGE} REQUIRED COMPONENTS Core Widgets Quick Qml QuickCompiler OpenGL)
