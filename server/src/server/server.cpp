@@ -1,4 +1,5 @@
 #include "server/server.hpp"
+#include "server/clients_holder.hpp"
 
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
@@ -12,40 +13,49 @@ struct server_t::impl_t
   ~impl_t();
   void start_receive();
   void send(const std::string& message, const endpoint_t& destination);
-  std::vector<datagram_t> pull();
   void handle_receive(const error_code_t& e, const size_t readed_size);
 
   boost::asio::ip::udp::socket socket_;
-  std::vector<datagram_t> messages_;
+  clients_holder_t clients_holder_;
 
   std::array<char, 1024> incoming_message_;
   endpoint_t last_mess_sender_;
 };
 
-server_t::datagram_t::datagram_t(const endpoint_t& addr, const std::string& mess)
-  : address(addr)
-  , message(mess)
-{}
-
 server_t::server_t(io_service_t& io_serv)
   : impl_(std::make_unique<impl_t>(io_serv))
 {}
 
-server_t::~server_t()
-{}
+server_t::~server_t() = default;
 
 void server_t::send(const std::string& message, const endpoint_t& destination)
 {
-  impl_->send(message, destination);
+  const auto cl_it = impl_->clients_holder_.find(destination);
+  if (cl_it == impl_->clients_holder_.end())
+  {
+    SPDLOG_ERROR("Unable to send message to destination={}; No client found! message={}", message, destination);
+    return;
+  }
+
+  cl_it->second.push_for_send(message);
 }
 
-std::vector<server_t::datagram_t> server_t::pull()
+void server_t::process()
 {
-  return impl_->pull();
+  for (const auto& datagram : impl_->clients_holder_.datagrams_to_send())
+  {
+    impl_->send(datagram.message, datagram.address);
+  }
+}
+
+std::vector<datagram_t> server_t::pull()
+{
+  return impl_->clients_holder_.datagrams_to_process();
 }
 
 server_t::impl_t::impl_t(io_service_t& io_serv)
-  : socket_(io_serv)
+  : socket_{io_serv}
+  , clients_holder_{io_serv}
 {
   enum
   {
@@ -86,34 +96,24 @@ void server_t::impl_t::send(const std::string& message, const endpoint_t& destin
 
 void server_t::impl_t::handle_receive(const error_code_t& e, const size_t readed_size)
 {
-  if (!e || e == boost::asio::error::message_size)
-  {
-    std::string mess(incoming_message_.begin(), incoming_message_.begin() + readed_size);
-    SPDLOG_INFO("read={}", mess);
-
-    messages_.push_back(datagram_t(last_mess_sender_, mess));
-    start_receive();
-  }
-  else
+  if (e && e != boost::asio::error::message_size)
   {
     SPDLOG_ERROR("hendle error!!");
+    return;
   }
+
+  const std::string mess(incoming_message_.begin(), incoming_message_.begin() + readed_size);
+  SPDLOG_INFO("read={}", mess);
+  clients_holder_.process(datagram_t{last_mess_sender_, mess});
+  start_receive();
 }
 
 void server_t::impl_t::start_receive()
 {
-  SPDLOG_INFO("start_receive()");
+  SPDLOG_TRACE("start_receive()");
   socket_.async_receive_from(
     boost::asio::buffer(incoming_message_), last_mess_sender_,
     boost::bind(&server_t::impl_t::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
-}
-
-std::vector<server_t::datagram_t> server_t::impl_t::pull()
-{
-  auto _1 = messages_;
-  messages_.clear();
-
-  return _1;
 }
 
 } // namespace server

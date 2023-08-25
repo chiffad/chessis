@@ -10,11 +10,17 @@ add_executable(${TARGET_NAME}
   src/main.cpp
   src/logic/games_manager.hpp
   src/logic/games_manager.cpp 
+  src/logic/player.cpp
+  src/logic/player.hpp
+  src/logic/players_holder.hpp
+  src/logic/players_holder.cpp 
   src/logic/board_logic.hpp
   src/logic/board_logic.cpp 
   src/logic/coord.hpp
   src/logic/boards_holder.hpp 
-  src/logic/boards_holder.cpp 
+  src/logic/boards_holder.cpp
+  src/logic/credentials.hpp
+  src/logic/credentials.cpp  
   src/server/handle_message.cpp  
   src/server/handle_message.hpp
   src/server/server.hpp    

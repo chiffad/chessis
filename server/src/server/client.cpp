@@ -14,27 +14,23 @@ namespace server {
 
 struct client_t::impl_t
 {
-  impl_t(io_service_t& io_serv, const endpoint_t& addr, const uuid_t& uuid);
+  impl_t(io_service_t& io_serv, const endpoint_t& addr);
   void message_received(const std::string& message);
-  bool is_message_for_server_append() const;
-  bool is_message_for_logic_append() const;
   std::string pull_for_server();
-  std::string pull_for_logic();
 
   bool check_ser_num(const msg::incoming_datagramm_t& num);
-  void add_for_server(const std::string& message, bool is_extra_message = false);
-  void is_message_received();
+  void add_for_server(const std::string& message, bool extra_message = false);
+  void check_message_received();
   void connection_timer_timeout();
   void begin_wait_receive(const std::string& message);
   void start_connection_timer();
   void start_response_timer();
 
+  // TODO: check can we use datagram_t
   struct server_mess_t
   {
-    server_mess_t(const std::string& m, bool is_extra);
-    server_mess_t() = default;
     std::string message;
-    bool is_extra;
+    bool extra;
   };
 
   deadline_timer_t response_timer_;
@@ -44,19 +40,15 @@ struct client_t::impl_t
   std::vector<std::string> messages_for_logic_;
   std::string last_send_message_;
 
-  credentials_t creds_;
-  int elo_;
-  bool playing_white_;
-  const uuid_t uuid_;
-
   int received_serial_num_;
   int send_serial_num_;
   bool prev_message_received_;
+
   endpoint_t address_;
 };
 
-client_t::client_t(io_service_t& io_serv, const endpoint_t& addr, const uuid_t& uuid)
-  : impl_(std::make_unique<impl_t>(io_serv, addr, uuid))
+client_t::client_t(io_service_t& io_serv, const endpoint_t& addr)
+  : impl_(std::make_unique<impl_t>(io_serv, addr))
 {}
 
 client_t::~client_t() = default;
@@ -68,17 +60,18 @@ void client_t::message_received(const std::string& message)
 
 void client_t::push_for_send(const std::string& m)
 {
-  impl_->messages_for_server_.push_back(server_mess_t(m, false));
+  impl_->messages_for_server_.push_back(client_t::impl_t::server_mess_t{m, false});
 }
 
-bool client_t::is_message_for_server_append() const
+bool client_t::message_for_server_append() const
 {
-  return impl_->is_message_for_server_append();
+  const auto& msg = impl_->messages_for_server_;
+  return !msg.empty() && (impl_->prev_message_received_ || (msg.front().extra && msg.front().message == impl_->last_send_message_));
 }
 
-bool client_t::is_message_for_logic_append() const
+bool client_t::message_for_logic_append() const
 {
-  return impl_->is_message_for_logic_append();
+  return !impl_->messages_for_logic_.empty();
 }
 
 std::string client_t::pull_for_server()
@@ -88,7 +81,10 @@ std::string client_t::pull_for_server()
 
 std::string client_t::pull_for_logic()
 {
-  return impl_->pull_for_logic();
+  SPDLOG_DEBUG("pull_for_logic");
+  const std::string m = impl_->messages_for_logic_.front();
+  impl_->messages_for_logic_.erase(impl_->messages_for_logic_.begin());
+  return m;
 }
 
 const endpoint_t& client_t::address() const
@@ -96,51 +92,13 @@ const endpoint_t& client_t::address() const
   return impl_->address_;
 }
 
-const client_t::uuid_t& client_t::uuid() const
-{
-  return impl_->uuid_;
-}
-
-void client_t::set_credentials(const credentials_t& creds)
-{
-  impl_->creds_ = creds;
-}
-
-const credentials_t& client_t::credentials() const
-{
-  return impl_->creds_;
-}
-
-void client_t::set_rating(const int rating)
-{
-  impl_->elo_ = rating;
-}
-
-int client_t::rating() const
-{
-  return impl_->elo_;
-}
-
-bool client_t::playing_white() const
-{
-  return impl_->playing_white_;
-}
-
-void client_t::set_playing_white(bool playing_white)
-{
-  impl_->playing_white_ = playing_white;
-}
-
-client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr, const uuid_t& uuid)
+client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
   : response_timer_(io_serv)
   , connection_timer_(io_serv)
-  , elo_{1200}
-  , playing_white_{true}
   , received_serial_num_(1)
   , send_serial_num_(0)
   , prev_message_received_(true)
   , address_(addr)
-  , uuid_{uuid}
 {}
 
 void client_t::impl_t::message_received(const std::string& m)
@@ -148,7 +106,6 @@ void client_t::impl_t::message_received(const std::string& m)
   SPDLOG_INFO("message={}", m);
 
   const auto datagramm = msg::init<msg::incoming_datagramm_t>(m);
-
   if (!check_ser_num(datagramm))
   {
     return;
@@ -156,14 +113,14 @@ void client_t::impl_t::message_received(const std::string& m)
 
   ++received_serial_num_;
   start_connection_timer();
-  const auto t = msg::init<msg::some_datagramm_t>(datagramm.data).type;
 
-  if (t != msg::id_v<msg::message_received_t>)
+  const auto msg_type = msg::init<msg::some_datagramm_t>(datagramm.data).type;
+  if (msg_type != msg::id_v<msg::message_received_t>)
   {
     add_for_server(msg::prepare_for_send(msg::message_received_t()));
   }
 
-  switch (msg::init<msg::some_datagramm_t>(datagramm.data).type)
+  switch (msg_type)
   {
     case msg::id_v<msg::message_received_t>:
       SPDLOG_DEBUG("msg::message_received_t");
@@ -176,17 +133,6 @@ void client_t::impl_t::message_received(const std::string& m)
       break;
     default: SPDLOG_ERROR("default"); messages_for_logic_.push_back(datagramm.data);
   }
-}
-
-bool client_t::impl_t::is_message_for_server_append() const
-{
-  return (!messages_for_server_.empty() &&
-          (prev_message_received_ || (messages_for_server_.front().is_extra && messages_for_server_.front().message == last_send_message_)));
-}
-
-bool client_t::impl_t::is_message_for_logic_append() const
-{
-  return !messages_for_logic_.empty();
 }
 
 std::string client_t::impl_t::pull_for_server()
@@ -202,17 +148,7 @@ std::string client_t::impl_t::pull_for_server()
 
   messages_for_server_.erase(messages_for_server_.begin());
 
-  return msg::prepare_for_send(msg::incoming_datagramm_t(_1.message, _1.is_extra ? send_serial_num_ : ++send_serial_num_));
-}
-
-std::string client_t::impl_t::pull_for_logic()
-{
-  SPDLOG_DEBUG("pull_for_logic");
-
-  const std::string m = messages_for_logic_.front();
-  messages_for_logic_.erase(messages_for_logic_.begin());
-
-  return m;
+  return msg::prepare_for_send(msg::incoming_datagramm_t(_1.message, _1.extra ? send_serial_num_ : ++send_serial_num_));
 }
 
 bool client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& _1)
@@ -233,11 +169,11 @@ bool client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& _1)
   return true;
 }
 
-void client_t::impl_t::add_for_server(const std::string& m, bool is_extra_message)
+void client_t::impl_t::add_for_server(const std::string& m, bool extra_message)
 {
   SPDLOG_DEBUG("add message={}", m);
-  auto _1 = server_mess_t(m, is_extra_message);
-  if (is_extra_message)
+  auto _1 = server_mess_t{m, extra_message};
+  if (extra_message)
   {
     messages_for_server_.insert(messages_for_server_.begin(), _1);
   }
@@ -254,7 +190,7 @@ void client_t::impl_t::begin_wait_receive(const std::string& message)
   start_response_timer();
 }
 
-void client_t::impl_t::is_message_received()
+void client_t::impl_t::check_message_received()
 {
   SPDLOG_TRACE("is message received");
   static int num_of_restarts = 0;
@@ -262,19 +198,18 @@ void client_t::impl_t::is_message_received()
   {
     response_timer_.cancel();
     num_of_restarts = 0;
+    return;
   }
-  else
+
+  add_for_server(last_send_message_, true);
+
+  if (msg::is_equal_types<msg::is_client_lost_t>(last_send_message_) && num_of_restarts == 3)
   {
-    add_for_server(last_send_message_, true);
-
-    if (msg::is_equal_types<msg::is_client_lost_t>(last_send_message_) && num_of_restarts == 3)
-    {
-      messages_for_logic_.push_back(msg::prepare_for_send(msg::client_lost_t()));
-    }
-
-    ++num_of_restarts;
-    start_response_timer();
+    messages_for_logic_.push_back(msg::prepare_for_send(msg::client_lost_t()));
   }
+
+  ++num_of_restarts;
+  start_response_timer();
 }
 
 void client_t::impl_t::connection_timer_timeout()
@@ -306,40 +241,20 @@ void client_t::impl_t::start_response_timer()
     SPDLOG_DEBUG(">>>>response_timer<<<< {}", error.message());
     if (!error)
     {
-      is_message_received();
+      check_message_received();
     }
   });
   // response_timer_.async_wait([&](auto /*e*/){log(">>>>response_timer<<<<");});
 }
 
-client_t::impl_t::server_mess_t::server_mess_t(const std::string& m, const bool is_extra_message)
-  : message(m)
-  , is_extra(is_extra_message)
-{}
-
 std::ostream& operator<<(std::ostream& os, const client_t& c)
 {
-  return os << "Client{ uuid=" << boost::uuids::to_string(c.uuid()) << "; creds=" << c.credentials() << "; address" << c.address() << " }";
+  return os << "Client{ address" << c.address() << " }";
 }
 
 bool operator==(const client_t& lhs, const client_t& rhs)
 {
-  return lhs.uuid() == rhs.uuid();
-}
-
-std::ostream& operator<<(std::ostream& os, const credentials_t& c)
-{
-  return os << "Credentials{ login=" << c.login << "; pwd=" << c.pwd << " }";
-}
-
-bool operator==(const credentials_t& lhs, const credentials_t& rhs)
-{
-  return lhs.login == rhs.login && lhs.pwd == rhs.pwd;
-}
-
-bool operator!=(const credentials_t& lhs, const credentials_t& rhs)
-{
-  return !(lhs == rhs);
+  return lhs.address() == rhs.address();
 }
 
 } // namespace server

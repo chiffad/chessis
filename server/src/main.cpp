@@ -24,26 +24,17 @@ try
   {
     io_service.run_one();
 
-    for (auto data : server.pull())
+    for (const auto& data : server.pull())
     {
       handler.process_server_message(data.address, data.message);
     }
 
-    for (auto& c_pair : games_manager_.clients())
+    for (const auto& data : games_manager_.messages_to_send())
     {
-      auto& c = c_pair.second;
-      if (c.is_message_for_server_append())
-      {
-        server.send(c.pull_for_server().data(), c.get_address());
-      }
-
-      if (c.is_message_for_logic_append())
-      {
-        const auto message = c.pull_for_logic();
-        SPDLOG_TRACE("message_from_logic={}", message);
-        handler.handle(message, c);
-      }
+      server.send(data.message, data.address);
     }
+
+    server.process();
   }
 
   return 0;
