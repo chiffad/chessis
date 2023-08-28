@@ -31,8 +31,9 @@ public:
   std::optional<player_t::uuid_t> free_player(const player_t& not_this) const;
 
 private:
-  void add_mapping(const player_t::uuid_t& player_1, const player_t::uuid_t& player_2, const board_logic_t::uuid_t& board_uuid);
-  void clear_mapping(const player_t::uuid_t& player);
+  void book_players(const player_t::uuid_t& player_1, const player_t::uuid_t& player_2, const board_logic_t::uuid_t& board_uuid);
+  void unbook_player(const player_t::uuid_t& player);
+  void remove_from_free_players(std::set<player_t::uuid_t> uuid);
 
 private:
   players_holder_t players_;

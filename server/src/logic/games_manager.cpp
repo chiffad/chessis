@@ -62,17 +62,15 @@ std::optional<board_logic_t::uuid_t> games_manager_t::board(const player_t& play
 
 void games_manager_t::start_game(const player_t::uuid_t& player_1, const player_t::uuid_t& player_2)
 {
-  clear_mapping(player_1);
-  clear_mapping(player_2);
+  unbook_player(player_1);
+  unbook_player(player_2);
 
   const auto board_uuid = boards_.add();
   const bool white_player = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() % 2 == 0;
   players_.at(player_1).set_playing_white(white_player);
   players_.at(player_2).set_playing_white(!white_player);
 
-  // TODO: remove player_1 and player_2 from free_players_;
-
-  add_mapping(player_1, player_2, board_uuid);
+  book_players(player_1, player_2, board_uuid);
 }
 
 std::optional<player_t::uuid_t> games_manager_t::opponent(const player_t::uuid_t& player_uuid) const
@@ -91,17 +89,20 @@ std::optional<player_t::uuid_t> games_manager_t::opponent(const player_t::uuid_t
   return std::nullopt;
 }
 
-void games_manager_t::add_mapping(const player_t::uuid_t& player_1, const player_t::uuid_t& player_2, const board_logic_t::uuid_t& board_uuid)
+void games_manager_t::book_players(const player_t::uuid_t& player_1, const player_t::uuid_t& player_2, const board_logic_t::uuid_t& board_uuid)
 {
   player_to_board_map_[player_1] = board_uuid;
   player_to_board_map_[player_2] = board_uuid;
   board_to_player_map_[board_uuid] = {player_1, player_2};
+  remove_from_free_players({player_1, player_2});
 }
 
-void games_manager_t::clear_mapping(const player_t::uuid_t& player)
+void games_manager_t::unbook_player(const player_t::uuid_t& player)
 {
   const auto player_2_board_it = player_to_board_map_.find(player);
   if (player_2_board_it == player_to_board_map_.end()) return;
+
+  free_players_.push_back(player);
 
   const auto board_2_player_it = board_to_player_map_.find(player_2_board_it->second);
   player_to_board_map_.erase(player_2_board_it);
@@ -113,6 +114,18 @@ void games_manager_t::clear_mapping(const player_t::uuid_t& player)
   {
     boards_.erase(player_2_board_it->second);
     board_to_player_map_.erase(board_2_player_it);
+  }
+}
+
+void games_manager_t::remove_from_free_players(std::set<player_t::uuid_t> uuids)
+{
+  for (auto it = free_players_.begin(); it != free_players_.end(); ++it)
+  {
+    if (!uuids.count(*it)) continue;
+
+    uuids.erase(*it);
+    it = free_players_.erase(it);
+    if (uuids.empty()) break;
   }
 }
 

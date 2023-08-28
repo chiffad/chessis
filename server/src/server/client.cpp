@@ -26,7 +26,6 @@ struct client_t::impl_t
   void start_connection_timer();
   void start_response_timer();
 
-  // TODO: check can we use datagram_t
   struct server_mess_t
   {
     std::string message;
