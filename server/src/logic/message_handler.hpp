@@ -12,11 +12,11 @@
 #include <string>
 #include <typeinfo>
 
-namespace server {
-class handle_message_t
+namespace logic {
+class message_handler_t
 {
 public:
-  explicit handle_message_t(logic::games_manager_t&, server_t&);
+  explicit message_handler_t(games_manager_t&, server::server_t&);
 
   void process_server_message(const endpoint_t& addr, const std::string& message);
 
@@ -24,7 +24,7 @@ public:
 #define handle(str, player) process_mess<boost::mpl::begin<msg::message_types>::type>(str, player);
 
   template<typename T>
-  void process_mess(const std::string& str, logic::player_t& player)
+  void process_mess(const std::string& str, player_t& player)
   {
     if (msg::is_equal_types<typename T::type>(str))
     {
@@ -37,31 +37,31 @@ public:
   }
 
 public:
-  handle_message_t(const handle_message_t&) = delete;
-  handle_message_t& operator=(const handle_message_t&) = delete;
-  handle_message_t(handle_message_t&&) = default;
-  handle_message_t& operator=(handle_message_t&&) = default;
+  message_handler_t(const message_handler_t&) = delete;
+  message_handler_t& operator=(const message_handler_t&) = delete;
+  message_handler_t(message_handler_t&&) = default;
+  message_handler_t& operator=(message_handler_t&&) = default;
 
 private:
-  void board_updated(logic::player_t& player);
-  void start_new_game(logic::player_t& player);
+  void board_updated(player_t& player);
+  void start_new_game(player_t& player);
 
   template<typename T>
-  void handle_fn(const std::string& str, logic::player_t& /*player*/)
+  void handle_fn(const std::string& str, player_t& /*player*/)
   {
     SPDLOG_ERROR("For type={} tactic isn't defined! msg={}", typeid(T).name(), str);
   }
 
-  logic::games_manager_t& games_manager_;
-  server_t& server_;
+  games_manager_t& games_manager_;
+  server::server_t& server_;
 };
 
 template<>
-void handle_message_t::process_mess<boost::mpl::end<msg::message_types>::type>(const std::string& /*str*/, logic::player_t& /*player*/);
+void message_handler_t::process_mess<boost::mpl::end<msg::message_types>::type>(const std::string& /*str*/, player_t& /*player*/);
 
 #define handle_macro(struct_type)                                                                                                                              \
   template<>                                                                                                                                                   \
-  void handle_message_t::handle_fn<struct_type>(const std::string& str, logic::player_t& player);
+  void message_handler_t::handle_fn<struct_type>(const std::string& str, player_t& player);
 handle_macro(msg::login_t);
 handle_macro(msg::opponent_inf_t);
 handle_macro(msg::my_inf_t);

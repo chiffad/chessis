@@ -18,8 +18,8 @@ add_executable(${TARGET_NAME}
   src/logic/boards_holder.cpp
   src/logic/credentials.hpp
   src/logic/credentials.cpp  
-  src/server/handle_message.cpp  
-  src/server/handle_message.hpp
+  src/logic/message_handler.cpp  
+  src/logic/message_handler.hpp
   src/server/server.hpp    
   src/server/server.cpp
   src/server/client.cpp

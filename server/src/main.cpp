@@ -1,14 +1,12 @@
-#include <algorithm>
-#include <boost/asio.hpp>
-#include <exception>
-#include <memory>
-#include <string>
-
 #include "common/helper.hpp"
 #include "common/logger.hpp"
 #include "logic/games_manager.hpp"
-#include "server/handle_message.hpp"
+#include "logic/message_handler.hpp"
 #include "server/server.hpp"
+
+#include <boost/asio.hpp>
+#include <exception>
+#include <spdlog/spdlog.h>
 
 int main()
 try
@@ -18,7 +16,7 @@ try
   io_service_t io_service;
   server::server_t server{io_service};
   logic::games_manager_t games_manager{io_service};
-  server::handle_message_t handler{games_manager, server};
+  logic::message_handler_t handler{games_manager, server};
 
   while (true)
   {
@@ -34,7 +32,7 @@ try
 
   return 0;
 }
-catch (std::exception const& ex)
+catch (const std::exception& ex)
 {
   SPDLOG_CRITICAL("Exception! ", ex.what());
 }
