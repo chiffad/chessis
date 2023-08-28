@@ -1,6 +1,5 @@
 [user]
-* give color side to the user (i.e. white player or black player)
-* rotate board according to color side
+* do not let black player to move white figures and wise verse (may be should be done on server side)
 
 [server]
-* refactor
+* logic player_t should not have endpoint. login or uuid should be used only 
