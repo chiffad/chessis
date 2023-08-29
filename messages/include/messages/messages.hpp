@@ -136,10 +136,9 @@ struct_proto(client_lost_t);
 struct_proto(opponent_lost_t);
 #undef struct_proto
 
-typedef boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t,
-                           incorrect_log_t, move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, server_lost_t, server_here_t,
-                           client_lost_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>
-  message_types;
+using message_types = boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t,
+                                         incorrect_log_t, move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, server_lost_t,
+                                         server_here_t, client_lost_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
 
 template<typename T, typename... U>
 concept one_of = (std::same_as<T, U> || ...);
@@ -152,54 +151,69 @@ concept one_of_msg_types = one_of<T, hello_server_t, message_received_t, is_serv
 template<typename T>
 inline constexpr int id_v = boost::mpl::find<message_types, T>::type::pos::value;
 
+namespace details {
+
 template<one_of_msg_types T>
-void update_struct(T& msg, const std::string& str)
+inline T from_string(const std::string& str)
 {
   std::stringstream ss;
   ss.str(str);
   boost::archive::text_iarchive ia(ss);
+  T msg;
   ia >> msg;
+  return msg;
 }
 
 template<one_of_msg_types T>
-T init(const std::string& str)
-{
-  some_datagramm_t _1;
-  update_struct(_1, str);
-
-  if (id_v<T> == id_v<some_datagramm_t>)
-  {
-    _1.data = str;
-  }
-  else if (_1.type != id_v<T>)
-  {
-    throw my_archive_exception("wrong type for init!!");
-  }
-
-  T my_struct;
-  update_struct(my_struct, _1.data);
-
-  return my_struct;
-}
-
-template<one_of_msg_types T>
-std::string prepare_for_send(const T& msg)
+inline std::string to_string(const T& msg)
 {
   std::stringstream ss;
   boost::archive::text_oarchive oa(ss);
   oa << msg;
-
-  if (id_v<T> != id_v<some_datagramm_t>)
-  {
-    some_datagramm_t _1(ss.str(), id_v<T>);
-    return prepare_for_send(_1);
-  }
-
   return ss.str();
 }
 
+} // namespace details
+
 template<one_of_msg_types T>
-bool is_equal_types(const std::string& str)
+T init(const some_datagramm_t& datagramm)
+{
+  if (datagramm.type != id_v<T>)
+  {
+    throw my_archive_exception("Wrong type for init! Can not create msg with type=" + std::to_string(id_v<T>) +
+                               "; from type=" + std::to_string(datagramm.type));
+  }
+
+  return details::from_string<T>(datagramm.data);
+}
+
+template<one_of_msg_types T>
+inline T init(const std::string& str)
+{
+  some_datagramm_t _1 = init<some_datagramm_t>(str);
+  return init<T>(_1);
+}
+
+template<>
+inline some_datagramm_t init<some_datagramm_t>(const std::string& str)
+{
+  return details::from_string<some_datagramm_t>(str);
+}
+
+template<one_of_msg_types T>
+inline std::string prepare_for_send(const T& msg)
+{
+  return prepare_for_send(some_datagramm_t{details::to_string(msg), id_v<T>});
+}
+
+template<>
+inline std::string prepare_for_send<some_datagramm_t>(const some_datagramm_t& msg)
+{
+  return details::to_string(msg);
+}
+
+template<one_of_msg_types T>
+inline bool is_equal_types(const std::string& str)
 {
   return init<some_datagramm_t>(str).type == id_v<T>;
 }
