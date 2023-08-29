@@ -28,24 +28,29 @@ struct message_handler_t::impl_t
     , server_{server}
   {}
 
-  void process_mess_begin(const std::string& str, player_t& player) { process_mess<boost::mpl::begin<msg::message_types>::type>(str, player); }
+  void process_mess_begin(const std::string& str, player_t& player)
+  {
+    const msg::some_datagramm_t datagramm = msg::init<msg::some_datagramm_t>(str);
+    SPDLOG_TRACE("Begin processing of the datagramm.type={}", datagramm.type);
+    process_mess<boost::mpl::begin<msg::message_types>::type>(datagramm, player);
+  }
 
   template<typename T>
-  void process_mess(const std::string& str, player_t& player)
+  void process_mess(const msg::some_datagramm_t& datagramm, player_t& player)
   {
-    if (msg::is_equal_types<typename T::type>(str))
+    if (datagramm.type == msg::id_v<typename T::type>)
     {
-      handle_fn<typename T::type>(str, player);
+      handle_fn<typename T::type>(datagramm, player);
       return;
     }
 
-    process_mess<typename boost::mpl::next<T>::type>(str, player);
+    process_mess<typename boost::mpl::next<T>::type>(datagramm, player);
   }
 
   template<msg::one_of_msg_types T>
-  void handle_fn(const std::string& str, player_t& /*player*/)
+  void handle_fn(const msg::some_datagramm_t& datagramm, player_t& /*player*/)
   {
-    SPDLOG_ERROR("For type={} tactic isn't defined! msg={}", typeid(T).name(), str);
+    SPDLOG_ERROR("For type={} tactic isn't defined! datagramm type={}", typeid(T).name(), datagramm.type);
   }
 
   void start_new_game(player_t& player)
@@ -88,16 +93,16 @@ struct message_handler_t::impl_t
 };
 
 template<>
-void message_handler_t::impl_t::process_mess<boost::mpl::end<msg::message_types>::type>(const std::string& str, player_t& player)
+void message_handler_t::impl_t::process_mess<boost::mpl::end<msg::message_types>::type>(const msg::some_datagramm_t& datagramm, player_t& player)
 {
-  SPDLOG_ERROR("No type found for str={}; player={};", str, player);
+  SPDLOG_ERROR("No type found for datagramm type={}; player={};", datagramm.type, player);
 }
 
 template<>
-void message_handler_t::impl_t::handle_fn<msg::login_t>(const std::string& message, player_t& player)
+void message_handler_t::impl_t::handle_fn<msg::login_t>(const msg::some_datagramm_t& datagramm, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for login_t; msg={}", message);
-  auto login = msg::init<msg::login_t>(message);
+  SPDLOG_DEBUG("tactic for login_t; datagramm={}", datagramm.data);
+  auto login = msg::init<msg::login_t>(datagramm);
 
   if (!player.credentials().login.empty() && player.credentials() != credentials_t{login.login, login.pwd})
   {
@@ -112,9 +117,9 @@ void message_handler_t::impl_t::handle_fn<msg::login_t>(const std::string& messa
 }
 
 template<>
-void message_handler_t::impl_t::handle_fn<msg::opponent_inf_t>(const std::string& message, player_t& player)
+void message_handler_t::impl_t::handle_fn<msg::opponent_inf_t>(const msg::some_datagramm_t& /*datagramm*/, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for opponent_inf_t; msg={}", message);
+  SPDLOG_DEBUG("tactic for opponent_inf_t;");
   const auto opp_uuid = games_manager_.opponent(player.uuid());
   if (!opp_uuid)
   {
@@ -126,16 +131,16 @@ void message_handler_t::impl_t::handle_fn<msg::opponent_inf_t>(const std::string
 }
 
 template<>
-void message_handler_t::impl_t::handle_fn<msg::my_inf_t>(const std::string& message, player_t& player)
+void message_handler_t::impl_t::handle_fn<msg::my_inf_t>(const msg::some_datagramm_t& /*datagramm*/, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for my_inf_t; msg={}", message);
+  SPDLOG_DEBUG("tactic for my_inf_t;");
   server_.send(get_person_inf(player), player.address());
 }
 
 template<>
-void message_handler_t::impl_t::handle_fn<msg::client_lost_t>(const std::string& message, player_t& player)
+void message_handler_t::impl_t::handle_fn<msg::client_lost_t>(const msg::some_datagramm_t& /*datagramm*/, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for client_lost_t; msg={}", message);
+  SPDLOG_DEBUG("tactic for client_lost_t");
 
   const auto opp_uuid = games_manager_.opponent(player.uuid());
   if (opp_uuid.has_value())
@@ -145,9 +150,9 @@ void message_handler_t::impl_t::handle_fn<msg::client_lost_t>(const std::string&
 }
 
 template<>
-void message_handler_t::impl_t::handle_fn<msg::move_t>(const std::string& message, player_t& player)
+void message_handler_t::impl_t::handle_fn<msg::move_t>(const msg::some_datagramm_t& datagramm, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for move_t; msg={}", message);
+  SPDLOG_DEBUG("tactic for move_t; datagramm={}", datagramm.data);
 
   const auto board_uuid = games_manager_.board(player);
   if (!board_uuid)
@@ -156,14 +161,14 @@ void message_handler_t::impl_t::handle_fn<msg::move_t>(const std::string& messag
     return;
   }
 
-  make_moves_from_str((msg::init<msg::move_t>(message)).data, games_manager_.board(board_uuid.value()));
+  make_moves_from_str((msg::init<msg::move_t>(datagramm)).data, games_manager_.board(board_uuid.value()));
   board_updated(player);
 }
 
 template<>
-void message_handler_t::impl_t::handle_fn<msg::back_move_t>(const std::string& message, player_t& player)
+void message_handler_t::impl_t::handle_fn<msg::back_move_t>(const msg::some_datagramm_t& /*datagramm*/, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for back_move_t; msg={}", message);
+  SPDLOG_DEBUG("tactic for back_move_t;");
 
   const auto board_uuid = games_manager_.board(player);
   if (!board_uuid)
@@ -177,9 +182,9 @@ void message_handler_t::impl_t::handle_fn<msg::back_move_t>(const std::string& m
 }
 
 template<>
-void message_handler_t::impl_t::handle_fn<msg::go_to_history_t>(const std::string& message, player_t& player)
+void message_handler_t::impl_t::handle_fn<msg::go_to_history_t>(const msg::some_datagramm_t& datagramm, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for go_to_history_t; msg={}", message);
+  SPDLOG_DEBUG("tactic for go_to_history_t; datagramm={}", datagramm.data);
 
   const auto board_uuid = games_manager_.board(player);
   if (!board_uuid)
@@ -188,14 +193,14 @@ void message_handler_t::impl_t::handle_fn<msg::go_to_history_t>(const std::strin
     return;
   }
 
-  games_manager_.board(board_uuid.value()).go_to_history(msg::init<msg::go_to_history_t>(message).index);
+  games_manager_.board(board_uuid.value()).go_to_history(msg::init<msg::go_to_history_t>(datagramm).index);
   board_updated(player);
 }
 
 template<>
-void message_handler_t::impl_t::handle_fn<msg::new_game_t>(const std::string& message, player_t& player)
+void message_handler_t::impl_t::handle_fn<msg::new_game_t>(const msg::some_datagramm_t& /*datagramm*/, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for start_new_game_t; msg={}", message);
+  SPDLOG_DEBUG("tactic for start_new_game_t;");
   start_new_game(player);
 }
 

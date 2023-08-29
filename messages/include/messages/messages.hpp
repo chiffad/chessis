@@ -148,9 +148,6 @@ concept one_of_msg_types = one_of<T, hello_server_t, message_received_t, is_serv
                                   incorrect_log_t, move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, server_lost_t, server_here_t,
                                   client_lost_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
 
-template<typename T>
-inline constexpr int id_v = boost::mpl::find<message_types, T>::type::pos::value;
-
 namespace details {
 
 template<one_of_msg_types T>
@@ -175,6 +172,9 @@ inline std::string to_string(const T& msg)
 
 } // namespace details
 
+template<typename T>
+inline constexpr int id_v = boost::mpl::find<message_types, T>::type::pos::value;
+
 template<one_of_msg_types T>
 T init(const some_datagramm_t& datagramm)
 {
@@ -188,9 +188,9 @@ T init(const some_datagramm_t& datagramm)
 }
 
 template<one_of_msg_types T>
-inline T init(const std::string& str)
+inline T init(const std::string& unprocessed_str)
 {
-  some_datagramm_t _1 = init<some_datagramm_t>(str);
+  some_datagramm_t _1 = init<some_datagramm_t>(unprocessed_str);
   return init<T>(_1);
 }
 
