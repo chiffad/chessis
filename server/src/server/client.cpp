@@ -122,15 +122,15 @@ void client_t::impl_t::message_received(const std::string& m)
   switch (msg_type)
   {
     case msg::id_v<msg::message_received_t>:
-      SPDLOG_DEBUG("msg::message_received_t");
+      SPDLOG_INFO("msg::message_received_t");
       prev_message_received_ = true;
       break;
-    case msg::id_v<msg::is_server_lost_t>: SPDLOG_DEBUG("msg::is_server_lost_t"); break;
+    case msg::id_v<msg::is_server_lost_t>: SPDLOG_INFO("msg::is_server_lost_t"); break;
     case msg::id_v<msg::hello_server_t>:
-      SPDLOG_DEBUG("msg::hello_server_t");
+      SPDLOG_INFO("msg::hello_server_t");
       add_for_server(msg::prepare_for_send(msg::get_login_t()));
       break;
-    default: SPDLOG_ERROR("default"); messages_for_logic_.push_back(datagramm.data);
+    default: SPDLOG_TRACE("default"); messages_for_logic_.push_back(datagramm.data);
   }
 }
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "spdlog/fmt/ostr.h"
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <spdlog/fmt/ostr.h>
 
 namespace common {
 

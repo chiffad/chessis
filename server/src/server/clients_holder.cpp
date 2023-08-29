@@ -17,7 +17,7 @@ void clients_holder_t::process(const datagram_t& datagram)
   const auto it = find(datagram.address);
   if (it == end())
   {
-    SPDLOG_INFO("datagram from unknown address received={}", datagram.address); // TODO print whole datagram
+    SPDLOG_INFO("datagram={} from unknown address received!", datagram);
     // TODO:
     //  * send login or uuid in each message!
     //  * check is this datagram contains known uuid or login and if exists -> update client address and process as usual i.e. do not add new client

@@ -34,5 +34,5 @@ try
 }
 catch (const std::exception& ex)
 {
-  SPDLOG_CRITICAL("Exception! ", ex.what());
+  SPDLOG_CRITICAL("Exception={}", ex.what());
 }
