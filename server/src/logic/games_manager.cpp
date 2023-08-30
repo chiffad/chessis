@@ -1,5 +1,7 @@
 #include "logic/games_manager.hpp"
 
+#include <spdlog/spdlog.h>
+
 namespace logic {
 
 games_manager_t::games_manager_t(io_service_t& io_service)
@@ -44,6 +46,7 @@ const player_t& games_manager_t::player(const player_t::uuid_t& uuid) const
 
 std::optional<player_t::uuid_t> games_manager_t::free_player(const player_t& not_this) const
 {
+  SPDLOG_DEBUG("Free players number={}", free_players_.size());
   for (const auto& cl : free_players_)
   {
     if (cl != not_this.uuid()) return cl;
@@ -66,6 +69,8 @@ void games_manager_t::start_game(const player_t::uuid_t& player_1, const player_
   unbook_player(player_2);
 
   const auto board_uuid = boards_.add();
+  SPDLOG_INFO("Start game beween player={} and player={}; board={}", player_1, player_2, board_uuid);
+
   const bool white_player = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() % 2 == 0;
   players_.at(player_1).set_playing_white(white_player);
   players_.at(player_2).set_playing_white(!white_player);
@@ -119,13 +124,16 @@ void games_manager_t::unbook_player(const player_t::uuid_t& player)
 
 void games_manager_t::remove_from_free_players(std::set<player_t::uuid_t> uuids)
 {
-  for (auto it = free_players_.begin(); it != free_players_.end(); ++it)
+  for (auto it = free_players_.begin(); !uuids.empty() && it != free_players_.end();)
   {
-    if (!uuids.count(*it)) continue;
+    if (uuids.count(*it))
+    {
+      uuids.erase(*it);
+      it = free_players_.erase(it);
+      continue;
+    }
 
-    uuids.erase(*it);
-    it = free_players_.erase(it);
-    if (uuids.empty()) break;
+    ++it;
   }
 }
 

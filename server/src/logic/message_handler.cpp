@@ -58,7 +58,7 @@ struct message_handler_t::impl_t
     const auto free_player_uuid = games_manager_.free_player(player);
     if (!free_player_uuid)
     {
-      SPDLOG_INFO("Can not start game for cleint={}; not opponent found!", player);
+      SPDLOG_INFO("Can not start game for cleint={}; no opponent found!", player);
       return;
     }
 

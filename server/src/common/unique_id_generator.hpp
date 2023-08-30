@@ -19,6 +19,6 @@ private:
   boost::uuids::random_generator generator_;
 };
 
-std::ostream& operator<<(std::ostream& os, const uuid_t& id);
-
 } // namespace common
+
+std::ostream& operator<<(std::ostream& os, const boost::uuids::uuid& id);

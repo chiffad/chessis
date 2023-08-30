@@ -1,5 +1,7 @@
 #include "logic/players_holder.hpp"
 
+#include <spdlog/spdlog.h>
+
 namespace logic {
 
 players_holder_t::players_holder_t() = default;
@@ -7,6 +9,7 @@ players_holder_t::players_holder_t() = default;
 player_t::uuid_t players_holder_t::add(const endpoint_t& addr)
 {
   const auto uuid = uuid_generator_.new_uuid();
+  SPDLOG_INFO("Add new player with addr={}; player uuid={}", addr, uuid);
   emplace(std::piecewise_construct, std::forward_as_tuple(uuid), std::forward_as_tuple(addr, uuid));
   return uuid;
 }

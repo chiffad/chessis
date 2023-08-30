@@ -11,9 +11,9 @@ uuid_t uuid_generator_t::new_uuid()
   return generator_();
 }
 
-std::ostream& operator<<(std::ostream& os, const uuid_t& id)
+} // namespace common
+
+std::ostream& operator<<(std::ostream& os, const boost::uuids::uuid& id)
 {
   return os << boost::uuids::to_string(id);
 }
-
-} // namespace common
