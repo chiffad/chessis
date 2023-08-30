@@ -1,5 +1,4 @@
 #include "server/client.hpp"
-
 #include "messages/messages.hpp"
 
 #include <boost/uuid/uuid_io.hpp>
@@ -102,8 +101,7 @@ client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
 
 void client_t::impl_t::message_received(const std::string& m)
 {
-  SPDLOG_INFO("message={}", m);
-
+  SPDLOG_INFO("Received data={}", m);
   const auto datagramm = msg::init<msg::incoming_datagramm_t>(m);
   if (!check_ser_num(datagramm))
   {
@@ -114,39 +112,34 @@ void client_t::impl_t::message_received(const std::string& m)
   start_connection_timer();
 
   const auto msg_type = msg::init<msg::some_datagramm_t>(datagramm.data).type;
-  if (msg_type != msg::id_v<msg::message_received_t>)
+  if (msg_type == msg::id_v<msg::message_received_t>)
   {
-    add_for_server(msg::prepare_for_send(msg::message_received_t()));
+    prev_message_received_ = true;
+    return;
   }
+
+  add_for_server(msg::prepare_for_send(msg::message_received_t()));
 
   switch (msg_type)
   {
-    case msg::id_v<msg::message_received_t>:
-      SPDLOG_INFO("msg::message_received_t");
-      prev_message_received_ = true;
-      break;
-    case msg::id_v<msg::is_server_lost_t>: SPDLOG_INFO("msg::is_server_lost_t"); break;
+    case msg::id_v<msg::is_server_lost_t>: break;
     case msg::id_v<msg::hello_server_t>:
-      SPDLOG_INFO("msg::hello_server_t");
+      SPDLOG_INFO("Received hello_server_t msg from address={}", address_);
       add_for_server(msg::prepare_for_send(msg::get_login_t()));
       break;
-    default: SPDLOG_TRACE("default"); messages_for_logic_.push_back(datagramm.data);
+    default: SPDLOG_TRACE("Push msg type={} to logic", msg_type); messages_for_logic_.push_back(datagramm.data);
   }
 }
 
 std::string client_t::impl_t::pull_for_server()
 {
-  SPDLOG_DEBUG("pull_for_server");
-
   const auto _1 = messages_for_server_.front();
-
   if (!msg::is_equal_types<msg::message_received_t>(_1.message))
   {
     begin_wait_receive(_1.message);
   }
 
   messages_for_server_.erase(messages_for_server_.begin());
-
   return msg::prepare_for_send(msg::incoming_datagramm_t(_1.message, _1.extra ? send_serial_num_ : ++send_serial_num_));
 }
 
@@ -170,7 +163,7 @@ bool client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& _1)
 
 void client_t::impl_t::add_for_server(const std::string& m, bool extra_message)
 {
-  SPDLOG_DEBUG("add message={}", m);
+  SPDLOG_TRACE("add message={}", m);
   auto _1 = server_mess_t{m, extra_message};
   if (extra_message)
   {
@@ -191,7 +184,6 @@ void client_t::impl_t::begin_wait_receive(const std::string& message)
 
 void client_t::impl_t::check_message_received()
 {
-  SPDLOG_TRACE("is message received");
   static int num_of_restarts = 0;
   if (prev_message_received_)
   {
@@ -218,30 +210,32 @@ void client_t::impl_t::connection_timer_timeout()
 
 void client_t::impl_t::start_connection_timer()
 {
-  SPDLOG_TRACE("start_connection_timer();");
+  // SPDLOG_TRACE("Start connection timer for client on address={}", address_);
   connection_timer_.cancel();
   connection_timer_.expires_from_now(boost::posix_time::milliseconds(7000));
   connection_timer_.async_wait([&](const boost::system::error_code& error) {
     if (!error)
     {
       connection_timer_timeout();
+      return;
     }
-    SPDLOG_DEBUG(">>>>connection_timer<<<< {}", error.message());
+    if (error != boost::system::errc::operation_canceled) SPDLOG_ERROR("connection timer error={}; client address={}", error.message(), address_);
   });
   //  connection_timer_.async_wait([&](auto /*e*/){log(">>>>connection_timer<<<<");});
 }
 
 void client_t::impl_t::start_response_timer()
 {
-  SPDLOG_TRACE("start_response_timer();");
+  // SPDLOG_TRACE("Start response timer for client on address={}", address_);
   response_timer_.cancel();
   response_timer_.expires_from_now(boost::posix_time::milliseconds(1500));
   response_timer_.async_wait([&](const boost::system::error_code& error) {
-    SPDLOG_DEBUG(">>>>response_timer<<<< {}", error.message());
     if (!error)
     {
       check_message_received();
+      return;
     }
+    if (error != boost::system::errc::operation_canceled) SPDLOG_ERROR("response timer error={}; client address={}", error.message(), address_);
   });
   // response_timer_.async_wait([&](auto /*e*/){log(">>>>response_timer<<<<");});
 }
