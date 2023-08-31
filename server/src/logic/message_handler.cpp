@@ -138,18 +138,6 @@ void message_handler_t::impl_t::handle_fn<msg::my_inf_t>(const msg::some_datagra
 }
 
 template<>
-void message_handler_t::impl_t::handle_fn<msg::client_lost_t>(const msg::some_datagramm_t& /*datagramm*/, player_t& player)
-{
-  SPDLOG_DEBUG("tactic for client_lost_t");
-
-  const auto opp_uuid = games_manager_.opponent(player.uuid());
-  if (opp_uuid.has_value())
-  {
-    server_.send(msg::opponent_lost_t(), games_manager_.player(opp_uuid.value()).address());
-  }
-}
-
-template<>
 void message_handler_t::impl_t::handle_fn<msg::move_t>(const msg::some_datagramm_t& datagramm, player_t& player)
 {
   SPDLOG_DEBUG("tactic for move_t; datagramm={}", datagramm.data);
@@ -213,7 +201,6 @@ message_handler_t::~message_handler_t() = default;
 void message_handler_t::process_server_message(const endpoint_t& addr, const std::string& message)
 {
   auto c = impl_->games_manager_.player(addr);
-  // TODO: simplify!
   if (c)
   {
     impl_->process_mess_begin(message, *c.value());
@@ -223,6 +210,22 @@ void message_handler_t::process_server_message(const endpoint_t& addr, const std
   SPDLOG_INFO("New player! addr={}", addr);
   const auto uuid = impl_->games_manager_.add_player(addr);
   impl_->process_mess_begin(message, impl_->games_manager_.player(uuid));
+}
+
+void message_handler_t::client_connection_changed(const endpoint_t& address, const bool online)
+{
+  SPDLOG_DEBUG("address={}, online={}", address, online);
+
+  if (online) return;
+
+  const auto player = impl_->games_manager_.player(address);
+  if (!player) return;
+
+  const auto opp_uuid = impl_->games_manager_.opponent(player.value()->uuid());
+  if (opp_uuid)
+  {
+    impl_->server_.send(msg::opponent_lost_t(), impl_->games_manager_.player(opp_uuid.value()).address());
+  }
 }
 
 } // namespace logic

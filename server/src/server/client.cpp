@@ -24,6 +24,7 @@ struct client_t::impl_t
   void begin_wait_receive(const std::string& message);
   void start_connection_timer();
   void start_response_timer();
+  void set_connection_status(bool online);
 
   struct server_mess_t
   {
@@ -43,6 +44,8 @@ struct client_t::impl_t
   bool prev_message_received_;
 
   endpoint_t address_;
+  bool online_;
+  client_t::connection_status_signal_t connection_status_signal_;
 };
 
 client_t::client_t(io_service_t& io_serv, const endpoint_t& addr)
@@ -90,6 +93,16 @@ const endpoint_t& client_t::address() const
   return impl_->address_;
 }
 
+bool client_t::online() const
+{
+  return impl_->online_;
+}
+
+boost::signals2::connection client_t::connect_connection_status_changed(const connection_status_signal_t::slot_type& subscriber)
+{
+  return impl_->connection_status_signal_.connect(subscriber);
+}
+
 client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
   : response_timer_(io_serv)
   , connection_timer_(io_serv)
@@ -97,6 +110,7 @@ client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
   , send_serial_num_(0)
   , prev_message_received_(true)
   , address_(addr)
+  , online_(false)
 {}
 
 void client_t::impl_t::message_received(const std::string& m)
@@ -108,6 +122,7 @@ void client_t::impl_t::message_received(const std::string& m)
     return;
   }
 
+  set_connection_status(true);
   ++received_serial_num_;
   start_connection_timer();
 
@@ -194,12 +209,11 @@ void client_t::impl_t::check_message_received()
 
   add_for_server(last_send_message_, true);
 
-  if (msg::is_equal_types<msg::is_client_lost_t>(last_send_message_) && num_of_restarts == 3)
+  if (msg::is_equal_types<msg::is_client_lost_t>(last_send_message_) && ++num_of_restarts == 3)
   {
-    messages_for_logic_.push_back(msg::prepare_for_send(msg::client_lost_t()));
+    set_connection_status(false);
   }
 
-  ++num_of_restarts;
   start_response_timer();
 }
 
@@ -238,6 +252,14 @@ void client_t::impl_t::start_response_timer()
     if (error != boost::system::errc::operation_canceled) SPDLOG_ERROR("response timer error={}; client address={}", error.message(), address_);
   });
   // response_timer_.async_wait([&](auto /*e*/){log(">>>>response_timer<<<<");});
+}
+
+void client_t::impl_t::set_connection_status(const bool online)
+{
+  if (online == online_) return;
+
+  online_ = online;
+  connection_status_signal_(online_);
 }
 
 std::ostream& operator<<(std::ostream& os, const client_t& c)

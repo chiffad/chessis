@@ -3,13 +3,16 @@
 
 namespace server {
 
-clients_holder_t::clients_holder_t(io_service_t& io_service)
+clients_holder_t::clients_holder_t(io_service_t& io_service, const connection_status_signal_t::slot_type& subscriber)
   : io_service_(io_service)
+  , subscriber_{subscriber}
 {}
 
 void clients_holder_t::add(const endpoint_t& addr)
 {
   emplace(std::piecewise_construct, std::forward_as_tuple(addr), std::forward_as_tuple(io_service_, addr));
+  auto& cl = at(addr);
+  at(addr).connect_connection_status_changed([&](const bool online) { subscriber_(cl, online); });
 }
 
 void clients_holder_t::process(const datagram_t& datagram)
@@ -25,6 +28,11 @@ void clients_holder_t::process(const datagram_t& datagram)
     add(datagram.address);
   }
 
+  // TODO now!:
+  //  * add client login to each message
+  //  * think about 2 types of client: logged in client and not logged in
+  //  * when cleint with unkown address is connetted -> create "not logged in client" -> ask login -> check received login/pwd
+  //    -> if valid -> create new registered client(or reinit existing one)
   auto& cl = at(datagram.address);
   cl.message_received(datagram.message);
 }
@@ -56,15 +64,5 @@ std::vector<datagram_t> clients_holder_t::datagrams_to_process()
 
   return res;
 }
-
-/*clients_arr_t::iterator clients_holder_t::find(const endpoint_t& addr)
-{
-  return find(addr);
-}*/
-
-/*clients_arr_t::iterator clients_holder_t::find(const std::string& login)
-{
-  return std::find_if(begin(), end(), [&login](const auto& cl) { return cl.second.credentials().login == login; });
-}*/
 
 } // namespace server

@@ -19,6 +19,7 @@ public:
   ~message_handler_t();
 
   void process_server_message(const endpoint_t& addr, const std::string& message);
+  void client_connection_changed(const endpoint_t& address, bool online);
 
 private:
   struct impl_t;

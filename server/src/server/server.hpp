@@ -1,6 +1,7 @@
 #pragma once
 #include "common/helper.hpp"
 #include "messages/messages.hpp"
+#include "server/clients_holder.hpp"
 #include "server/datagram.hpp"
 
 #include <boost/asio.hpp>
@@ -13,7 +14,7 @@ namespace server {
 class server_t
 {
 public:
-  server_t(io_service_t& io_serv);
+  server_t(io_service_t& io_serv, const clients_holder_t::connection_status_signal_t::slot_type& subscriber);
   server_t(const server_t&) = delete;
   server_t& operator=(const server_t&) = delete;
   server_t(server_t&&) = default;

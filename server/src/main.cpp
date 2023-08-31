@@ -14,9 +14,11 @@ try
   logger::logger_t::get().init();
 
   io_service_t io_service;
-  server::server_t server{io_service};
+  std::unique_ptr<logic::message_handler_t> handler;
+  server::server_t server{io_service, [&](const server::client_t& cl, const bool online) { handler->client_connection_changed(cl.address(), online); }};
+
   logic::games_manager_t games_manager{io_service};
-  logic::message_handler_t handler{games_manager, server};
+  handler = std::make_unique<logic::message_handler_t>(games_manager, server);
 
   while (true)
   {
@@ -24,7 +26,7 @@ try
 
     for (const auto& data : server.read())
     {
-      handler.process_server_message(data.address, data.message);
+      handler->process_server_message(data.address, data.message);
     }
 
     server.process();

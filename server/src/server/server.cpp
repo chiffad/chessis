@@ -9,7 +9,7 @@
 namespace server {
 struct server_t::impl_t
 {
-  impl_t(io_service_t& io_serv);
+  impl_t(io_service_t& io_serv, const clients_holder_t::connection_status_signal_t::slot_type& subscriber);
   ~impl_t();
   void start_receive();
   void send(const std::string& message, const endpoint_t& destination);
@@ -22,8 +22,8 @@ struct server_t::impl_t
   endpoint_t last_mess_sender_;
 };
 
-server_t::server_t(io_service_t& io_serv)
-  : impl_(std::make_unique<impl_t>(io_serv))
+server_t::server_t(io_service_t& io_serv, const clients_holder_t::connection_status_signal_t::slot_type& subscriber)
+  : impl_(std::make_unique<impl_t>(io_serv, subscriber))
 {}
 
 server_t::~server_t() = default;
@@ -53,9 +53,9 @@ std::vector<datagram_t> server_t::read()
   return impl_->clients_holder_.datagrams_to_process();
 }
 
-server_t::impl_t::impl_t(io_service_t& io_serv)
+server_t::impl_t::impl_t(io_service_t& io_serv, const clients_holder_t::connection_status_signal_t::slot_type& subscriber)
   : socket_{io_serv}
-  , clients_holder_{io_serv}
+  , clients_holder_{io_serv, subscriber}
 {
   enum
   {
