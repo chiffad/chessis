@@ -111,30 +111,28 @@ void serialize(Archive& ar, some_datagramm_t& _1, const unsigned /*version*/)
   ar& _1.data;
 }
 
-#define struct_proto(name)                                                                                                                                     \
+#define SIMPLE_MSG(name)                                                                                                                                       \
   struct name                                                                                                                                                  \
-  {                                                                                                                                                            \
-  private:                                                                                                                                                     \
-    friend class boost::serialization::access;                                                                                                                 \
-    template<typename Archive>                                                                                                                                 \
-    void serialize(Archive& /*ar*/, const unsigned /*version*/)                                                                                                \
-    {}                                                                                                                                                         \
-  };
-struct_proto(hello_server_t);
-struct_proto(message_received_t);
-struct_proto(is_server_lost_t);
-struct_proto(is_client_lost_t);
-struct_proto(opponent_inf_t);
-struct_proto(my_inf_t);
-struct_proto(get_login_t);
-struct_proto(incorrect_log_t);
-struct_proto(back_move_t);
-struct_proto(new_game_t);
-struct_proto(server_lost_t);
-struct_proto(server_here_t);
-struct_proto(client_lost_t);
-struct_proto(opponent_lost_t);
-#undef struct_proto
+  {};                                                                                                                                                          \
+  template<typename Archive>                                                                                                                                   \
+  void serialize(Archive& /*ar*/, name&, const unsigned /*version*/)                                                                                           \
+  {}
+
+SIMPLE_MSG(hello_server_t);
+SIMPLE_MSG(message_received_t);
+SIMPLE_MSG(is_server_lost_t);
+SIMPLE_MSG(is_client_lost_t);
+SIMPLE_MSG(opponent_inf_t);
+SIMPLE_MSG(my_inf_t);
+SIMPLE_MSG(get_login_t);
+SIMPLE_MSG(incorrect_log_t);
+SIMPLE_MSG(back_move_t);
+SIMPLE_MSG(new_game_t);
+SIMPLE_MSG(server_lost_t);
+SIMPLE_MSG(server_here_t);
+SIMPLE_MSG(client_lost_t);
+SIMPLE_MSG(opponent_lost_t);
+#undef SIMPLE_MSG
 
 using message_types = boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t,
                                          incorrect_log_t, move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, server_lost_t,
