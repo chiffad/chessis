@@ -11,36 +11,28 @@
 
 namespace handler {
 
+namespace details {
 template<typename T>
-struct type_2_type
-{
-  typedef T original_t;
-};
-
-template<typename T>
-void process_mess(const std::string& str, controller::message_processor_t& mp, type_2_type<T>)
+void process_mess(const std::string& str, controller::message_processor_t& mp)
 {
   if (msg::is_equal_types<typename T::type>(str))
   {
-    process(mp, str, type_2_type<typename T::type>());
+    process<typename T::type>(mp, str);
   }
   else
   {
-    process_mess<typename boost::mpl::next<T>::type>(str, mp, type_2_type<typename boost::mpl::next<T>::type>());
+    process_mess<typename boost::mpl::next<T>::type>(str, mp);
   }
 }
 
 template<>
-void process_mess(const std::string& /*str*/, controller::message_processor_t& /*mp*/, type_2_type<typename boost::mpl::end<msg::message_types>::type>)
+inline void process_mess<boost::mpl::end<msg::message_types>::type>(const std::string& /*str*/, controller::message_processor_t& /*mp*/)
 {
   SPDLOG_ERROR("no type found!!");
 }
 
-#define handle(str, graphic)                                                                                                                                   \
-  process_mess<boost::mpl::begin<msg::message_types>::type>(str, graphic, handler::type_2_type<typename boost::mpl::begin<msg::message_types>::type>());
-
 template<typename struct_t>
-void process(controller::message_processor_t& mp, const std::string& message, type_2_type<struct_t>)
+void process(controller::message_processor_t& mp, const std::string& message) //, type_2_type<struct_t>)
 {
   using processible_message_types = boost::mpl::vector<msg::inf_request_t, msg::game_inf_t, msg::get_login_t, msg::incorrect_log_t, msg::server_lost_t,
                                                        msg::server_here_t, msg::opponent_lost_t>;
@@ -56,6 +48,13 @@ void process(controller::message_processor_t& mp, const std::string& message, ty
     SPDLOG_DEBUG("Process struct={}", typeid(struct_t).name());
     mp.process(msg::init<struct_t>(message));
   }
+}
+
+} // namespace details
+
+inline void process_mess_begin(const std::string& str, controller::message_processor_t& mp)
+{
+  details::process_mess<boost::mpl::begin<msg::message_types>::type>(str, mp);
 }
 
 } // namespace handler

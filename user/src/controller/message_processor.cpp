@@ -12,7 +12,7 @@ message_processor_t::message_processor_t(menu_layout_t& menu_layout, board_t& bo
 
 void message_processor_t::process_server_message(const std::string& server_message)
 {
-  handler::handle(server_message, *this);
+  handler::process_mess_begin(server_message, *this);
 }
 
 void message_processor_t::process(const msg::inf_request_t info_request)
