@@ -16,8 +16,7 @@ add_executable(${TARGET_NAME}
   src/client/socket.cpp 
   src/client/socket.hpp 
   src/client/client.h
-  src/client/client.cpp
-  src/client/handle_message.h
+  src/client/client.cpp  
   src/controller/menu_layout.hpp 
   src/controller/menu_layout.cpp 
   src/controller/figures_model.hpp
@@ -30,6 +29,7 @@ add_executable(${TARGET_NAME}
   src/controller/message_processor.cpp 
   src/controller/app.hpp 
   src/controller/app.cpp
+  src/controller/handle_message.hpp
   src/coord.h
   src/figure.h
   src/helper.h

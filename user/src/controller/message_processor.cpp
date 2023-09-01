@@ -1,6 +1,6 @@
 #include "controller/message_processor.hpp"
 
-#include "client/handle_message.h"
+#include "controller/handle_message.hpp"
 
 namespace controller {
 
