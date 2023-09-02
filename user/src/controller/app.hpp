@@ -18,6 +18,7 @@ public:
   explicit app_t(const command_requested_callback_t& callback);
   ~app_t();
   void process(const std::string& server_message);
+  void server_status_changed(bool server_online);
 
 private:
   menu_layout_t menu_layout_;

@@ -194,19 +194,19 @@ void menu_layout_t::read_moves_from_file(const QString& path)
   command_requested(msg::move_t(data_from_file));
 }
 
-void menu_layout_t::set_connect_status(const int status)
+void menu_layout_t::set_connect_status(const connection_status_t status)
 {
   switch (status)
   {
-    case msg::id_v<msg::server_here_t>:
+    case connection_status_t::server_available:
       if (connection_status_ == "Disconnected")
       {
         connection_status_ = "Connect";
       }
       break;
-    case msg::id_v<msg::server_lost_t>: connection_status_ = "Disconnected"; break;
-    case msg::id_v<msg::opponent_lost_t>: connection_status_ = "Opponent disconnected"; break;
-    default: SPDLOG_ERROR("Unknown status={}", status); return;
+    case connection_status_t::server_lost: connection_status_ = "Disconnected"; break;
+    case connection_status_t::opponent_lost: connection_status_ = "Opponent disconnected"; break;
+    default: SPDLOG_ERROR("Unknown status"); return;
   }
   emit connection_status_changed();
 }

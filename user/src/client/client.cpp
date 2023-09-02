@@ -52,7 +52,7 @@ struct client_t::impl_t
     void read() override;
   };
 
-  explicit impl_t(const client_t::message_received_callback_t& callback);
+  impl_t(const client_t::message_received_callback_t& callback, const client_t::server_status_changed_callback_t& server_status_changed);
   void resend_prev_message();
   std::string add_serial_num(const std::string& data, bool prev_serial_needed = false);
   void begin_wait_receive(const std::string& data);
@@ -72,11 +72,12 @@ struct client_t::impl_t
   bool prev_message_sent_;
   endpoint_t endpoint_;
   client_t::message_received_callback_t message_received_callback_;
+  client_t::server_status_changed_callback_t server_status_changed_callback_;
   std::shared_ptr<state_t> state_;
 };
 
-client_t::client_t(const message_received_callback_t& callback)
-  : impl_(std::make_unique<impl_t>(callback))
+client_t::client_t(const message_received_callback_t& callback, const client_t::server_status_changed_callback_t& server_status_changed)
+  : impl_(std::make_unique<impl_t>(callback, server_status_changed))
 {}
 
 client_t::~client_t() = default;
@@ -86,13 +87,14 @@ void client_t::send(const std::string& data)
   impl_->send(data);
 }
 
-client_t::impl_t::impl_t(const client_t::message_received_callback_t& callback)
+client_t::impl_t::impl_t(const client_t::message_received_callback_t& callback, const client_t::server_status_changed_callback_t& server_status_changed)
   : socket_{[this]() { state_->read(); }}
   , received_serial_num_(0)
   , send_serial_num_(0)
   , prev_message_sent_(true)
   , endpoint_{"127.0.0.1", FIRST_PORT - 1}
   , message_received_callback_(callback)
+  , server_status_changed_callback_(server_status_changed)
 {
   QObject::connect(&response_checker_timer_, &QTimer::timeout, [&]() { resend_prev_message(); });
   QObject::connect(&server_alive_timer_, &QTimer::timeout, [&]() { send(msg::prepare_for_send(msg::is_server_lost_t{})); });
@@ -121,7 +123,7 @@ void client_t::impl_t::resend_prev_message()
 
   if (++num_of_restarts == 5 || msg::id_v<msg::is_server_lost_t> == msg::init<msg::some_datagramm_t>(last_send_message_).type)
   {
-    message_received_callback_(msg::prepare_for_send(msg::server_lost_t()));
+    server_status_changed_callback_(false);
   }
 }
 
@@ -195,7 +197,7 @@ void client_t::impl_t::connect_state_t::read()
   client_.endpoint_.port = data.endpoint.port;
   resend_hello_server_timer_.stop();
 
-  client_.message_received_callback_(msg::prepare_for_send(msg::server_here_t()));
+  client_.server_status_changed_callback_(true);
 
   auto self = shared_from_this(); // set_new_state will change current state on new one
   client_.set_new_state(std::make_shared<connected_state_t>(client_));
@@ -243,7 +245,7 @@ void client_t::impl_t::connected_state_t::read()
   if (msg::is_equal_types<msg::message_received_t>(datagramm.data))
   {
     client_.prev_message_sent_ = true;
-    client_.message_received_callback_(msg::prepare_for_send(msg::server_here_t()));
+    client_.server_status_changed_callback_(true);
     return;
   }
 

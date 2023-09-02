@@ -128,32 +128,29 @@ SIMPLE_MSG(get_login_t);
 SIMPLE_MSG(incorrect_log_t);
 SIMPLE_MSG(back_move_t);
 SIMPLE_MSG(new_game_t);
-SIMPLE_MSG(server_lost_t);
-SIMPLE_MSG(server_here_t);
 SIMPLE_MSG(opponent_lost_t);
 #undef SIMPLE_MSG
 
-using message_types = boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t,
-                                         incorrect_log_t, move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, server_lost_t,
-                                         server_here_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
+using message_types =
+  boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, incorrect_log_t,
+                     move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
 
 template<typename T, typename... U>
 concept one_of = (std::same_as<T, U> || ...);
 
-// template<typename T>
-// concept to_server_msg_types = one_of<T, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t,my_inf_t, move_t, back_move_t,
-// go_to_history_t, new_game_t, some_datagramm_t>;
+// TODO: use this!
+//  template<typename T>
+//  concept to_server_msg_types = one_of<T, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t,my_inf_t, move_t, back_move_t,
+//  go_to_history_t, new_game_t, some_datagramm_t>;
 
 // template<typename T>
 // concept to_client_msg_types = one_of<T, message_received_t, get_login_t, message_received_t, is_client_lost_t, opponent_lost_t, inf_request_t,
 // incorrect_log_t, game_inf_t, server_here_t, some_datagramm_t>;
 
 template<typename T>
-concept one_of_msg_types = one_of<T, hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t,
-                                  incorrect_log_t, move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, server_lost_t, server_here_t,
-                                  opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
-
-// server_lost_t - used only internally
+concept one_of_msg_types =
+  one_of<T, hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, incorrect_log_t, move_t,
+         back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
 
 namespace details {
 

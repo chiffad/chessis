@@ -28,7 +28,8 @@ int main(int argc, char* argv[])
 
   QGuiApplication app(argc, argv);
   controller::app_t app_controller([&](std::string str) { messages_to_send.push_back(std::move(str)); });
-  cl::client_t client{[&](std::string str) { received_messages.push_back(std::move(str)); }};
+  cl::client_t client{[&](std::string str) { received_messages.push_back(std::move(str)); },
+                      [&](bool server_online) { app_controller.server_status_changed(server_online); }};
 
   const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();

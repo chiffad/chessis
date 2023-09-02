@@ -33,4 +33,9 @@ void app_t::process(const std::string& server_message)
   message_processor_.process_server_message(server_message);
 }
 
+void app_t::server_status_changed(const bool server_online)
+{
+  message_processor_.server_status_changed(server_online);
+}
+
 } // namespace controller

@@ -15,6 +15,12 @@ void message_processor_t::process_server_message(const std::string& server_messa
   handler::process_mess_begin(server_message, *this);
 }
 
+void message_processor_t::server_status_changed(const bool server_online)
+{
+  SPDLOG_INFO("Server online={}", server_online);
+  menu_layout_.set_connect_status(server_online ? menu_layout_t::connection_status_t::server_available : menu_layout_t::connection_status_t::server_lost);
+}
+
 void message_processor_t::process(const msg::inf_request_t info_request)
 {
   SPDLOG_DEBUG("Process msg::inf_request_t");
@@ -25,7 +31,7 @@ void message_processor_t::process(const msg::game_inf_t game_info)
 {
   SPDLOG_DEBUG("Process msg::game_inf_t");
 
-  menu_layout_.set_connect_status(msg::id_v<msg::server_here_t>);
+  menu_layout_.set_connect_status(menu_layout_t::connection_status_t::server_available);
   menu_layout_.update_game_info(game_info);
   board_.update_game_info(game_info);
 }
@@ -42,22 +48,9 @@ void message_processor_t::process(const msg::incorrect_log_t /*incorrect_log*/)
   login_input_.get_login("This login already exist. Enter another login!");
 }
 
-void message_processor_t::process(const msg::server_lost_t /*server_lost*/)
-{
-  SPDLOG_DEBUG("Process msg::server_lost_t");
-  menu_layout_.set_connect_status(msg::id_v<msg::server_lost_t>);
-}
-
-void message_processor_t::process(const msg::server_here_t /*server_here*/)
-{
-  SPDLOG_DEBUG("Process msg::server_here_t");
-  menu_layout_.set_connect_status(msg::id_v<msg::server_here_t>);
-}
-
 void message_processor_t::process(const msg::opponent_lost_t /*opp_lst*/)
 {
-  SPDLOG_DEBUG("Process msg::opponent_lost_t");
-  menu_layout_.set_connect_status(msg::id_v<msg::opponent_lost_t>);
+  menu_layout_.set_connect_status(menu_layout_t::connection_status_t::opponent_lost);
 }
 
 } // namespace controller

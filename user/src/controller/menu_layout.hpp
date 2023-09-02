@@ -25,6 +25,12 @@ class menu_layout_t : public QObject
 
 public:
   using command_requested_callback_t = std::function<void(std::string)>;
+  enum class connection_status_t
+  {
+    server_available,
+    server_lost,
+    opponent_lost
+  };
 
 public:
   explicit menu_layout_t(const command_requested_callback_t& callback);
@@ -33,7 +39,8 @@ public:
   ~menu_layout_t();
 
   void update_game_info(const msg::game_inf_t& game_info);
-  void set_connect_status(int status); // TODO: use enum
+
+  void set_connect_status(connection_status_t status);
   void add_to_command_history(const QString& str);
 
   bool white_move_turn() const;

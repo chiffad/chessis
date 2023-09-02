@@ -10,9 +10,10 @@ class client_t
 {
 public:
   using message_received_callback_t = std::function<void(std::string)>;
+  using server_status_changed_callback_t = std::function<void(bool /*online*/)>;
 
 public:
-  explicit client_t(const message_received_callback_t& callback);
+  client_t(const message_received_callback_t& callback, const server_status_changed_callback_t& server_status_changed);
   ~client_t();
   void send(const std::string& message);
 

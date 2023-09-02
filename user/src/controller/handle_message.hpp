@@ -32,10 +32,9 @@ inline void process_mess<boost::mpl::end<msg::message_types>::type>(const std::s
 }
 
 template<typename struct_t>
-void process(controller::message_processor_t& mp, const std::string& message) //, type_2_type<struct_t>)
+void process(controller::message_processor_t& mp, const std::string& message)
 {
-  using processible_message_types = boost::mpl::vector<msg::inf_request_t, msg::game_inf_t, msg::get_login_t, msg::incorrect_log_t, msg::server_lost_t,
-                                                       msg::server_here_t, msg::opponent_lost_t>;
+  using processible_message_types = boost::mpl::vector<msg::inf_request_t, msg::game_inf_t, msg::get_login_t, msg::incorrect_log_t, msg::opponent_lost_t>;
   using end_t = typename boost::mpl::end<processible_message_types>::type;
   using found_type = typename boost::mpl::find<processible_message_types, struct_t>::type;
   if constexpr (std::is_same_v<found_type, end_t>)
