@@ -12,48 +12,42 @@
 namespace handler {
 
 namespace details {
+
+template<typename T>
+concept one_of_processible_msgs = msg::one_of<T, msg::inf_request_t, msg::game_inf_t, msg::get_login_t, msg::incorrect_log_t, msg::opponent_lost_t>;
+
 template<typename T>
 void process_mess(const std::string& str, controller::message_processor_t& mp)
 {
-  if (msg::is_equal_types<typename T::type>(str))
+  if constexpr (one_of_processible_msgs<typename T::type>)
   {
-    process<typename T::type>(mp, str);
+    if (msg::is_equal_types<typename T::type>(str))
+    {
+      process<typename T::type>(mp, str);
+      return;
+    }
   }
-  else
-  {
-    process_mess<typename boost::mpl::next<T>::type>(str, mp);
-  }
+  process_mess<typename boost::mpl::next<T>::type>(str, mp);
 }
 
 template<>
-inline void process_mess<boost::mpl::end<msg::message_types>::type>(const std::string& /*str*/, controller::message_processor_t& /*mp*/)
+inline void process_mess<boost::mpl::end<msg::messages_t>::type>(const std::string& str, controller::message_processor_t& /*mp*/)
 {
-  SPDLOG_ERROR("no type found!!");
+  SPDLOG_ERROR("No type found for message to client type={}", msg::init<msg::some_datagramm_t>(str).type);
 }
 
-template<typename struct_t>
+template<one_of_processible_msgs msg_t>
 void process(controller::message_processor_t& mp, const std::string& message)
 {
-  using processible_message_types = boost::mpl::vector<msg::inf_request_t, msg::game_inf_t, msg::get_login_t, msg::incorrect_log_t, msg::opponent_lost_t>;
-  using end_t = typename boost::mpl::end<processible_message_types>::type;
-  using found_type = typename boost::mpl::find<processible_message_types, struct_t>::type;
-  if constexpr (std::is_same_v<found_type, end_t>)
-  {
-    SPDLOG_DEBUG("Received unexpected message type={}", typeid(struct_t).name());
-    return;
-  }
-  else
-  {
-    SPDLOG_DEBUG("Process struct={}", typeid(struct_t).name());
-    mp.process(msg::init<struct_t>(message));
-  }
+  SPDLOG_DEBUG("Process struct={}", typeid(msg_t).name());
+  mp.process(msg::init<msg_t>(message));
 }
 
 } // namespace details
 
 inline void process_mess_begin(const std::string& str, controller::message_processor_t& mp)
 {
-  details::process_mess<boost::mpl::begin<msg::message_types>::type>(str, mp);
+  details::process_mess<boost::mpl::begin<msg::messages_t>::type>(str, mp);
 }
 
 } // namespace handler

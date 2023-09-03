@@ -21,7 +21,7 @@ public:
   server_t& operator=(server_t&&) = default;
   ~server_t();
 
-  template<msg::one_of_msg_types T>
+  template<msg::one_of_to_client_msgs T>
   void send(T&& data, const endpoint_t& destination)
   {
     send(msg::prepare_for_send(std::forward<T>(data)), destination);

@@ -131,30 +131,28 @@ SIMPLE_MSG(new_game_t);
 SIMPLE_MSG(opponent_lost_t);
 #undef SIMPLE_MSG
 
-using message_types =
+using messages_t =
   boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, incorrect_log_t,
                      move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
 
 template<typename T, typename... U>
 concept one_of = (std::same_as<T, U> || ...);
 
-// TODO: use this!
-//  template<typename T>
-//  concept to_server_msg_types = one_of<T, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t,my_inf_t, move_t, back_move_t,
-//  go_to_history_t, new_game_t, some_datagramm_t>;
-
-// template<typename T>
-// concept to_client_msg_types = one_of<T, message_received_t, get_login_t, message_received_t, is_client_lost_t, opponent_lost_t, inf_request_t,
-// incorrect_log_t, game_inf_t, server_here_t, some_datagramm_t>;
+template<typename T>
+concept one_of_to_server_msgs =
+  one_of<T, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t, my_inf_t, move_t, back_move_t, go_to_history_t, new_game_t>;
 
 template<typename T>
-concept one_of_msg_types =
+concept one_of_to_client_msgs = one_of<T, message_received_t, get_login_t, is_client_lost_t, opponent_lost_t, inf_request_t, incorrect_log_t, game_inf_t>;
+
+template<typename T>
+concept one_of_msgs =
   one_of<T, hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, incorrect_log_t, move_t,
          back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
 
 namespace details {
 
-template<one_of_msg_types T>
+template<one_of_msgs T>
 inline T from_string(const std::string& str)
 {
   std::stringstream ss;
@@ -165,7 +163,7 @@ inline T from_string(const std::string& str)
   return msg;
 }
 
-template<one_of_msg_types T>
+template<one_of_msgs T>
 inline std::string to_string(const T& msg)
 {
   std::stringstream ss;
@@ -177,9 +175,9 @@ inline std::string to_string(const T& msg)
 } // namespace details
 
 template<typename T>
-inline constexpr int id_v = boost::mpl::find<message_types, T>::type::pos::value;
+inline constexpr int id_v = boost::mpl::find<messages_t, T>::type::pos::value;
 
-template<one_of_msg_types T>
+template<one_of_msgs T>
 T init(const some_datagramm_t& datagramm)
 {
   if (datagramm.type != id_v<T>)
@@ -191,7 +189,7 @@ T init(const some_datagramm_t& datagramm)
   return details::from_string<T>(datagramm.data);
 }
 
-template<one_of_msg_types T>
+template<one_of_msgs T>
 inline T init(const std::string& unprocessed_str)
 {
   some_datagramm_t _1 = init<some_datagramm_t>(unprocessed_str);
@@ -204,7 +202,7 @@ inline some_datagramm_t init<some_datagramm_t>(const std::string& str)
   return details::from_string<some_datagramm_t>(str);
 }
 
-template<one_of_msg_types T>
+template<one_of_msgs T>
 inline std::string prepare_for_send(const T& msg)
 {
   return prepare_for_send(some_datagramm_t{details::to_string(msg), id_v<T>});
@@ -216,7 +214,7 @@ inline std::string prepare_for_send<some_datagramm_t>(const some_datagramm_t& ms
   return details::to_string(msg);
 }
 
-template<one_of_msg_types T>
+template<one_of_msgs T>
 inline bool is_equal_types(const std::string& str)
 {
   return init<some_datagramm_t>(str).type == id_v<T>;

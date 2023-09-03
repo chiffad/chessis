@@ -56,7 +56,7 @@ void menu_layout_t::go_to_history(const int hist_i)
   msg::go_to_history_t gth;
   gth.index = hist_i + 1;
   add_to_command_history(COMMAND + HISTORY + " " + QString::number(gth.index));
-  command_requested(gth);
+  command_requested(std::move(gth));
 }
 
 void menu_layout_t::run_command(const QString& message)

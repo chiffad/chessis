@@ -68,7 +68,7 @@ private:
   void write_moves_to_file(const QString& path);
   void read_moves_from_file(const QString& path);
 
-  template<typename T>
+  template<msg::one_of_to_server_msgs T>
   inline void command_requested(T&& command)
   {
     command_requested_callback_(msg::prepare_for_send(std::forward<T>(command)));
