@@ -26,6 +26,12 @@ add_executable(${TARGET_NAME}
   src/server/client.hpp
   src/server/clients_holder.hpp
   src/server/clients_holder.cpp 
+  src/server/authentication/client.hpp
+  src/server/authentication/client.cpp  
+  src/server/authentication/message_handler.cpp 
+  src/server/authentication/message_handler.hpp 
+  src/server/authentication/server.cpp 
+  src/server/authentication/server.hpp 
   src/common/helper.hpp
   src/common/logger.hpp 
   src/common/logger.cpp 

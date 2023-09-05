@@ -2,6 +2,7 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <spdlog/fmt/ostr.h>
 
 namespace common {
@@ -19,6 +20,6 @@ private:
   boost::uuids::random_generator generator_;
 };
 
-} // namespace common
+std::ostream& operator<<(std::ostream& os, const uuid_t& id);
 
-std::ostream& operator<<(std::ostream& os, const boost::uuids::uuid& id);
+} // namespace common
