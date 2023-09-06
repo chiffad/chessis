@@ -32,9 +32,10 @@ struct message_handler_t::impl_t
   {
     const msg::some_datagramm_t datagramm = msg::init<msg::some_datagramm_t>(str);
     SPDLOG_TRACE("Begin processing of the datagramm.type={}", datagramm.type);
-    process_mess<boost::mpl::begin<msg::messages_t>::type>(datagramm, player);
+    process_mess<boost::mpl::begin<msg::to_server_messages_t>::type>(datagramm, player);
   }
 
+  // template<typename T> requires msg::one_of_to_server_msgs<typename T::type>
   template<typename T>
   void process_mess(const msg::some_datagramm_t& datagramm, player_t& player)
   {
@@ -95,7 +96,7 @@ struct message_handler_t::impl_t
 };
 
 template<>
-void message_handler_t::impl_t::process_mess<boost::mpl::end<msg::messages_t>::type>(const msg::some_datagramm_t& datagramm, player_t& player)
+void message_handler_t::impl_t::process_mess<boost::mpl::end<msg::to_server_messages_t>::type>(const msg::some_datagramm_t& datagramm, player_t& player)
 {
   SPDLOG_ERROR("No type found for datagramm type={}; player={};", datagramm.type, player);
 }

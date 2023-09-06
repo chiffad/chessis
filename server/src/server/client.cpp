@@ -135,15 +135,16 @@ void client_t::impl_t::message_received(const std::string& m)
 
   add_for_server(msg::prepare_for_send(msg::message_received_t()));
 
-  switch (msg_type)
+  if (msg_type == msg::id_v<msg::is_server_lost_t>) return;
+  if (msg_type == msg::id_v<msg::hello_server_t>)
   {
-    case msg::id_v<msg::is_server_lost_t>: break;
-    case msg::id_v<msg::hello_server_t>:
-      SPDLOG_INFO("Received hello_server_t msg from address={}", address_);
-      add_for_server(msg::prepare_for_send(msg::get_login_t()));
-      break;
-    default: SPDLOG_TRACE("Push msg type={} to logic", msg_type); messages_for_logic_.push_back(datagramm.data);
+    SPDLOG_INFO("Received hello_server_t msg from address={}", address_);
+    add_for_server(msg::prepare_for_send(msg::get_login_t()));
+    return;
   }
+
+  SPDLOG_TRACE("Push msg type={} to logic", msg_type);
+  messages_for_logic_.push_back(datagramm.data);
 }
 
 std::string client_t::impl_t::pull_for_server()

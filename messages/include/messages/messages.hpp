@@ -7,6 +7,7 @@
 #include <boost/serialization/string.hpp>
 #include <concepts>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace msg {
@@ -58,8 +59,18 @@ struct incoming_datagramm_t
 
 struct some_datagramm_t
 {
+  some_datagramm_t() = default;
+  some_datagramm_t(std::string data, std::string type)
+    : data(std::move(data))
+    , type(std::move(type))
+  {}
+
+  some_datagramm_t(std::string data, std::string_view type)
+    : some_datagramm_t(std::move(data), std::string(type))
+  {}
+
   std::string data;
-  int type{};
+  std::string type;
 };
 
 template<typename Archive>
@@ -111,12 +122,31 @@ void serialize(Archive& ar, some_datagramm_t& _1, const unsigned /*version*/)
   ar& _1.data;
 }
 
+template<typename T>
+constexpr std::string_view msg_type();
+
+#define MSG_TYPE(name)                                                                                                                                         \
+  template<>                                                                                                                                                   \
+  constexpr std::string_view msg_type<name>()                                                                                                                  \
+  {                                                                                                                                                            \
+    return #name;                                                                                                                                              \
+  }
+
+MSG_TYPE(incoming_datagramm_t);
+MSG_TYPE(some_datagramm_t);
+MSG_TYPE(game_inf_t);
+MSG_TYPE(login_t);
+MSG_TYPE(move_t);
+MSG_TYPE(go_to_history_t);
+MSG_TYPE(inf_request_t);
+
 #define SIMPLE_MSG(name)                                                                                                                                       \
   struct name                                                                                                                                                  \
   {};                                                                                                                                                          \
   template<typename Archive>                                                                                                                                   \
   void serialize(Archive& /*ar*/, name&, const unsigned /*version*/)                                                                                           \
-  {}
+  {}                                                                                                                                                           \
+  MSG_TYPE(name)
 
 SIMPLE_MSG(hello_server_t);
 SIMPLE_MSG(message_received_t);
@@ -130,25 +160,34 @@ SIMPLE_MSG(back_move_t);
 SIMPLE_MSG(new_game_t);
 SIMPLE_MSG(opponent_lost_t);
 #undef SIMPLE_MSG
+#undef MSG_TYPE
 
 using messages_t =
   boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, incorrect_log_t,
                      move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
 
+using to_server_messages_t = boost::mpl::vector<some_datagramm_t, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t, my_inf_t,
+                                                move_t, back_move_t, go_to_history_t, new_game_t>;
+
+using to_client_messages_t =
+  boost::mpl::vector<some_datagramm_t, message_received_t, get_login_t, is_client_lost_t, opponent_lost_t, inf_request_t, incorrect_log_t, game_inf_t>;
+
+namespace details {
+template<typename mpl_vector, typename T>
+concept mpl_vector_has_type = !std::same_as<typename boost::mpl::find<mpl_vector, T>::type, typename boost::mpl::end<mpl_vector>::type>;
+}
+
 template<typename T, typename... U>
 concept one_of = (std::same_as<T, U> || ...);
 
 template<typename T>
-concept one_of_to_server_msgs =
-  one_of<T, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t, my_inf_t, move_t, back_move_t, go_to_history_t, new_game_t>;
+concept one_of_to_server_msgs = details::mpl_vector_has_type<to_server_messages_t, T>;
 
 template<typename T>
-concept one_of_to_client_msgs = one_of<T, message_received_t, get_login_t, is_client_lost_t, opponent_lost_t, inf_request_t, incorrect_log_t, game_inf_t>;
+concept one_of_to_client_msgs = details::mpl_vector_has_type<to_client_messages_t, T>;
 
 template<typename T>
-concept one_of_msgs =
-  one_of<T, hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, incorrect_log_t, move_t,
-         back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
+concept one_of_msgs = details::mpl_vector_has_type<messages_t, T>;
 
 namespace details {
 
@@ -175,15 +214,14 @@ inline std::string to_string(const T& msg)
 } // namespace details
 
 template<typename T>
-inline constexpr int id_v = boost::mpl::find<messages_t, T>::type::pos::value;
+inline constexpr std::string_view id_v = msg_type<T>();
 
 template<one_of_msgs T>
 T init(const some_datagramm_t& datagramm)
 {
   if (datagramm.type != id_v<T>)
   {
-    throw my_archive_exception("Wrong type for init! Can not create msg with type=" + std::to_string(id_v<T>) +
-                               "; from type=" + std::to_string(datagramm.type));
+    throw my_archive_exception("Wrong type for init! Can not create msg with type=" + std::string(id_v<T>) + "; from type=" + datagramm.type);
   }
 
   return details::from_string<T>(datagramm.data);
