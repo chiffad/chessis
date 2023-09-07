@@ -16,8 +16,11 @@ inline bool valid_credentials(const logic::credentials_t& cred)
   return !cred.login.empty() && !cred.pwd.empty();
 }
 
+using authentication_messages_t = boost::mpl::vector<msg::hello_server_t, msg::login_t>;
+
 template<typename T>
-concept one_of_authentication_msg = msg::one_of<T, msg::hello_server_t, msg::login_t>;
+concept one_of_authentication_msg = msg::mpl_vector_has_type<authentication_messages_t, T>;
+
 } // namespace
 
 struct message_handler_t::impl_t
@@ -41,7 +44,6 @@ struct message_handler_t::impl_t
   {
     if constexpr (one_of_authentication_msg<typename T::type>)
     {
-      // TODO: use enum values for msg::id_v
       if (datagramm.type == msg::id_v<typename T::type>)
       {
         handle(msg::init<typename T::type>(datagramm), sender);
@@ -76,8 +78,8 @@ struct message_handler_t::impl_t
       {
         SPDLOG_DEBUG("Recconect client={} on addr={}", msg.login, sender);
         cl.address = sender;
-        // TODO
-        // send_to_client(msg::login_responce_t{cl.uuid, logic_server_endpoint_});
+        send_to_client(msg::login_response_t{boost::uuids::to_string(cl.uuid), logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()},
+                       sender);
       }
       return;
     }
@@ -91,8 +93,9 @@ struct message_handler_t::impl_t
     const client_t cl = {client_uuid, endpoint, creds};
     SPDLOG_INFO("Add new client={}!", cl);
 
-    // TODO
-    //  send_to_client(msg::login_responce_t{cl.uuid, logic_server_endpoint_}, endpoint);
+    // send_to_client(msg::login_response_t{boost::uuids::to_string(cl.uuid), logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()},
+    // endpoint);
+
     clients_[creds.login] = std::move(cl);
     client_authenticated_callback_(client_uuid);
   }
@@ -106,7 +109,7 @@ struct message_handler_t::impl_t
 };
 
 template<>
-void message_handler_t::impl_t::process<boost::mpl::end<msg::messages_t>::type>(const msg::some_datagramm_t& datagramm, const endpoint_t& sender)
+void message_handler_t::impl_t::process<boost::mpl::end<authentication_messages_t>::type>(const msg::some_datagramm_t& datagramm, const endpoint_t& sender)
 {
   SPDLOG_ERROR("No type found for datagramm type={}; sender={};", datagramm.type, sender);
 }
@@ -122,7 +125,7 @@ void message_handler_t::handle(const endpoint_t& addr, const std::string& messag
 {
   const msg::some_datagramm_t datagramm = msg::init<msg::some_datagramm_t>(message);
   SPDLOG_TRACE("Begin processing of the datagramm.type={} from addr={}", datagramm.type, addr);
-  impl_->process<boost::mpl::begin<msg::messages_t>::type>(datagramm, addr);
+  impl_->process<boost::mpl::begin<authentication_messages_t>::type>(datagramm, addr);
 }
 
 } // namespace server::authentication
