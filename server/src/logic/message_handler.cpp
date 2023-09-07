@@ -1,6 +1,6 @@
 #include "logic/message_handler.hpp"
 
-#include "messages/messages.hpp"
+#include <messages/messages.hpp>
 
 #include <boost/mpl/begin_end.hpp>
 #include <spdlog/spdlog.h>
@@ -9,6 +9,10 @@
 namespace logic {
 
 namespace {
+
+template<typename T>
+concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagramm_t, msg::message_received_t, msg::is_server_lost_t, msg::hello_server_t>;
+
 inline msg::game_inf_t get_board_state(const board_logic_t& d, const bool playing_white)
 {
   return {d.get_board_mask(), d.get_moves_history(), d.mate(), static_cast<int>(d.get_move_num()), playing_white};
@@ -53,6 +57,7 @@ struct message_handler_t::impl_t
   template<msg::one_of_to_server_msgs T>
   void handle(const msg::some_datagramm_t& datagramm, player_t& /*player*/)
   {
+    static_assert(one_of_msg_to_ignore<T>, "Unexpected type received. Handle it or ignore!");
     SPDLOG_ERROR("For type={} tactic isn't defined! datagramm type={}", typeid(T).name(), datagramm.type);
   }
 

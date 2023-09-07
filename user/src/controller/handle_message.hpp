@@ -10,7 +10,6 @@
 #include <typeinfo>
 
 namespace handler {
-
 namespace details {
 
 template<typename T>
