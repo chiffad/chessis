@@ -172,22 +172,20 @@ using to_server_messages_t = boost::mpl::vector<some_datagramm_t, message_receiv
 using to_client_messages_t =
   boost::mpl::vector<some_datagramm_t, message_received_t, get_login_t, is_client_lost_t, opponent_lost_t, inf_request_t, incorrect_log_t, game_inf_t>;
 
-namespace details {
 template<typename mpl_vector, typename T>
 concept mpl_vector_has_type = !std::same_as<typename boost::mpl::find<mpl_vector, T>::type, typename boost::mpl::end<mpl_vector>::type>;
-}
 
 template<typename T, typename... U>
 concept one_of = (std::same_as<T, U> || ...);
 
 template<typename T>
-concept one_of_to_server_msgs = details::mpl_vector_has_type<to_server_messages_t, T>;
+concept one_of_to_server_msgs = mpl_vector_has_type<to_server_messages_t, T>;
 
 template<typename T>
-concept one_of_to_client_msgs = details::mpl_vector_has_type<to_client_messages_t, T>;
+concept one_of_to_client_msgs = mpl_vector_has_type<to_client_messages_t, T>;
 
 template<typename T>
-concept one_of_msgs = details::mpl_vector_has_type<messages_t, T>;
+concept one_of_msgs = mpl_vector_has_type<messages_t, T>;
 
 namespace details {
 
