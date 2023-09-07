@@ -149,26 +149,26 @@ void client_t::impl_t::message_received(const std::string& m)
 
 std::string client_t::impl_t::pull_for_server()
 {
-  const auto _1 = messages_for_server_.front();
-  if (!msg::is_equal_types<msg::message_received_t>(_1.message))
+  const auto msg = messages_for_server_.front();
+  if (!msg::is_equal_types<msg::message_received_t>(msg.message))
   {
-    begin_wait_receive(_1.message);
+    begin_wait_receive(msg.message);
   }
 
   messages_for_server_.erase(messages_for_server_.begin());
-  return msg::prepare_for_send(msg::incoming_datagramm_t(_1.message, _1.extra ? send_serial_num_ : ++send_serial_num_));
+  return msg::prepare_for_send(msg::incoming_datagramm_t(msg.message, msg.extra ? send_serial_num_ : ++send_serial_num_));
 }
 
-bool client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& _1)
+bool client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& datagram)
 {
-  if (_1.ser_num == received_serial_num_ - 1 && !msg::is_equal_types<msg::message_received_t>(_1.data))
+  if (datagram.ser_num == received_serial_num_ - 1 && !msg::is_equal_types<msg::message_received_t>(datagram.data))
   {
     start_connection_timer();
     add_for_server(msg::prepare_for_send(msg::message_received_t()), true);
     return false;
   }
 
-  if (_1.ser_num != received_serial_num_)
+  if (datagram.ser_num != received_serial_num_)
   {
     SPDLOG_WARN("Warning! Wrong serial number!");
     return false;
@@ -180,14 +180,14 @@ bool client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& _1)
 void client_t::impl_t::add_for_server(const std::string& m, bool extra_message)
 {
   SPDLOG_TRACE("add message={}", m);
-  auto _1 = server_mess_t{m, extra_message};
+  auto msg = server_mess_t{m, extra_message};
   if (extra_message)
   {
-    messages_for_server_.insert(messages_for_server_.begin(), _1);
+    messages_for_server_.insert(messages_for_server_.begin(), std::move(msg));
   }
   else
   {
-    messages_for_server_.push_back(_1);
+    messages_for_server_.push_back(std::move(msg));
   }
 }
 

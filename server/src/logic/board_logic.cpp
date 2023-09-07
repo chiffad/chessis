@@ -94,7 +94,7 @@ struct board_logic_t::impl_t
   bool is_can_move(const coord_t& from, const coord_t& to) const;
   bool is_en_passant(const coord_t& fr, const coord_t& to) const;
 
-  int diff(const int _1, const int _2) const;
+  int diff(const int first, const int second) const;
 
   struct Moves
   {
@@ -585,9 +585,9 @@ COLOR board_logic_t::impl_t::get_color(const coord_t& c) const
   return islower(f) ? WHITE : BLACK;
 }
 
-int board_logic_t::impl_t::diff(const int _1, const int _2) const
+int board_logic_t::impl_t::diff(const int first, const int second) const
 {
-  return (_1 - _2);
+  return first - second;
 }
 
 unsigned board_logic_t::impl_t::get_field_index(const coord_t& c) const
