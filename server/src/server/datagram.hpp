@@ -1,20 +1,28 @@
 #pragma once
 
 #include "common/helper.hpp"
+#include <messages/messages.hpp>
 #include <spdlog/fmt/ostr.h>
 #include <string>
 
 namespace server {
 
+template<typename T>
 struct datagram_t
 {
   endpoint_t address;
-  std::string message;
+  T message;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const datagram_t& d)
+template<typename T>
+inline std::ostream& operator<<(std::ostream& os, const datagram_t<T>& d)
 {
   return os << "Datagram{ address=" << d.address << "; message=" << d.message << "; }";
+}
+
+inline std::ostream& operator<<(std::ostream& os, const datagram_t<msg::some_datagramm_t>& d)
+{
+  return os << "Datagram{ address=" << d.address << "; message={ type=" << d.message.type << "; msg=" << d.message.data << "; }";
 }
 
 } // namespace server

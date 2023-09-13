@@ -22,8 +22,10 @@ add_executable(${TARGET_NAME}
   src/logic/message_handler.hpp
   src/server/server.hpp    
   src/server/server.cpp
+  src/server/base_client.cpp
+  src/server/base_client.hpp
+  src/server/client.hpp 
   src/server/client.cpp
-  src/server/client.hpp
   src/server/clients_holder.hpp
   src/server/clients_holder.cpp 
   src/server/authentication/client.hpp

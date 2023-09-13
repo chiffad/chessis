@@ -20,9 +20,9 @@ public:
 public:
   clients_holder_t(io_service_t& io_service, const connection_status_signal_t::slot_type& subscriber);
   void add(const endpoint_t& addr);
-  void process(const datagram_t& datagram);
-  std::vector<datagram_t> datagrams_to_send();
-  std::vector<datagram_t> datagrams_to_process();
+  void process(const datagram_t<std::string>& datagram);
+  std::vector<datagram_t<std::string>> datagrams_to_send();
+  std::vector<datagram_t<msg::some_datagramm_t>> datagrams_to_process();
 
   using clients_arr_t::at;
   using clients_arr_t::begin;

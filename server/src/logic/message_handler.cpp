@@ -1,7 +1,5 @@
 #include "logic/message_handler.hpp"
 
-#include <messages/messages.hpp>
-
 #include <boost/mpl/begin_end.hpp>
 #include <spdlog/spdlog.h>
 #include <typeinfo>
@@ -32,9 +30,8 @@ struct message_handler_t::impl_t
     , server_{server}
   {}
 
-  void process_mess_begin(const std::string& str, player_t& player)
+  void process_mess_begin(const msg::some_datagramm_t& datagramm, player_t& player)
   {
-    const msg::some_datagramm_t datagramm = msg::init<msg::some_datagramm_t>(str);
     SPDLOG_TRACE("Begin processing of the datagramm.type={}", datagramm.type);
     process_mess<boost::mpl::begin<msg::to_server_messages_t>::type>(datagramm, player);
   }
@@ -206,7 +203,7 @@ message_handler_t::message_handler_t(games_manager_t& games_manager, server::ser
 
 message_handler_t::~message_handler_t() = default;
 
-void message_handler_t::process_server_message(const endpoint_t& addr, const std::string& message)
+void message_handler_t::process_server_message(const endpoint_t& addr, const msg::some_datagramm_t& message)
 {
   auto c = impl_->games_manager_.player(addr);
   if (c)

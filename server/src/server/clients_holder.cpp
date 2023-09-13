@@ -15,7 +15,7 @@ void clients_holder_t::add(const endpoint_t& addr)
   at(addr).connect_connection_status_changed([&](const bool online) { subscriber_(cl, online); });
 }
 
-void clients_holder_t::process(const datagram_t& datagram)
+void clients_holder_t::process(const datagram_t<std::string>& datagram)
 {
   const auto it = find(datagram.address);
   if (it == end())
@@ -37,9 +37,9 @@ void clients_holder_t::process(const datagram_t& datagram)
   cl.message_received(datagram.message);
 }
 
-std::vector<datagram_t> clients_holder_t::datagrams_to_send()
+std::vector<datagram_t<std::string>> clients_holder_t::datagrams_to_send()
 {
-  std::vector<datagram_t> res;
+  std::vector<datagram_t<std::string>> res;
   for (auto& client : *this)
   {
     while (client.second.message_for_server_append())
@@ -51,9 +51,9 @@ std::vector<datagram_t> clients_holder_t::datagrams_to_send()
   return res;
 }
 
-std::vector<datagram_t> clients_holder_t::datagrams_to_process()
+std::vector<datagram_t<msg::some_datagramm_t>> clients_holder_t::datagrams_to_process()
 {
-  std::vector<datagram_t> res;
+  std::vector<datagram_t<msg::some_datagramm_t>> res;
   for (auto& client : *this)
   {
     while (client.second.message_for_logic_append())

@@ -36,7 +36,8 @@ struct message_handler_t::impl_t
   template<typename T>
   inline void send_to_client(T&& msg, const endpoint_t& sender) const
   {
-    send_to_client_(msg::prepare_for_send(msg::incoming_datagramm_t{msg::prepare_for_send(std::forward<T>(msg)), ++send_serial_num_}), sender);
+    // TODO:
+    // send_to_client_(msg::prepare_for_send(msg::incoming_datagramm_t{msg::prepare_for_send(std::forward<T>(msg)), ++send_serial_num_}), sender);
   }
 
   // TODO: rename some_datagramm_t -> some_datagram_t

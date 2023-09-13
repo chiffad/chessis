@@ -4,6 +4,7 @@
 #include "logic/games_manager.hpp"
 #include "server/server.hpp"
 #include <memory>
+#include <messages/messages.hpp>
 #include <string>
 
 namespace logic {
@@ -18,7 +19,7 @@ public:
   message_handler_t& operator=(message_handler_t&&) = default;
   ~message_handler_t();
 
-  void process_server_message(const endpoint_t& addr, const std::string& message);
+  void process_server_message(const endpoint_t& addr, const msg::some_datagramm_t& message);
   void client_connection_changed(const endpoint_t& address, bool online);
 
 private:

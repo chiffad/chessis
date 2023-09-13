@@ -39,7 +39,7 @@ struct server_t::impl_t
 
     const std::string mess(incoming_message_.begin(), incoming_message_.begin() + readed_size);
     SPDLOG_INFO("read={}", mess);
-    clients_holder_.process(datagram_t{last_mess_sender_, mess});
+    clients_holder_.process(datagram_t<std::string>{last_mess_sender_, mess});
     start_receive();
   }
 
@@ -87,7 +87,7 @@ void server_t::process()
   }
 }
 
-std::vector<datagram_t> server_t::read()
+std::vector<datagram_t<msg::some_datagramm_t>> server_t::read()
 {
   return impl_->clients_holder_.datagrams_to_process();
 }

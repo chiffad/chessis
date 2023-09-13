@@ -28,7 +28,7 @@ public:
   }
 
   void process();
-  std::vector<datagram_t> read();
+  std::vector<datagram_t<msg::some_datagramm_t>> read();
   endpoint_t address() const;
 
 private:
