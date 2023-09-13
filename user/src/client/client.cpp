@@ -1,26 +1,22 @@
 #include "client.h"
 #include "client/socket.hpp"
+#include "helper.h"
+#include <messages/messages.hpp>
 
 #include <QByteArray>
 #include <QObject>
 #include <QTimer>
 #include <QUdpSocket>
 #include <functional>
+#include <spdlog/spdlog.h>
 #include <vector>
 
-#include "helper.h"
-#include <messages/messages.hpp>
-#include <spdlog/spdlog.h>
-
-using namespace cl;
+namespace cl {
 
 namespace {
 const int RESPONSE_WAIT_TIME = 500;
 const int CHECK_CONNECT_TIME = 5000;
 const int RESEND_HELLO_SERVER_TIME = 40;
-const int FIRST_PORT = 49152;
-const int LAST_PORT = 49300;
-const char FREE_SPASE = ' ';
 
 } // namespace
 
@@ -38,11 +34,13 @@ struct client_t::impl_t
 
   struct connect_state_t : public state_t
   {
-    explicit connect_state_t(client_t::impl_t& client);
+    connect_state_t(client_t::impl_t& client, std::unique_ptr<connection_strategy_t>& connection_strategy);
     void establish_connection(const bool prev_serial_needed);
     void send(const std::string& data, const bool prev_serial_needed) override;
     void read() override;
+
     QTimer resend_hello_server_timer_;
+    std::unique_ptr<connection_strategy_t>& connection_strategy_;
   };
 
   struct connected_state_t : public state_t
@@ -52,7 +50,8 @@ struct client_t::impl_t
     void read() override;
   };
 
-  impl_t(const client_t::message_received_callback_t& callback, const client_t::server_status_changed_callback_t& server_status_changed);
+  impl_t(const client_t::message_received_callback_t& callback, const client_t::server_status_changed_callback_t& server_status_changed,
+         std::unique_ptr<connection_strategy_t> connection_strategy);
   void resend_prev_message();
   std::string add_serial_num(const std::string& data, bool prev_serial_needed = false);
   void begin_wait_receive(const std::string& data);
@@ -73,11 +72,13 @@ struct client_t::impl_t
   endpoint_t endpoint_;
   client_t::message_received_callback_t message_received_callback_;
   client_t::server_status_changed_callback_t server_status_changed_callback_;
+  std::unique_ptr<connection_strategy_t> connection_strategy_;
   std::shared_ptr<state_t> state_;
 };
 
-client_t::client_t(const message_received_callback_t& callback, const client_t::server_status_changed_callback_t& server_status_changed)
-  : impl_(std::make_unique<impl_t>(callback, server_status_changed))
+client_t::client_t(const message_received_callback_t& callback, const client_t::server_status_changed_callback_t& server_status_changed,
+                   std::unique_ptr<connection_strategy_t> connection_strategy)
+  : impl_(std::make_unique<impl_t>(callback, server_status_changed, std::move(connection_strategy)))
 {}
 
 client_t::~client_t() = default;
@@ -87,19 +88,21 @@ void client_t::send(const std::string& data)
   impl_->send(data);
 }
 
-client_t::impl_t::impl_t(const client_t::message_received_callback_t& callback, const client_t::server_status_changed_callback_t& server_status_changed)
+client_t::impl_t::impl_t(const client_t::message_received_callback_t& callback, const client_t::server_status_changed_callback_t& server_status_changed,
+                         std::unique_ptr<connection_strategy_t> connection_strategy)
   : socket_{[this]() { state_->read(); }}
   , received_serial_num_(0)
   , send_serial_num_(0)
   , prev_message_sent_(true)
-  , endpoint_{"127.0.0.1", FIRST_PORT - 1}
+  , endpoint_{}
   , message_received_callback_(callback)
   , server_status_changed_callback_(server_status_changed)
+  , connection_strategy_{std::move(connection_strategy)}
 {
   QObject::connect(&response_checker_timer_, &QTimer::timeout, [&]() { resend_prev_message(); });
   QObject::connect(&server_alive_timer_, &QTimer::timeout, [&]() { send(msg::prepare_for_send(msg::is_server_lost_t{})); });
 
-  state_ = std::make_shared<connect_state_t>(*this);
+  state_ = std::make_shared<connect_state_t>(*this, connection_strategy_);
 }
 
 void client_t::impl_t::begin_wait_receive(const std::string& data)
@@ -160,9 +163,12 @@ client_t::impl_t::state_t::state_t(client_t::impl_t& client)
 
 //============================ connect_state_t ============================
 
-client_t::impl_t::connect_state_t::connect_state_t(client_t::impl_t& client)
+client_t::impl_t::connect_state_t::connect_state_t(client_t::impl_t& client, std::unique_ptr<connection_strategy_t>& connection_strategy)
   : state_t{client}
+  , connection_strategy_{connection_strategy}
 {
+  assert(connection_strategy_ != nullptr);
+
   QObject::connect(&resend_hello_server_timer_, &QTimer::timeout, [&]() { establish_connection(true); });
 
   client_.socket_.bind();
@@ -173,7 +179,12 @@ client_t::impl_t::connect_state_t::connect_state_t(client_t::impl_t& client)
 
 void client_t::impl_t::connect_state_t::establish_connection(const bool prev_serial_needed)
 {
-  if (++client_.endpoint_.port == LAST_PORT) client_.endpoint_.port = FIRST_PORT;
+  // TODO: make strategy to be able to connect to logic server by provided endpoint and login server with search logic
+  // when login_response_t received, client_t should be reinit with new strategy for logic server connection
+  // login_response_t should not be processed in controllers logic
+
+  connection_strategy_->exec(client_.endpoint_);
+  SPDLOG_INFO("Try to establish connection on address={}", client_.endpoint_);
   client_.write_datagram(msg::prepare_for_send(msg::hello_server_t{}), prev_serial_needed);
 }
 
@@ -255,3 +266,5 @@ void client_t::impl_t::connected_state_t::read()
     client_.message_received_callback_(datagramm.data);
   }
 }
+
+} // namespace cl

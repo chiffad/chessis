@@ -22,6 +22,7 @@ public:
   void process(msg::get_login_t get_login);
   void process(msg::incorrect_log_t incorrect_log);
   void process(msg::opponent_lost_t opp_lst);
+  void process(msg::login_response_t login_response);
 
 private:
   menu_layout_t& menu_layout_;

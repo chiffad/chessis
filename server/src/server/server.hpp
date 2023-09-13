@@ -29,6 +29,7 @@ public:
 
   void process();
   std::vector<datagram_t> read();
+  endpoint_t address() const;
 
 private:
   void send(const std::string& message, const endpoint_t& destination);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "client/connection_strategy.hpp"
+
 #include <functional>
 #include <memory>
 #include <string>
@@ -13,7 +15,8 @@ public:
   using server_status_changed_callback_t = std::function<void(bool /*online*/)>;
 
 public:
-  client_t(const message_received_callback_t& callback, const server_status_changed_callback_t& server_status_changed);
+  client_t(const message_received_callback_t& callback, const server_status_changed_callback_t& server_status_changed,
+           std::unique_ptr<connection_strategy_t> connection_strategy);
   ~client_t();
   void send(const std::string& message);
 

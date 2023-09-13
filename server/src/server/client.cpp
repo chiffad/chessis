@@ -5,10 +5,6 @@
 #include <spdlog/spdlog.h>
 #include <vector>
 
-namespace {
-const char FREE_SPASE = ' ';
-}
-
 namespace server {
 
 struct client_t::impl_t
