@@ -42,9 +42,9 @@ std::vector<datagram_t<std::string>> clients_holder_t::datagrams_to_send()
   std::vector<datagram_t<std::string>> res;
   for (auto& client : *this)
   {
-    while (client.second.message_for_server_append())
+    while (client.second.message_for_send_append())
     {
-      res.push_back({client.second.address(), client.second.pull_for_server()});
+      res.push_back({client.second.address(), client.second.pull_for_send()});
     }
   }
 

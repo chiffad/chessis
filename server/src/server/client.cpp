@@ -24,12 +24,17 @@ void client_t::message_received(const std::string& m)
   if (some_datagram.type == msg::id_v<msg::hello_server_t>)
   {
     SPDLOG_INFO("Received hello_server_t msg from address={}", address());
-    add_for_server(msg::prepare_for_send(msg::get_login_t()));
+    add_for_send(msg::prepare_for_send(msg::get_login_t()));
     return;
   }
 
   SPDLOG_TRACE("Push msg type={} to logic", some_datagram.type);
   add_for_logic(std::move(some_datagram));
+}
+
+void client_t::push_for_send(const std::string& message)
+{
+  add_for_send(message);
 }
 
 } // namespace server

@@ -27,18 +27,18 @@ public:
   base_client_t& operator=(base_client_t&&) = default;
   virtual ~base_client_t();
 
-  void push_for_send(const std::string& message);
-  bool message_for_server_append() const;
+  bool message_for_send_append() const;
   bool message_for_logic_append() const;
-  std::string pull_for_server();
+  std::string pull_for_send();
   msg::some_datagramm_t pull_for_logic();
+
   const endpoint_t& address() const;
   bool online() const;
   boost::signals2::connection connect_connection_status_changed(const connection_status_signal_t::slot_type& subscriber);
 
 protected:
   std::optional<msg::some_datagramm_t> preprocess_message(const std::string& m);
-  void add_for_server(const std::string& message, bool extra_message = false);
+  void add_for_send(const std::string& message, bool extra_message = false);
   void add_for_logic(msg::some_datagramm_t);
 
 private:

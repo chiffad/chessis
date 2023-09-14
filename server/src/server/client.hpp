@@ -18,6 +18,7 @@ public:
   ~client_t() override;
 
   void message_received(const std::string& message);
+  void push_for_send(const std::string& message);
 
 private:
   struct impl_t;

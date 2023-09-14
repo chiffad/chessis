@@ -1,39 +1,46 @@
 #include "server/base_client.hpp"
 
 #include <boost/uuid/uuid_io.hpp>
+#include <deque>
 #include <spdlog/spdlog.h>
-#include <vector>
 
 namespace server {
+
+namespace {
+enum class received_serial_num_t
+{
+  prev,
+  wrong,
+  ok
+};
+
+struct msg_to_send_t
+{
+  std::string message;
+  bool extra;
+};
+
+} // namespace
 
 struct base_client_t::impl_t
 {
   impl_t(io_service_t& io_serv, const endpoint_t& addr);
   void message_received(const std::string& message);
-  std::string pull_for_server();
   std::optional<msg::some_datagramm_t> preprocess_message(const std::string& m);
 
-  bool check_ser_num(const msg::incoming_datagramm_t& num);
-  void add_for_server(const std::string& message, bool extra_message = false);
+  received_serial_num_t check_ser_num(const msg::incoming_datagramm_t& num) const;
+  void add_for_send(const std::string& message, bool extra_message = false);
   void check_message_received();
-  void connection_timer_timeout();
   void begin_wait_receive(const std::string& message);
   void start_connection_timer();
   void start_response_timer();
   void set_connection_status(bool online);
 
-  struct server_mess_t
-  {
-    std::string message;
-    bool extra;
-  };
-
   deadline_timer_t response_timer_;
   deadline_timer_t connection_timer_;
 
-  // TODO: use deque?
-  std::vector<server_mess_t> messages_for_server_;
-  std::vector<msg::some_datagramm_t> messages_for_logic_;
+  std::deque<msg_to_send_t> messages_for_send_;
+  std::deque<msg::some_datagramm_t> messages_for_logic_;
   std::string last_send_message_;
 
   int received_serial_num_;
@@ -56,9 +63,9 @@ std::optional<msg::some_datagramm_t> base_client_t::preprocess_message(const std
   return impl_->preprocess_message(m);
 }
 
-void base_client_t::add_for_server(const std::string& message, bool extra_message)
+void base_client_t::add_for_send(const std::string& message, bool extra_message)
 {
-  impl_->add_for_server(message, extra_message);
+  impl_->add_for_send(message, extra_message);
 }
 
 void base_client_t::add_for_logic(msg::some_datagramm_t msg)
@@ -66,14 +73,9 @@ void base_client_t::add_for_logic(msg::some_datagramm_t msg)
   impl_->messages_for_logic_.push_back(std::move(msg));
 }
 
-void base_client_t::push_for_send(const std::string& m)
+bool base_client_t::message_for_send_append() const
 {
-  impl_->messages_for_server_.push_back(base_client_t::impl_t::server_mess_t{m, false});
-}
-
-bool base_client_t::message_for_server_append() const
-{
-  const auto& msg = impl_->messages_for_server_;
+  const auto& msg = impl_->messages_for_send_;
   return !msg.empty() && (impl_->prev_message_received_ || (msg.front().extra && msg.front().message == impl_->last_send_message_));
 }
 
@@ -82,16 +84,20 @@ bool base_client_t::message_for_logic_append() const
   return !impl_->messages_for_logic_.empty();
 }
 
-std::string base_client_t::pull_for_server()
+std::string base_client_t::pull_for_send()
 {
-  return impl_->pull_for_server();
+  auto msg = std::move(impl_->messages_for_send_.front());
+  impl_->messages_for_send_.pop_front();
+  if (!msg::is_equal_types<msg::message_received_t>(msg.message)) impl_->begin_wait_receive(msg.message);
+
+  return msg::prepare_for_send(msg::incoming_datagramm_t{std::move(msg.message), msg.extra ? impl_->send_serial_num_ : ++impl_->send_serial_num_});
 }
 
 msg::some_datagramm_t base_client_t::pull_for_logic()
 {
   SPDLOG_DEBUG("pull_for_logic");
   const msg::some_datagramm_t m = impl_->messages_for_logic_.front();
-  impl_->messages_for_logic_.erase(impl_->messages_for_logic_.begin());
+  impl_->messages_for_logic_.pop_front();
   return m;
 }
 
@@ -122,15 +128,16 @@ base_client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
 
 std::optional<msg::some_datagramm_t> base_client_t::impl_t::preprocess_message(const std::string& m)
 {
-  const auto datagramm = msg::init<msg::incoming_datagramm_t>(m);
-  if (!check_ser_num(datagramm))
-  {
-    return std::nullopt;
-  }
-
-  set_connection_status(true);
-  ++received_serial_num_;
   start_connection_timer();
+  set_connection_status(true);
+
+  const auto datagramm = msg::init<msg::incoming_datagramm_t>(m);
+  switch (check_ser_num(datagramm))
+  {
+    case received_serial_num_t::prev: add_for_send(msg::prepare_for_send(msg::message_received_t()), true); return std::nullopt;
+    case received_serial_num_t::wrong: return std::nullopt;
+    default: received_serial_num_ = datagramm.ser_num;
+  }
 
   const auto some_datagram = msg::init<msg::some_datagramm_t>(datagramm.data);
   if (some_datagram.type == msg::id_v<msg::message_received_t>)
@@ -139,52 +146,32 @@ std::optional<msg::some_datagramm_t> base_client_t::impl_t::preprocess_message(c
     return std::nullopt;
   }
 
-  add_for_server(msg::prepare_for_send(msg::message_received_t()));
+  add_for_send(msg::prepare_for_send(msg::message_received_t()));
   return some_datagram;
 }
 
-std::string base_client_t::impl_t::pull_for_server()
-{
-  const auto msg = messages_for_server_.front();
-  if (!msg::is_equal_types<msg::message_received_t>(msg.message))
-  {
-    begin_wait_receive(msg.message);
-  }
-
-  messages_for_server_.erase(messages_for_server_.begin());
-  return msg::prepare_for_send(msg::incoming_datagramm_t(msg.message, msg.extra ? send_serial_num_ : ++send_serial_num_));
-}
-
-bool base_client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& datagram)
+received_serial_num_t base_client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& datagram) const
 {
   if (datagram.ser_num == received_serial_num_ - 1 && !msg::is_equal_types<msg::message_received_t>(datagram.data))
   {
-    start_connection_timer();
-    add_for_server(msg::prepare_for_send(msg::message_received_t()), true);
-    return false;
+    return received_serial_num_t::prev;
   }
 
   if (datagram.ser_num != received_serial_num_)
   {
     SPDLOG_WARN("Warning! Wrong serial number!");
-    return false;
+    return received_serial_num_t::wrong;
   }
 
-  return true;
+  return received_serial_num_t::ok;
 }
 
-void base_client_t::impl_t::add_for_server(const std::string& m, bool extra_message)
+void base_client_t::impl_t::add_for_send(const std::string& m, bool extra_message)
 {
   SPDLOG_TRACE("add message={}", m);
-  auto msg = server_mess_t{m, extra_message};
-  if (extra_message)
-  {
-    messages_for_server_.insert(messages_for_server_.begin(), std::move(msg));
-  }
-  else
-  {
-    messages_for_server_.push_back(std::move(msg));
-  }
+  auto msg = msg_to_send_t{m, extra_message};
+  if (extra_message) messages_for_send_.push_front(std::move(msg));
+  else messages_for_send_.push_back(std::move(msg));
 }
 
 void base_client_t::impl_t::begin_wait_receive(const std::string& message)
@@ -204,7 +191,7 @@ void base_client_t::impl_t::check_message_received()
     return;
   }
 
-  add_for_server(last_send_message_, true);
+  add_for_send(last_send_message_, true);
 
   if (msg::is_equal_types<msg::is_client_lost_t>(last_send_message_) && ++num_of_restarts == 3)
   {
@@ -214,30 +201,22 @@ void base_client_t::impl_t::check_message_received()
   start_response_timer();
 }
 
-void base_client_t::impl_t::connection_timer_timeout()
-{
-  add_for_server(msg::prepare_for_send(msg::is_client_lost_t()));
-}
-
 void base_client_t::impl_t::start_connection_timer()
 {
-  // SPDLOG_TRACE("Start connection timer for client on address={}", address_);
   connection_timer_.cancel();
   connection_timer_.expires_from_now(boost::posix_time::milliseconds(7000));
   connection_timer_.async_wait([&](const boost::system::error_code& error) {
     if (!error)
     {
-      connection_timer_timeout();
+      add_for_send(msg::prepare_for_send(msg::is_client_lost_t()));
       return;
     }
     if (error != boost::system::errc::operation_canceled) SPDLOG_ERROR("connection timer error={}; client address={}", error.message(), address_);
   });
-  //  connection_timer_.async_wait([&](auto /*e*/){log(">>>>connection_timer<<<<");});
 }
 
 void base_client_t::impl_t::start_response_timer()
 {
-  // SPDLOG_TRACE("Start response timer for client on address={}", address_);
   response_timer_.cancel();
   response_timer_.expires_from_now(boost::posix_time::milliseconds(1500));
   response_timer_.async_wait([&](const boost::system::error_code& error) {
@@ -248,7 +227,6 @@ void base_client_t::impl_t::start_response_timer()
     }
     if (error != boost::system::errc::operation_canceled) SPDLOG_ERROR("response timer error={}; client address={}", error.message(), address_);
   });
-  // response_timer_.async_wait([&](auto /*e*/){log(">>>>response_timer<<<<");});
 }
 
 void base_client_t::impl_t::set_connection_status(const bool online)
