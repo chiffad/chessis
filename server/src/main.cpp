@@ -31,6 +31,7 @@ try
       handler->process_server_message(data.address, data.message);
     }
 
+    // authentication_server.process();
     server.process();
   }
 

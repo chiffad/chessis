@@ -30,40 +30,38 @@ struct message_handler_t::impl_t
     : logic_server_endpoint_{logic_server_endpoint}
     , client_authenticated_callback_{client_authenticated_callback}
     , send_to_client_{send_to_client_callback}
-    , send_serial_num_{0}
   {}
 
   template<typename T>
-  inline void send_to_client(T&& msg, const endpoint_t& sender) const
+  inline void send_to_client(T&& msg, const endpoint_t& sender, short send_serial_num) const
   {
-    // TODO:
-    // send_to_client_(msg::prepare_for_send(msg::incoming_datagramm_t{msg::prepare_for_send(std::forward<T>(msg)), ++send_serial_num_}), sender);
+    send_to_client_(msg::prepare_for_send(msg::incoming_datagramm_t{msg::prepare_for_send(std::forward<T>(msg)), send_serial_num, 0}), sender);
   }
 
   // TODO: rename some_datagramm_t -> some_datagram_t
   template<typename T>
-  void process(const msg::some_datagramm_t& datagram, const endpoint_t& sender)
+  void process(const msg::some_datagramm_t& datagram, const endpoint_t& sender, const int ser_num)
   {
     if constexpr (one_of_authentication_msg<typename T::type>)
     {
       if (datagram.type == msg::id_v<typename T::type>)
       {
-        handle(msg::init<typename T::type>(datagram), sender);
+        handle(msg::init<typename T::type>(datagram), sender, ser_num);
         return;
       }
     }
-    process<typename boost::mpl::next<T>::type>(datagram, sender);
+    process<typename boost::mpl::next<T>::type>(datagram, sender, ser_num);
   }
 
   // TODO: define, what to do with send_serial_num_ in case of receiving
   //  and do we need send_serial_num_ at all in authentication server
-  void handle(const msg::hello_server_t& /*msg*/, const endpoint_t& sender)
+  void handle(const msg::hello_server_t& msg, const endpoint_t& sender, const int ser_num)
   {
     SPDLOG_INFO("New client={} connection request received!", sender);
-    send_to_client(msg::get_login_t{}, sender);
+    send_to_client(msg::get_login_t{}, sender, ser_num);
   }
 
-  void handle(const msg::login_t& msg, const endpoint_t& sender)
+  void handle(const msg::login_t& msg, const endpoint_t& sender, const int ser_num)
   {
     const logic::credentials_t creds = {msg.login, msg.pwd};
     SPDLOG_INFO("Handle login requested from address={}; creds={}", sender, creds);
@@ -71,7 +69,7 @@ struct message_handler_t::impl_t
     if (!valid_credentials(creds))
     {
       SPDLOG_INFO("Not valid creds={} from addr={}", creds, sender);
-      send_to_client(msg::incorrect_log_t{}, sender);
+      send_to_client(msg::incorrect_log_t{}, sender, ser_num);
       return;
     }
 
@@ -83,22 +81,22 @@ struct message_handler_t::impl_t
         SPDLOG_DEBUG("Recconect client={} on addr={}", msg.login, sender);
         cl.address = sender;
         send_to_client(msg::login_response_t{boost::uuids::to_string(cl.uuid), logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()},
-                       sender);
+                       sender, ser_num);
       }
       return;
     }
 
-    add_client(creds, sender);
+    add_client(creds, sender, ser_num);
   }
 
-  void add_client(const logic::credentials_t& creds, const endpoint_t& endpoint)
+  void add_client(const logic::credentials_t& creds, const endpoint_t& endpoint, const int ser_num)
   {
     const auto client_uuid = clients_uuid_generator_.new_uuid();
     const client_t cl = {client_uuid, endpoint, creds};
     SPDLOG_INFO("Add new client={}!", cl);
 
     send_to_client(msg::login_response_t{boost::uuids::to_string(cl.uuid), logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()},
-                   endpoint);
+                   endpoint, ser_num);
 
     clients_[creds.login] = std::move(cl);
     client_authenticated_callback_(client_uuid);
@@ -110,11 +108,11 @@ struct message_handler_t::impl_t
   const endpoint_t logic_server_endpoint_;
   const client_authenticated_callback_t client_authenticated_callback_;
   const send_to_client_callback_t send_to_client_;
-  int send_serial_num_;
 };
 
 template<>
-void message_handler_t::impl_t::process<boost::mpl::end<authentication_messages_t>::type>(const msg::some_datagramm_t& datagram, const endpoint_t& sender)
+void message_handler_t::impl_t::process<boost::mpl::end<authentication_messages_t>::type>(const msg::some_datagramm_t& datagram, const endpoint_t& sender,
+                                                                                          const int ser_num)
 {
   SPDLOG_ERROR("No type found for datagram type={}; sender={};", datagram.type, sender);
 }
@@ -130,15 +128,13 @@ void message_handler_t::handle(const endpoint_t& addr, const std::string& messag
 {
   SPDLOG_INFO("Received data={}", message);
   const auto incoming_datagramm = msg::init<msg::incoming_datagramm_t>(message);
-  // authentification server do not care about incoming serial number
-
   const auto datagram = msg::init<msg::some_datagramm_t>(incoming_datagramm.data);
   if (datagram.type == msg::id_v<msg::message_received_t>) return;
 
-  impl_->send_to_client(msg::message_received_t{}, addr);
+  impl_->send_to_client(msg::message_received_t{}, addr, incoming_datagramm.response_ser_num);
 
   SPDLOG_TRACE("Begin processing of the datagram.type={} from addr={}", datagram.type, addr);
-  impl_->process<boost::mpl::begin<authentication_messages_t>::type>(datagram, addr);
+  impl_->process<boost::mpl::begin<authentication_messages_t>::type>(datagram, addr, incoming_datagramm.response_ser_num + 1);
 }
 
 } // namespace server::authentication

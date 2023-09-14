@@ -23,27 +23,54 @@ struct my_archive_exception : public boost::archive::archive_exception
 
 struct login_t
 {
+  login_t() = default;
+  login_t(std::string login, std::string pwd)
+    : login{std::move(login)}
+    , pwd{std::move(pwd)}
+  {}
+
   std::string login;
   std::string pwd;
 };
 
 struct move_t
 {
+  move_t() = default;
+  move_t(std::string data)
+    : data{std::move(data)}
+  {}
   std::string data;
 };
 
 struct go_to_history_t
 {
+  go_to_history_t() = default;
+  go_to_history_t(int index)
+    : index{index}
+  {}
   int index{};
 };
 
 struct inf_request_t
 {
+  inf_request_t() = default;
+  inf_request_t(std::string data)
+    : data{std::move(data)}
+  {}
   std::string data;
 };
 
 struct game_inf_t
 {
+  game_inf_t() = default;
+  game_inf_t(std::string board_mask, std::string moves_history, bool is_mate, int move_num, bool playing_white)
+    : board_mask{std::move(board_mask)}
+    , moves_history{std::move(moves_history)}
+    , is_mate{}
+    , move_num{}
+    , playing_white{}
+  {}
+
   std::string board_mask;
   std::string moves_history;
   bool is_mate{};
@@ -53,15 +80,29 @@ struct game_inf_t
 
 struct login_response_t
 {
+  login_response_t() = default;
+  login_response_t(std::string uuid, std::string logic_server_address, unsigned logic_server_port)
+    : uuid{std::move(uuid)}
+    , logic_server_address{std::move(logic_server_address)}
+    , logic_server_port{logic_server_port}
+  {}
+
   std::string uuid;
   std::string logic_server_address;
-  unsigned logic_server_port;
+  unsigned logic_server_port{};
 };
 
 struct incoming_datagramm_t
 {
+  incoming_datagramm_t() = default;
+  incoming_datagramm_t(std::string data, int ser_num, int response_ser_num)
+    : data{std::move(data)}
+    , ser_num{ser_num}
+    , response_ser_num{response_ser_num}
+  {}
   std::string data;
   int ser_num{};
+  int response_ser_num{};
 };
 
 struct some_datagramm_t
@@ -71,7 +112,6 @@ struct some_datagramm_t
     : data(std::move(data))
     , type(std::move(type))
   {}
-
   some_datagramm_t(std::string data, std::string_view type)
     : some_datagramm_t(std::move(data), std::string(type))
   {}
@@ -126,6 +166,7 @@ void serialize(Archive& ar, login_response_t& _1, const unsigned /*version*/)
 template<typename Archive>
 void serialize(Archive& ar, incoming_datagramm_t& _1, const unsigned /*version*/)
 {
+  ar& _1.response_ser_num;
   ar& _1.ser_num;
   ar& _1.data;
 }

@@ -90,7 +90,8 @@ std::string base_client_t::pull_for_send()
   impl_->messages_for_send_.pop_front();
   if (!msg::is_equal_types<msg::message_received_t>(msg.message)) impl_->begin_wait_receive(msg.message);
 
-  return msg::prepare_for_send(msg::incoming_datagramm_t{std::move(msg.message), msg.extra ? impl_->send_serial_num_ : ++impl_->send_serial_num_});
+  return msg::prepare_for_send(
+    msg::incoming_datagramm_t{std::move(msg.message), msg.extra ? impl_->send_serial_num_ : ++impl_->send_serial_num_, impl_->received_serial_num_ + 1});
 }
 
 msg::some_datagramm_t base_client_t::pull_for_logic()

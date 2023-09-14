@@ -132,7 +132,7 @@ void client_t::impl_t::resend_prev_message()
 
 std::string client_t::impl_t::add_serial_num(const std::string& data, const bool prev_serial_needed)
 {
-  return msg::prepare_for_send(msg::incoming_datagramm_t(data, prev_serial_needed ? send_serial_num_ : ++send_serial_num_));
+  return msg::prepare_for_send(msg::incoming_datagramm_t{data, prev_serial_needed ? send_serial_num_ : ++send_serial_num_, received_serial_num_ + 1});
 }
 
 bool client_t::impl_t::validate_serial_num(const msg::incoming_datagramm_t& datagramm)
