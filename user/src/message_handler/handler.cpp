@@ -1,5 +1,5 @@
 #include "message_handler/handler.hpp"
-#include "message_handler/handle_message.hpp"
+#include "message_handler/helper.hpp"
 
 namespace message_handler {
 
@@ -31,7 +31,7 @@ handler_t::~handler_t() = default;
 
 void handler_t::handle(std::string msg)
 {
-  helper::process_mess_begin(msg, *impl_);
+  helper::find_msg_type_and_handle(msg, *impl_);
 }
 
 } // namespace message_handler

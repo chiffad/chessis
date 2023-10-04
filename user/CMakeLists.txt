@@ -31,7 +31,7 @@ add_executable(${TARGET_NAME}
   src/controller/message_processor.cpp 
   src/controller/app.hpp 
   src/controller/app.cpp
-  src/message_handler/handle_message.hpp 
+  src/message_handler/helper.hpp 
   src/message_handler/handler.hpp 
   src/message_handler/handler.cpp
   src/coord.h
