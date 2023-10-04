@@ -1,7 +1,5 @@
 #include "controller/message_processor.hpp"
 
-#include "controller/handle_message.hpp"
-
 namespace controller {
 
 message_processor_t::message_processor_t(menu_layout_t& menu_layout, board_t& board, login_input_t& login_input)
@@ -9,11 +7,6 @@ message_processor_t::message_processor_t(menu_layout_t& menu_layout, board_t& bo
   , board_{board}
   , login_input_{login_input}
 {}
-
-void message_processor_t::process_server_message(const std::string& server_message)
-{
-  handler::process_mess_begin(server_message, *this);
-}
 
 void message_processor_t::server_status_changed(const bool server_online)
 {
@@ -32,7 +25,7 @@ void message_processor_t::process(const msg::game_inf_t game_info)
   SPDLOG_DEBUG("Process msg::game_inf_t");
 
   menu_layout_.set_connect_status(menu_layout_t::connection_status_t::server_available);
-  menu_layout_.update_game_info(game_info);
+  menu_layout_.update_game_info(game_info.move_num, game_info.moves_history);
   board_.update_game_info(game_info);
 }
 
@@ -51,11 +44,6 @@ void message_processor_t::process(const msg::incorrect_log_t /*incorrect_log*/)
 void message_processor_t::process(const msg::opponent_lost_t /*opp_lst*/)
 {
   menu_layout_.set_connect_status(menu_layout_t::connection_status_t::opponent_lost);
-}
-
-void message_processor_t::process(const msg::login_response_t login_response)
-{
-  // TODO!!
 }
 
 } // namespace controller

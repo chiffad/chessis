@@ -8,8 +8,6 @@
 #include <functional>
 #include <vector>
 
-#include <messages/messages.hpp>
-
 #include <spdlog/spdlog.h>
 
 namespace controller {
@@ -24,7 +22,16 @@ class menu_layout_t : public QObject
   Q_PROPERTY(QString connection_status READ connection_status NOTIFY connection_status_changed)
 
 public:
-  using command_requested_callback_t = std::function<void(std::string)>;
+  struct command_requested_callbacks_t
+  {
+    std::function<void(std::string)> move;
+    std::function<void(size_t)> go_to_history;
+    std::function<void()> new_game;
+    std::function<void()> back_move;
+    std::function<void()> opponent_inf;
+    std::function<void()> my_inf;
+  };
+
   enum class connection_status_t
   {
     server_available,
@@ -33,13 +40,12 @@ public:
   };
 
 public:
-  explicit menu_layout_t(const command_requested_callback_t& callback);
+  explicit menu_layout_t(const command_requested_callbacks_t& callbacks);
   menu_layout_t(const menu_layout_t&) = delete;
   menu_layout_t& operator=(const menu_layout_t&) = delete;
   ~menu_layout_t();
 
-  void update_game_info(const msg::game_inf_t& game_info);
-
+  void update_game_info(int move_num, const std::string& moves_history);
   void set_connect_status(connection_status_t status);
   void add_to_command_history(const QString& str);
 
@@ -68,19 +74,13 @@ private:
   void write_moves_to_file(const QString& path);
   void read_moves_from_file(const QString& path);
 
-  template<msg::one_of_to_server_msgs T>
-  inline void command_requested(T&& command)
-  {
-    command_requested_callback_(msg::prepare_for_send(std::forward<T>(command)));
-  }
-
 private:
   bool white_move_turn_;
   QString connection_status_;
   QStringList str_moves_history_;
   QStringList commands_history_;
   QString field_;
-  command_requested_callback_t command_requested_callback_;
+  command_requested_callbacks_t command_requested_;
 };
 
 } // namespace controller

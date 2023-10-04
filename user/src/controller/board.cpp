@@ -84,9 +84,7 @@ void board_t::update_game_info(const msg::game_inf_t& game_info)
 void board_t::move(const int x1, const int y1, const int x2, const int y2)
 {
   SPDLOG_DEBUG("move requested: x1={}; y1={}; x1={}; y2={}", x1, y1, x2, y2);
-  msg::move_t move_msg;
-  move_msg.data = to_str(get_coord(x1, y1)) + " - " + to_str(get_coord(x2, y2));
-  move_requested_callback_(std::move(move_msg));
+  move_requested_callback_(to_str(get_coord(x1, y1)) + " - " + to_str(get_coord(x2, y2)));
 }
 
 void board_t::set_board_mask(const std::string& mask)

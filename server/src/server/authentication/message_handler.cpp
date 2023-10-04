@@ -80,8 +80,9 @@ struct message_handler_t::impl_t
       {
         SPDLOG_DEBUG("Recconect client={} on addr={}", msg.login, sender);
         cl.address = sender;
-        send_to_client(msg::login_response_t{boost::uuids::to_string(cl.uuid), logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()},
-                       sender, ser_num);
+        send_to_client(
+          msg::login_response_t{msg::token_t{boost::uuids::to_string(cl.uuid)}, logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()},
+          sender, ser_num);
       }
       return;
     }
@@ -95,8 +96,9 @@ struct message_handler_t::impl_t
     const client_t cl = {client_uuid, endpoint, creds};
     SPDLOG_INFO("Add new client={}!", cl);
 
-    send_to_client(msg::login_response_t{boost::uuids::to_string(cl.uuid), logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()},
-                   endpoint, ser_num);
+    send_to_client(
+      msg::login_response_t{msg::token_t{boost::uuids::to_string(cl.uuid)}, logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()},
+      endpoint, ser_num);
 
     clients_[creds.login] = std::move(cl);
     client_authenticated_callback_(client_uuid);

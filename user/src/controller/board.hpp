@@ -16,7 +16,7 @@ class board_t : public QObject
   Q_PROPERTY(bool playing_white READ playing_white NOTIFY playing_white_changed)
 
 public:
-  using move_requested_callback_t = std::function<void(msg::move_t)>;
+  using move_requested_callback_t = std::function<void(const std::string& move_msg)>;
 
 public:
   explicit board_t(const move_requested_callback_t& callback);

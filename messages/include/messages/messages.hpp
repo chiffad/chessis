@@ -21,6 +21,16 @@ struct my_archive_exception : public boost::archive::archive_exception
   std::string message;
 };
 
+struct token_t
+{
+  token_t() = default;
+  token_t(std::string uuid)
+    : uuid{std::move(uuid)}
+  {}
+
+  std::string uuid;
+};
+
 struct login_t
 {
   login_t() = default;
@@ -36,18 +46,22 @@ struct login_t
 struct move_t
 {
   move_t() = default;
-  move_t(std::string data)
-    : data{std::move(data)}
+  move_t(const token_t& t, std::string data)
+    : token{t}
+    , data{std::move(data)}
   {}
+  token_t token;
   std::string data;
 };
 
 struct go_to_history_t
 {
   go_to_history_t() = default;
-  go_to_history_t(int index)
-    : index{index}
+  go_to_history_t(const token_t& t, int index)
+    : token{t}
+    , index{index}
   {}
+  token_t token;
   int index{};
 };
 
@@ -81,13 +95,13 @@ struct game_inf_t
 struct login_response_t
 {
   login_response_t() = default;
-  login_response_t(std::string uuid, std::string logic_server_address, unsigned logic_server_port)
-    : uuid{std::move(uuid)}
+  login_response_t(token_t token, std::string logic_server_address, unsigned logic_server_port)
+    : token{std::move(token)}
     , logic_server_address{std::move(logic_server_address)}
     , logic_server_port{logic_server_port}
   {}
 
-  std::string uuid;
+  token_t token;
   std::string logic_server_address;
   unsigned logic_server_port{};
 };
@@ -140,12 +154,14 @@ template<typename Archive>
 void serialize(Archive& ar, go_to_history_t& _1, const unsigned /*version*/)
 {
   ar& _1.index;
+  ar& _1.token;
 }
 
 template<typename Archive>
 void serialize(Archive& ar, move_t& _1, const unsigned /*version*/)
 {
   ar& _1.data;
+  ar& _1.token;
 }
 
 template<typename Archive>
@@ -160,7 +176,7 @@ void serialize(Archive& ar, login_response_t& _1, const unsigned /*version*/)
 {
   ar& _1.logic_server_address;
   ar& _1.logic_server_port;
-  ar& _1.uuid;
+  ar& _1.token;
 }
 
 template<typename Archive>
@@ -176,6 +192,12 @@ void serialize(Archive& ar, some_datagramm_t& _1, const unsigned /*version*/)
 {
   ar& _1.type;
   ar& _1.data;
+}
+
+template<typename Archive>
+void serialize(Archive& ar, token_t& _1, const unsigned /*version*/)
+{
+  ar& _1.uuid;
 }
 
 template<typename T>
@@ -196,6 +218,7 @@ MSG_TYPE(login_response_t);
 MSG_TYPE(move_t);
 MSG_TYPE(go_to_history_t);
 MSG_TYPE(inf_request_t);
+MSG_TYPE(token_t);
 
 #define SIMPLE_MSG(name)                                                                                                                                       \
   struct name                                                                                                                                                  \
@@ -209,14 +232,28 @@ SIMPLE_MSG(hello_server_t);
 SIMPLE_MSG(message_received_t);
 SIMPLE_MSG(is_server_lost_t);
 SIMPLE_MSG(is_client_lost_t);
-SIMPLE_MSG(opponent_inf_t);
-SIMPLE_MSG(my_inf_t);
 SIMPLE_MSG(get_login_t);
 SIMPLE_MSG(incorrect_log_t);
-SIMPLE_MSG(back_move_t);
-SIMPLE_MSG(new_game_t);
 SIMPLE_MSG(opponent_lost_t);
 #undef SIMPLE_MSG
+
+#define TOKENIZED_SIMPLE_MSG(name)                                                                                                                             \
+  struct name                                                                                                                                                  \
+  {                                                                                                                                                            \
+    token_t token;                                                                                                                                             \
+  };                                                                                                                                                           \
+  template<typename Archive>                                                                                                                                   \
+  void serialize(Archive& ar, name& _1, const unsigned /*version*/)                                                                                            \
+  {                                                                                                                                                            \
+    ar& _1.token;                                                                                                                                              \
+  }                                                                                                                                                            \
+  MSG_TYPE(name)
+
+TOKENIZED_SIMPLE_MSG(opponent_inf_t);
+TOKENIZED_SIMPLE_MSG(my_inf_t);
+TOKENIZED_SIMPLE_MSG(back_move_t);
+TOKENIZED_SIMPLE_MSG(new_game_t);
+#undef TOKENIZED_SIMPLE_MSG
 #undef MSG_TYPE
 
 using messages_t = boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t,

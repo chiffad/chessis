@@ -12,13 +12,21 @@ namespace controller {
 class app_t
 {
 public:
-  using command_requested_callback_t = std::function<void(std::string)>;
+  struct command_requested_callbacks_t : menu_layout_t::command_requested_callbacks_t
+  {
+    std::function<void(const std::string& /*login*/, const std::string& /*pwd*/)> login;
+  };
 
 public:
-  explicit app_t(const command_requested_callback_t& callback);
+  explicit app_t(const command_requested_callbacks_t& callback);
   ~app_t();
-  void process(const std::string& server_message);
+
   void server_status_changed(bool server_online);
+  template<typename T>
+  void process(T&& msg)
+  {
+    message_processor_.process(std::forward<T>(msg));
+  }
 
 private:
   menu_layout_t menu_layout_;

@@ -24,39 +24,38 @@ const QString COMMAND = "Command: ";
 
 namespace controller {
 
-menu_layout_t::menu_layout_t(const command_requested_callback_t& callback)
+menu_layout_t::menu_layout_t(const command_requested_callbacks_t& callbacks)
   : QObject()
   , white_move_turn_(true)
   , connection_status_("Disconnected")
-  , command_requested_callback_(callback)
+  , command_requested_(callbacks)
 {}
 
 menu_layout_t::~menu_layout_t() = default;
 
-void menu_layout_t::update_game_info(const msg::game_inf_t& game_info)
+void menu_layout_t::update_game_info(const int move_num, const std::string& moves_history)
 {
-  set_move_turn(game_info.move_num);
-  set_moves_history(QString::fromStdString(game_info.moves_history));
+  set_move_turn(move_num);
+  set_moves_history(QString::fromStdString(moves_history));
 }
 
 void menu_layout_t::new_game()
 {
-  command_requested(msg::new_game_t{});
+  command_requested_.new_game();
   add_to_command_history(COMMAND + NEW_GAME);
 }
 
 void menu_layout_t::back_move()
 {
-  command_requested(msg::back_move_t{});
+  command_requested_.back_move();
   add_to_command_history(COMMAND + BACK_MOVE);
 }
 
 void menu_layout_t::go_to_history(const int hist_i)
 {
-  msg::go_to_history_t gth;
-  gth.index = hist_i + 1;
-  add_to_command_history(COMMAND + HISTORY + " " + QString::number(gth.index));
-  command_requested(std::move(gth));
+  const auto idx = hist_i + 1;
+  command_requested_.go_to_history(idx);
+  add_to_command_history(COMMAND + HISTORY + " " + QString::number(idx));
 }
 
 void menu_layout_t::run_command(const QString& message)
@@ -86,17 +85,15 @@ void menu_layout_t::run_command(const QString& message)
                            "4.For go to history index, type '" + HISTORY + "' and index" + "\n" + "5.To view opponent information, print '" + SHOW_OPPONENT +
                            "'" + "\n" + "6.To view your information, print '" + SHOW_ME + "'");
   }
-  else if (message == SHOW_OPPONENT) command_requested(msg::opponent_inf_t{});
-  else if (message == SHOW_ME) command_requested(msg::my_inf_t{});
+  else if (message == SHOW_OPPONENT) command_requested_.opponent_inf();
+  else if (message == SHOW_ME) command_requested_.my_inf();
   else if (message.contains(MOVE_WORD))
   {
     const QString command(message.mid(0, message.indexOf(FREE_SPACE)));
     const QString command_content(message.mid(command.size()));
     if (!command_content.isEmpty())
     {
-      msg::move_t move;
-      move.data = command_content.toStdString();
-      command_requested(std::move(move));
+      command_requested_.move(command_content.toStdString());
     }
     else
     {
@@ -191,7 +188,7 @@ void menu_layout_t::read_moves_from_file(const QString& path)
 
   std::string data_from_file(std::istream_iterator<char>(from_file), (std::istream_iterator<char>()));
 
-  command_requested(msg::move_t(data_from_file));
+  command_requested_.move(data_from_file);
 }
 
 void menu_layout_t::set_connect_status(const connection_status_t status)
