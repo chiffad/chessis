@@ -17,12 +17,11 @@ public:
 public:
   client_t(const message_received_callback_t& callback, const server_status_changed_callback_t& server_status_changed,
            std::unique_ptr<connection_strategy_t> connection_strategy);
-  ~client_t();
-  void send(const std::string& message);
-
-public:
   client_t(const client_t&) = delete;
   client_t& operator=(const client_t&) = delete;
+  ~client_t();
+
+  void send(const std::string& message);
 
 private:
   struct impl_t;

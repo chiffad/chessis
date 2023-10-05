@@ -17,6 +17,8 @@ add_executable(${TARGET_NAME}
   src/client/socket.hpp 
   src/client/client.h
   src/client/client.cpp
+  src/client/client_controller.hpp
+  src/client/client_controller.cpp 
   src/client/connection_strategy.hpp
   src/client/connection_strategy.cpp   
   src/controller/menu_layout.hpp 
