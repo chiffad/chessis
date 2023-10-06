@@ -52,15 +52,13 @@ struct message_handler_t::impl_t
     process<typename boost::mpl::next<T>::type>(datagram, sender, ser_num);
   }
 
-  // TODO: define, what to do with send_serial_num_ in case of receiving
-  //  and do we need send_serial_num_ at all in authentication server
-  void handle(const msg::hello_server_t& msg, const endpoint_t& sender, const int ser_num)
+  void handle(const msg::hello_server_t& msg, const endpoint_t& sender, const uint64_t ser_num)
   {
     SPDLOG_INFO("New client={} connection request received!", sender);
     send_to_client(msg::get_login_t{}, sender, ser_num);
   }
 
-  void handle(const msg::login_t& msg, const endpoint_t& sender, const int ser_num)
+  void handle(const msg::login_t& msg, const endpoint_t& sender, const uint64_t ser_num)
   {
     const logic::credentials_t creds = {msg.login, msg.pwd};
     SPDLOG_INFO("Handle login requested from address={}; creds={}", sender, creds);
@@ -88,7 +86,7 @@ struct message_handler_t::impl_t
     add_client(creds, sender, ser_num);
   }
 
-  void add_client(const logic::credentials_t& creds, const endpoint_t& endpoint, const int ser_num)
+  void add_client(const logic::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)
   {
     const auto client_uuid = clients_uuid_generator_.new_uuid();
     const client_t cl = {client_uuid, endpoint, creds};
@@ -132,6 +130,7 @@ void message_handler_t::handle(const endpoint_t& addr, const std::string& messag
   impl_->send_to_client(msg::message_received_t{}, addr, incoming_datagramm.response_ser_num);
 
   SPDLOG_TRACE("Begin processing of the datagram.type={} from addr={}", datagram.type, addr);
+  // TODO: get rid from +1
   impl_->process<boost::mpl::begin<authentication_messages_t>::type>(datagram, addr, incoming_datagramm.response_ser_num + 1);
 }
 

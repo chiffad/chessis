@@ -24,7 +24,6 @@ void client_t::message_received(const std::string& m)
   if (some_datagram.type == msg::id_v<msg::hello_server_t>)
   {
     SPDLOG_INFO("Received hello_server_t msg from address={}", address());
-    add_for_send(msg::prepare_for_send(msg::get_login_t()));
     return;
   }
 
