@@ -2,7 +2,6 @@
 #include "common/logger.hpp"
 #include "logic/games_manager.hpp"
 #include "logic/message_handler.hpp"
-#include "server/authentication/server.hpp"
 #include "server/server.hpp"
 
 #include <boost/asio.hpp>
@@ -16,8 +15,8 @@ try
 
   io_service_t io_service;
   std::unique_ptr<logic::message_handler_t> handler;
-  server::server_t server{io_service, [&](const server::client_t& cl, const bool online) { handler->client_connection_changed(cl.address(), online); }};
-  server::authentication::server_t authentication_server{io_service, server.address(), [](server::authentication::server_t::client_uuid_t uuid) {}};
+  server::server_t server{io_service, [&](const server::logic::client_t& cl, const bool online) { handler->client_connection_changed(cl.address(), online); },
+                          [](server::authentication::server_t::client_uuid_t uuid) {}};
 
   logic::games_manager_t games_manager{io_service};
   handler = std::make_unique<logic::message_handler_t>(games_manager, server);
