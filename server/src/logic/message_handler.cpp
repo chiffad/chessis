@@ -13,7 +13,7 @@ concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagramm_t, msg::messag
 
 inline msg::game_inf_t get_board_state(const board_logic_t& d, const bool playing_white)
 {
-  return {d.get_board_mask(), d.get_moves_history(), d.mate(), static_cast<int>(d.get_move_num()), playing_white};
+  return {d.get_board_mask(), d.get_moves_history(), d.mate(), d.get_move_num(), playing_white};
 }
 
 inline msg::inf_request_t get_person_inf(const player_t& player)

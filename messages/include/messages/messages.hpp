@@ -57,12 +57,12 @@ struct move_t
 struct go_to_history_t
 {
   go_to_history_t() = default;
-  go_to_history_t(size_t index, token_t t)
+  go_to_history_t(uint16_t index, token_t t)
     : token{std::move(t)}
     , index{index}
   {}
   token_t token;
-  size_t index{};
+  uint16_t index{};
 };
 
 struct inf_request_t
@@ -77,7 +77,7 @@ struct inf_request_t
 struct game_inf_t
 {
   game_inf_t() = default;
-  game_inf_t(std::string board_mask, std::string moves_history, bool is_mate, int move_num, bool playing_white)
+  game_inf_t(std::string board_mask, std::string moves_history, bool is_mate, uint16_t move_num, bool playing_white)
     : board_mask{std::move(board_mask)}
     , moves_history{std::move(moves_history)}
     , is_mate{}
@@ -88,14 +88,14 @@ struct game_inf_t
   std::string board_mask;
   std::string moves_history;
   bool is_mate{};
-  int move_num{};
+  uint16_t move_num{};
   bool playing_white{};
 };
 
 struct login_response_t
 {
   login_response_t() = default;
-  login_response_t(token_t token, std::string logic_server_address, unsigned logic_server_port)
+  login_response_t(token_t token, std::string logic_server_address, uint16_t logic_server_port)
     : token{std::move(token)}
     , logic_server_address{std::move(logic_server_address)}
     , logic_server_port{logic_server_port}
@@ -103,20 +103,20 @@ struct login_response_t
 
   token_t token;
   std::string logic_server_address;
-  unsigned logic_server_port{};
+  uint16_t logic_server_port{};
 };
 
 struct incoming_datagramm_t
 {
   incoming_datagramm_t() = default;
-  incoming_datagramm_t(std::string data, int ser_num, int response_ser_num)
+  incoming_datagramm_t(std::string data, uint64_t ser_num, uint64_t response_ser_num)
     : data{std::move(data)}
     , ser_num{ser_num}
     , response_ser_num{response_ser_num}
   {}
   std::string data;
-  int ser_num{};
-  int response_ser_num{};
+  uint64_t ser_num{};
+  uint64_t response_ser_num{};
 };
 
 struct some_datagramm_t

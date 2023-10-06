@@ -43,8 +43,8 @@ struct base_client_t::impl_t
   std::deque<msg::some_datagramm_t> messages_for_logic_;
   std::string last_send_message_;
 
-  int received_serial_num_;
-  int send_serial_num_;
+  uint64_t received_serial_num_;
+  uint64_t send_serial_num_;
   bool prev_message_received_;
 
   endpoint_t address_;
@@ -90,8 +90,7 @@ std::string base_client_t::pull_for_send()
   impl_->messages_for_send_.pop_front();
   if (!msg::is_equal_types<msg::message_received_t>(msg.message)) impl_->begin_wait_receive(msg.message);
 
-  return msg::prepare_for_send(
-    msg::incoming_datagramm_t{std::move(msg.message), msg.extra ? impl_->send_serial_num_ : ++impl_->send_serial_num_, impl_->received_serial_num_ + 1});
+  return msg::prepare_for_send(msg::incoming_datagramm_t{std::move(msg.message), msg.extra ? impl_->send_serial_num_ : ++impl_->send_serial_num_, impl_->received_serial_num_ + 1});
 }
 
 msg::some_datagramm_t base_client_t::pull_for_logic()

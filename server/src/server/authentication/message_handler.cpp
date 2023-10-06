@@ -25,22 +25,21 @@ concept one_of_authentication_msg = msg::mpl_vector_has_type<authentication_mess
 
 struct message_handler_t::impl_t
 {
-  impl_t(const endpoint_t logic_server_endpoint, const client_authenticated_callback_t client_authenticated_callback,
-         const send_to_client_callback_t& send_to_client_callback)
+  impl_t(const endpoint_t logic_server_endpoint, const client_authenticated_callback_t client_authenticated_callback, const send_to_client_callback_t& send_to_client_callback)
     : logic_server_endpoint_{logic_server_endpoint}
     , client_authenticated_callback_{client_authenticated_callback}
     , send_to_client_{send_to_client_callback}
   {}
 
   template<typename T>
-  inline void send_to_client(T&& msg, const endpoint_t& sender, short send_serial_num) const
+  inline void send_to_client(T&& msg, const endpoint_t& sender, uint64_t send_serial_num) const
   {
     send_to_client_(msg::prepare_for_send(msg::incoming_datagramm_t{msg::prepare_for_send(std::forward<T>(msg)), send_serial_num, 0}), sender);
   }
 
   // TODO: rename some_datagramm_t -> some_datagram_t
   template<typename T>
-  void process(const msg::some_datagramm_t& datagram, const endpoint_t& sender, const int ser_num)
+  void process(const msg::some_datagramm_t& datagram, const endpoint_t& sender, const uint64_t ser_num)
   {
     if constexpr (one_of_authentication_msg<typename T::type>)
     {
@@ -80,9 +79,8 @@ struct message_handler_t::impl_t
       {
         SPDLOG_DEBUG("Recconect client={} on addr={}", msg.login, sender);
         cl.address = sender;
-        send_to_client(
-          msg::login_response_t{msg::token_t{boost::uuids::to_string(cl.uuid)}, logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()},
-          sender, ser_num);
+        send_to_client(msg::login_response_t{msg::token_t{boost::uuids::to_string(cl.uuid)}, logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()}, sender,
+                       ser_num);
       }
       return;
     }
@@ -96,9 +94,8 @@ struct message_handler_t::impl_t
     const client_t cl = {client_uuid, endpoint, creds};
     SPDLOG_INFO("Add new client={}!", cl);
 
-    send_to_client(
-      msg::login_response_t{msg::token_t{boost::uuids::to_string(cl.uuid)}, logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()},
-      endpoint, ser_num);
+    send_to_client(msg::login_response_t{msg::token_t{boost::uuids::to_string(cl.uuid)}, logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()}, endpoint,
+                   ser_num);
 
     clients_[creds.login] = std::move(cl);
     client_authenticated_callback_(client_uuid);
@@ -113,8 +110,7 @@ struct message_handler_t::impl_t
 };
 
 template<>
-void message_handler_t::impl_t::process<boost::mpl::end<authentication_messages_t>::type>(const msg::some_datagramm_t& datagram, const endpoint_t& sender,
-                                                                                          const int ser_num)
+void message_handler_t::impl_t::process<boost::mpl::end<authentication_messages_t>::type>(const msg::some_datagramm_t& datagram, const endpoint_t& sender, const uint64_t ser_num)
 {
   SPDLOG_ERROR("No type found for datagram type={}; sender={};", datagram.type, sender);
 }

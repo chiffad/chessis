@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
   controller::app_t::command_requested_callbacks_t controller_callbacks;
   controller_callbacks.login = [&](const std::string& login, const std::string& pwd) { messages_to_send.push_back(client.prepare_for_send<msg::login_t>(login, pwd)); };
   controller_callbacks.move = [&](std::string data) { messages_to_send.push_back(client.prepare_for_send<msg::move_t>(std::move(data))); };
-  controller_callbacks.go_to_history = [&](size_t history_i) { messages_to_send.push_back(client.prepare_for_send<msg::go_to_history_t>(history_i)); };
+  controller_callbacks.go_to_history = [&](uint16_t history_i) { messages_to_send.push_back(client.prepare_for_send<msg::go_to_history_t>(history_i)); };
   controller_callbacks.new_game = [&]() { messages_to_send.push_back(client.prepare_for_send<msg::new_game_t>()); };
   controller_callbacks.back_move = [&]() { messages_to_send.push_back(client.prepare_for_send<msg::back_move_t>()); };
   controller_callbacks.opponent_inf = [&]() { messages_to_send.push_back(client.prepare_for_send<msg::opponent_inf_t>()); };

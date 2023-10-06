@@ -25,7 +25,7 @@ public:
   struct command_requested_callbacks_t
   {
     std::function<void(std::string)> move;
-    std::function<void(size_t)> go_to_history;
+    std::function<void(uint16_t)> go_to_history;
     std::function<void()> new_game;
     std::function<void()> back_move;
     std::function<void()> opponent_inf;

@@ -66,8 +66,8 @@ struct client_t::impl_t
 
   std::string last_send_message_;
   std::vector<std::string> messages_to_send_;
-  int received_serial_num_;
-  int send_serial_num_;
+  uint64_t received_serial_num_;
+  uint64_t send_serial_num_;
   bool prev_message_sent_;
   endpoint_t endpoint_;
   client_t::message_received_callback_t message_received_callback_;

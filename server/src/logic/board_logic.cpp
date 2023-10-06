@@ -68,7 +68,7 @@ struct board_logic_t::impl_t
   void go_to_history(size_t i);
   bool mate() const;
   std::string get_moves_history() const;
-  unsigned get_move_num() const;
+  uint16_t get_move_num() const;
   std::string get_board_mask() const;
 
   COLOR get_color(const coord_t& c) const;
@@ -80,7 +80,7 @@ struct board_logic_t::impl_t
   void re_en_passant();
   void pawn_re_transform();
   void pawn_transform(const coord_t& c);
-  unsigned get_move_num_from_0() const;
+  uint16_t get_move_num_from_0() const;
   unsigned get_field_index(const coord_t& c) const;
   void if_castling(const coord_t& fr, const coord_t& to);
   void finish_move(const coord_t& from, const coord_t& to);
@@ -148,7 +148,7 @@ std::string board_logic_t::get_moves_history() const
   return impl_->get_moves_history();
 }
 
-unsigned board_logic_t::get_move_num() const
+uint16_t board_logic_t::get_move_num() const
 {
   return impl_->get_move_num();
 }
@@ -530,12 +530,12 @@ void board_logic_t::impl_t::next_move(const coord_t& from, const coord_t& to)
   }
 }
 
-unsigned board_logic_t::impl_t::get_move_num() const
+uint16_t board_logic_t::impl_t::get_move_num() const
 {
   return moves_.size();
 }
 
-unsigned board_logic_t::impl_t::get_move_num_from_0() const
+uint16_t board_logic_t::impl_t::get_move_num_from_0() const
 {
   return get_move_num() ? get_move_num() - 1 : 0;
 }

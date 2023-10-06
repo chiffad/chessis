@@ -23,7 +23,7 @@ public:
   const uuid_t& uuid() const;
   bool mate() const;
   std::string get_moves_history() const;
-  unsigned get_move_num() const;
+  uint16_t get_move_num() const;
   std::string get_board_mask() const;
 
 public:
