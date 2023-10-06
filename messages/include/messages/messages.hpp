@@ -106,10 +106,10 @@ struct login_response_t
   uint16_t logic_server_port{};
 };
 
-struct incoming_datagramm_t
+struct incoming_datagram_t
 {
-  incoming_datagramm_t() = default;
-  incoming_datagramm_t(std::string data, uint64_t ser_num, uint64_t response_ser_num)
+  incoming_datagram_t() = default;
+  incoming_datagram_t(std::string data, uint64_t ser_num, uint64_t response_ser_num)
     : data{std::move(data)}
     , ser_num{ser_num}
     , response_ser_num{response_ser_num}
@@ -119,15 +119,15 @@ struct incoming_datagramm_t
   uint64_t response_ser_num{};
 };
 
-struct some_datagramm_t
+struct some_datagram_t
 {
-  some_datagramm_t() = default;
-  some_datagramm_t(std::string data, std::string type)
+  some_datagram_t() = default;
+  some_datagram_t(std::string data, std::string type)
     : data(std::move(data))
     , type(std::move(type))
   {}
-  some_datagramm_t(std::string data, std::string_view type)
-    : some_datagramm_t(std::move(data), std::string(type))
+  some_datagram_t(std::string data, std::string_view type)
+    : some_datagram_t(std::move(data), std::string(type))
   {}
 
   std::string data;
@@ -180,7 +180,7 @@ void serialize(Archive& ar, login_response_t& _1, const unsigned /*version*/)
 }
 
 template<typename Archive>
-void serialize(Archive& ar, incoming_datagramm_t& _1, const unsigned /*version*/)
+void serialize(Archive& ar, incoming_datagram_t& _1, const unsigned /*version*/)
 {
   ar& _1.response_ser_num;
   ar& _1.ser_num;
@@ -188,7 +188,7 @@ void serialize(Archive& ar, incoming_datagramm_t& _1, const unsigned /*version*/
 }
 
 template<typename Archive>
-void serialize(Archive& ar, some_datagramm_t& _1, const unsigned /*version*/)
+void serialize(Archive& ar, some_datagram_t& _1, const unsigned /*version*/)
 {
   ar& _1.type;
   ar& _1.data;
@@ -210,8 +210,8 @@ constexpr std::string_view msg_type();
     return #name;                                                                                                                                                                  \
   }
 
-MSG_TYPE(incoming_datagramm_t);
-MSG_TYPE(some_datagramm_t);
+MSG_TYPE(incoming_datagram_t);
+MSG_TYPE(some_datagram_t);
 MSG_TYPE(game_inf_t);
 MSG_TYPE(login_t);
 MSG_TYPE(login_response_t);
@@ -258,13 +258,13 @@ TOKENIZED_SIMPLE_MSG(new_game_t);
 
 using messages_t =
   boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, login_response_t, incorrect_log_t,
-                     move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
+                     move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagram_t, some_datagram_t>;
 
 using to_server_messages_t =
-  boost::mpl::vector<some_datagramm_t, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t, my_inf_t, move_t, back_move_t, go_to_history_t, new_game_t>;
+  boost::mpl::vector<some_datagram_t, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t, my_inf_t, move_t, back_move_t, go_to_history_t, new_game_t>;
 
 using to_client_messages_t =
-  boost::mpl::vector<some_datagramm_t, message_received_t, get_login_t, login_response_t, is_client_lost_t, opponent_lost_t, inf_request_t, incorrect_log_t, game_inf_t>;
+  boost::mpl::vector<some_datagram_t, message_received_t, get_login_t, login_response_t, is_client_lost_t, opponent_lost_t, inf_request_t, incorrect_log_t, game_inf_t>;
 
 template<typename mpl_vector, typename T>
 concept mpl_vector_has_type = !std::same_as<typename boost::mpl::find<mpl_vector, T>::type, typename boost::mpl::end<mpl_vector>::type>;
@@ -315,37 +315,37 @@ template<typename T>
 inline constexpr std::string_view id_v = msg_type<T>();
 
 template<one_of_msgs T>
-T init(const some_datagramm_t& datagramm)
+T init(const some_datagram_t& datagram)
 {
-  if (datagramm.type != id_v<T>)
+  if (datagram.type != id_v<T>)
   {
-    throw my_archive_exception("Wrong type for init! Can not create msg with type=" + std::string(id_v<T>) + "; from type=" + datagramm.type);
+    throw my_archive_exception("Wrong type for init! Can not create msg with type=" + std::string(id_v<T>) + "; from type=" + datagram.type);
   }
 
-  return details::from_string<T>(datagramm.data);
+  return details::from_string<T>(datagram.data);
 }
 
 template<one_of_msgs T>
 inline T init(const std::string& unprocessed_str)
 {
-  some_datagramm_t _1 = init<some_datagramm_t>(unprocessed_str);
+  some_datagram_t _1 = init<some_datagram_t>(unprocessed_str);
   return init<T>(_1);
 }
 
 template<>
-inline some_datagramm_t init<some_datagramm_t>(const std::string& str)
+inline some_datagram_t init<some_datagram_t>(const std::string& str)
 {
-  return details::from_string<some_datagramm_t>(str);
+  return details::from_string<some_datagram_t>(str);
 }
 
 template<one_of_msgs T>
 inline std::string prepare_for_send(const T& msg)
 {
-  return prepare_for_send(some_datagramm_t{details::to_string(msg), id_v<T>});
+  return prepare_for_send(some_datagram_t{details::to_string(msg), id_v<T>});
 }
 
 template<>
-inline std::string prepare_for_send<some_datagramm_t>(const some_datagramm_t& msg)
+inline std::string prepare_for_send<some_datagram_t>(const some_datagram_t& msg)
 {
   return details::to_string(msg);
 }
@@ -353,7 +353,7 @@ inline std::string prepare_for_send<some_datagramm_t>(const some_datagramm_t& ms
 template<one_of_msgs T>
 inline bool is_equal_types(const std::string& str)
 {
-  return init<some_datagramm_t>(str).type == id_v<T>;
+  return init<some_datagram_t>(str).type == id_v<T>;
 }
 
 } // namespace msg

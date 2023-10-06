@@ -20,7 +20,7 @@ inline std::ostream& operator<<(std::ostream& os, const datagram_t<T>& d)
   return os << "Datagram{ address=" << d.address << "; message=" << d.message << "; }";
 }
 
-inline std::ostream& operator<<(std::ostream& os, const datagram_t<msg::some_datagramm_t>& d)
+inline std::ostream& operator<<(std::ostream& os, const datagram_t<msg::some_datagram_t>& d)
 {
   return os << "Datagram{ address=" << d.address << "; message={ type=" << d.message.type << "; msg=" << d.message.data << "; }";
 }

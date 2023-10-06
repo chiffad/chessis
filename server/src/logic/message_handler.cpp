@@ -9,7 +9,7 @@ namespace logic {
 namespace {
 
 template<typename T>
-concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagramm_t, msg::message_received_t, msg::is_server_lost_t, msg::hello_server_t>;
+concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagram_t, msg::message_received_t, msg::is_server_lost_t, msg::hello_server_t>;
 
 inline msg::game_inf_t get_board_state(const board_logic_t& d, const bool playing_white)
 {
@@ -30,32 +30,32 @@ struct message_handler_t::impl_t
     , server_{server}
   {}
 
-  void process_mess_begin(const msg::some_datagramm_t& datagramm, player_t& player)
+  void process_mess_begin(const msg::some_datagram_t& datagram, player_t& player)
   {
-    SPDLOG_TRACE("Begin processing of the datagramm.type={}", datagramm.type);
-    process_mess<boost::mpl::begin<msg::to_server_messages_t>::type>(datagramm, player);
+    SPDLOG_TRACE("Begin processing of the datagram.type={}", datagram.type);
+    process_mess<boost::mpl::begin<msg::to_server_messages_t>::type>(datagram, player);
   }
 
   // template<typename T> requires msg::one_of_to_server_msgs<typename T::type>
   template<typename T>
-  void process_mess(const msg::some_datagramm_t& datagramm, player_t& player)
+  void process_mess(const msg::some_datagram_t& datagram, player_t& player)
   {
     if constexpr (msg::one_of_to_server_msgs<typename T::type>)
     {
-      if (datagramm.type == msg::id_v<typename T::type>)
+      if (datagram.type == msg::id_v<typename T::type>)
       {
-        handle<typename T::type>(datagramm, player);
+        handle<typename T::type>(datagram, player);
         return;
       }
     }
-    process_mess<typename boost::mpl::next<T>::type>(datagramm, player);
+    process_mess<typename boost::mpl::next<T>::type>(datagram, player);
   }
 
   template<msg::one_of_to_server_msgs T>
-  void handle(const msg::some_datagramm_t& datagramm, player_t& /*player*/)
+  void handle(const msg::some_datagram_t& datagram, player_t& /*player*/)
   {
     static_assert(one_of_msg_to_ignore<T>, "Unexpected type received. Handle it or ignore!");
-    SPDLOG_ERROR("For type={} tactic isn't defined! datagramm type={}", typeid(T).name(), datagramm.type);
+    SPDLOG_ERROR("For type={} tactic isn't defined! datagram type={}", typeid(T).name(), datagram.type);
   }
 
   void start_new_game(player_t& player)
@@ -98,16 +98,16 @@ struct message_handler_t::impl_t
 };
 
 template<>
-void message_handler_t::impl_t::process_mess<boost::mpl::end<msg::to_server_messages_t>::type>(const msg::some_datagramm_t& datagramm, player_t& player)
+void message_handler_t::impl_t::process_mess<boost::mpl::end<msg::to_server_messages_t>::type>(const msg::some_datagram_t& datagram, player_t& player)
 {
-  SPDLOG_ERROR("No type found for datagramm type={}; player={};", datagramm.type, player);
+  SPDLOG_ERROR("No type found for datagram type={}; player={};", datagram.type, player);
 }
 
 template<>
-void message_handler_t::impl_t::handle<msg::login_t>(const msg::some_datagramm_t& datagramm, player_t& player)
+void message_handler_t::impl_t::handle<msg::login_t>(const msg::some_datagram_t& datagram, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for login_t; datagramm={}", datagramm.data);
-  auto login = msg::init<msg::login_t>(datagramm);
+  SPDLOG_DEBUG("tactic for login_t; datagram={}", datagram.data);
+  auto login = msg::init<msg::login_t>(datagram);
 
   if (!player.credentials().login.empty() && player.credentials() != credentials_t{login.login, login.pwd})
   {
@@ -122,7 +122,7 @@ void message_handler_t::impl_t::handle<msg::login_t>(const msg::some_datagramm_t
 }
 
 template<>
-void message_handler_t::impl_t::handle<msg::opponent_inf_t>(const msg::some_datagramm_t& /*datagramm*/, player_t& player)
+void message_handler_t::impl_t::handle<msg::opponent_inf_t>(const msg::some_datagram_t& /*datagram*/, player_t& player)
 {
   SPDLOG_DEBUG("tactic for opponent_inf_t;");
   const auto opp_uuid = games_manager_.opponent(player.uuid());
@@ -136,16 +136,16 @@ void message_handler_t::impl_t::handle<msg::opponent_inf_t>(const msg::some_data
 }
 
 template<>
-void message_handler_t::impl_t::handle<msg::my_inf_t>(const msg::some_datagramm_t& /*datagramm*/, player_t& player)
+void message_handler_t::impl_t::handle<msg::my_inf_t>(const msg::some_datagram_t& /*datagram*/, player_t& player)
 {
   SPDLOG_DEBUG("tactic for my_inf_t;");
   server_.send(get_person_inf(player), player.address());
 }
 
 template<>
-void message_handler_t::impl_t::handle<msg::move_t>(const msg::some_datagramm_t& datagramm, player_t& player)
+void message_handler_t::impl_t::handle<msg::move_t>(const msg::some_datagram_t& datagram, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for move_t; datagramm={}", datagramm.data);
+  SPDLOG_DEBUG("tactic for move_t; datagram={}", datagram.data);
 
   const auto board_uuid = games_manager_.board(player);
   if (!board_uuid)
@@ -154,12 +154,12 @@ void message_handler_t::impl_t::handle<msg::move_t>(const msg::some_datagramm_t&
     return;
   }
 
-  make_moves_from_str((msg::init<msg::move_t>(datagramm)).data, games_manager_.board(board_uuid.value()));
+  make_moves_from_str((msg::init<msg::move_t>(datagram)).data, games_manager_.board(board_uuid.value()));
   board_updated(player);
 }
 
 template<>
-void message_handler_t::impl_t::handle<msg::back_move_t>(const msg::some_datagramm_t& /*datagramm*/, player_t& player)
+void message_handler_t::impl_t::handle<msg::back_move_t>(const msg::some_datagram_t& /*datagram*/, player_t& player)
 {
   SPDLOG_DEBUG("tactic for back_move_t;");
 
@@ -175,9 +175,9 @@ void message_handler_t::impl_t::handle<msg::back_move_t>(const msg::some_datagra
 }
 
 template<>
-void message_handler_t::impl_t::handle<msg::go_to_history_t>(const msg::some_datagramm_t& datagramm, player_t& player)
+void message_handler_t::impl_t::handle<msg::go_to_history_t>(const msg::some_datagram_t& datagram, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for go_to_history_t; datagramm={}", datagramm.data);
+  SPDLOG_DEBUG("tactic for go_to_history_t; datagram={}", datagram.data);
 
   const auto board_uuid = games_manager_.board(player);
   if (!board_uuid)
@@ -186,12 +186,12 @@ void message_handler_t::impl_t::handle<msg::go_to_history_t>(const msg::some_dat
     return;
   }
 
-  games_manager_.board(board_uuid.value()).go_to_history(msg::init<msg::go_to_history_t>(datagramm).index);
+  games_manager_.board(board_uuid.value()).go_to_history(msg::init<msg::go_to_history_t>(datagram).index);
   board_updated(player);
 }
 
 template<>
-void message_handler_t::impl_t::handle<msg::new_game_t>(const msg::some_datagramm_t& /*datagramm*/, player_t& player)
+void message_handler_t::impl_t::handle<msg::new_game_t>(const msg::some_datagram_t& /*datagram*/, player_t& player)
 {
   SPDLOG_DEBUG("tactic for start_new_game_t;");
   start_new_game(player);
@@ -203,7 +203,7 @@ message_handler_t::message_handler_t(games_manager_t& games_manager, server::ser
 
 message_handler_t::~message_handler_t() = default;
 
-void message_handler_t::process_server_message(const endpoint_t& addr, const msg::some_datagramm_t& message)
+void message_handler_t::process_server_message(const endpoint_t& addr, const msg::some_datagram_t& message)
 {
   auto c = impl_->games_manager_.player(addr);
   if (c)

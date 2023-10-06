@@ -26,9 +26,9 @@ struct base_client_t::impl_t
 {
   impl_t(io_service_t& io_serv, const endpoint_t& addr);
   void message_received(const std::string& message);
-  std::optional<msg::some_datagramm_t> preprocess_message(const std::string& m);
+  std::optional<msg::some_datagram_t> preprocess_message(const std::string& m);
 
-  received_serial_num_t check_ser_num(const msg::incoming_datagramm_t& num) const;
+  received_serial_num_t check_ser_num(const msg::incoming_datagram_t& num) const;
   void add_for_send(const std::string& message, bool extra_message = false);
   void check_message_received();
   void begin_wait_receive(const std::string& message);
@@ -40,7 +40,7 @@ struct base_client_t::impl_t
   deadline_timer_t connection_timer_;
 
   std::deque<msg_to_send_t> messages_for_send_;
-  std::deque<msg::some_datagramm_t> messages_for_logic_;
+  std::deque<msg::some_datagram_t> messages_for_logic_;
   std::string last_send_message_;
 
   uint64_t received_serial_num_;
@@ -58,7 +58,7 @@ base_client_t::base_client_t(io_service_t& io_serv, const endpoint_t& addr)
 
 base_client_t::~base_client_t() = default;
 
-std::optional<msg::some_datagramm_t> base_client_t::preprocess_message(const std::string& m)
+std::optional<msg::some_datagram_t> base_client_t::preprocess_message(const std::string& m)
 {
   return impl_->preprocess_message(m);
 }
@@ -68,7 +68,7 @@ void base_client_t::add_for_send(const std::string& message, bool extra_message)
   impl_->add_for_send(message, extra_message);
 }
 
-void base_client_t::add_for_logic(msg::some_datagramm_t msg)
+void base_client_t::add_for_logic(msg::some_datagram_t msg)
 {
   impl_->messages_for_logic_.push_back(std::move(msg));
 }
@@ -90,13 +90,13 @@ std::string base_client_t::pull_for_send()
   impl_->messages_for_send_.pop_front();
   if (!msg::is_equal_types<msg::message_received_t>(msg.message)) impl_->begin_wait_receive(msg.message);
 
-  return msg::prepare_for_send(msg::incoming_datagramm_t{std::move(msg.message), msg.extra ? impl_->send_serial_num_ : ++impl_->send_serial_num_, impl_->received_serial_num_ + 1});
+  return msg::prepare_for_send(msg::incoming_datagram_t{std::move(msg.message), msg.extra ? impl_->send_serial_num_ : ++impl_->send_serial_num_, impl_->received_serial_num_ + 1});
 }
 
-msg::some_datagramm_t base_client_t::pull_for_logic()
+msg::some_datagram_t base_client_t::pull_for_logic()
 {
   SPDLOG_DEBUG("pull_for_logic");
-  const msg::some_datagramm_t m = impl_->messages_for_logic_.front();
+  const msg::some_datagram_t m = impl_->messages_for_logic_.front();
   impl_->messages_for_logic_.pop_front();
   return m;
 }
@@ -126,20 +126,20 @@ base_client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
   , online_(false)
 {}
 
-std::optional<msg::some_datagramm_t> base_client_t::impl_t::preprocess_message(const std::string& m)
+std::optional<msg::some_datagram_t> base_client_t::impl_t::preprocess_message(const std::string& m)
 {
   start_connection_timer();
   set_connection_status(true);
 
-  const auto datagramm = msg::init<msg::incoming_datagramm_t>(m);
-  switch (check_ser_num(datagramm))
+  const auto datagram = msg::init<msg::incoming_datagram_t>(m);
+  switch (check_ser_num(datagram))
   {
     case received_serial_num_t::prev: add_for_send(msg::prepare_for_send(msg::message_received_t()), true); return std::nullopt;
     case received_serial_num_t::wrong: return std::nullopt;
-    default: received_serial_num_ = datagramm.ser_num;
+    default: received_serial_num_ = datagram.ser_num;
   }
 
-  const auto some_datagram = msg::init<msg::some_datagramm_t>(datagramm.data);
+  const auto some_datagram = msg::init<msg::some_datagram_t>(datagram.data);
   if (some_datagram.type == msg::id_v<msg::message_received_t>)
   {
     prev_message_received_ = true;
@@ -150,7 +150,7 @@ std::optional<msg::some_datagramm_t> base_client_t::impl_t::preprocess_message(c
   return some_datagram;
 }
 
-received_serial_num_t base_client_t::impl_t::check_ser_num(const msg::incoming_datagramm_t& datagram) const
+received_serial_num_t base_client_t::impl_t::check_ser_num(const msg::incoming_datagram_t& datagram) const
 {
   if (datagram.ser_num == received_serial_num_ - 1 && !msg::is_equal_types<msg::message_received_t>(datagram.data))
   {

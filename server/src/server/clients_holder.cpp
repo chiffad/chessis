@@ -51,9 +51,9 @@ std::vector<datagram_t<std::string>> clients_holder_t::datagrams_to_send()
   return res;
 }
 
-std::vector<datagram_t<msg::some_datagramm_t>> clients_holder_t::datagrams_to_process()
+std::vector<datagram_t<msg::some_datagram_t>> clients_holder_t::datagrams_to_process()
 {
-  std::vector<datagram_t<msg::some_datagramm_t>> res;
+  std::vector<datagram_t<msg::some_datagram_t>> res;
   for (auto& client : *this)
   {
     while (client.second.message_for_logic_append())

@@ -46,9 +46,8 @@ struct server_t::impl_t
   void start_receive()
   {
     SPDLOG_TRACE("start_receive()");
-    socket_.async_receive_from(
-      boost::asio::buffer(incoming_message_), last_mess_sender_,
-      boost::bind(&server_t::impl_t::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    socket_.async_receive_from(boost::asio::buffer(incoming_message_), last_mess_sender_,
+                               boost::bind(&server_t::impl_t::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
   }
 
   boost::asio::ip::udp::socket socket_;
@@ -87,7 +86,7 @@ void server_t::process()
   }
 }
 
-std::vector<datagram_t<msg::some_datagramm_t>> server_t::read()
+std::vector<datagram_t<msg::some_datagram_t>> server_t::read()
 {
   return impl_->clients_holder_.datagrams_to_process();
 }

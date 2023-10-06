@@ -55,7 +55,7 @@ struct client_t::impl_t
   void resend_prev_message();
   std::string add_serial_num(const std::string& data, bool prev_serial_needed = false);
   void begin_wait_receive(const std::string& data);
-  bool validate_serial_num(const msg::incoming_datagramm_t& data);
+  bool validate_serial_num(const msg::incoming_datagram_t& data);
   inline void send(const std::string& data, bool prev_serial_needed = false) { state_->send(data, prev_serial_needed); }
   inline void set_new_state(std::shared_ptr<state_t> s) { state_ = std::move(s); }
   void write_datagram(const std::string& data, bool prev_serial_needed);
@@ -124,7 +124,7 @@ void client_t::impl_t::resend_prev_message()
 
   write_datagram(last_send_message_, true);
 
-  if (++num_of_restarts == 5 || msg::id_v<msg::is_server_lost_t> == msg::init<msg::some_datagramm_t>(last_send_message_).type)
+  if (++num_of_restarts == 5 || msg::id_v<msg::is_server_lost_t> == msg::init<msg::some_datagram_t>(last_send_message_).type)
   {
     server_status_changed_callback_(false);
   }
@@ -132,16 +132,16 @@ void client_t::impl_t::resend_prev_message()
 
 std::string client_t::impl_t::add_serial_num(const std::string& data, const bool prev_serial_needed)
 {
-  return msg::prepare_for_send(msg::incoming_datagramm_t{data, prev_serial_needed ? send_serial_num_ : ++send_serial_num_, received_serial_num_ + 1});
+  return msg::prepare_for_send(msg::incoming_datagram_t{data, prev_serial_needed ? send_serial_num_ : ++send_serial_num_, received_serial_num_ + 1});
 }
 
-bool client_t::impl_t::validate_serial_num(const msg::incoming_datagramm_t& datagramm)
+bool client_t::impl_t::validate_serial_num(const msg::incoming_datagram_t& datagram)
 {
-  if (datagramm.ser_num == ++received_serial_num_) return true;
+  if (datagram.ser_num == ++received_serial_num_) return true;
 
-  SPDLOG_WARN("Wrong serial number! ex={}; received={}", received_serial_num_, datagramm.ser_num);
+  SPDLOG_WARN("Wrong serial number! ex={}; received={}", received_serial_num_, datagram.ser_num);
   --received_serial_num_;
-  if (datagramm.ser_num == received_serial_num_ && !msg::is_equal_types<msg::message_received_t>(datagramm.data))
+  if (datagram.ser_num == received_serial_num_ && !msg::is_equal_types<msg::message_received_t>(datagram.data))
   {
     send(msg::prepare_for_send(msg::message_received_t()), true);
   }
@@ -200,9 +200,9 @@ void client_t::impl_t::connect_state_t::read()
 
   if (data.endpoint == client_.socket_.endpoint()) return;
 
-  const auto datagramm = msg::init<msg::incoming_datagramm_t>(data.data);
-  if (!client_.validate_serial_num(datagramm)) return;
-  if (!msg::is_equal_types<msg::message_received_t>(datagramm.data)) return;
+  const auto datagram = msg::init<msg::incoming_datagram_t>(data.data);
+  if (!client_.validate_serial_num(datagram)) return;
+  if (!msg::is_equal_types<msg::message_received_t>(datagram.data)) return;
 
   SPDLOG_INFO("Server found on {}", data.endpoint);
   client_.endpoint_.port = data.endpoint.port;
@@ -250,10 +250,10 @@ void client_t::impl_t::connected_state_t::read()
 
   client_.server_alive_timer_.start(CHECK_CONNECT_TIME);
 
-  const auto datagramm = msg::init<msg::incoming_datagramm_t>(data.data);
-  if (!client_.validate_serial_num(datagramm)) return;
+  const auto datagram = msg::init<msg::incoming_datagram_t>(data.data);
+  if (!client_.validate_serial_num(datagram)) return;
 
-  if (msg::is_equal_types<msg::message_received_t>(datagramm.data))
+  if (msg::is_equal_types<msg::message_received_t>(datagram.data))
   {
     client_.prev_message_sent_ = true;
     client_.server_status_changed_callback_(true);
@@ -261,9 +261,9 @@ void client_t::impl_t::connected_state_t::read()
   }
 
   client_.send(msg::prepare_for_send(msg::message_received_t()));
-  if (!msg::is_equal_types<msg::is_client_lost_t>(datagramm.data))
+  if (!msg::is_equal_types<msg::is_client_lost_t>(datagram.data))
   {
-    client_.message_received_callback_(datagramm.data);
+    client_.message_received_callback_(datagram.data);
   }
 }
 

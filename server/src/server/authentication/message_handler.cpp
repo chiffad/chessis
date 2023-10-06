@@ -34,12 +34,11 @@ struct message_handler_t::impl_t
   template<typename T>
   inline void send_to_client(T&& msg, const endpoint_t& sender, uint64_t send_serial_num) const
   {
-    send_to_client_(msg::prepare_for_send(msg::incoming_datagramm_t{msg::prepare_for_send(std::forward<T>(msg)), send_serial_num, 0}), sender);
+    send_to_client_(msg::prepare_for_send(msg::incoming_datagram_t{msg::prepare_for_send(std::forward<T>(msg)), send_serial_num, 0}), sender);
   }
 
-  // TODO: rename some_datagramm_t -> some_datagram_t
   template<typename T>
-  void process(const msg::some_datagramm_t& datagram, const endpoint_t& sender, const uint64_t ser_num)
+  void process(const msg::some_datagram_t& datagram, const endpoint_t& sender, const uint64_t ser_num)
   {
     if constexpr (one_of_authentication_msg<typename T::type>)
     {
@@ -108,7 +107,7 @@ struct message_handler_t::impl_t
 };
 
 template<>
-void message_handler_t::impl_t::process<boost::mpl::end<authentication_messages_t>::type>(const msg::some_datagramm_t& datagram, const endpoint_t& sender, const uint64_t ser_num)
+void message_handler_t::impl_t::process<boost::mpl::end<authentication_messages_t>::type>(const msg::some_datagram_t& datagram, const endpoint_t& sender, const uint64_t ser_num)
 {
   SPDLOG_ERROR("No type found for datagram type={}; sender={};", datagram.type, sender);
 }
@@ -123,15 +122,15 @@ message_handler_t::~message_handler_t() = default;
 void message_handler_t::handle(const endpoint_t& addr, const std::string& message)
 {
   SPDLOG_INFO("Received data={}", message);
-  const auto incoming_datagramm = msg::init<msg::incoming_datagramm_t>(message);
-  const auto datagram = msg::init<msg::some_datagramm_t>(incoming_datagramm.data);
+  const auto incoming_datagram = msg::init<msg::incoming_datagram_t>(message);
+  const auto datagram = msg::init<msg::some_datagram_t>(incoming_datagram.data);
   if (datagram.type == msg::id_v<msg::message_received_t>) return;
 
-  impl_->send_to_client(msg::message_received_t{}, addr, incoming_datagramm.response_ser_num);
+  impl_->send_to_client(msg::message_received_t{}, addr, incoming_datagram.response_ser_num);
 
   SPDLOG_TRACE("Begin processing of the datagram.type={} from addr={}", datagram.type, addr);
   // TODO: get rid from +1
-  impl_->process<boost::mpl::begin<authentication_messages_t>::type>(datagram, addr, incoming_datagramm.response_ser_num + 1);
+  impl_->process<boost::mpl::begin<authentication_messages_t>::type>(datagram, addr, incoming_datagram.response_ser_num + 1);
 }
 
 } // namespace server::authentication

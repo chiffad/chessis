@@ -22,7 +22,7 @@ public:
   void add(const endpoint_t& addr);
   void process(const datagram_t<std::string>& datagram);
   std::vector<datagram_t<std::string>> datagrams_to_send();
-  std::vector<datagram_t<msg::some_datagramm_t>> datagrams_to_process();
+  std::vector<datagram_t<msg::some_datagram_t>> datagrams_to_process();
 
   using clients_arr_t::at;
   using clients_arr_t::begin;
