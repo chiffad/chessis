@@ -20,14 +20,17 @@ add_executable(${TARGET_NAME}
   src/logic/credentials.cpp  
   src/logic/message_handler.cpp  
   src/logic/message_handler.hpp
-  src/server/server.hpp    
-  src/server/server.cpp
-  src/server/base_client.cpp
-  src/server/base_client.hpp
-  src/server/client.hpp 
-  src/server/client.cpp
-  src/server/clients_holder.hpp
-  src/server/clients_holder.cpp 
+  #src/server/server_controller.hpp
+  #src/server/server_controller.cpp 
+  src/server/datagram.hpp 
+  src/server/logic/server.hpp    
+  src/server/logic/server.cpp
+  src/server/logic/base_client.cpp
+  src/server/logic/base_client.hpp
+  src/server/logic/client.hpp 
+  src/server/logic/client.cpp
+  src/server/logic/clients_holder.hpp
+  src/server/logic/clients_holder.cpp 
   src/server/authentication/client.hpp
   src/server/authentication/client.cpp  
   src/server/authentication/message_handler.cpp 

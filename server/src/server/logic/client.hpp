@@ -1,8 +1,8 @@
 #pragma once
 
-#include "server/base_client.hpp"
+#include "server/logic/base_client.hpp"
 
-namespace server {
+namespace server::logic {
 
 class client_t : public base_client_t
 {

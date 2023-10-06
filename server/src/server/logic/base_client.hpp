@@ -12,7 +12,7 @@
 
 #include "spdlog/fmt/ostr.h"
 
-namespace server {
+namespace server::logic {
 
 class base_client_t
 {

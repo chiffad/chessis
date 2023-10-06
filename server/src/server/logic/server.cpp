@@ -1,10 +1,10 @@
-#include "server/server.hpp"
-#include "server/clients_holder.hpp"
+#include "server/logic/server.hpp"
+#include "server/logic/clients_holder.hpp"
 
 #include <boost/bind/bind.hpp>
 #include <spdlog/spdlog.h>
 
-namespace server {
+namespace server::logic {
 struct server_t::impl_t
 {
   impl_t(io_service_t& io_serv, const clients_holder_t::connection_status_signal_t::slot_type& subscriber)

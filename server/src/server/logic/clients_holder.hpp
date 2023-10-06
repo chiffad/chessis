@@ -1,14 +1,14 @@
 #pragma once
 
 #include "common/helper.hpp"
-#include "server/client.hpp"
+#include "server/logic/client.hpp"
 #include "server/datagram.hpp"
 
 #include <map>
 #include <memory>
 #include <vector>
 
-namespace server {
+namespace server::logic {
 
 using clients_arr_t = std::map<endpoint_t, client_t>;
 

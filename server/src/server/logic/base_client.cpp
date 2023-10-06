@@ -1,10 +1,10 @@
-#include "server/base_client.hpp"
+#include "server/logic/base_client.hpp"
 
 #include <boost/uuid/uuid_io.hpp>
 #include <deque>
 #include <spdlog/spdlog.h>
 
-namespace server {
+namespace server::logic {
 
 namespace {
 enum class received_serial_num_t

@@ -1,7 +1,7 @@
-#include "server/clients_holder.hpp"
+#include "server/logic/clients_holder.hpp"
 #include <spdlog/spdlog.h>
 
-namespace server {
+namespace server::logic {
 
 clients_holder_t::clients_holder_t(io_service_t& io_service, const connection_status_signal_t::slot_type& subscriber)
   : io_service_(io_service)

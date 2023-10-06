@@ -1,7 +1,7 @@
-#include "server/client.hpp"
+#include "server/logic/client.hpp"
 #include <spdlog/spdlog.h>
 
-namespace server {
+namespace server::logic {
 
 struct client_t::impl_t
 {};
