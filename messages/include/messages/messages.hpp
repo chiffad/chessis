@@ -46,8 +46,8 @@ struct login_t
 struct move_t
 {
   move_t() = default;
-  move_t(const token_t& t, std::string data)
-    : token{t}
+  move_t(std::string data, token_t t)
+    : token{std::move(t)}
     , data{std::move(data)}
   {}
   token_t token;
@@ -57,12 +57,12 @@ struct move_t
 struct go_to_history_t
 {
   go_to_history_t() = default;
-  go_to_history_t(const token_t& t, int index)
-    : token{t}
+  go_to_history_t(size_t index, token_t t)
+    : token{std::move(t)}
     , index{index}
   {}
   token_t token;
-  int index{};
+  size_t index{};
 };
 
 struct inf_request_t
@@ -203,11 +203,11 @@ void serialize(Archive& ar, token_t& _1, const unsigned /*version*/)
 template<typename T>
 constexpr std::string_view msg_type();
 
-#define MSG_TYPE(name)                                                                                                                                         \
-  template<>                                                                                                                                                   \
-  constexpr std::string_view msg_type<name>()                                                                                                                  \
-  {                                                                                                                                                            \
-    return #name;                                                                                                                                              \
+#define MSG_TYPE(name)                                                                                                                                                             \
+  template<>                                                                                                                                                                       \
+  constexpr std::string_view msg_type<name>()                                                                                                                                      \
+  {                                                                                                                                                                                \
+    return #name;                                                                                                                                                                  \
   }
 
 MSG_TYPE(incoming_datagramm_t);
@@ -220,12 +220,12 @@ MSG_TYPE(go_to_history_t);
 MSG_TYPE(inf_request_t);
 MSG_TYPE(token_t);
 
-#define SIMPLE_MSG(name)                                                                                                                                       \
-  struct name                                                                                                                                                  \
-  {};                                                                                                                                                          \
-  template<typename Archive>                                                                                                                                   \
-  void serialize(Archive& /*ar*/, name&, const unsigned /*version*/)                                                                                           \
-  {}                                                                                                                                                           \
+#define SIMPLE_MSG(name)                                                                                                                                                           \
+  struct name                                                                                                                                                                      \
+  {};                                                                                                                                                                              \
+  template<typename Archive>                                                                                                                                                       \
+  void serialize(Archive& /*ar*/, name&, const unsigned /*version*/)                                                                                                               \
+  {}                                                                                                                                                                               \
   MSG_TYPE(name)
 
 SIMPLE_MSG(hello_server_t);
@@ -237,16 +237,16 @@ SIMPLE_MSG(incorrect_log_t);
 SIMPLE_MSG(opponent_lost_t);
 #undef SIMPLE_MSG
 
-#define TOKENIZED_SIMPLE_MSG(name)                                                                                                                             \
-  struct name                                                                                                                                                  \
-  {                                                                                                                                                            \
-    token_t token;                                                                                                                                             \
-  };                                                                                                                                                           \
-  template<typename Archive>                                                                                                                                   \
-  void serialize(Archive& ar, name& _1, const unsigned /*version*/)                                                                                            \
-  {                                                                                                                                                            \
-    ar& _1.token;                                                                                                                                              \
-  }                                                                                                                                                            \
+#define TOKENIZED_SIMPLE_MSG(name)                                                                                                                                                 \
+  struct name                                                                                                                                                                      \
+  {                                                                                                                                                                                \
+    token_t token;                                                                                                                                                                 \
+  };                                                                                                                                                                               \
+  template<typename Archive>                                                                                                                                                       \
+  void serialize(Archive& ar, name& _1, const unsigned /*version*/)                                                                                                                \
+  {                                                                                                                                                                                \
+    ar& _1.token;                                                                                                                                                                  \
+  }                                                                                                                                                                                \
   MSG_TYPE(name)
 
 TOKENIZED_SIMPLE_MSG(opponent_inf_t);
@@ -256,15 +256,15 @@ TOKENIZED_SIMPLE_MSG(new_game_t);
 #undef TOKENIZED_SIMPLE_MSG
 #undef MSG_TYPE
 
-using messages_t = boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t,
-                                      login_response_t, incorrect_log_t, move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t,
-                                      opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
+using messages_t =
+  boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, login_response_t, incorrect_log_t,
+                     move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagramm_t, some_datagramm_t>;
 
-using to_server_messages_t = boost::mpl::vector<some_datagramm_t, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t, my_inf_t,
-                                                move_t, back_move_t, go_to_history_t, new_game_t>;
+using to_server_messages_t =
+  boost::mpl::vector<some_datagramm_t, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t, my_inf_t, move_t, back_move_t, go_to_history_t, new_game_t>;
 
-using to_client_messages_t = boost::mpl::vector<some_datagramm_t, message_received_t, get_login_t, login_response_t, is_client_lost_t, opponent_lost_t,
-                                                inf_request_t, incorrect_log_t, game_inf_t>;
+using to_client_messages_t =
+  boost::mpl::vector<some_datagramm_t, message_received_t, get_login_t, login_response_t, is_client_lost_t, opponent_lost_t, inf_request_t, incorrect_log_t, game_inf_t>;
 
 template<typename mpl_vector, typename T>
 concept mpl_vector_has_type = !std::same_as<typename boost::mpl::find<mpl_vector, T>::type, typename boost::mpl::end<mpl_vector>::type>;
@@ -280,6 +280,12 @@ concept one_of_to_client_msgs = mpl_vector_has_type<to_client_messages_t, T>;
 
 template<typename T>
 concept one_of_msgs = mpl_vector_has_type<messages_t, T>;
+
+template<typename T>
+concept tokenized_msg = requires
+{
+  T::token;
+};
 
 namespace details {
 

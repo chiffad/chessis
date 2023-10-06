@@ -1,14 +1,21 @@
 #pragma once
 
-#include "controller/app.hpp"
 #include <memory>
+#include <string>
+
+namespace controller {
+class app_t;
+}
+namespace cl {
+class client_controller_t;
+}
 
 namespace message_handler {
 
 class handler_t
 {
 public:
-  explicit handler_t(controller::app_t& app_controller);
+  explicit handler_t(controller::app_t& app_controller, cl::client_controller_t& client);
   ~handler_t();
   void handle(std::string msg);
 

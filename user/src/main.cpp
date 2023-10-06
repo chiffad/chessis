@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
   controller_callbacks.my_inf = [&]() { messages_to_send.push_back(client.prepare_for_send<msg::my_inf_t>()); };
 
   app_controller = std::make_unique<controller::app_t>(controller_callbacks);
-  message_handler::handler_t msg_handler{*app_controller};
+  message_handler::handler_t msg_handler{*app_controller, client};
 
   const double CHECK_TIME = 0.015 * CLOCKS_PER_SEC;
   clock_t timer = clock();
