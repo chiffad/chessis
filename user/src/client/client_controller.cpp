@@ -36,20 +36,20 @@ struct client_controller_t::impl_t
   }
 
   template<tokenized_msg_to_server Msg_t, typename... Args>
-  inline std::string prepare_for_send(Args&&... args) const
+  inline client_t::data_to_send_t prepare_for_send(Args&&... args) const
   {
     if (!token_)
     {
       SPDLOG_CRITICAL("there is no token!");
       throw std::logic_error("prepare_for_send with token requested, but there is no token!");
     }
-    return msg::prepare_for_send(Msg_t{std::forward<Args>(args)..., *token_});
+    return client_t::data_to_send_t{Msg_t{std::forward<Args>(args)..., *token_}};
   }
 
   template<msg::one_of_to_server_msgs Msg_t, typename... Args>
-  inline std::string prepare_for_send(Args&&... args) const
+  inline client_t::data_to_send_t prepare_for_send(Args&&... args) const
   {
-    return msg::prepare_for_send(Msg_t{std::forward<Args>(args)...});
+    return client_t::data_to_send_t{Msg_t{std::forward<Args>(args)...}};
   }
 
   const message_received_callback_t message_received_callback_;

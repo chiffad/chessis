@@ -3,3 +3,7 @@
 
 [server]
 * logic player_t should not have endpoint. login or uuid should be used only 
+
+
+* avoid nested msg::prepare_for_send in client
+* use response serial num for all messages

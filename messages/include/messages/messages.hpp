@@ -116,7 +116,7 @@ struct incoming_datagram_t
   {}
   std::string data;
   uint64_t ser_num{};
-  uint64_t response_ser_num{};
+  uint64_t response_ser_num{}; // if no response expected, send 0
 };
 
 struct some_datagram_t

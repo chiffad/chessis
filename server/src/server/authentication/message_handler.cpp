@@ -121,7 +121,7 @@ message_handler_t::~message_handler_t() = default;
 
 void message_handler_t::handle(const endpoint_t& addr, const std::string& message)
 {
-  SPDLOG_INFO("Received data={}", message);
+  SPDLOG_INFO("Received data={} from {}", message, addr);
   const auto incoming_datagram = msg::init<msg::incoming_datagram_t>(message);
   const auto datagram = msg::init<msg::some_datagram_t>(incoming_datagram.data);
   if (datagram.type == msg::id_v<msg::message_received_t>) return;
