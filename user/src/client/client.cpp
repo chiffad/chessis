@@ -57,14 +57,15 @@ struct client_t::impl_t
   void write_datagram(const std::string& data, bool prev_serial_needed);
 
   udp_socket_t socket_;
-  QTimer response_checker_timer_;
   QTimer server_alive_timer_;
 
+  QTimer response_checker_timer_;
   data_to_send_t last_send_message_;
   std::vector<data_to_send_t> messages_to_send_; // TODO: fix: not used!
-  uint64_t received_serial_num_;
-  uint64_t send_serial_num_;
+  uint64_t received_sequence_num_;
+  uint64_t send_sequence_num_;
   bool prev_message_sent_;
+
   endpoint_t endpoint_;
   message_received_callback_t message_received_callback_;
   server_status_changed_callback_t server_status_changed_callback_;
@@ -87,8 +88,8 @@ void client_t::send(const data_to_send_t& data)
 client_t::impl_t::impl_t(const client_t::message_received_callback_t& callback, const client_t::server_status_changed_callback_t& server_status_changed,
                          std::unique_ptr<connection_strategy_t> connection_strategy)
   : socket_{[this]() { state_->read(); }}
-  , received_serial_num_(0)
-  , send_serial_num_(0)
+  , received_sequence_num_(0)
+  , send_sequence_num_(0)
   , prev_message_sent_(true)
   , endpoint_{}
   , message_received_callback_(callback)
@@ -128,11 +129,11 @@ void client_t::impl_t::resend_prev_message()
 
 bool client_t::impl_t::validate_serial_num(const msg::incoming_datagram_t& datagram)
 {
-  if (datagram.ser_num == ++received_serial_num_) return true;
+  if (datagram.ser_num == ++received_sequence_num_) return true;
 
-  SPDLOG_WARN("Wrong serial number! ex={}; received={}", received_serial_num_, datagram.ser_num);
-  --received_serial_num_;
-  if (datagram.ser_num == received_serial_num_ && !msg::is_equal_types<msg::message_received_t>(datagram.data))
+  SPDLOG_WARN("Wrong serial number! ex={}; received={}", received_sequence_num_, datagram.ser_num);
+  --received_sequence_num_;
+  if (datagram.ser_num == received_sequence_num_ && !msg::is_equal_types<msg::message_received_t>(datagram.data))
   {
     state_->send(msg::message_received_t{}, true);
   }
@@ -142,7 +143,7 @@ bool client_t::impl_t::validate_serial_num(const msg::incoming_datagram_t& datag
 
 void client_t::impl_t::write_datagram(const std::string& data, const bool prev_serial_needed)
 {
-  std::string to_send = msg::prepare_for_send(msg::incoming_datagram_t{data, prev_serial_needed ? send_serial_num_ : ++send_serial_num_, received_serial_num_ + 1});
+  std::string to_send = msg::prepare_for_send(msg::incoming_datagram_t{data, prev_serial_needed ? send_sequence_num_ : ++send_sequence_num_, received_sequence_num_ + 1});
 
   // SPDLOG_TRACE("Send data={}; to {}", to_send, endpoint_);
   socket_.write({endpoint_, std::move(to_send)});

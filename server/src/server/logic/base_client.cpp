@@ -7,7 +7,7 @@
 namespace server::logic {
 
 namespace {
-enum class received_serial_num_t
+enum class received_serial_num_error_t
 {
   prev,
   wrong,
@@ -28,7 +28,7 @@ struct base_client_t::impl_t
   void message_received(const std::string& message);
   std::optional<msg::some_datagram_t> preprocess_message(const std::string& m);
 
-  received_serial_num_t check_ser_num(const msg::incoming_datagram_t& num) const;
+  received_serial_num_error_t check_ser_num(const msg::incoming_datagram_t& num) const;
   void add_for_send(const std::string& message, bool extra_message = false);
   void check_message_received();
   void begin_wait_receive(const std::string& message);
@@ -119,7 +119,7 @@ boost::signals2::connection base_client_t::connect_connection_status_changed(con
 base_client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
   : response_timer_(io_serv)
   , connection_timer_(io_serv)
-  , received_serial_num_(1)
+  , received_serial_num_(0)
   , send_serial_num_(0)
   , prev_message_received_(true)
   , address_(addr)
@@ -134,8 +134,8 @@ std::optional<msg::some_datagram_t> base_client_t::impl_t::preprocess_message(co
   const auto datagram = msg::init<msg::incoming_datagram_t>(m);
   switch (check_ser_num(datagram))
   {
-    case received_serial_num_t::prev: add_for_send(msg::prepare_for_send(msg::message_received_t()), true); return std::nullopt;
-    case received_serial_num_t::wrong: return std::nullopt;
+    case received_serial_num_error_t::prev: add_for_send(msg::prepare_for_send(msg::message_received_t()), true); return std::nullopt;
+    case received_serial_num_error_t::wrong: return std::nullopt;
     default: received_serial_num_ = datagram.ser_num;
   }
 
@@ -150,20 +150,20 @@ std::optional<msg::some_datagram_t> base_client_t::impl_t::preprocess_message(co
   return some_datagram;
 }
 
-received_serial_num_t base_client_t::impl_t::check_ser_num(const msg::incoming_datagram_t& datagram) const
+received_serial_num_error_t base_client_t::impl_t::check_ser_num(const msg::incoming_datagram_t& datagram) const
 {
-  if (datagram.ser_num == received_serial_num_ - 1 && !msg::is_equal_types<msg::message_received_t>(datagram.data))
+  if (datagram.ser_num == received_serial_num_ && !msg::is_equal_types<msg::message_received_t>(datagram.data))
   {
-    return received_serial_num_t::prev;
+    return received_serial_num_error_t::prev;
   }
 
-  if (datagram.ser_num != received_serial_num_)
+  if (datagram.ser_num != received_serial_num_ + 1)
   {
-    SPDLOG_WARN("Warning! Wrong serial number!");
-    return received_serial_num_t::wrong;
+    SPDLOG_WARN("Warning! Wrong sequence number! received={}; ex={}", datagram.ser_num, received_serial_num_);
+    return received_serial_num_error_t::wrong;
   }
 
-  return received_serial_num_t::ok;
+  return received_serial_num_error_t::ok;
 }
 
 void base_client_t::impl_t::add_for_send(const std::string& m, bool extra_message)
@@ -247,4 +247,4 @@ bool operator==(const base_client_t& lhs, const base_client_t& rhs)
   return lhs.address() == rhs.address();
 }
 
-} // namespace server
+} // namespace server::logic
