@@ -3,7 +3,7 @@
 #include "spdlog/fmt/ostr.h"
 #include <string>
 
-namespace logic {
+namespace chess::logic {
 
 struct credentials_t
 {
@@ -15,4 +15,4 @@ std::ostream& operator<<(std::ostream& os, const credentials_t& c);
 bool operator==(const credentials_t& lhs, const credentials_t& rhs);
 bool operator!=(const credentials_t& lhs, const credentials_t& rhs);
 
-} // namespace logic
+} // namespace chess::logic

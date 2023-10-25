@@ -13,7 +13,7 @@
 
 int main(int argc, char* argv[])
 {
-  logger::logger_t::get().init();
+  chess::logger::logger_t::get().init();
 
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   qmlRegisterSingletonType(QUrl("qrc:/res/Constants.qml"), "Constants", 1, 0, "Constants");
@@ -21,18 +21,18 @@ int main(int argc, char* argv[])
   QGuiApplication app(argc, argv);
   const auto invoke_on_main_thread = [&app](std::function<void()> fn) { QTimer::singleShot(0, /*app,*/ std::move(fn)); };
 
-  std::unique_ptr<controller::app_t> app_controller;
-  std::unique_ptr<message_handler::handler_t> msg_handler;
+  std::unique_ptr<chess::controller::app_t> app_controller;
+  std::unique_ptr<chess::message_handler::handler_t> msg_handler;
 
-  const cl::client_t::message_received_callback_t message_received_callback = [&](std::string str) {
+  const chess::cl::client_t::message_received_callback_t message_received_callback = [&](std::string str) {
     invoke_on_main_thread([&, str = std::move(str)] { msg_handler->handle(std::move(str)); });
   };
-  const cl::client_t::server_status_changed_callback_t server_status_changed = [&](bool server_online) {
+  const chess::cl::client_t::server_status_changed_callback_t server_status_changed = [&](bool server_online) {
     invoke_on_main_thread([&, server_online] { app_controller->server_status_changed(server_online); });
   };
-  cl::client_controller_t client{message_received_callback, server_status_changed};
+  chess::cl::client_controller_t client{message_received_callback, server_status_changed};
 
-  controller::app_t::command_requested_callbacks_t controller_callbacks;
+  chess::controller::app_t::command_requested_callbacks_t controller_callbacks;
   controller_callbacks.login = [&](const std::string& login, const std::string& pwd) { invoke_on_main_thread([&, login, pwd]() { client.send_login(login, pwd); }); };
   controller_callbacks.move = [&](std::string data) { invoke_on_main_thread([&, data = std::move(data)]() { client.send_move(std::move(data)); }); };
   controller_callbacks.go_to_history = [&](uint16_t history_i) { invoke_on_main_thread([&, history_i]() { client.send_go_to_history(history_i); }); };
@@ -41,8 +41,8 @@ int main(int argc, char* argv[])
   controller_callbacks.opponent_inf = [&]() { invoke_on_main_thread([&]() { client.send_opponent_inf(); }); };
   controller_callbacks.my_inf = [&]() { invoke_on_main_thread([&]() { client.send_my_inf(); }); };
 
-  app_controller = std::make_unique<controller::app_t>(controller_callbacks);
-  msg_handler = std::make_unique<message_handler::handler_t>(*app_controller, client);
+  app_controller = std::make_unique<chess::controller::app_t>(controller_callbacks);
+  msg_handler = std::make_unique<chess::message_handler::handler_t>(*app_controller, client);
 
   return app.exec();
 }

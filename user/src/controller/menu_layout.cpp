@@ -22,7 +22,7 @@ constexpr const char* const SHOW_OPPONENT = "show opponent";
 const QString COMMAND = "Command: ";
 } // namespace
 
-namespace controller {
+namespace chess::controller {
 
 menu_layout_t::menu_layout_t(const command_requested_callbacks_t& callbacks)
   : QObject()
@@ -80,10 +80,9 @@ void menu_layout_t::run_command(const QString& message)
 
   if (message == HELP_WORD)
   {
-    add_to_command_history(QString("1.For move, type '") + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4)" + "\n" +
-                           "2.For back move, type '" + BACK_MOVE + "'" + "\n" + "3.For start new game, type '" + NEW_GAME + "'" + "\n" +
-                           "4.For go to history index, type '" + HISTORY + "' and index" + "\n" + "5.To view opponent information, print '" + SHOW_OPPONENT +
-                           "'" + "\n" + "6.To view your information, print '" + SHOW_ME + "'");
+    add_to_command_history(QString("1.For move, type '") + MOVE_WORD + "' and coordinates(example: " + MOVE_WORD + " d2-d4)" + "\n" + "2.For back move, type '" + BACK_MOVE + "'" +
+                           "\n" + "3.For start new game, type '" + NEW_GAME + "'" + "\n" + "4.For go to history index, type '" + HISTORY + "' and index" + "\n" +
+                           "5.To view opponent information, print '" + SHOW_OPPONENT + "'" + "\n" + "6.To view your information, print '" + SHOW_ME + "'");
   }
   else if (message == SHOW_OPPONENT) command_requested_.opponent_inf();
   else if (message == SHOW_ME) command_requested_.my_inf();
@@ -233,4 +232,4 @@ QString menu_layout_t::connection_status() const
   return connection_status_;
 }
 
-} // namespace controller
+} // namespace chess::controller

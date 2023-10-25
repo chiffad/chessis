@@ -5,7 +5,7 @@
 #include <spdlog/fmt/ostr.h>
 #include <string>
 
-namespace server {
+namespace chess::server {
 
 template<typename T>
 struct datagram_t
@@ -25,4 +25,4 @@ inline std::ostream& operator<<(std::ostream& os, const datagram_t<msg::some_dat
   return os << "Datagram{ address=" << d.address << "; message={ type=" << d.message.type << "; msg=" << d.message.data << "; }";
 }
 
-} // namespace server
+} // namespace chess::server

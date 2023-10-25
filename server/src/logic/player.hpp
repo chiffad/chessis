@@ -10,7 +10,7 @@
 
 #include "spdlog/fmt/ostr.h"
 
-namespace logic {
+namespace chess::logic {
 
 class player_t
 {
@@ -43,4 +43,4 @@ private:
 std::ostream& operator<<(std::ostream& os, const player_t& c);
 bool operator==(const player_t& lhs, const player_t& rhs);
 
-} // namespace logic
+} // namespace chess::logic

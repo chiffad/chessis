@@ -1,15 +1,15 @@
 #pragma once
 #include "common/helper.hpp"
 #include "messages/messages.hpp"
-#include "server/logic/clients_holder.hpp"
 #include "server/datagram.hpp"
+#include "server/logic/clients_holder.hpp"
 
 #include <boost/asio.hpp>
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace server::logic {
+namespace chess::server::logic {
 
 class server_t
 {
@@ -20,7 +20,7 @@ public:
   server_t(server_t&&) = default;
   server_t& operator=(server_t&&) = default;
   ~server_t();
-  
+
   void send(const std::string& message, const endpoint_t& destination);
   void process();
   std::vector<datagram_t<msg::some_datagram_t>> read();
@@ -31,4 +31,4 @@ private:
   std::unique_ptr<impl_t> impl_;
 };
 
-} // namespace server
+} // namespace chess::server::logic

@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <typeinfo>
 
-namespace message_handler::helper {
+namespace chess::message_handler::helper {
 namespace details {
 
 template<typename T>
@@ -51,4 +51,4 @@ void find_msg_type_and_handle(const std::string& str, Handler& handler)
   details::msg_type_finder_t<boost::mpl::begin<msg::to_client_messages_t>::type, Handler>::exec(msg::init<msg::some_datagram_t>(str), handler);
 }
 
-} // namespace message_handler::helper
+} // namespace chess::message_handler::helper

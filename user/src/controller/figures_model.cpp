@@ -3,7 +3,7 @@
 #include "helper.h"
 #include <spdlog/spdlog.h>
 
-namespace controller {
+namespace chess::controller {
 
 figures_model_t::figures_model_t(QObject* parent)
   : QAbstractListModel(parent)
@@ -65,4 +65,4 @@ QHash<int, QByteArray> figures_model_t::roleNames() const
   return roles;
 }
 
-} // namespace controller
+} // namespace chess::controller

@@ -12,6 +12,8 @@
 #include <iostream>
 #include <sstream>
 
+namespace chess::controller {
+
 namespace {
 const int CELL_NUM = 8;
 const char FREE_FIELD = '.';
@@ -43,8 +45,6 @@ QString figure_from_field_mask(const char figure_symbol)
 }
 
 } // namespace
-
-namespace controller {
 
 board_t::board_t(const move_requested_callback_t& callback)
   : QObject(nullptr)
@@ -189,4 +189,4 @@ coord_t board_t::according_to_side(const coord_t& c) const
   return playing_white_ ? c : coord_t{CELL_NUM - 1 - c.x, CELL_NUM - 1 - c.y};
 }
 
-} // namespace controller
+} // namespace chess::controller

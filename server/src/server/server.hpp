@@ -6,13 +6,13 @@
 #include "server/logic/server.hpp"
 #include <messages/messages.hpp>
 
-namespace server {
+namespace chess::server {
 
 class server_t
 {
 public:
-  using client_connection_changed_callback_t = ::server::logic::clients_holder_t::connection_status_signal_t::slot_type;
-  using client_authenticated_callback_t = ::server::authentication::server_t::client_authenticated_callback_t;
+  using client_connection_changed_callback_t = chess::server::logic::clients_holder_t::connection_status_signal_t::slot_type;
+  using client_authenticated_callback_t = ::chess::server::authentication::server_t::client_authenticated_callback_t;
 
 public:
   server_t(io_service_t& io_service, const client_connection_changed_callback_t& client_connection_changed, const client_authenticated_callback_t& client_authenticated);
@@ -29,4 +29,4 @@ private:
   authentication::server_t authentication_server_;
 };
 
-} // namespace server
+} // namespace chess::server

@@ -1,7 +1,7 @@
 #include "server/logic/client.hpp"
 #include <spdlog/spdlog.h>
 
-namespace server::logic {
+namespace chess::server::logic {
 
 struct client_t::impl_t
 {};
@@ -36,4 +36,4 @@ void client_t::push_for_send(const std::string& message)
   add_for_send(message);
 }
 
-} // namespace server
+} // namespace chess::server::logic

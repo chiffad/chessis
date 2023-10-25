@@ -2,7 +2,7 @@
 
 #include "server/logic/base_client.hpp"
 
-namespace server::logic {
+namespace chess::server::logic {
 
 class client_t : public base_client_t
 {
@@ -25,4 +25,4 @@ private:
   std::unique_ptr<impl_t> impl_;
 };
 
-} // namespace server
+} // namespace chess::server::logic

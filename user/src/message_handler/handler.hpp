@@ -3,14 +3,14 @@
 #include <memory>
 #include <string>
 
-namespace controller {
+namespace chess::controller {
 class app_t;
 }
-namespace cl {
+namespace chess::cl {
 class client_controller_t;
 }
 
-namespace message_handler {
+namespace chess::message_handler {
 
 class handler_t
 {
@@ -24,4 +24,4 @@ private:
   std::unique_ptr<impl_t> impl_;
 };
 
-} // namespace message_handler
+} // namespace chess::message_handler

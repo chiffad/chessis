@@ -5,7 +5,7 @@
 #include <messages/messages.hpp>
 #include <string>
 
-namespace cl {
+namespace chess::cl {
 
 class client_controller_t
 {
@@ -32,4 +32,4 @@ private:
   std::unique_ptr<impl_t> impl_;
 };
 
-} // namespace cl
+} // namespace chess::cl

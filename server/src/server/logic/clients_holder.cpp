@@ -1,7 +1,7 @@
 #include "server/logic/clients_holder.hpp"
 #include <spdlog/spdlog.h>
 
-namespace server::logic {
+namespace chess::server::logic {
 
 clients_holder_t::clients_holder_t(io_service_t& io_service, const connection_status_signal_t::slot_type& subscriber)
   : io_service_(io_service)
@@ -65,4 +65,4 @@ std::vector<datagram_t<msg::some_datagram_t>> clients_holder_t::datagrams_to_pro
   return res;
 }
 
-} // namespace server
+} // namespace chess::server::logic

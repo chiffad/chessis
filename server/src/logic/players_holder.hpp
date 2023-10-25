@@ -6,7 +6,7 @@
 #include <map>
 #include <memory>
 
-namespace logic {
+namespace chess::logic {
 
 using player_arr_t = std::map<player_t::uuid_t, player_t>;
 
@@ -26,4 +26,4 @@ private:
   common::uuid_generator_t uuid_generator_;
 };
 
-} // namespace logic
+} // namespace chess::logic

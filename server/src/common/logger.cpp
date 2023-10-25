@@ -7,11 +7,11 @@
 #include <spdlog/spdlog.h>
 #include <string>
 
+namespace chess::logger {
+
 namespace {
 const spdlog::level::level_enum DEFAULT_LOG_LVL = spdlog::level::trace;
 }
-
-namespace logger {
 
 logger_t& logger_t::get()
 {
@@ -36,4 +36,4 @@ void logger_t::init()
   spdlog::set_pattern("[%H:%M:%S.%f][%^%l%$]<%s:%#><%!> %v");
 }
 
-} // namespace logger
+} // namespace chess::logger

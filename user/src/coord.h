@@ -2,6 +2,7 @@
 
 #include "spdlog/fmt/ostr.h"
 
+namespace chess {
 struct coord_t
 {
   coord_t(const unsigned x = 0, const unsigned y = 0)
@@ -19,3 +20,5 @@ inline std::ostream& operator<<(std::ostream& os, const coord_t& c)
 {
   return os << "[" << c.x << "; " << c.y << "]";
 }
+
+} // namespace chess

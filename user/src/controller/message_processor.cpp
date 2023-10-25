@@ -1,6 +1,6 @@
 #include "controller/message_processor.hpp"
 
-namespace controller {
+namespace chess::controller {
 
 message_processor_t::message_processor_t(menu_layout_t& menu_layout, board_t& board, login_input_t& login_input)
   : menu_layout_{menu_layout}
@@ -46,4 +46,4 @@ void message_processor_t::process(const msg::opponent_lost_t /*opp_lst*/)
   menu_layout_.set_connect_status(menu_layout_t::connection_status_t::opponent_lost);
 }
 
-} // namespace controller
+} // namespace chess::controller

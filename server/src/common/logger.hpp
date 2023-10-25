@@ -1,6 +1,6 @@
 #pragma once
 
-namespace logger {
+namespace chess::logger {
 
 class logger_t
 {
@@ -17,4 +17,4 @@ private:
   logger_t& operator=(logger_t&&) = default;
 };
 
-} // namespace logger
+} // namespace chess::logger

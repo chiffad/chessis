@@ -7,7 +7,7 @@
 #include <memory>
 #include <string>
 
-namespace cl {
+namespace chess::cl {
 
 class client_t
 {
@@ -47,4 +47,4 @@ private:
   std::unique_ptr<impl_t> impl_;
 };
 
-} // namespace cl
+} // namespace chess::cl

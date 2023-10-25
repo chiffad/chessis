@@ -2,7 +2,7 @@
 
 #include <spdlog/spdlog.h>
 
-namespace logic {
+namespace chess::logic {
 
 players_holder_t::players_holder_t() = default;
 
@@ -24,4 +24,4 @@ player_arr_t::iterator players_holder_t::find(const std::string& login)
   return std::find_if(begin(), end(), [&login](const auto& cl) { return cl.second.credentials().login == login; });
 }
 
-} // namespace logic
+} // namespace chess::logic

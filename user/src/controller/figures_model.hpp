@@ -5,7 +5,7 @@
 #include <QAbstractListModel>
 #include <vector>
 
-namespace controller {
+namespace chess::controller {
 
 class figures_model_t : public QAbstractListModel
 {
@@ -35,4 +35,4 @@ private:
   std::vector<figure_t> figures_model_;
 };
 
-} // namespace controller
+} // namespace chess::controller

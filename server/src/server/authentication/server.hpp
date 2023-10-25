@@ -6,7 +6,7 @@
 #include <functional>
 #include <memory>
 
-namespace server::authentication {
+namespace chess::server::authentication {
 
 class server_t
 {
@@ -27,4 +27,4 @@ private:
   std::unique_ptr<impl_t> impl_;
 };
 
-} // namespace server::authentication
+} // namespace chess::server::authentication

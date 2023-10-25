@@ -9,7 +9,7 @@
 #include <optional>
 #include <set>
 
-namespace logic {
+namespace chess::logic {
 
 class games_manager_t
 {
@@ -44,4 +44,4 @@ private:
   std::map<player_t::uuid_t, board_logic_t::uuid_t> player_to_board_map_;
 };
 
-} // namespace logic
+} // namespace chess::logic

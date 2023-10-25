@@ -4,7 +4,8 @@
 #include <boost/bind/bind.hpp>
 #include <spdlog/spdlog.h>
 
-namespace server::logic {
+namespace chess::server::logic {
+
 struct server_t::impl_t
 {
   impl_t(io_service_t& io_serv, const clients_holder_t::connection_status_signal_t::slot_type& subscriber)
@@ -96,4 +97,4 @@ endpoint_t server_t::address() const
   return impl_->socket_.local_endpoint();
 }
 
-} // namespace server
+} // namespace chess::server::logic

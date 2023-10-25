@@ -2,7 +2,7 @@
 
 #include "client/socket.hpp"
 
-namespace cl {
+namespace chess::cl {
 
 struct connection_strategy_t
 {
@@ -35,4 +35,4 @@ private:
   endpoint_t endpoint_;
 };
 
-} // namespace cl
+} // namespace chess::cl

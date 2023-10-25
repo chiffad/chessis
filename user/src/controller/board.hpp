@@ -7,7 +7,7 @@
 #include <QQmlApplicationEngine>
 #include <functional>
 
-namespace controller {
+namespace chess::controller {
 
 class board_t : public QObject
 {
@@ -55,4 +55,4 @@ private:
   move_requested_callback_t move_requested_callback_;
 };
 
-} // namespace controller
+} // namespace chess::controller

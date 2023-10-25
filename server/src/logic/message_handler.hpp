@@ -7,7 +7,7 @@
 #include <messages/messages.hpp>
 #include <string>
 
-namespace logic {
+namespace chess::logic {
 
 class message_handler_t
 {
@@ -27,4 +27,4 @@ private:
   std::unique_ptr<impl_t> impl_;
 };
 
-} // namespace logic
+} // namespace chess::logic

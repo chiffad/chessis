@@ -7,7 +7,7 @@
 #include <memory>
 #include <string>
 
-namespace server::authentication {
+namespace chess::server::authentication {
 
 class message_handler_t
 {
@@ -17,8 +17,7 @@ public:
   using send_to_client_callback_t = std::function<void(const std::string& message, const endpoint_t& destination)>;
 
 public:
-  message_handler_t(const endpoint_t& logic_server_endpoint, const client_authenticated_callback_t& client_authenticated_callback,
-                    const send_to_client_callback_t& send_to_client);
+  message_handler_t(const endpoint_t& logic_server_endpoint, const client_authenticated_callback_t& client_authenticated_callback, const send_to_client_callback_t& send_to_client);
   message_handler_t(const message_handler_t&) = delete;
   message_handler_t(message_handler_t&&) = default;
   message_handler_t& operator=(const message_handler_t&) = delete;
@@ -32,4 +31,4 @@ private:
   std::unique_ptr<impl_t> impl_;
 };
 
-} // namespace server::authentication
+} // namespace chess::server::authentication

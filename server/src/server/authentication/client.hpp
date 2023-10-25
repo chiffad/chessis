@@ -5,7 +5,7 @@
 #include "logic/credentials.hpp"
 #include <spdlog/fmt/ostr.h>
 
-namespace server::authentication {
+namespace chess::server::authentication {
 
 struct client_t
 {
@@ -16,4 +16,4 @@ struct client_t
 
 std::ostream& operator<<(std::ostream& os, const client_t& cl);
 
-} // namespace server::authentication
+} // namespace chess::server::authentication

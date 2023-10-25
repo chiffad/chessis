@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace controller {
+namespace chess::controller {
 
 class message_processor_t
 {
@@ -28,4 +28,4 @@ private:
   login_input_t& login_input_;
 };
 
-} // namespace controller
+} // namespace chess::controller

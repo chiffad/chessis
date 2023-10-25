@@ -10,7 +10,7 @@
 #include <spdlog/spdlog.h>
 #include <vector>
 
-namespace cl {
+namespace chess::cl {
 
 namespace {
 const int RESPONSE_WAIT_TIME = 500;
@@ -257,4 +257,4 @@ void client_t::impl_t::connected_state_t::read()
   }
 }
 
-} // namespace cl
+} // namespace chess::cl

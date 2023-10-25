@@ -10,7 +10,7 @@
 #include <string_view>
 #include <vector>
 
-namespace msg {
+namespace chess::msg {
 struct my_archive_exception : public boost::archive::archive_exception
 {
   my_archive_exception(const std::string& ex)
@@ -356,4 +356,4 @@ inline bool is_equal_types(const std::string& str)
   return init<some_datagram_t>(str).type == id_v<T>;
 }
 
-} // namespace msg
+} // namespace chess::msg

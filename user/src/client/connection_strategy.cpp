@@ -1,6 +1,6 @@
 #include "client/connection_strategy.hpp"
 
-namespace cl {
+namespace chess::cl {
 
 search_port_t::search_port_t(const endpoint_t& start, const int first_port, const int last_port)
   : endpoint_{start}
@@ -32,4 +32,4 @@ void connect_port_t::exec(endpoint_t& curr_endpoint)
   curr_endpoint = endpoint_;
 }
 
-} // namespace cl
+} // namespace chess::cl

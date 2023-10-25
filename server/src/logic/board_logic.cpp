@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <vector>
 
-namespace logic {
+namespace chess::logic {
 
 const auto BOARD_SIDE = 8;
 const auto FIGURES_NUMBER = 32;
@@ -665,4 +665,4 @@ void write_moves_to_file(const std::string& path, board_logic_t& desk)
   std::copy(history.begin(), history.end(), std::ostreambuf_iterator<char>(in_file));
 }
 
-} // namespace logic
+} // namespace chess::logic

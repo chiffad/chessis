@@ -2,7 +2,7 @@
 
 #include <spdlog/spdlog.h>
 
-namespace logic {
+namespace chess::logic {
 
 games_manager_t::games_manager_t(io_service_t& io_service)
   : players_{}
@@ -137,4 +137,4 @@ void games_manager_t::remove_from_free_players(std::set<player_t::uuid_t> uuids)
   }
 }
 
-} // namespace logic
+} // namespace chess::logic

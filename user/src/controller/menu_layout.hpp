@@ -10,7 +10,7 @@
 
 #include <spdlog/spdlog.h>
 
-namespace controller {
+namespace chess::controller {
 
 class menu_layout_t : public QObject
 {
@@ -83,4 +83,4 @@ private:
   command_requested_callbacks_t command_requested_;
 };
 
-} // namespace controller
+} // namespace chess::controller

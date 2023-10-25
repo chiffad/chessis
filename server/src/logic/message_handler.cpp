@@ -4,7 +4,7 @@
 #include <spdlog/spdlog.h>
 #include <typeinfo>
 
-namespace logic {
+namespace chess::logic {
 
 namespace {
 
@@ -233,4 +233,4 @@ void message_handler_t::client_connection_changed(const endpoint_t& address, con
   }
 }
 
-} // namespace logic
+} // namespace chess::logic

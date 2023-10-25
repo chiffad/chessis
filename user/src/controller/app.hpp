@@ -7,7 +7,7 @@
 
 #include <QQmlApplicationEngine>
 
-namespace controller {
+namespace chess::controller {
 
 class app_t
 {
@@ -36,4 +36,4 @@ private:
   QQmlApplicationEngine engine_;
 };
 
-} // namespace controller
+} // namespace chess::controller

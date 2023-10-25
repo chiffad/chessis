@@ -4,7 +4,7 @@
 
 #include <map>
 
-namespace logic {
+namespace chess::logic {
 
 using desks_arr_t = std::map<board_logic_t::uuid_t, board_logic_t>;
 
@@ -21,4 +21,4 @@ private:
   common::uuid_generator_t uuid_generator_;
 };
 
-} // namespace logic
+} // namespace chess::logic

@@ -6,7 +6,7 @@
 
 #include "spdlog/fmt/ostr.h"
 
-namespace cl {
+namespace chess::cl {
 
 struct endpoint_t
 {
@@ -38,4 +38,4 @@ bool operator==(const endpoint_t& lhs, const endpoint_t& rhs);
 std::ostream& operator<<(std::ostream& os, const endpoint_t& e);
 std::ostream& operator<<(std::ostream& os, const data_t& d);
 
-} // namespace cl
+} // namespace chess::cl

@@ -5,7 +5,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <spdlog/fmt/ostr.h>
 
-namespace common {
+namespace chess::common {
 
 using uuid_t = boost::uuids::uuid;
 
@@ -22,4 +22,4 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const uuid_t& id);
 
-} // namespace common
+} // namespace chess::common

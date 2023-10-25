@@ -12,7 +12,7 @@
 
 #include "spdlog/fmt/ostr.h"
 
-namespace server::logic {
+namespace chess::server::logic {
 
 class base_client_t
 {
@@ -49,4 +49,4 @@ private:
 std::ostream& operator<<(std::ostream& os, const base_client_t& c);
 bool operator==(const base_client_t& lhs, const base_client_t& rhs);
 
-} // namespace server
+} // namespace chess::server::logic

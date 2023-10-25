@@ -1,5 +1,6 @@
 #pragma once
-namespace logic {
+
+namespace chess::logic {
 
 struct coord_t
 {
@@ -14,4 +15,4 @@ struct coord_t
   unsigned y;
 };
 
-} // namespace logic
+} // namespace chess::logic

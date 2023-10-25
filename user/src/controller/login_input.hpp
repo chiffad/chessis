@@ -4,7 +4,7 @@
 #include <QString>
 #include <functional>
 
-namespace controller {
+namespace chess::controller {
 
 class login_input_t : public QObject
 {
@@ -33,4 +33,4 @@ private:
   login_entered_callback_t login_entered_callback_;
 };
 
-} // namespace controller
+} // namespace chess::controller

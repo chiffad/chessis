@@ -1,14 +1,14 @@
 #pragma once
 
 #include "common/helper.hpp"
-#include "server/logic/client.hpp"
 #include "server/datagram.hpp"
+#include "server/logic/client.hpp"
 
 #include <map>
 #include <memory>
 #include <vector>
 
-namespace server::logic {
+namespace chess::server::logic {
 
 using clients_arr_t = std::map<endpoint_t, client_t>;
 
@@ -34,4 +34,4 @@ private:
   connection_status_signal_t::slot_type subscriber_;
 };
 
-} // namespace server
+} // namespace chess::server::logic

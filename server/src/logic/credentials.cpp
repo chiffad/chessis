@@ -1,6 +1,6 @@
 #include "logic/credentials.hpp"
 
-namespace logic {
+namespace chess::logic {
 
 std::ostream& operator<<(std::ostream& os, const credentials_t& c)
 {
@@ -17,4 +17,4 @@ bool operator!=(const credentials_t& lhs, const credentials_t& rhs)
   return !(lhs == rhs);
 }
 
-} // namespace logic
+} // namespace chess::logic

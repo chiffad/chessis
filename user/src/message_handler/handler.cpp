@@ -4,7 +4,7 @@
 #include "controller/app.hpp"
 #include "message_handler/helper.hpp"
 
-namespace message_handler {
+namespace chess::message_handler {
 
 struct handler_t::impl_t
 {
@@ -36,4 +36,4 @@ void handler_t::handle(std::string msg)
   helper::find_msg_type_and_handle(msg, *impl_);
 }
 
-} // namespace message_handler
+} // namespace chess::message_handler

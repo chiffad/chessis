@@ -8,7 +8,7 @@
 #include <map>
 #include <spdlog/spdlog.h>
 
-namespace server::authentication {
+namespace chess::server::authentication {
 
 namespace {
 inline bool valid_credentials(const logic::credentials_t& cred)
@@ -133,4 +133,4 @@ void message_handler_t::handle(const endpoint_t& addr, const std::string& messag
   impl_->process<boost::mpl::begin<authentication_messages_t>::type>(datagram, addr, incoming_datagram.response_ser_num + 1);
 }
 
-} // namespace server::authentication
+} // namespace chess::server::authentication

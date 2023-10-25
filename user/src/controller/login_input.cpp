@@ -18,7 +18,7 @@ constexpr const char* const EMPTY_ERR = "PWD and login should not be empty!";
 constexpr const char* const NO_ERROR = "";
 } // namespace
 
-namespace controller {
+namespace chess::controller {
 
 login_input_t::login_input_t(const login_entered_callback_t& callback)
   : error_message_{}
@@ -75,4 +75,4 @@ void login_input_t::get_login(const QString& error_mess)
   emit enter_login();
 }
 
-} // namespace controller
+} // namespace chess::controller

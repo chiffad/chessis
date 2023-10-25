@@ -3,7 +3,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <spdlog/spdlog.h>
 
-namespace logic {
+namespace chess::logic {
 
 struct player_t::impl_t
 {
@@ -77,4 +77,4 @@ bool operator==(const player_t& lhs, const player_t& rhs)
   return lhs.uuid() == rhs.uuid();
 }
 
-} // namespace logic
+} // namespace chess::logic

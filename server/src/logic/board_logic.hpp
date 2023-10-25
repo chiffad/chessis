@@ -6,7 +6,7 @@
 #include <memory>
 #include <string>
 
-namespace logic {
+namespace chess::logic {
 
 class board_logic_t
 {
@@ -41,4 +41,4 @@ void make_moves_from_str(const std::string& str, board_logic_t& desk);
 void load_moves_from_file(const std::string& path, board_logic_t& desk);
 void write_moves_to_file(const std::string& path, board_logic_t& desk);
 
-} // namespace logic
+} // namespace chess::logic

@@ -1,6 +1,6 @@
 #include "logic/boards_holder.hpp"
 
-namespace logic {
+namespace chess::logic {
 
 boards_holder_t::boards_holder_t() = default;
 
@@ -11,4 +11,4 @@ board_logic_t::uuid_t boards_holder_t::add()
   return uuid;
 }
 
-} // namespace logic
+} // namespace chess::logic

@@ -11,15 +11,15 @@
 int main()
 try
 {
-  logger::logger_t::get().init();
+  chess::logger::logger_t::get().init();
 
-  io_service_t io_service;
-  std::unique_ptr<logic::message_handler_t> handler;
-  server::server_t server{io_service, [&](const server::logic::client_t& cl, const bool online) { handler->client_connection_changed(cl.address(), online); },
-                          [](server::authentication::server_t::client_uuid_t uuid) {}};
+  chess::io_service_t io_service;
+  std::unique_ptr<chess::logic::message_handler_t> handler;
+  chess::server::server_t server{io_service, [&](const chess::server::logic::client_t& cl, const bool online) { handler->client_connection_changed(cl.address(), online); },
+                                 [](chess::server::authentication::server_t::client_uuid_t uuid) {}};
 
-  logic::games_manager_t games_manager{io_service};
-  handler = std::make_unique<logic::message_handler_t>(games_manager, server);
+  chess::logic::games_manager_t games_manager{io_service};
+  handler = std::make_unique<chess::logic::message_handler_t>(games_manager, server);
 
   while (true)
   {

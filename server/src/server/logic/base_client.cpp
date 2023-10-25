@@ -4,7 +4,7 @@
 #include <deque>
 #include <spdlog/spdlog.h>
 
-namespace server::logic {
+namespace chess::server::logic {
 
 namespace {
 enum class received_serial_num_error_t
@@ -247,4 +247,4 @@ bool operator==(const base_client_t& lhs, const base_client_t& rhs)
   return lhs.address() == rhs.address();
 }
 
-} // namespace server::logic
+} // namespace chess::server::logic

@@ -9,7 +9,7 @@ const int FIRST_PORT = 49152;
 const int LAST_PORT = 49300;
 } // namespace
 
-namespace server::authentication {
+namespace chess::server::authentication {
 
 struct server_t::impl_t
 {
@@ -62,9 +62,8 @@ struct server_t::impl_t
 
   void start_receive()
   {
-    socket_.async_receive_from(
-      boost::asio::buffer(incoming_message_), last_mess_sender_,
-      boost::bind(&server_t::impl_t::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    socket_.async_receive_from(boost::asio::buffer(incoming_message_), last_mess_sender_,
+                               boost::bind(&server_t::impl_t::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
   }
 
   boost::asio::ip::udp::socket socket_;
@@ -80,4 +79,4 @@ server_t::server_t(io_service_t& io_serv, const endpoint_t& logic_server_endpoin
 
 server_t::~server_t() = default;
 
-} // namespace server::authentication
+} // namespace chess::server::authentication

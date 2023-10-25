@@ -3,7 +3,7 @@
 #include <messages/messages.hpp>
 #include <spdlog/spdlog.h>
 
-namespace cl {
+namespace chess::cl {
 
 template<typename T>
 concept tokenized_msg_to_server = msg::tokenized_msg<T> && msg::one_of_to_server_msgs<T>;
@@ -101,4 +101,4 @@ void client_controller_t::send_my_inf()
   impl_->send<msg::my_inf_t>();
 }
 
-} // namespace cl
+} // namespace chess::cl

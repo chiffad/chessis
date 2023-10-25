@@ -3,7 +3,7 @@
 #include <QObject>
 #include <spdlog/spdlog.h>
 
-namespace cl {
+namespace chess::cl {
 
 udp_socket_t::udp_socket_t(const std::function<void()>& ready_read)
 {
@@ -63,4 +63,4 @@ std::ostream& operator<<(std::ostream& os, const data_t& d)
   return os << "data_t{ data=" << d.data << "; endpoint=" << d.endpoint << "; }";
 }
 
-} // namespace cl
+} // namespace chess::cl

@@ -5,7 +5,7 @@
 
 #include <spdlog/spdlog.h>
 
-namespace controller {
+namespace chess::controller {
 
 app_t::app_t(const command_requested_callbacks_t& callbacks)
   : menu_layout_{callbacks}
@@ -33,4 +33,4 @@ void app_t::server_status_changed(const bool server_online)
   message_processor_.server_status_changed(server_online);
 }
 
-} // namespace controller
+} // namespace chess::controller

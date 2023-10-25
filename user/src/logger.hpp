@@ -4,7 +4,7 @@
 #include <QString>
 #include <QtGlobal>
 
-namespace logger {
+namespace chess::logger {
 
 class logger_t
 {
@@ -23,4 +23,4 @@ private:
 
 void qt_message_hanlder(QtMsgType type, const QMessageLogContext& context, const QString& msg);
 
-} // namespace logger
+} // namespace chess::logger

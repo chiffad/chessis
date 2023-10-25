@@ -4,6 +4,7 @@
 
 #include "coord.h"
 
+namespace chess {
 class figure_t
 {
 public:
@@ -30,3 +31,5 @@ private:
   coord_t coord_{};
   bool visible_{false};
 };
+
+} // namespace chess
