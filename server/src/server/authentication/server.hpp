@@ -1,4 +1,5 @@
 #pragma once
+
 #include "common/helper.hpp"
 #include "common/unique_id_generator.hpp"
 #include "server/authentication/message_handler.hpp"
@@ -11,7 +12,6 @@ namespace chess::server::authentication {
 class server_t
 {
 public:
-  using client_uuid_t = message_handler_t::client_uuid_t;
   using client_authenticated_callback_t = message_handler_t::client_authenticated_callback_t;
 
 public:

@@ -233,4 +233,10 @@ void message_handler_t::client_connection_changed(const endpoint_t& address, con
   }
 }
 
+void message_handler_t::client_authenticated(client_uuid_t uuid)
+{
+  SPDLOG_INFO("Client uuid={} authenticated", uuid);
+  // TODO
+}
+
 } // namespace chess::logic

@@ -12,7 +12,6 @@ namespace chess::server::authentication {
 class message_handler_t
 {
 public:
-  using client_uuid_t = common::uuid_t;
   using client_authenticated_callback_t = std::function<void(client_uuid_t)>;
   using send_to_client_callback_t = std::function<void(const std::string& message, const endpoint_t& destination)>;
 

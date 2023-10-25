@@ -21,6 +21,7 @@ public:
 
   void process_server_message(const endpoint_t& addr, const msg::some_datagram_t& message);
   void client_connection_changed(const endpoint_t& address, bool online);
+  void client_authenticated(client_uuid_t uuid);
 
 private:
   struct impl_t;
