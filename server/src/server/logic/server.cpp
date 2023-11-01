@@ -40,7 +40,16 @@ struct server_t::impl_t
 
     const std::string mess(incoming_message_.begin(), incoming_message_.begin() + readed_size);
     SPDLOG_INFO("read={}", mess);
-    clients_holder_.process(datagram_t<std::string>{last_mess_sender_, mess});
+
+    try
+    {
+      // TODO: client should be found here by uuid, not address
+      clients_holder_.at(last_mess_sender_).message_received(mess);
+    }
+    catch (const std::exception& ex)
+    {
+      SPDLOG_ERROR("Failed to find client with address={}; ex={}!!!", ex.what());
+    }
     start_receive();
   }
 
@@ -64,16 +73,19 @@ server_t::server_t(io_service_t& io_serv, const clients_holder_t::connection_sta
 
 server_t::~server_t() = default;
 
-void server_t::send(const std::string& message, const endpoint_t& destination)
+void server_t::add_client(const client_uuid_t& uuid, const endpoint_t& addr)
 {
-  const auto cl_it = impl_->clients_holder_.find(destination);
-  if (cl_it == impl_->clients_holder_.end())
-  {
-    SPDLOG_ERROR("Unable to send message to destination={}; No client found! message={}", message, destination);
-    return;
-  }
+  impl_->clients_holder_.add(uuid, addr);
+}
 
-  cl_it->second.push_for_send(message);
+void server_t::send(const std::string& message, const endpoint_t& addr)
+try
+{
+  impl_->clients_holder_.at(addr).push_for_send(message);
+}
+catch (...)
+{
+  SPDLOG_ERROR("Unable to send message to addr={}; No client found! message={}", message, addr);
 }
 
 void server_t::process()
@@ -87,7 +99,7 @@ void server_t::process()
   }
 }
 
-std::vector<datagram_t<msg::some_datagram_t>> server_t::read()
+std::map<client_uuid_t, std::vector<msg::some_datagram_t>> server_t::read()
 {
   return impl_->clients_holder_.datagrams_to_process();
 }

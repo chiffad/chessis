@@ -21,9 +21,10 @@ public:
   server_t& operator=(server_t&&) = default;
   ~server_t();
 
+  void add_client(const client_uuid_t& uuid, const endpoint_t& addr);
   void send(const std::string& message, const endpoint_t& destination);
   void process();
-  std::vector<datagram_t<msg::some_datagram_t>> read();
+  std::map<client_uuid_t, std::vector<msg::some_datagram_t>> read();
   endpoint_t address() const;
 
 private:

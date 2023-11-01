@@ -4,11 +4,16 @@
 namespace chess::server::logic {
 
 struct client_t::impl_t
-{};
+{
+  impl_t(const client_uuid_t& uuid)
+    : uuid_{uuid}
+  {}
+  const client_uuid_t uuid_;
+};
 
-client_t::client_t(io_service_t& io_serv, const endpoint_t& addr)
+client_t::client_t(io_service_t& io_serv, const client_uuid_t& uuid, const endpoint_t& addr)
   : base_client_t(io_serv, addr)
-  , impl_(std::make_unique<impl_t>())
+  , impl_(std::make_unique<impl_t>(uuid))
 {}
 
 client_t::~client_t() = default;
@@ -34,6 +39,11 @@ void client_t::message_received(const std::string& m)
 void client_t::push_for_send(const std::string& message)
 {
   add_for_send(message);
+}
+
+const client_uuid_t& client_t::uuid() const
+{
+  return impl_->uuid_;
 }
 
 } // namespace chess::server::logic

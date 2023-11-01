@@ -12,8 +12,9 @@ namespace chess::server::authentication {
 class message_handler_t
 {
 public:
-  using client_authenticated_callback_t = std::function<void(client_uuid_t)>;
+  using client_authenticated_callback_t = std::function<void(const endpoint_t& addr, client_uuid_t)>;
   using send_to_client_callback_t = std::function<void(const std::string& message, const endpoint_t& destination)>;
+  // TODO: add client_reconnected_callback for already known clients by id\pwd
 
 public:
   message_handler_t(const endpoint_t& logic_server_endpoint, const client_authenticated_callback_t& client_authenticated_callback, const send_to_client_callback_t& send_to_client);

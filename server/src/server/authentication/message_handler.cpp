@@ -95,7 +95,7 @@ struct message_handler_t::impl_t
                    ser_num);
 
     clients_[creds.login] = std::move(cl);
-    client_authenticated_callback_(client_uuid);
+    client_authenticated_callback_(endpoint, client_uuid);
   }
 
   using login_t = std::string;
