@@ -7,10 +7,9 @@ namespace chess::logic {
 
 struct player_t::impl_t
 {
-  impl_t(const endpoint_t& addr, const uuid_t& uuid)
+  explicit impl_t(const uuid_t& uuid)
     : elo_{1200}
     , playing_white_{true}
-    , address_(addr)
     , uuid_{uuid}
   {}
 
@@ -18,19 +17,13 @@ struct player_t::impl_t
   int elo_;
   bool playing_white_;
   const uuid_t uuid_;
-  endpoint_t address_;
 };
 
-player_t::player_t(const endpoint_t& addr, const uuid_t& uuid)
-  : impl_(std::make_unique<impl_t>(addr, uuid))
+player_t::player_t(const uuid_t& uuid)
+  : impl_(std::make_unique<impl_t>(uuid))
 {}
 
 player_t::~player_t() = default;
-
-const endpoint_t& player_t::address() const
-{
-  return impl_->address_;
-}
 
 const player_t::uuid_t& player_t::uuid() const
 {
@@ -69,7 +62,7 @@ void player_t::set_playing_white(bool playing_white)
 
 std::ostream& operator<<(std::ostream& os, const player_t& c)
 {
-  return os << "Player{ uuid=" << boost::uuids::to_string(c.uuid()) << "; creds=" << c.credentials() << "; address" << c.address() << " }";
+  return os << "Player{ uuid=" << boost::uuids::to_string(c.uuid()) << "; creds=" << c.credentials() << " }";
 }
 
 bool operator==(const player_t& lhs, const player_t& rhs)

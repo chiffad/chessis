@@ -15,12 +15,11 @@ namespace chess::logic {
 class player_t
 {
 public:
-  using uuid_t = common::uuid_t;
+  using uuid_t = client_uuid_t;
 
-  player_t(const endpoint_t& addr, const uuid_t& uuid);
+  player_t(const uuid_t& uuid);
   ~player_t();
 
-  const endpoint_t& address() const;
   const uuid_t& uuid() const;
   void set_credentials(const credentials_t& cred);
   const credentials_t& credentials() const;

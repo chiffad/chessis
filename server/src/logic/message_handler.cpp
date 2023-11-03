@@ -81,7 +81,7 @@ struct message_handler_t::impl_t
     }
 
     const auto& board = games_manager_.board(board_uuid.value());
-    server_.send(get_board_state(board, player.playing_white()), player.address());
+    server_.send(get_board_state(board, player.playing_white()), player.uuid());
 
     const auto opp_uuid = games_manager_.opponent(player.uuid());
     if (!opp_uuid)
@@ -90,7 +90,7 @@ struct message_handler_t::impl_t
       return;
     }
 
-    server_.send(get_board_state(board, !player.playing_white()), games_manager_.player(opp_uuid.value()).address());
+    server_.send(get_board_state(board, !player.playing_white()), opp_uuid.value());
   }
 
   games_manager_t& games_manager_;
@@ -112,7 +112,7 @@ void message_handler_t::impl_t::handle<msg::login_t>(const msg::some_datagram_t&
   if (!player.credentials().login.empty() && player.credentials() != credentials_t{login.login, login.pwd})
   {
     SPDLOG_INFO("attempt to login to the player={} with incorrect credentials login={}; pwd={}", player, login.login, login.pwd);
-    server_.send(msg::incorrect_log_t(), player.address());
+    server_.send(msg::incorrect_log_t(), player.uuid());
     return;
   }
 
@@ -128,18 +128,18 @@ void message_handler_t::impl_t::handle<msg::opponent_inf_t>(const msg::some_data
   const auto opp_uuid = games_manager_.opponent(player.uuid());
   if (!opp_uuid)
   {
-    server_.send(msg::inf_request_t("No opponent: no game in progress!"), player.address());
+    server_.send(msg::inf_request_t("No opponent: no game in progress!"), player.uuid());
     return;
   }
 
-  server_.send(get_person_inf(games_manager_.player(opp_uuid.value())), player.address());
+  server_.send(get_person_inf(games_manager_.player(opp_uuid.value())), player.uuid());
 }
 
 template<>
 void message_handler_t::impl_t::handle<msg::my_inf_t>(const msg::some_datagram_t& /*datagram*/, player_t& player)
 {
   SPDLOG_DEBUG("tactic for my_inf_t;");
-  server_.send(get_person_inf(player), player.address());
+  server_.send(get_person_inf(player), player.uuid());
 }
 
 template<>
@@ -203,40 +203,33 @@ message_handler_t::message_handler_t(games_manager_t& games_manager, server::ser
 
 message_handler_t::~message_handler_t() = default;
 
-void message_handler_t::process_server_message(const endpoint_t& addr, const msg::some_datagram_t& message)
+void message_handler_t::process_server_message(const client_uuid_t& uuid, const msg::some_datagram_t& message)
 {
-  auto c = impl_->games_manager_.player(addr);
-  if (c)
+  if (!impl_->games_manager_.count(uuid))
   {
-    impl_->process_mess_begin(message, *c.value());
+    SPDLOG_ERROR("No client found for uuid={}", uuid);
     return;
   }
 
-  SPDLOG_INFO("New player! addr={}", addr);
-  const auto uuid = impl_->games_manager_.add_player(addr);
   impl_->process_mess_begin(message, impl_->games_manager_.player(uuid));
 }
 
-void message_handler_t::client_connection_changed(const endpoint_t& address, const bool online)
+void message_handler_t::client_connection_changed(const client_uuid_t& uuid, const bool online)
 {
-  SPDLOG_DEBUG("address={}, online={}", address, online);
-
+  SPDLOG_DEBUG("Client with uuid={} connection changed online={}", uuid, online);
   if (online) return;
 
-  const auto player = impl_->games_manager_.player(address);
-  if (!player) return;
-
-  const auto opp_uuid = impl_->games_manager_.opponent(player.value()->uuid());
+  const auto opp_uuid = impl_->games_manager_.opponent(uuid);
   if (opp_uuid)
   {
-    impl_->server_.send(msg::opponent_lost_t(), impl_->games_manager_.player(opp_uuid.value()).address());
+    impl_->server_.send(msg::opponent_lost_t(), opp_uuid.value());
   }
 }
 
 void message_handler_t::client_authenticated(client_uuid_t uuid)
 {
-  SPDLOG_INFO("Client uuid={} authenticated", uuid);
-  // TODO
+  SPDLOG_INFO("New player! uuid={}", uuid);
+  impl_->games_manager_.add_player(std::move(uuid));
 }
 
 } // namespace chess::logic

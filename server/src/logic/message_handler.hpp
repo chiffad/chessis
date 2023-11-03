@@ -3,8 +3,9 @@
 #include "common/helper.hpp"
 #include "logic/games_manager.hpp"
 #include "server/server.hpp"
-#include <memory>
 #include <messages/messages.hpp>
+
+#include <memory>
 #include <string>
 
 namespace chess::logic {
@@ -19,8 +20,8 @@ public:
   message_handler_t& operator=(message_handler_t&&) = default;
   ~message_handler_t();
 
-  void process_server_message(const endpoint_t& addr, const msg::some_datagram_t& message);
-  void client_connection_changed(const endpoint_t& address, bool online);
+  void process_server_message(const client_uuid_t& uuid, const msg::some_datagram_t& message);
+  void client_connection_changed(const client_uuid_t& uuid, bool online);
   void client_authenticated(client_uuid_t uuid);
 
 private:

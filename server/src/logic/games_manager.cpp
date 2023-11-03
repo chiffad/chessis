@@ -19,19 +19,15 @@ const board_logic_t& games_manager_t::board(const board_logic_t::uuid_t& uuid) c
   return boards_.at(uuid);
 }
 
-player_t::uuid_t games_manager_t::add_player(const endpoint_t& addr)
+player_t& games_manager_t::add_player(const player_t::uuid_t& uuid)
 {
-  const auto uuid = players_.add(addr);
   free_players_.push_back(uuid);
-  return uuid;
+  return players_.add(uuid);
 }
 
-std::optional<player_t*> games_manager_t::player(const endpoint_t& addr)
+bool games_manager_t::count(const player_t::uuid_t& uuid) const
 {
-  const auto it = players_.find(addr);
-  if (it == players_.end()) return std::nullopt;
-
-  return &it->second;
+  return players_.count(uuid);
 }
 
 player_t& games_manager_t::player(const player_t::uuid_t& uuid)

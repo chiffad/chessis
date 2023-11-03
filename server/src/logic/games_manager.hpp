@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/helper.hpp"
 #include "logic/boards_holder.hpp"
 #include "logic/players_holder.hpp"
 
@@ -18,8 +17,8 @@ public:
   board_logic_t& board(const board_logic_t::uuid_t& uuid);
   const board_logic_t& board(const board_logic_t::uuid_t& uuid) const;
 
-  player_t::uuid_t add_player(const endpoint_t& addr);
-  std::optional<player_t*> player(const endpoint_t& addr);
+  player_t& add_player(const player_t::uuid_t& uuid);
+  bool count(const player_t::uuid_t& addr) const;
   player_t& player(const player_t::uuid_t& uuid);
   const player_t& player(const player_t::uuid_t& uuid) const;
 

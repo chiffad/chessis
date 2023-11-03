@@ -20,9 +20,9 @@ public:
   std::map<client_uuid_t, std::vector<msg::some_datagram_t>> read();
 
   template<msg::one_of_to_client_msgs T>
-  void send(T&& data, const endpoint_t& destination)
+  void send(T&& data, const client_uuid_t& client_uuid)
   {
-    logic_server_.send(msg::prepare_for_send(std::forward<T>(data)), destination);
+    logic_server_.send(msg::prepare_for_send(std::forward<T>(data)), client_uuid);
   }
 
 private:

@@ -24,12 +24,6 @@ struct server_t::impl_t
 
   ~impl_t() { socket_.close(); }
 
-  // void send(const std::string& message, const endpoint_t& destination)
-  //{
-  //   SPDLOG_INFO("send={}; to={}", message, destination.address().to_string());
-  //   socket_.async_send_to(boost::asio::buffer(message), destination, [](auto /*_1*/, auto /*_2*/) {});
-  // }
-
   void handle_receive(const error_code_t& e, const size_t readed_size)
   {
     if (e && e != boost::asio::error::message_size)
@@ -48,7 +42,7 @@ struct server_t::impl_t
     }
     catch (const std::exception& ex)
     {
-      SPDLOG_ERROR("Failed to find client with address={}; ex={}!!!", ex.what());
+      SPDLOG_ERROR("Failed to find client with address={}; ex={}!!!", last_mess_sender_, ex.what());
     }
     start_receive();
   }
@@ -78,14 +72,14 @@ void server_t::add_client(const client_uuid_t& uuid, const endpoint_t& addr)
   impl_->clients_holder_.add(uuid, addr);
 }
 
-void server_t::send(const std::string& message, const endpoint_t& addr)
+void server_t::send(const std::string& message, const client_uuid_t& client_uuid)
 try
 {
-  impl_->clients_holder_.at(addr).push_for_send(message);
+  impl_->clients_holder_.at(client_uuid).push_for_send(message);
 }
 catch (...)
 {
-  SPDLOG_ERROR("Unable to send message to addr={}; No client found! message={}", message, addr);
+  SPDLOG_ERROR("Unable to send message to client={}; No client found! message={}", message, client_uuid);
 }
 
 void server_t::process()
@@ -94,8 +88,6 @@ void server_t::process()
   {
     SPDLOG_INFO("send datagram={}", datagram);
     impl_->socket_.async_send_to(boost::asio::buffer(datagram.message), datagram.address, [](auto /*_1*/, auto /*_2*/) {});
-
-    // impl_->send(datagram.message, datagram.address);
   }
 }
 
