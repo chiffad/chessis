@@ -2,6 +2,7 @@
 #include "server/logic/clients_holder.hpp"
 
 #include <boost/bind/bind.hpp>
+#include <messages/messages_io.hpp>
 #include <spdlog/spdlog.h>
 
 namespace chess::server::logic {
@@ -37,12 +38,12 @@ struct server_t::impl_t
 
     try
     {
-      // TODO: client should be found here by uuid, not address
-      clients_holder_.at(last_mess_sender_).message_received(mess);
+      auto tokenized_msg = msg::init<msg::tokenized_msg_t>(mess);
+      clients_holder_.at(chess::common::from_msg_token(tokenized_msg.token)).message_received(last_mess_sender_, std::move(tokenized_msg.data));
     }
     catch (const std::exception& ex)
     {
-      SPDLOG_ERROR("Failed to find client with address={}; ex={}!!!", last_mess_sender_, ex.what());
+      SPDLOG_ERROR("Failed to process mess={} from address={}; ex={}!!!", mess, last_mess_sender_, ex.what());
     }
     start_receive();
   }
@@ -72,7 +73,7 @@ void server_t::add_client(const client_uuid_t& uuid, const endpoint_t& addr)
   impl_->clients_holder_.add(uuid, addr);
 }
 
-void server_t::send(const std::string& message, const client_uuid_t& client_uuid)
+void server_t::send(const msg::some_datagram_t& message, const client_uuid_t& client_uuid)
 try
 {
   impl_->clients_holder_.at(client_uuid).push_for_send(message);

@@ -17,8 +17,8 @@ public:
   client_t& operator=(client_t&&) = default;
   ~client_t() override;
 
-  void message_received(const std::string& message);
-  void push_for_send(const std::string& message);
+  void message_received(const endpoint_t& e, msg::incoming_datagram_t message);
+  void push_for_send(const msg::some_datagram_t& message);
   const client_uuid_t& uuid() const;
 
 private:

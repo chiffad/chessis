@@ -22,7 +22,7 @@ public:
   ~server_t();
 
   void add_client(const client_uuid_t& uuid, const endpoint_t& addr);
-  void send(const std::string& message, const client_uuid_t& client_uuid);
+  void send(const msg::some_datagram_t& message, const client_uuid_t& client_uuid);
   void process();
   std::map<client_uuid_t, std::vector<msg::some_datagram_t>> read();
   endpoint_t address() const;

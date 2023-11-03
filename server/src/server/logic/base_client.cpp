@@ -2,6 +2,8 @@
 
 #include <boost/uuid/uuid_io.hpp>
 #include <deque>
+#include <messages/messages_eq.hpp>
+#include <messages/messages_io.hpp>
 #include <spdlog/spdlog.h>
 
 namespace chess::server::logic {
@@ -16,7 +18,7 @@ enum class received_serial_num_error_t
 
 struct msg_to_send_t
 {
-  std::string message;
+  msg::some_datagram_t message;
   bool extra;
 };
 
@@ -26,12 +28,12 @@ struct base_client_t::impl_t
 {
   impl_t(io_service_t& io_serv, const endpoint_t& addr);
   void message_received(const std::string& message);
-  std::optional<msg::some_datagram_t> preprocess_message(const std::string& m);
+  std::optional<msg::some_datagram_t> preprocess_message(msg::incoming_datagram_t m);
 
   received_serial_num_error_t check_ser_num(const msg::incoming_datagram_t& num) const;
-  void add_for_send(const std::string& message, bool extra_message = false);
+  void add_for_send(const msg::some_datagram_t& message, bool extra_message = false);
   void check_message_received();
-  void begin_wait_receive(const std::string& message);
+  void begin_wait_receive(const msg::some_datagram_t& message);
   void start_connection_timer();
   void start_response_timer();
   void set_connection_status(bool online);
@@ -41,7 +43,7 @@ struct base_client_t::impl_t
 
   std::deque<msg_to_send_t> messages_for_send_;
   std::deque<msg::some_datagram_t> messages_for_logic_;
-  std::string last_send_message_;
+  msg::some_datagram_t last_send_message_;
 
   uint64_t received_serial_num_;
   uint64_t send_serial_num_;
@@ -58,12 +60,12 @@ base_client_t::base_client_t(io_service_t& io_serv, const endpoint_t& addr)
 
 base_client_t::~base_client_t() = default;
 
-std::optional<msg::some_datagram_t> base_client_t::preprocess_message(const std::string& m)
+std::optional<msg::some_datagram_t> base_client_t::preprocess_message(msg::incoming_datagram_t m)
 {
-  return impl_->preprocess_message(m);
+  return impl_->preprocess_message(std::move(m));
 }
 
-void base_client_t::add_for_send(const std::string& message, bool extra_message)
+void base_client_t::add_for_send(const msg::some_datagram_t& message, bool extra_message)
 {
   impl_->add_for_send(message, extra_message);
 }
@@ -88,7 +90,7 @@ std::string base_client_t::pull_for_send()
 {
   auto msg = std::move(impl_->messages_for_send_.front());
   impl_->messages_for_send_.pop_front();
-  if (!msg::is_equal_types<msg::message_received_t>(msg.message)) impl_->begin_wait_receive(msg.message);
+  if (msg.message.type != msg::id_v<msg::message_received_t>) impl_->begin_wait_receive(msg.message);
 
   return msg::prepare_for_send(msg::incoming_datagram_t{std::move(msg.message), msg.extra ? impl_->send_serial_num_ : ++impl_->send_serial_num_, impl_->received_serial_num_ + 1});
 }
@@ -104,6 +106,11 @@ msg::some_datagram_t base_client_t::pull_for_logic()
 const endpoint_t& base_client_t::address() const
 {
   return impl_->address_;
+}
+
+void base_client_t::set_address(const endpoint_t& addr)
+{
+  impl_->address_ = addr;
 }
 
 bool base_client_t::online() const
@@ -126,15 +133,14 @@ base_client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
   , online_(false)
 {}
 
-std::optional<msg::some_datagram_t> base_client_t::impl_t::preprocess_message(const std::string& m)
+std::optional<msg::some_datagram_t> base_client_t::impl_t::preprocess_message(const msg::incoming_datagram_t datagram)
 {
   start_connection_timer();
   set_connection_status(true);
 
-  const auto datagram = msg::init<msg::incoming_datagram_t>(m);
   switch (check_ser_num(datagram))
   {
-    case received_serial_num_error_t::prev: add_for_send(msg::prepare_for_send(msg::message_received_t()), true); return std::nullopt;
+    case received_serial_num_error_t::prev: add_for_send(msg::message_received_t{}, true); return std::nullopt;
     case received_serial_num_error_t::wrong: return std::nullopt;
     default: received_serial_num_ = datagram.ser_num;
   }
@@ -146,13 +152,13 @@ std::optional<msg::some_datagram_t> base_client_t::impl_t::preprocess_message(co
     return std::nullopt;
   }
 
-  add_for_send(msg::prepare_for_send(msg::message_received_t()));
+  add_for_send(msg::message_received_t{});
   return some_datagram;
 }
 
 received_serial_num_error_t base_client_t::impl_t::check_ser_num(const msg::incoming_datagram_t& datagram) const
 {
-  if (datagram.ser_num == received_serial_num_ && !msg::is_equal_types<msg::message_received_t>(datagram.data))
+  if (datagram.ser_num == received_serial_num_ && datagram.data.type != msg::id_v<msg::message_received_t>)
   {
     return received_serial_num_error_t::prev;
   }
@@ -166,7 +172,7 @@ received_serial_num_error_t base_client_t::impl_t::check_ser_num(const msg::inco
   return received_serial_num_error_t::ok;
 }
 
-void base_client_t::impl_t::add_for_send(const std::string& m, bool extra_message)
+void base_client_t::impl_t::add_for_send(const msg::some_datagram_t& m, bool extra_message)
 {
   SPDLOG_TRACE("add message={}", m);
   auto msg = msg_to_send_t{m, extra_message};
@@ -174,7 +180,7 @@ void base_client_t::impl_t::add_for_send(const std::string& m, bool extra_messag
   else messages_for_send_.push_back(std::move(msg));
 }
 
-void base_client_t::impl_t::begin_wait_receive(const std::string& message)
+void base_client_t::impl_t::begin_wait_receive(const msg::some_datagram_t& message)
 {
   prev_message_received_ = false;
   last_send_message_ = message;
@@ -193,7 +199,7 @@ void base_client_t::impl_t::check_message_received()
 
   add_for_send(last_send_message_, true);
 
-  if (msg::is_equal_types<msg::is_client_lost_t>(last_send_message_) && ++num_of_restarts == 3)
+  if (msg::id_v<msg::is_client_lost_t> == last_send_message_.type && ++num_of_restarts == 3)
   {
     set_connection_status(false);
   }
@@ -208,7 +214,7 @@ void base_client_t::impl_t::start_connection_timer()
   connection_timer_.async_wait([&](const boost::system::error_code& error) {
     if (!error)
     {
-      add_for_send(msg::prepare_for_send(msg::is_client_lost_t()));
+      add_for_send(msg::is_client_lost_t{});
       return;
     }
     if (error != boost::system::errc::operation_canceled) SPDLOG_ERROR("connection timer error={}; client address={}", error.message(), address_);

@@ -9,7 +9,7 @@ namespace chess::logic {
 namespace {
 
 template<typename T>
-concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagram_t, msg::message_received_t, msg::is_server_lost_t, msg::hello_server_t>;
+concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagram_t, msg::message_received_t, msg::is_server_lost_t, msg::hello_server_t, msg::tokenized_msg_t>;
 
 inline msg::game_inf_t get_board_state(const board_logic_t& d, const bool playing_white)
 {

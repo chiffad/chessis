@@ -37,9 +37,10 @@ public:
   boost::signals2::connection connect_connection_status_changed(const connection_status_signal_t::slot_type& subscriber);
 
 protected:
-  std::optional<msg::some_datagram_t> preprocess_message(const std::string& m);
-  void add_for_send(const std::string& message, bool extra_message = false);
+  std::optional<msg::some_datagram_t> preprocess_message(msg::incoming_datagram_t m);
+  void add_for_send(const msg::some_datagram_t& message, bool extra_message = false);
   void add_for_logic(msg::some_datagram_t);
+  void set_address(const endpoint_t& addr);
 
 private:
   struct impl_t;

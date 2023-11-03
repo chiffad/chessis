@@ -106,19 +106,6 @@ struct login_response_t
   uint16_t logic_server_port{};
 };
 
-struct incoming_datagram_t
-{
-  incoming_datagram_t() = default;
-  incoming_datagram_t(std::string data, uint64_t ser_num, uint64_t response_ser_num)
-    : data{std::move(data)}
-    , ser_num{ser_num}
-    , response_ser_num{response_ser_num}
-  {}
-  std::string data;
-  uint64_t ser_num{};
-  uint64_t response_ser_num{}; // if no response expected, send 0
-};
-
 struct some_datagram_t
 {
   some_datagram_t() = default;
@@ -130,8 +117,36 @@ struct some_datagram_t
     : some_datagram_t(std::move(data), std::string(type))
   {}
 
+  template<typename T>
+  some_datagram_t(T&& msg);
+
   std::string data;
   std::string type;
+};
+
+struct incoming_datagram_t
+{
+  incoming_datagram_t() = default;
+  incoming_datagram_t(some_datagram_t data, uint64_t ser_num, uint64_t response_ser_num)
+    : data{std::move(data)}
+    , ser_num{ser_num}
+    , response_ser_num{response_ser_num}
+  {}
+  some_datagram_t data;
+  uint64_t ser_num{};
+  uint64_t response_ser_num{}; // if no response expected, send 0
+};
+
+struct tokenized_msg_t
+{
+  tokenized_msg_t() = default;
+  tokenized_msg_t(token_t token, incoming_datagram_t data)
+    : token{std::move(token)}
+    , data{std::move(data)}
+  {}
+
+  token_t token;
+  incoming_datagram_t data;
 };
 
 template<typename Archive>
@@ -195,6 +210,13 @@ void serialize(Archive& ar, some_datagram_t& _1, const unsigned /*version*/)
 }
 
 template<typename Archive>
+void serialize(Archive& ar, tokenized_msg_t& _1, const unsigned /*version*/)
+{
+  ar& _1.token;
+  ar& _1.data;
+}
+
+template<typename Archive>
 void serialize(Archive& ar, token_t& _1, const unsigned /*version*/)
 {
   ar& _1.uuid;
@@ -212,6 +234,7 @@ constexpr std::string_view msg_type();
 
 MSG_TYPE(incoming_datagram_t);
 MSG_TYPE(some_datagram_t);
+MSG_TYPE(tokenized_msg_t);
 MSG_TYPE(game_inf_t);
 MSG_TYPE(login_t);
 MSG_TYPE(login_response_t);
@@ -237,6 +260,7 @@ SIMPLE_MSG(incorrect_log_t);
 SIMPLE_MSG(opponent_lost_t);
 #undef SIMPLE_MSG
 
+// TODO: token not needed
 #define TOKENIZED_SIMPLE_MSG(name)                                                                                                                                                 \
   struct name                                                                                                                                                                      \
   {                                                                                                                                                                                \
@@ -258,10 +282,10 @@ TOKENIZED_SIMPLE_MSG(new_game_t);
 
 using messages_t =
   boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, login_response_t, incorrect_log_t,
-                     move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagram_t, some_datagram_t>;
+                     move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagram_t, some_datagram_t, tokenized_msg_t>;
 
-using to_server_messages_t =
-  boost::mpl::vector<some_datagram_t, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t, my_inf_t, move_t, back_move_t, go_to_history_t, new_game_t>;
+using to_server_messages_t = boost::mpl::vector<some_datagram_t, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t, my_inf_t, move_t, back_move_t,
+                                                go_to_history_t, new_game_t, tokenized_msg_t>;
 
 using to_client_messages_t =
   boost::mpl::vector<some_datagram_t, message_received_t, get_login_t, login_response_t, is_client_lost_t, opponent_lost_t, inf_request_t, incorrect_log_t, game_inf_t>;
@@ -286,6 +310,9 @@ concept tokenized_msg = requires
 {
   T::token;
 };
+
+template<typename T>
+inline constexpr std::string_view id_v = msg_type<T>();
 
 namespace details {
 
@@ -312,7 +339,12 @@ inline std::string to_string(const T& msg)
 } // namespace details
 
 template<typename T>
-inline constexpr std::string_view id_v = msg_type<T>();
+some_datagram_t::some_datagram_t(T&& msg)
+  : data{details::to_string(std::forward<T>(msg))}
+  , type{id_v<std::decay_t<T>>}
+{
+  static_assert(one_of_msgs<std::decay_t<T>>, "some_datagram_t could be constructed only from message types");
+}
 
 template<one_of_msgs T>
 T init(const some_datagram_t& datagram)
@@ -341,7 +373,7 @@ inline some_datagram_t init<some_datagram_t>(const std::string& str)
 template<one_of_msgs T>
 inline std::string prepare_for_send(const T& msg)
 {
-  return prepare_for_send(some_datagram_t{details::to_string(msg), id_v<T>});
+  return prepare_for_send(some_datagram_t{msg});
 }
 
 template<>
