@@ -46,22 +46,20 @@ struct login_t
 struct move_t
 {
   move_t() = default;
-  move_t(std::string data, token_t t)
-    : token{std::move(t)}
-    , data{std::move(data)}
+  move_t(std::string data)
+    : data{std::move(data)}
   {}
-  token_t token;
+
   std::string data;
 };
 
 struct go_to_history_t
 {
   go_to_history_t() = default;
-  go_to_history_t(uint16_t index, token_t t)
-    : token{std::move(t)}
-    , index{index}
+  go_to_history_t(uint16_t index)
+    : index{index}
   {}
-  token_t token;
+
   uint16_t index{};
 };
 
@@ -169,14 +167,12 @@ template<typename Archive>
 void serialize(Archive& ar, go_to_history_t& _1, const unsigned /*version*/)
 {
   ar& _1.index;
-  ar& _1.token;
 }
 
 template<typename Archive>
 void serialize(Archive& ar, move_t& _1, const unsigned /*version*/)
 {
   ar& _1.data;
-  ar& _1.token;
 }
 
 template<typename Archive>
@@ -258,27 +254,11 @@ SIMPLE_MSG(is_client_lost_t);
 SIMPLE_MSG(get_login_t);
 SIMPLE_MSG(incorrect_log_t);
 SIMPLE_MSG(opponent_lost_t);
+SIMPLE_MSG(opponent_inf_t);
+SIMPLE_MSG(my_inf_t);
+SIMPLE_MSG(back_move_t);
+SIMPLE_MSG(new_game_t);
 #undef SIMPLE_MSG
-
-// TODO: token not needed
-#define TOKENIZED_SIMPLE_MSG(name)                                                                                                                                                 \
-  struct name                                                                                                                                                                      \
-  {                                                                                                                                                                                \
-    token_t token;                                                                                                                                                                 \
-  };                                                                                                                                                                               \
-  template<typename Archive>                                                                                                                                                       \
-  void serialize(Archive& ar, name& _1, const unsigned /*version*/)                                                                                                                \
-  {                                                                                                                                                                                \
-    ar& _1.token;                                                                                                                                                                  \
-  }                                                                                                                                                                                \
-  MSG_TYPE(name)
-
-TOKENIZED_SIMPLE_MSG(opponent_inf_t);
-TOKENIZED_SIMPLE_MSG(my_inf_t);
-TOKENIZED_SIMPLE_MSG(back_move_t);
-TOKENIZED_SIMPLE_MSG(new_game_t);
-#undef TOKENIZED_SIMPLE_MSG
-#undef MSG_TYPE
 
 using messages_t =
   boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, login_response_t, incorrect_log_t,
@@ -304,12 +284,6 @@ concept one_of_to_client_msgs = mpl_vector_has_type<to_client_messages_t, T>;
 
 template<typename T>
 concept one_of_msgs = mpl_vector_has_type<messages_t, T>;
-
-template<typename T>
-concept tokenized_msg = requires
-{
-  T::token;
-};
 
 template<typename T>
 inline constexpr std::string_view id_v = msg_type<T>();
