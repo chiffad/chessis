@@ -310,6 +310,9 @@ inline std::string to_string(const T& msg)
   return ss.str();
 }
 
+// TODO: move here logic from server/authentication/message_handler.cpp   template<typename T> void process(const msg::some_datagram_t& datagram, const endpoint_t& sender, const
+// uint64_t ser_num) as it is used in ultiple places in server nd client. It should be possible to configure accesable types
+
 } // namespace details
 
 template<typename T>

@@ -15,7 +15,7 @@ concept raw_to_server_msg = msg::one_of_to_server_msgs<T> && !msg::one_of<T, msg
 class client_t
 {
 public:
-  using message_received_callback_t = std::function<void(std::string)>;
+  using message_received_callback_t = std::function<void(msg::some_datagram_t)>;
   using server_status_changed_callback_t = std::function<void(bool /*online*/)>;
   using prepare_msg_strategy_t = std::function<std::string(msg::some_datagram_t data, uint64_t ser_num, uint64_t response_ser_num)>;
 

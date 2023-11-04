@@ -1,5 +1,7 @@
 #include "logic/message_handler.hpp"
 
+#include <messages/messages_io.hpp>
+
 #include <boost/mpl/begin_end.hpp>
 #include <spdlog/spdlog.h>
 #include <typeinfo>
@@ -204,6 +206,7 @@ message_handler_t::message_handler_t(games_manager_t& games_manager, server::ser
 message_handler_t::~message_handler_t() = default;
 
 void message_handler_t::process_server_message(const client_uuid_t& uuid, const msg::some_datagram_t& message)
+try
 {
   if (!impl_->games_manager_.count(uuid))
   {
@@ -212,6 +215,11 @@ void message_handler_t::process_server_message(const client_uuid_t& uuid, const 
   }
 
   impl_->process_mess_begin(message, impl_->games_manager_.player(uuid));
+}
+catch (const std::exception& ex)
+{
+  SPDLOG_CRITICAL("Exception during server message={} processing for user={}", message, uuid);
+  throw;
 }
 
 void message_handler_t::client_connection_changed(const client_uuid_t& uuid, const bool online)

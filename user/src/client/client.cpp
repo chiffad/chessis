@@ -146,10 +146,6 @@ bool client_t::impl_t::validate_serial_num(const msg::incoming_datagram_t& datag
 
 void client_t::impl_t::write_datagram(msg::some_datagram_t data, const bool prev_serial_needed)
 {
-  // std::string to_send = msg::prepare_for_send(msg::incoming_datagram_t{std::move(data), prev_serial_needed ? send_sequence_num_ : ++send_sequence_num_, received_sequence_num_ +
-  // 1});
-
-  // SPDLOG_TRACE("Send data={}; to {}", to_send, endpoint_);
   socket_.write({endpoint_, prepare_msg_fn_(std::move(data), prev_serial_needed ? send_sequence_num_ : ++send_sequence_num_, received_sequence_num_ + 1)});
 }
 
@@ -257,8 +253,7 @@ void client_t::impl_t::connected_state_t::read()
   send(msg::message_received_t{}, false);
   if (msg::id_v<msg::is_client_lost_t> != datagram.data.type)
   {
-    // TODO: fix me
-    // client_.message_received_callback_(datagram.data);
+    client_.message_received_callback_(datagram.data);
   }
 }
 

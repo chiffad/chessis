@@ -120,17 +120,21 @@ message_handler_t::message_handler_t(const endpoint_t& logic_server_endpoint, co
 message_handler_t::~message_handler_t() = default;
 
 void message_handler_t::handle(const endpoint_t& addr, const std::string& message)
+try
 {
   SPDLOG_INFO("Received data={} from {}", message, addr);
-  const auto incoming_datagram = msg::init<msg::incoming_datagram_t>(message);
-  const auto datagram = msg::init<msg::some_datagram_t>(incoming_datagram.data);
-  if (datagram.type == msg::id_v<msg::message_received_t>) return;
+  const msg::incoming_datagram_t incoming_datagram = msg::init<msg::incoming_datagram_t>(message);
+  if (incoming_datagram.data.type == msg::id_v<msg::message_received_t>) return;
 
   impl_->send_to_client(msg::message_received_t{}, addr, incoming_datagram.response_ser_num);
 
-  SPDLOG_TRACE("Begin processing of the datagram.type={} from addr={}", datagram.type, addr);
-  // TODO: get rid from +1
-  impl_->process<boost::mpl::begin<authentication_messages_t>::type>(datagram, addr, incoming_datagram.response_ser_num + 1);
+  SPDLOG_TRACE("Begin processing of the datagram.type={} from addr={}", incoming_datagram.data.type, addr);
+  impl_->process<boost::mpl::begin<authentication_messages_t>::type>(incoming_datagram.data, addr, incoming_datagram.response_ser_num + 1);
+}
+catch (const std::exception& ex)
+{
+  SPDLOG_CRITICAL("Failed to handle msg={} from {}", message, addr);
+  throw;
 }
 
 } // namespace chess::server::authentication

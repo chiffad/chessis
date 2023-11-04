@@ -1,15 +1,16 @@
+#include "client/client_controller.hpp"
+#include "controller/app.hpp"
+#include "logger.hpp"
+#include "message_handler/handler.hpp"
+
+#include <messages/messages.hpp>
+#include <spdlog/spdlog.h>
+
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QString>
 #include <QTimer>
-
-#include <spdlog/spdlog.h>
-
-#include "client/client_controller.hpp"
-#include "controller/app.hpp"
-#include "logger.hpp"
-#include "message_handler/handler.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -24,8 +25,8 @@ int main(int argc, char* argv[])
   std::unique_ptr<chess::controller::app_t> app_controller;
   std::unique_ptr<chess::message_handler::handler_t> msg_handler;
 
-  const chess::cl::client_t::message_received_callback_t message_received_callback = [&](std::string str) {
-    invoke_on_main_thread([&, str = std::move(str)] { msg_handler->handle(std::move(str)); });
+  const chess::cl::client_t::message_received_callback_t message_received_callback = [&](chess::msg::some_datagram_t d) {
+    invoke_on_main_thread([&, d = std::move(d)] { msg_handler->handle(std::move(d)); });
   };
   const chess::cl::client_t::server_status_changed_callback_t server_status_changed = [&](bool server_online) {
     invoke_on_main_thread([&, server_online] { app_controller->server_status_changed(server_online); });

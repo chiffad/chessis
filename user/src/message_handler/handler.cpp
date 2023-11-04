@@ -31,9 +31,9 @@ handler_t::handler_t(controller::app_t& app_controller, cl::client_controller_t&
 
 handler_t::~handler_t() = default;
 
-void handler_t::handle(std::string msg)
+void handler_t::handle(msg::some_datagram_t msg)
 {
-  helper::find_msg_type_and_handle(msg, *impl_);
+  helper::find_msg_type_and_handle(std::move(msg), *impl_);
 }
 
 } // namespace chess::message_handler
