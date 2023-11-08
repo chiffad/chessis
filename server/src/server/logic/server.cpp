@@ -34,8 +34,6 @@ struct server_t::impl_t
     }
 
     const std::string mess(incoming_message_.begin(), incoming_message_.begin() + readed_size);
-    SPDLOG_INFO("read={}", mess);
-
     try
     {
       auto tokenized_msg = msg::init<msg::tokenized_msg_t>(mess);
@@ -43,7 +41,7 @@ struct server_t::impl_t
     }
     catch (const std::exception& ex)
     {
-      SPDLOG_ERROR("Failed to process mess={} from address={}; ex={}!!!", mess, last_mess_sender_, ex.what());
+      SPDLOG_ERROR("Failed to process mess=\"{}\"; from address={}; ex={}!!!", mess, last_mess_sender_, ex.what());
     }
     start_receive();
   }

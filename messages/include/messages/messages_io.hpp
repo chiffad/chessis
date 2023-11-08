@@ -56,4 +56,22 @@ inline std::ostream& operator<<(std::ostream& os, const tokenized_msg_t& el)
   return os << "tokenized_msg_t{ token=" << el.token << "; data=" << el.data << "; }";
 }
 
+#define GEN_PRINT_FN(name)                                                                                                                                                         \
+  inline std::ostream& operator<<(std::ostream& os, const name& el)                                                                                                                \
+  {                                                                                                                                                                                \
+    return os << #name << "{}";                                                                                                                                                    \
+  }
+GEN_PRINT_FN(hello_server_t);
+GEN_PRINT_FN(message_received_t);
+GEN_PRINT_FN(is_server_lost_t);
+GEN_PRINT_FN(is_client_lost_t);
+GEN_PRINT_FN(get_login_t);
+GEN_PRINT_FN(incorrect_log_t);
+GEN_PRINT_FN(opponent_lost_t);
+GEN_PRINT_FN(opponent_inf_t);
+GEN_PRINT_FN(my_inf_t);
+GEN_PRINT_FN(back_move_t);
+GEN_PRINT_FN(new_game_t);
+#undef GEN_PRINT_FN
+
 } // namespace chess::msg

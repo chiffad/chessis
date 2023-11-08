@@ -20,22 +20,28 @@ client_t::client_t(io_service_t& io_serv, const client_uuid_t& uuid, const endpo
 client_t::~client_t() = default;
 
 void client_t::message_received(const endpoint_t& e, msg::incoming_datagram_t m)
+try
 {
-  SPDLOG_INFO("Client={}; Received data={}", uuid(), m);
+  SPDLOG_TRACE("Client={}; addr={}; Received data={}", uuid(), e, m);
   set_address(e);
-  const auto some_datagram_opt = preprocess_message(m);
-  if (!some_datagram_opt) return;
 
-  auto some_datagram = std::move(some_datagram_opt.value());
-  if (some_datagram.type == msg::id_v<msg::is_server_lost_t>) return;
-  if (some_datagram.type == msg::id_v<msg::hello_server_t>)
+  if (!default_preprocess_and_is_futher_processing_needed(m)) return;
+
+  if (m.data.type == msg::id_v<msg::is_server_lost_t>) return;
+  if (m.data.type == msg::id_v<msg::hello_server_t>)
   {
-    SPDLOG_INFO("Received hello_server_t msg from client={}, address={}", uuid(), address());
+    SPDLOG_INFO("Received msg=hello_server_t from client={}, address={}", uuid(), address());
+    // TODO: add processing
     return;
   }
 
-  SPDLOG_TRACE("Client={}; Push msg type={} to logic", uuid(), some_datagram.type);
-  add_for_logic(std::move(some_datagram));
+  SPDLOG_INFO("Client={}; Push msg={}; to logic!", uuid(), m.data);
+  add_for_logic(std::move(m.data));
+}
+catch (const std::exception& ex)
+{
+  SPDLOG_CRITICAL("Failed to process mess=\"{}\"; from={}; ex={}!!!", m, e, ex.what());
+  throw;
 }
 
 void client_t::push_for_send(const msg::some_datagram_t& message)

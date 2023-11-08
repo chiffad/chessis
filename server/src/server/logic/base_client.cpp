@@ -28,15 +28,27 @@ struct base_client_t::impl_t
 {
   impl_t(io_service_t& io_serv, const endpoint_t& addr);
   void message_received(const std::string& message);
-  std::optional<msg::some_datagram_t> preprocess_message(msg::incoming_datagram_t m);
+  bool default_preprocess_and_is_futher_processing_needed(const msg::incoming_datagram_t& m);
 
   received_serial_num_error_t check_ser_num(const msg::incoming_datagram_t& num) const;
-  void add_for_send(const msg::some_datagram_t& message, bool extra_message = false);
   void check_message_received();
   void begin_wait_receive(const msg::some_datagram_t& message);
   void start_connection_timer();
   void start_response_timer();
   void set_connection_status(bool online);
+
+  template<typename T>
+  void add_for_send(T&& m, bool extra_message = false)
+  {
+    SPDLOG_TRACE("add message={}", m);
+    msg::some_datagram_t d;
+    if constexpr (!std::is_same_v<std::decay_t<T>, msg::some_datagram_t>) d = msg::to_some_datagram(std::forward<T>(m));
+    else d = std::forward<T>(m);
+
+    auto msg = msg_to_send_t{std::move(d), extra_message};
+    if (extra_message) messages_for_send_.push_front(std::move(msg));
+    else messages_for_send_.push_back(std::move(msg));
+  }
 
   deadline_timer_t response_timer_;
   deadline_timer_t connection_timer_;
@@ -60,9 +72,9 @@ base_client_t::base_client_t(io_service_t& io_serv, const endpoint_t& addr)
 
 base_client_t::~base_client_t() = default;
 
-std::optional<msg::some_datagram_t> base_client_t::preprocess_message(msg::incoming_datagram_t m)
+bool base_client_t::default_preprocess_and_is_futher_processing_needed(const msg::incoming_datagram_t& m)
 {
-  return impl_->preprocess_message(std::move(m));
+  return impl_->default_preprocess_and_is_futher_processing_needed(m);
 }
 
 void base_client_t::add_for_send(const msg::some_datagram_t& message, bool extra_message)
@@ -133,27 +145,32 @@ base_client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
   , online_(false)
 {}
 
-std::optional<msg::some_datagram_t> base_client_t::impl_t::preprocess_message(const msg::incoming_datagram_t datagram)
+bool base_client_t::impl_t::default_preprocess_and_is_futher_processing_needed(const msg::incoming_datagram_t& datagram)
+try
 {
   start_connection_timer();
   set_connection_status(true);
 
   switch (check_ser_num(datagram))
   {
-    case received_serial_num_error_t::prev: add_for_send(msg::message_received_t{}, true); return std::nullopt;
-    case received_serial_num_error_t::wrong: return std::nullopt;
+    case received_serial_num_error_t::prev: add_for_send(msg::message_received_t{}, true); return false;
+    case received_serial_num_error_t::wrong: return false;
     default: received_serial_num_ = datagram.ser_num;
   }
 
-  const auto some_datagram = msg::init<msg::some_datagram_t>(datagram.data);
-  if (some_datagram.type == msg::id_v<msg::message_received_t>)
+  if (datagram.data.type == msg::id_v<msg::message_received_t>)
   {
     prev_message_received_ = true;
-    return std::nullopt;
+    return false;
   }
 
   add_for_send(msg::message_received_t{});
-  return some_datagram;
+  return true;
+}
+catch (const std::exception& ex)
+{
+  SPDLOG_CRITICAL("Failed to process datagrm={}; reason={}!!!", datagram, ex.what());
+  throw;
 }
 
 received_serial_num_error_t base_client_t::impl_t::check_ser_num(const msg::incoming_datagram_t& datagram) const
@@ -170,14 +187,6 @@ received_serial_num_error_t base_client_t::impl_t::check_ser_num(const msg::inco
   }
 
   return received_serial_num_error_t::ok;
-}
-
-void base_client_t::impl_t::add_for_send(const msg::some_datagram_t& m, bool extra_message)
-{
-  SPDLOG_TRACE("add message={}", m);
-  auto msg = msg_to_send_t{m, extra_message};
-  if (extra_message) messages_for_send_.push_front(std::move(msg));
-  else messages_for_send_.push_back(std::move(msg));
 }
 
 void base_client_t::impl_t::begin_wait_receive(const msg::some_datagram_t& message)

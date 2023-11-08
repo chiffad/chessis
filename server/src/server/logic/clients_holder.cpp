@@ -10,6 +10,7 @@ clients_holder_t::clients_holder_t(io_service_t& io_service, const connection_st
 
 client_t& clients_holder_t::add(const client_uuid_t& uuid, const endpoint_t& addr)
 {
+  // TODO: do we need address_to_cl_?
   if (address_to_cl_.count(addr))
   {
     SPDLOG_INFO("Client on address={} already known!", addr);
@@ -63,7 +64,7 @@ std::vector<datagram_t<std::string>> clients_holder_t::datagrams_to_send()
   {
     while (client->message_for_send_append())
     {
-      res.push_back({addr, client->pull_for_send()});
+      res.push_back({client->address(), client->pull_for_send()});
     }
   }
 

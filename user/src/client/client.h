@@ -29,7 +29,7 @@ public:
   template<raw_to_server_msg T>
   void send(T&& data)
   {
-    send(msg::some_datagram_t{std::forward<T>(data)});
+    send(msg::to_some_datagram(std::forward<T>(data)));
   }
 
 private:

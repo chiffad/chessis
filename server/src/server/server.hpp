@@ -22,7 +22,7 @@ public:
   template<msg::one_of_to_client_msgs T>
   void send(T&& data, const client_uuid_t& client_uuid)
   {
-    logic_server_.send(msg::some_datagram_t{std::forward<T>(data)}, client_uuid);
+    logic_server_.send(msg::to_some_datagram(std::forward<T>(data)), client_uuid);
   }
 
 private:

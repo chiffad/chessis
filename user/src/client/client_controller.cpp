@@ -68,7 +68,7 @@ client_controller_t::~client_controller_t() = default;
 
 void client_controller_t::process(msg::login_response_t data)
 {
-  SPDLOG_INFO("New login info received: ", data);
+  SPDLOG_INFO("New login info received: {}", data);
   impl_->token_ = std::make_unique<msg::token_t>(std::move(data.token));
   impl_->client_ = impl_->build_logic_client(std::move(data.logic_server_address), data.logic_server_port);
 }

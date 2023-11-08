@@ -107,6 +107,11 @@ struct login_response_t
 struct some_datagram_t
 {
   some_datagram_t() = default;
+  some_datagram_t(const some_datagram_t&) = default;
+  some_datagram_t& operator=(const some_datagram_t&) = default;
+  some_datagram_t(some_datagram_t&&) = default;
+  some_datagram_t& operator=(some_datagram_t&&) = default;
+
   some_datagram_t(std::string data, std::string type)
     : data(std::move(data))
     , type(std::move(type))
@@ -114,9 +119,6 @@ struct some_datagram_t
   some_datagram_t(std::string data, std::string_view type)
     : some_datagram_t(std::move(data), std::string(type))
   {}
-
-  template<typename T>
-  some_datagram_t(T&& msg);
 
   std::string data;
   std::string type;
@@ -316,14 +318,15 @@ inline std::string to_string(const T& msg)
 } // namespace details
 
 template<typename T>
-some_datagram_t::some_datagram_t(T&& msg)
-  : data{details::to_string(std::forward<T>(msg))}
-  , type{id_v<std::decay_t<T>>}
+concept not_some_datagram_t_msg = one_of_msgs<std::decay_t<T>> && !std::same_as<std::decay_t<T>, some_datagram_t> && !std::convertible_to<T, some_datagram_t>;
+
+template<not_some_datagram_t_msg T>
+inline some_datagram_t to_some_datagram(T&& msg)
 {
-  static_assert(one_of_msgs<std::decay_t<T>>, "some_datagram_t could be constructed only from message types");
+  return {details::to_string(std::forward<T>(msg)), id_v<std::decay_t<T>>};
 }
 
-template<one_of_msgs T>
+template<not_some_datagram_t_msg T>
 T init(const some_datagram_t& datagram)
 {
   if (datagram.type != id_v<T>)
@@ -350,7 +353,7 @@ inline some_datagram_t init<some_datagram_t>(const std::string& str)
 template<one_of_msgs T>
 inline std::string prepare_for_send(const T& msg)
 {
-  return prepare_for_send(some_datagram_t{msg});
+  return prepare_for_send(msg::to_some_datagram(msg));
 }
 
 template<>

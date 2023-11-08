@@ -15,8 +15,6 @@ namespace chess::cl {
 namespace {
 const int RESPONSE_WAIT_TIME = 500;
 const int CHECK_CONNECT_TIME = 5000;
-const int RESEND_HELLO_SERVER_TIME = 40;
-
 } // namespace
 
 struct client_t::impl_t
@@ -100,7 +98,7 @@ client_t::impl_t::impl_t(const client_t::message_received_callback_t& callback, 
   , connection_strategy_{std::move(connection_strategy)}
 {
   QObject::connect(&response_checker_timer_, &QTimer::timeout, [&]() { resend_prev_message(); });
-  QObject::connect(&server_alive_timer_, &QTimer::timeout, [&]() { state_->send(msg::is_server_lost_t{}, false); });
+  QObject::connect(&server_alive_timer_, &QTimer::timeout, [&]() { state_->send(msg::to_some_datagram(msg::is_server_lost_t{}), false); });
 
   state_ = std::make_shared<connect_state_t>(*this, connection_strategy_);
 }
@@ -138,7 +136,7 @@ bool client_t::impl_t::validate_serial_num(const msg::incoming_datagram_t& datag
   --received_sequence_num_;
   if (datagram.ser_num == received_sequence_num_ && msg::id_v<msg::message_received_t> != datagram.data.type)
   {
-    state_->send(msg::message_received_t{}, true);
+    state_->send(msg::to_some_datagram(msg::message_received_t{}), true);
   }
 
   return false;
@@ -168,14 +166,14 @@ client_t::impl_t::connect_state_t::connect_state_t(client_t::impl_t& client, std
   client_.socket_.bind();
   SPDLOG_DEBUG("Trying to connect to the server");
   establish_connection(false);
-  resend_hello_server_timer_.start(RESEND_HELLO_SERVER_TIME);
+  resend_hello_server_timer_.start(RESPONSE_WAIT_TIME);
 }
 
 void client_t::impl_t::connect_state_t::establish_connection(const bool prev_serial_needed)
 {
   connection_strategy_->exec(client_.endpoint_);
   SPDLOG_INFO("Try to establish connection on address={}", client_.endpoint_);
-  client_.write_datagram(msg::hello_server_t{}, prev_serial_needed);
+  client_.write_datagram(msg::to_some_datagram(msg::hello_server_t{}), prev_serial_needed);
 }
 
 void client_t::impl_t::connect_state_t::send(msg::some_datagram_t data, const bool prev_serial_needed)
@@ -250,7 +248,7 @@ void client_t::impl_t::connected_state_t::read()
     return;
   }
 
-  send(msg::message_received_t{}, false);
+  send(msg::to_some_datagram(msg::message_received_t{}), false);
   if (msg::id_v<msg::is_client_lost_t> != datagram.data.type)
   {
     client_.message_received_callback_(datagram.data);
