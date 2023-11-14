@@ -16,8 +16,6 @@ add_executable(${TARGET_NAME}
   src/logic/coord.hpp
   src/logic/boards_holder.hpp 
   src/logic/boards_holder.cpp
-  src/logic/credentials.hpp
-  src/logic/credentials.cpp  
   src/logic/message_handler.cpp  
   src/logic/message_handler.hpp
   src/server/server.hpp
@@ -31,8 +29,6 @@ add_executable(${TARGET_NAME}
   src/server/logic/client.cpp
   src/server/logic/clients_holder.hpp
   src/server/logic/clients_holder.cpp 
-  src/server/authentication/client.hpp
-  src/server/authentication/client.cpp  
   src/server/authentication/message_handler.cpp 
   src/server/authentication/message_handler.hpp 
   src/server/authentication/server.cpp 
@@ -42,6 +38,11 @@ add_executable(${TARGET_NAME}
   src/common/logger.cpp 
   src/common/unique_id_generator.hpp
   src/common/unique_id_generator.cpp 
+  src/user_data/users_data_manager.hpp 
+  src/user_data/users_data_manager.cpp
+  src/user_data/session_token_generator.hpp 
+  src/user_data/credentials.hpp
+  src/user_data/credentials.cpp  
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

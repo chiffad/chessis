@@ -111,7 +111,8 @@ void message_handler_t::impl_t::handle<msg::login_t>(const msg::some_datagram_t&
   SPDLOG_DEBUG("tactic for login_t; datagram={}", datagram.data);
   auto login = msg::init<msg::login_t>(datagram);
 
-  if (!player.credentials().login.empty() && player.credentials() != credentials_t{login.login, login.pwd})
+  // TODO: should not depend on credentials_t!
+  if (!player.credentials().login.empty() && player.credentials() != server::user_data::credentials_t{login.login, login.pwd})
   {
     SPDLOG_INFO("attempt to login to the player={} with incorrect credentials login={}; pwd={}", player, login.login, login.pwd);
     server_.send(msg::incorrect_log_t(), player.uuid());
@@ -238,6 +239,7 @@ void message_handler_t::client_authenticated(client_uuid_t uuid)
 {
   SPDLOG_INFO("New player! uuid={}", uuid);
   impl_->games_manager_.add_player(std::move(uuid));
+  //  impl_->start_new_game(player);
 }
 
 } // namespace chess::logic

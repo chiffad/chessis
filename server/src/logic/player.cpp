@@ -13,7 +13,7 @@ struct player_t::impl_t
     , uuid_{uuid}
   {}
 
-  credentials_t creds_;
+  server::user_data::credentials_t creds_;
   int elo_;
   bool playing_white_;
   const uuid_t uuid_;
@@ -30,12 +30,12 @@ const player_t::uuid_t& player_t::uuid() const
   return impl_->uuid_;
 }
 
-void player_t::set_credentials(const credentials_t& creds)
+void player_t::set_credentials(const server::user_data::credentials_t& creds)
 {
   impl_->creds_ = creds;
 }
 
-const credentials_t& player_t::credentials() const
+const server::user_data::credentials_t& player_t::credentials() const
 {
   return impl_->creds_;
 }

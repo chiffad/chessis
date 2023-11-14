@@ -1,6 +1,6 @@
-#include "logic/credentials.hpp"
+#include "user_data/credentials.hpp"
 
-namespace chess::logic {
+namespace chess::server::user_data {
 
 std::ostream& operator<<(std::ostream& os, const credentials_t& c)
 {

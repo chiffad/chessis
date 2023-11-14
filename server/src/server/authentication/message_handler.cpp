@@ -1,20 +1,15 @@
 #include "server/authentication/message_handler.hpp"
 #include "common/unique_id_generator.hpp"
-#include "logic/credentials.hpp"
 #include "messages/messages.hpp"
-#include "server/authentication/client.hpp"
+#include "user_data/credentials.hpp"
+#include "user_data/session_token_generator.hpp"
 
 #include <boost/mpl/begin_end.hpp>
-#include <map>
 #include <spdlog/spdlog.h>
 
 namespace chess::server::authentication {
 
 namespace {
-inline bool valid_credentials(const logic::credentials_t& cred)
-{
-  return !cred.login.empty() && !cred.pwd.empty();
-}
 
 using authentication_messages_t = boost::mpl::vector<msg::hello_server_t, msg::login_t>;
 
@@ -25,8 +20,10 @@ concept one_of_authentication_msg = msg::mpl_vector_has_type<authentication_mess
 
 struct message_handler_t::impl_t
 {
-  impl_t(const endpoint_t logic_server_endpoint, const client_authenticated_callback_t client_authenticated_callback, const send_to_client_callback_t& send_to_client_callback)
-    : logic_server_endpoint_{logic_server_endpoint}
+  impl_t(user_data::users_data_manager_t& users_data_manager, const endpoint_t logic_server_endpoint, const client_authenticated_callback_t client_authenticated_callback,
+         const send_to_client_callback_t& send_to_client_callback)
+    : users_data_manager_{users_data_manager}
+    , logic_server_endpoint_{logic_server_endpoint}
     , client_authenticated_callback_{client_authenticated_callback}
     , send_to_client_{send_to_client_callback}
   {}
@@ -59,48 +56,44 @@ struct message_handler_t::impl_t
 
   void handle(const msg::login_t& msg, const endpoint_t& sender, const uint64_t ser_num)
   {
-    const logic::credentials_t creds = {msg.login, msg.pwd};
+    const user_data::credentials_t creds = {msg.login, msg.pwd};
     SPDLOG_INFO("Handle login requested from address={}; creds={}", sender, creds);
 
-    if (!valid_credentials(creds))
+    switch (users_data_manager_.known(creds))
     {
-      SPDLOG_INFO("Not valid creds={} from addr={}", creds, sender);
-      send_to_client(msg::incorrect_log_t{}, sender, ser_num);
-      return;
-    }
-
-    if (clients_.count(creds.login))
-    {
-      auto& cl = clients_.at(creds.login);
-      if (cl.credentials == creds)
+      case user_data::users_data_manager_t::known_user_res_t::known: client_reconnected(creds, sender, ser_num); break;
+      case user_data::users_data_manager_t::known_user_res_t::unknown: new_client(creds, sender, ser_num); break;
+      default:
       {
-        SPDLOG_DEBUG("Recconect client={} on addr={}", msg.login, sender);
-        cl.address = sender;
-        send_to_client(msg::login_response_t{msg::token_t{boost::uuids::to_string(cl.uuid)}, logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()}, sender,
-                       ser_num);
+        SPDLOG_INFO("Not valid creds={} from addr={}", creds, sender);
+        send_to_client(msg::incorrect_log_t{}, sender, ser_num);
       }
-      return;
     }
-
-    add_client(creds, sender, ser_num);
   }
 
-  void add_client(const logic::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)
+  void send_login_reponse(const client_uuid_t& uuid, const endpoint_t& endpoint, const uint64_t ser_num)
   {
-    const auto client_uuid = clients_uuid_generator_.new_uuid();
-    const client_t cl = {client_uuid, endpoint, creds};
-    SPDLOG_INFO("Add new client={}!", cl);
+    send_to_client(msg::login_response_t{session_token_generator_.gen(uuid), logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()}, endpoint, ser_num);
+  }
 
-    send_to_client(msg::login_response_t{msg::token_t{boost::uuids::to_string(cl.uuid)}, logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()}, endpoint,
-                   ser_num);
+  void client_reconnected(const user_data::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)
+  {
+    SPDLOG_INFO("Recconect client={} on addr={}", creds, endpoint);
+    send_login_reponse(users_data_manager_.uuid(creds), endpoint, ser_num);
+  }
 
-    clients_[creds.login] = std::move(cl);
+  void new_client(const user_data::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)
+  {
+    const auto client_uuid = users_data_manager_.add_user(creds);
+    SPDLOG_INFO("Add new client! client_uuid={}; endpoint={}; creds={}", client_uuid, endpoint, creds);
+
+    send_login_reponse(client_uuid, endpoint, ser_num);
     client_authenticated_callback_(endpoint, client_uuid);
   }
 
-  using login_t = std::string;
-  std::map<login_t, client_t> clients_;
-  common::uuid_generator_t clients_uuid_generator_;
+  chess::server::user_data::session_token_generator_t session_token_generator_;
+  user_data::users_data_manager_t& users_data_manager_;
+
   const endpoint_t logic_server_endpoint_;
   const client_authenticated_callback_t client_authenticated_callback_;
   const send_to_client_callback_t send_to_client_;
@@ -112,9 +105,9 @@ void message_handler_t::impl_t::process<boost::mpl::end<authentication_messages_
   SPDLOG_ERROR("No type found for datagram type={}; sender={};", datagram.type, sender);
 }
 
-message_handler_t::message_handler_t(const endpoint_t& logic_server_endpoint, const client_authenticated_callback_t& client_authenticated_callback,
-                                     const send_to_client_callback_t& send_to_client)
-  : impl_(std::make_unique<impl_t>(logic_server_endpoint, client_authenticated_callback, send_to_client))
+message_handler_t::message_handler_t(user_data::users_data_manager_t& users_data_manager, const endpoint_t& logic_server_endpoint,
+                                     const client_authenticated_callback_t& client_authenticated_callback, const send_to_client_callback_t& send_to_client)
+  : impl_(std::make_unique<impl_t>(users_data_manager, logic_server_endpoint, client_authenticated_callback, send_to_client))
 {}
 
 message_handler_t::~message_handler_t() = default;

@@ -13,9 +13,10 @@ namespace chess::server::authentication {
 
 struct server_t::impl_t
 {
-  impl_t(io_service_t& io_serv, const endpoint_t& logic_server_endpoint, const server_t::client_authenticated_callback_t& callback)
+  impl_t(io_service_t& io_serv, user_data::users_data_manager_t& users_data_manager, const endpoint_t& logic_server_endpoint,
+         const server_t::client_authenticated_callback_t& callback)
     : socket_{io_serv}
-    , message_handler_{logic_server_endpoint, callback, [this](const std::string& message, const endpoint_t& destination) { send(message, destination); }}
+    , message_handler_{users_data_manager, logic_server_endpoint, callback, [this](const std::string& message, const endpoint_t& destination) { send(message, destination); }}
   {
     while (!socket_.is_open())
     {
@@ -73,8 +74,9 @@ struct server_t::impl_t
   message_handler_t message_handler_;
 };
 
-server_t::server_t(io_service_t& io_serv, const endpoint_t& logic_server_endpoint, const client_authenticated_callback_t& callback)
-  : impl_(std::make_unique<impl_t>(io_serv, logic_server_endpoint, callback))
+server_t::server_t(io_service_t& io_serv, user_data::users_data_manager_t& users_data_manager, const endpoint_t& logic_server_endpoint,
+                   const client_authenticated_callback_t& callback)
+  : impl_(std::make_unique<impl_t>(io_serv, users_data_manager, logic_server_endpoint, callback))
 {}
 
 server_t::~server_t() = default;
