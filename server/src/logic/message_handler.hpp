@@ -3,6 +3,7 @@
 #include "common/helper.hpp"
 #include "logic/games_manager.hpp"
 #include "server/server.hpp"
+#include "user_data/users_data_manager.hpp"
 #include <messages/messages.hpp>
 
 #include <memory>
@@ -13,7 +14,7 @@ namespace chess::logic {
 class message_handler_t
 {
 public:
-  message_handler_t(games_manager_t&, server::server_t&);
+  message_handler_t(games_manager_t&, server::server_t&, server::user_data::users_data_manager_t&);
   message_handler_t(const message_handler_t&) = delete;
   message_handler_t(message_handler_t&&) = default;
   message_handler_t& operator=(const message_handler_t&) = delete;

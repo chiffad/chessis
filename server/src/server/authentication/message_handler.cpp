@@ -1,5 +1,4 @@
 #include "server/authentication/message_handler.hpp"
-#include "common/unique_id_generator.hpp"
 #include "messages/messages.hpp"
 #include "user_data/credentials.hpp"
 #include "user_data/session_token_generator.hpp"

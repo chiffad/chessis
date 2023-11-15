@@ -23,6 +23,8 @@ public:
   known_user_res_t known(const credentials_t& credentials) const;
   client_uuid_t add_user(const credentials_t& credentials);
   client_uuid_t uuid(const credentials_t& credentials) const;
+  client_uuid_t uuid(const std::string& login) const;
+  const credentials_t& credentials(const client_uuid_t& uuid) const;
 
 private:
   struct impl_t;

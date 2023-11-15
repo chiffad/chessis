@@ -24,7 +24,7 @@ try
     [&](chess::client_uuid_t uuid) { io_service.post([&]() { handler->client_authenticated(std::move(uuid)); }); }};
 
   chess::logic::games_manager_t games_manager{io_service};
-  handler = std::make_unique<chess::logic::message_handler_t>(games_manager, server);
+  handler = std::make_unique<chess::logic::message_handler_t>(games_manager, server, users_data_manager);
 
   while (true)
   {

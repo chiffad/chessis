@@ -20,10 +20,11 @@ inline bool format_valid(const credentials_t& cred)
   return !cred.login.empty() && !cred.pwd.empty();
 }
 
-std::string to_string(const credentials_t& credentials)
+template<typename T>
+std::string to_string(const T& data)
 {
   std::ostringstream ss;
-  ss << credentials;
+  ss << data;
   return ss.str();
 }
 
@@ -44,7 +45,7 @@ users_data_manager_t::~users_data_manager_t() = default;
 users_data_manager_t::known_user_res_t users_data_manager_t::known(const credentials_t& credentials) const
 try
 {
-  if(!format_valid(credentials))
+  if (!format_valid(credentials))
   {
     return known_user_res_t::wrong_format;
   }
@@ -69,8 +70,8 @@ client_uuid_t users_data_manager_t::add_user(const credentials_t& credentials)
     throw std::logic_error("Can not add user with credentials=" + to_string(credentials) + " as this user present!");
   }
 
-  auto uuid = impl_->clients_uuid_generator_.new_uuid();
-  impl_->clients_[credentials] = std::move(uuid);
+  const auto uuid = impl_->clients_uuid_generator_.new_uuid();
+  impl_->clients_[credentials] = uuid;
   return uuid;
 }
 
@@ -83,6 +84,23 @@ catch (const std::exception& ex)
 {
   SPDLOG_ERROR("Exception handled: {}; credentials={}", ex.what(), credentials);
   throw std::logic_error("Can not return uuid for user with credentials=" + to_string(credentials) + " as this user not present!");
+}
+
+client_uuid_t users_data_manager_t::uuid(const std::string& login) const
+{
+  return uuid(credentials_t{login, ""});
+}
+
+const credentials_t& users_data_manager_t::credentials(const client_uuid_t& uuid) const
+{
+  // TODO! not optimal!
+  for (const auto& el : impl_->clients_)
+  {
+    if (el.second == uuid) return el.first;
+  }
+
+  SPDLOG_ERROR("Failed to find uuid={}", uuid);
+  throw std::logic_error("Can not return credentials for user uuid=" + to_string(uuid) + " as this user not present!");
 }
 
 } // namespace chess::server::user_data

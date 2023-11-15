@@ -11,25 +11,21 @@ namespace chess::logic {
 namespace {
 
 template<typename T>
-concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagram_t, msg::message_received_t, msg::is_server_lost_t, msg::hello_server_t, msg::tokenized_msg_t>;
+concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagram_t, msg::message_received_t, msg::is_server_lost_t, msg::hello_server_t, msg::tokenized_msg_t, msg::login_t>;
 
 inline msg::game_inf_t get_board_state(const board_logic_t& d, const bool playing_white)
 {
   return {d.get_board_mask(), d.get_moves_history(), d.mate(), d.get_move_num(), playing_white};
 }
 
-inline msg::inf_request_t get_person_inf(const player_t& player)
-{
-  return {"Login: " + player.credentials().login + "; Elo rating: " + std::to_string(player.rating())};
-}
-
 } // namespace
 
 struct message_handler_t::impl_t
 {
-  impl_t(games_manager_t& games_manager, server::server_t& server)
+  impl_t(games_manager_t& games_manager, server::server_t& server, const server::user_data::users_data_manager_t& users_data_manager)
     : games_manager_{games_manager}
     , server_{server}
+    , users_data_manager_{users_data_manager}
   {}
 
   void process_mess_begin(const msg::some_datagram_t& datagram, player_t& player)
@@ -58,6 +54,11 @@ struct message_handler_t::impl_t
   {
     static_assert(one_of_msg_to_ignore<T>, "Unexpected type received. Handle it or ignore!");
     SPDLOG_ERROR("For type={} tactic isn't defined! datagram type={}", typeid(T).name(), datagram.type);
+  }
+
+  msg::inf_request_t get_person_inf(const player_t& player) const
+  {
+    return {"Login: " + users_data_manager_.credentials(player.uuid()).login + "; Elo rating: " + std::to_string(player.rating())};
   }
 
   void start_new_game(player_t& player)
@@ -97,6 +98,7 @@ struct message_handler_t::impl_t
 
   games_manager_t& games_manager_;
   server::server_t& server_;
+  const server::user_data::users_data_manager_t& users_data_manager_;
 };
 
 template<>
@@ -105,7 +107,7 @@ void message_handler_t::impl_t::process_mess<boost::mpl::end<msg::to_server_mess
   SPDLOG_ERROR("No type found for datagram type={}; player={};", datagram.type, player);
 }
 
-template<>
+/*template<>
 void message_handler_t::impl_t::handle<msg::login_t>(const msg::some_datagram_t& datagram, player_t& player)
 {
   SPDLOG_DEBUG("tactic for login_t; datagram={}", datagram.data);
@@ -122,7 +124,7 @@ void message_handler_t::impl_t::handle<msg::login_t>(const msg::some_datagram_t&
   player.set_credentials({login.login, login.pwd});
   // TODO check is there game in progress for this player update board?
   start_new_game(player);
-}
+}*/
 
 template<>
 void message_handler_t::impl_t::handle<msg::opponent_inf_t>(const msg::some_datagram_t& /*datagram*/, player_t& player)
@@ -200,8 +202,8 @@ void message_handler_t::impl_t::handle<msg::new_game_t>(const msg::some_datagram
   start_new_game(player);
 }
 
-message_handler_t::message_handler_t(games_manager_t& games_manager, server::server_t& server)
-  : impl_(std::make_unique<impl_t>(games_manager, server))
+message_handler_t::message_handler_t(games_manager_t& games_manager, server::server_t& server, server::user_data::users_data_manager_t& users_data_manager)
+  : impl_(std::make_unique<impl_t>(games_manager, server, users_data_manager))
 {}
 
 message_handler_t::~message_handler_t() = default;

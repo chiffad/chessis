@@ -1,8 +1,6 @@
 #pragma once
 
 #include "common/helper.hpp"
-#include "common/unique_id_generator.hpp"
-#include "user_data/credentials.hpp"
 
 #include <boost/asio.hpp>
 #include <memory>
@@ -21,9 +19,6 @@ public:
   ~player_t();
 
   const uuid_t& uuid() const;
-  // TODO: should not depend on credentials_t!
-  void set_credentials(const server::user_data::credentials_t& cred);
-  const server::user_data::credentials_t& credentials() const;
   void set_rating(const int rating);
   int rating() const;
   bool playing_white() const;
