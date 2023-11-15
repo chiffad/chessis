@@ -1,5 +1,7 @@
 #include "server/logic/client.hpp"
 #include <messages/messages_io.hpp>
+
+#include <set>
 #include <spdlog/spdlog.h>
 
 namespace chess::server::logic {
@@ -26,15 +28,10 @@ try
   set_address(e);
 
   if (!default_preprocess_and_is_futher_processing_needed(m)) return;
-
   if (m.data.type == msg::id_v<msg::is_server_lost_t>) return;
-  if (m.data.type == msg::id_v<msg::hello_server_t>)
-  {
-    SPDLOG_INFO("Received msg=hello_server_t from client={}, address={}", uuid(), address());
-    // TODO: add processing
-    return;
-  }
+  if (m.data.type == msg::id_v<msg::hello_server_t>) return;
 
+  // TODO: think how to process reconnected clients
   SPDLOG_INFO("Client={}; Push msg={}; to logic!", uuid(), m.data);
   add_for_logic(std::move(m.data));
 }

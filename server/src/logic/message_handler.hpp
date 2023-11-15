@@ -22,8 +22,8 @@ public:
   ~message_handler_t();
 
   void process_server_message(const client_uuid_t& uuid, const msg::some_datagram_t& message);
-  void client_connection_changed(const client_uuid_t& uuid, bool online);
-  void client_authenticated(client_uuid_t uuid);
+  void user_connection_changed(const client_uuid_t& uuid, bool online);
+  void user_connected(client_uuid_t uuid);
 
 private:
   struct impl_t;

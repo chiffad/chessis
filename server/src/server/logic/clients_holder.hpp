@@ -23,9 +23,10 @@ public:
   std::map<client_uuid_t, std::vector<msg::some_datagram_t>> datagrams_to_process();
 
   client_t& at(const client_uuid_t& addr);
-  const client_t& at(const endpoint_t& addr) const;
-  client_t& at(const endpoint_t& uuid);
   const client_t& at(const client_uuid_t& uuid) const;
+
+  client_t& at(const endpoint_t& uuid);
+  const client_t& at(const endpoint_t& addr) const;
 
 private:
   io_service_t& io_service_;

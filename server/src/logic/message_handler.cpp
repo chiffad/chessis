@@ -225,7 +225,7 @@ catch (const std::exception& ex)
   throw;
 }
 
-void message_handler_t::client_connection_changed(const client_uuid_t& uuid, const bool online)
+void message_handler_t::user_connection_changed(const client_uuid_t& uuid, const bool online)
 {
   SPDLOG_DEBUG("Client with uuid={} connection changed online={}", uuid, online);
   if (online) return;
@@ -235,13 +235,13 @@ void message_handler_t::client_connection_changed(const client_uuid_t& uuid, con
   {
     impl_->server_.send(msg::opponent_lost_t(), opp_uuid.value());
   }
+  // TODO: here we should check is there any game in progress for this client or not
 }
 
-void message_handler_t::client_authenticated(client_uuid_t uuid)
+void message_handler_t::user_connected(client_uuid_t uuid)
 {
   SPDLOG_INFO("New player! uuid={}", uuid);
   impl_->games_manager_.add_player(std::move(uuid));
-  //  impl_->start_new_game(player);
 }
 
 } // namespace chess::logic
