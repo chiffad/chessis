@@ -56,7 +56,7 @@ struct server_t::impl_t
     }
 
     const std::string mess(incoming_message_.begin(), incoming_message_.begin() + readed_size);
-    SPDLOG_INFO("read={}", mess);
+    SPDLOG_TRACE("read={}", mess);
     message_handler_.handle(last_mess_sender_, mess);
     start_receive();
   }

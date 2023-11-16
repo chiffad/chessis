@@ -11,7 +11,7 @@ namespace chess::logic {
 namespace {
 
 template<typename T>
-concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagram_t, msg::message_received_t, msg::is_server_lost_t, msg::hello_server_t, msg::tokenized_msg_t, msg::login_t>;
+concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagram_t, msg::message_received_t, msg::is_server_lost_t, msg::tokenized_msg_t, msg::login_t>;
 
 inline msg::game_inf_t get_board_state(const board_logic_t& d, const bool playing_white)
 {
@@ -107,24 +107,14 @@ void message_handler_t::impl_t::process_mess<boost::mpl::end<msg::to_server_mess
   SPDLOG_ERROR("No type found for datagram type={}; player={};", datagram.type, player);
 }
 
-/*template<>
-void message_handler_t::impl_t::handle<msg::login_t>(const msg::some_datagram_t& datagram, player_t& player)
+template<>
+void message_handler_t::impl_t::handle<msg::hello_server_t>(const msg::some_datagram_t& datagram, player_t& player)
 {
-  SPDLOG_DEBUG("tactic for login_t; datagram={}", datagram.data);
-  auto login = msg::init<msg::login_t>(datagram);
+  SPDLOG_DEBUG("tactic for hello_server_t;");
 
-  // TODO: should not depend on credentials_t!
-  if (!player.credentials().login.empty() && player.credentials() != server::user_data::credentials_t{login.login, login.pwd})
-  {
-    SPDLOG_INFO("attempt to login to the player={} with incorrect credentials login={}; pwd={}", player, login.login, login.pwd);
-    server_.send(msg::incorrect_log_t(), player.uuid());
-    return;
-  }
-
-  player.set_credentials({login.login, login.pwd});
-  // TODO check is there game in progress for this player update board?
-  start_new_game(player);
-}*/
+  // TODO check is there game in progress for this player update board
+  // start_new_game(player);
+}
 
 template<>
 void message_handler_t::impl_t::handle<msg::opponent_inf_t>(const msg::some_datagram_t& /*datagram*/, player_t& player)
@@ -235,7 +225,6 @@ void message_handler_t::user_connection_changed(const client_uuid_t& uuid, const
   {
     impl_->server_.send(msg::opponent_lost_t(), opp_uuid.value());
   }
-  // TODO: here we should check is there any game in progress for this client or not
 }
 
 void message_handler_t::user_connected(client_uuid_t uuid)
