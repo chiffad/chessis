@@ -10,11 +10,6 @@ namespace chess::server::user_data {
 
 namespace {
 
-struct credentials_less_by_login_t
-{
-  bool operator()(const credentials_t& lhs, const credentials_t& rhs) const { return lhs.login < rhs.login; }
-};
-
 inline bool format_valid(const credentials_t& cred)
 {
   return !cred.login.empty() && !cred.pwd.empty();
@@ -32,8 +27,10 @@ std::string to_string(const T& data)
 
 struct users_data_manager_t::impl_t
 {
-  std::map<credentials_t, client_uuid_t, credentials_less_by_login_t> clients_;
-  common::uuid_generator_t clients_uuid_generator_;
+  std::map<client_uuid_t, user_data_t> uuid_to_user_;
+  std::map<std::string, client_uuid_t> login_to_uuid_;
+
+  common::uuid_generator_t user_uuid_generator_;
 };
 
 users_data_manager_t::users_data_manager_t()
@@ -50,12 +47,10 @@ try
     return known_user_res_t::wrong_format;
   }
 
-  auto it = impl_->clients_.find(credentials);
-  if (it == impl_->clients_.end()) return known_user_res_t::unknown;
+  auto uuid_it = impl_->login_to_uuid_.find(credentials.login);
+  if (uuid_it == impl_->login_to_uuid_.end()) return known_user_res_t::unknown;
 
-  if (it->first.pwd != credentials.pwd) return known_user_res_t::wrong_pwd;
-
-  return known_user_res_t::known;
+  return impl_->uuid_to_user_.at(uuid_it->second).credentials().pwd == credentials.pwd ? known_user_res_t::known : known_user_res_t::wrong_pwd;
 }
 catch (const std::exception& ex)
 {
@@ -63,42 +58,37 @@ catch (const std::exception& ex)
   throw;
 }
 
-client_uuid_t users_data_manager_t::add_user(const credentials_t& credentials)
+user_data_t& users_data_manager_t::add_user(const credentials_t& credentials)
 {
   if (known(credentials) != known_user_res_t::unknown)
   {
     throw std::logic_error("Can not add user with credentials=" + to_string(credentials) + " as this user present!");
   }
 
-  const auto uuid = impl_->clients_uuid_generator_.new_uuid();
-  impl_->clients_[credentials] = uuid;
-  return uuid;
+  const auto uuid = impl_->user_uuid_generator_.new_uuid();
+  impl_->login_to_uuid_[credentials.login] = uuid;
+  auto res = impl_->uuid_to_user_.emplace(std::piecewise_construct, std::forward_as_tuple(uuid), std::forward_as_tuple(uuid, credentials));
+  return res.first->second;
 }
 
-client_uuid_t users_data_manager_t::uuid(const credentials_t& credentials) const
+const user_data_t& users_data_manager_t::user(const std::string& login) const
 try
 {
-  return impl_->clients_.at(credentials);
+  return impl_->uuid_to_user_.at(impl_->login_to_uuid_.at(login));
 }
 catch (const std::exception& ex)
 {
-  SPDLOG_ERROR("Exception handled: {}; credentials={}", ex.what(), credentials);
-  throw std::logic_error("Can not return uuid for user with credentials=" + to_string(credentials) + " as this user not present!");
+  SPDLOG_ERROR("Exception handled: {}; login={}", ex.what(), login);
+  throw std::logic_error("Can not return uuid for user with credentials=" + to_string(login) + " as this user not present!");
 }
 
-client_uuid_t users_data_manager_t::uuid(const std::string& login) const
+const user_data_t& users_data_manager_t::user(const client_uuid_t& uuid) const
+try
 {
-  return uuid(credentials_t{login, ""});
+  return impl_->uuid_to_user_.at(uuid);
 }
-
-const credentials_t& users_data_manager_t::credentials(const client_uuid_t& uuid) const
+catch (const std::exception& ex)
 {
-  // TODO! not optimal!
-  for (const auto& el : impl_->clients_)
-  {
-    if (el.second == uuid) return el.first;
-  }
-
   SPDLOG_ERROR("Failed to find uuid={}", uuid);
   throw std::logic_error("Can not return credentials for user uuid=" + to_string(uuid) + " as this user not present!");
 }

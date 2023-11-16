@@ -6,7 +6,7 @@ namespace chess::logic {
 
 players_holder_t::players_holder_t() = default;
 
-player_t& players_holder_t::add(const player_t::uuid_t& uuid)
+player_t& players_holder_t::add(const client_uuid_t& uuid)
 {
   if (count(uuid))
   {

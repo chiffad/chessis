@@ -43,6 +43,8 @@ add_executable(${TARGET_NAME}
   src/user_data/session_token_generator.hpp 
   src/user_data/credentials.hpp
   src/user_data/credentials.cpp  
+  src/user_data/user_data.hpp 
+  src/user_data/user_data.cpp 
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

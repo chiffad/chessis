@@ -2,37 +2,16 @@
 
 #include "common/helper.hpp"
 
-#include <boost/asio.hpp>
-#include <memory>
-#include <string>
-
 #include "spdlog/fmt/ostr.h"
 
 namespace chess::logic {
 
-class player_t
+struct player_t
 {
-public:
-  using uuid_t = client_uuid_t;
+  player_t(const client_uuid_t& uuid);
 
-  player_t(const uuid_t& uuid);
-  ~player_t();
-
-  const uuid_t& uuid() const;
-  void set_rating(const int rating);
-  int rating() const;
-  bool playing_white() const;
-  void set_playing_white(bool playing_white);
-
-public:
-  player_t(const player_t&) = delete;
-  player_t& operator=(const player_t&) = delete;
-  player_t(player_t&&) = default;
-  player_t& operator=(player_t&&) = default;
-
-private:
-  struct impl_t;
-  std::unique_ptr<impl_t> impl_;
+  bool playing_white;
+  const client_uuid_t uuid;
 };
 
 std::ostream& operator<<(std::ostream& os, const player_t& c);

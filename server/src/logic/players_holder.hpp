@@ -7,13 +7,13 @@
 
 namespace chess::logic {
 
-using player_arr_t = std::map<player_t::uuid_t, player_t>;
+using player_arr_t = std::map<client_uuid_t, player_t>;
 
 class players_holder_t : private player_arr_t
 {
 public:
   explicit players_holder_t();
-  player_t& add(const player_t::uuid_t& addr);
+  player_t& add(const client_uuid_t& addr);
 
   using player_arr_t::at;
   using player_arr_t::begin;

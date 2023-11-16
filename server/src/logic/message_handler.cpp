@@ -58,42 +58,42 @@ struct message_handler_t::impl_t
 
   msg::inf_request_t get_person_inf(const player_t& player) const
   {
-    return {"Login: " + users_data_manager_.credentials(player.uuid()).login + "; Elo rating: " + std::to_string(player.rating())};
+    const auto& user = users_data_manager_.user(player.uuid);
+    return {"Login: " + user.credentials().login + "; Elo rating: " + std::to_string(user.elo_rating())};
   }
 
   void start_new_game(player_t& player)
   {
-    const auto free_player_uuid = games_manager_.free_player(player);
+    const auto free_player_uuid = games_manager_.free_player_uuid(player.uuid);
     if (!free_player_uuid)
     {
       SPDLOG_INFO("Can not start game for cleint={}; no opponent found!", player);
       return;
     }
 
-    games_manager_.start_game(player.uuid(), free_player_uuid.value());
-    board_updated(player);
+    const auto board_uuid = games_manager_.start_game(player.uuid, free_player_uuid.value());
+    board_updated(games_manager_.board(board_uuid), player);
   }
 
-  void board_updated(player_t& player)
+  void board_updated(const board_logic_t& board, const player_t& player)
   {
-    const auto board_uuid = games_manager_.board(player);
-    if (!board_uuid)
-    {
-      SPDLOG_ERROR("No board found for player={}", player);
-      return;
-    }
+    server_.send(get_board_state(board, player.playing_white), player.uuid);
 
-    const auto& board = games_manager_.board(board_uuid.value());
-    server_.send(get_board_state(board, player.playing_white()), player.uuid());
-
-    const auto opp_uuid = games_manager_.opponent(player.uuid());
+    const auto opp_uuid = games_manager_.opponent_uuid(player.uuid);
     if (!opp_uuid)
     {
       SPDLOG_INFO("No opponent found for player={}", player);
       return;
     }
 
-    server_.send(get_board_state(board, !player.playing_white()), opp_uuid.value());
+    server_.send(get_board_state(board, !player.playing_white), opp_uuid.value());
+  }
+
+  void exec_on_board_and_send_update(const board_logic_t::uuid_t& board_uuid, player_t& player, const std::function<void(board_logic_t&)>& extra_logic)
+  {
+    auto& board = games_manager_.board(board_uuid);
+    extra_logic(board);
+    board_updated(board, player);
   }
 
   games_manager_t& games_manager_;
@@ -120,21 +120,21 @@ template<>
 void message_handler_t::impl_t::handle<msg::opponent_inf_t>(const msg::some_datagram_t& /*datagram*/, player_t& player)
 {
   SPDLOG_DEBUG("tactic for opponent_inf_t;");
-  const auto opp_uuid = games_manager_.opponent(player.uuid());
+  const auto opp_uuid = games_manager_.opponent_uuid(player.uuid);
   if (!opp_uuid)
   {
-    server_.send(msg::inf_request_t("No opponent: no game in progress!"), player.uuid());
+    server_.send(msg::inf_request_t("No opponent: no game in progress!"), player.uuid);
     return;
   }
 
-  server_.send(get_person_inf(games_manager_.player(opp_uuid.value())), player.uuid());
+  server_.send(get_person_inf(games_manager_.player(opp_uuid.value())), player.uuid);
 }
 
 template<>
 void message_handler_t::impl_t::handle<msg::my_inf_t>(const msg::some_datagram_t& /*datagram*/, player_t& player)
 {
   SPDLOG_DEBUG("tactic for my_inf_t;");
-  server_.send(get_person_inf(player), player.uuid());
+  server_.send(get_person_inf(player), player.uuid);
 }
 
 template<>
@@ -142,15 +142,14 @@ void message_handler_t::impl_t::handle<msg::move_t>(const msg::some_datagram_t& 
 {
   SPDLOG_DEBUG("tactic for move_t; datagram={}", datagram.data);
 
-  const auto board_uuid = games_manager_.board(player);
+  const auto board_uuid = games_manager_.board_uuid(player.uuid);
   if (!board_uuid)
   {
     SPDLOG_ERROR("No board found for player={}", player);
     return;
   }
 
-  make_moves_from_str((msg::init<msg::move_t>(datagram)).data, games_manager_.board(board_uuid.value()));
-  board_updated(player);
+  exec_on_board_and_send_update(board_uuid.value(), player, [&](board_logic_t& board) { make_moves_from_str((msg::init<msg::move_t>(datagram)).data, board); });
 }
 
 template<>
@@ -158,15 +157,14 @@ void message_handler_t::impl_t::handle<msg::back_move_t>(const msg::some_datagra
 {
   SPDLOG_DEBUG("tactic for back_move_t;");
 
-  const auto board_uuid = games_manager_.board(player);
+  const auto board_uuid = games_manager_.board_uuid(player.uuid);
   if (!board_uuid)
   {
     SPDLOG_ERROR("No board found for player={}", player);
     return;
   }
 
-  games_manager_.board(board_uuid.value()).back_move();
-  board_updated(player);
+  exec_on_board_and_send_update(board_uuid.value(), player, [](board_logic_t& board) { board.back_move(); });
 }
 
 template<>
@@ -174,15 +172,14 @@ void message_handler_t::impl_t::handle<msg::go_to_history_t>(const msg::some_dat
 {
   SPDLOG_DEBUG("tactic for go_to_history_t; datagram={}", datagram.data);
 
-  const auto board_uuid = games_manager_.board(player);
+  const auto board_uuid = games_manager_.board_uuid(player.uuid);
   if (!board_uuid)
   {
     SPDLOG_ERROR("No board found for player={}", player);
     return;
   }
 
-  games_manager_.board(board_uuid.value()).go_to_history(msg::init<msg::go_to_history_t>(datagram).index);
-  board_updated(player);
+  exec_on_board_and_send_update(board_uuid.value(), player, [&](board_logic_t& board) { board.go_to_history(msg::init<msg::go_to_history_t>(datagram).index); });
 }
 
 template<>
@@ -220,7 +217,7 @@ void message_handler_t::user_connection_changed(const client_uuid_t& uuid, const
   SPDLOG_DEBUG("Client with uuid={} connection changed online={}", uuid, online);
   if (online) return;
 
-  const auto opp_uuid = impl_->games_manager_.opponent(uuid);
+  const auto opp_uuid = impl_->games_manager_.opponent_uuid(uuid);
   if (opp_uuid)
   {
     impl_->server_.send(msg::opponent_lost_t(), opp_uuid.value());

@@ -78,12 +78,12 @@ struct message_handler_t::impl_t
   void client_reconnected(const user_data::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)
   {
     SPDLOG_INFO("Recconect client={} on addr={}", creds, endpoint);
-    send_login_reponse(users_data_manager_.uuid(creds), endpoint, ser_num);
+    send_login_reponse(users_data_manager_.user(creds.login).uuid(), endpoint, ser_num);
   }
 
   void new_client(const user_data::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)
   {
-    const auto client_uuid = users_data_manager_.add_user(creds);
+    const auto client_uuid = users_data_manager_.add_user(creds).uuid();
     SPDLOG_INFO("Add new client! client_uuid={}; endpoint={}; creds={}", client_uuid, endpoint, creds);
 
     send_login_reponse(client_uuid, endpoint, ser_num);

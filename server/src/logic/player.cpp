@@ -1,62 +1,20 @@
 #include "logic/player.hpp"
 
-#include <boost/uuid/uuid_io.hpp>
-#include <spdlog/spdlog.h>
-
 namespace chess::logic {
 
-struct player_t::impl_t
-{
-  explicit impl_t(const uuid_t& uuid)
-    : elo_{1200}
-    , playing_white_{true}
-    , uuid_{uuid}
-  {}
-
-  int elo_;
-  bool playing_white_;
-  const uuid_t uuid_;
-};
-
-player_t::player_t(const uuid_t& uuid)
-  : impl_(std::make_unique<impl_t>(uuid))
+player_t::player_t(const client_uuid_t& client_uuid)
+  : playing_white{true}
+  , uuid{client_uuid}
 {}
-
-player_t::~player_t() = default;
-
-const player_t::uuid_t& player_t::uuid() const
-{
-  return impl_->uuid_;
-}
-
-void player_t::set_rating(const int rating)
-{
-  impl_->elo_ = rating;
-}
-
-int player_t::rating() const
-{
-  return impl_->elo_;
-}
-
-bool player_t::playing_white() const
-{
-  return impl_->playing_white_;
-}
-
-void player_t::set_playing_white(bool playing_white)
-{
-  impl_->playing_white_ = playing_white;
-}
 
 std::ostream& operator<<(std::ostream& os, const player_t& c)
 {
-  return os << "Player{ uuid=" << boost::uuids::to_string(c.uuid()) << " }";
+  return os << "Player{ uuid=" << c.uuid << " }";
 }
 
 bool operator==(const player_t& lhs, const player_t& rhs)
 {
-  return lhs.uuid() == rhs.uuid();
+  return lhs.uuid == rhs.uuid;
 }
 
 } // namespace chess::logic
