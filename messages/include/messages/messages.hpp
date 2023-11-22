@@ -78,9 +78,9 @@ struct game_inf_t
   game_inf_t(std::string board_mask, std::string moves_history, bool is_mate, uint16_t move_num, bool playing_white)
     : board_mask{std::move(board_mask)}
     , moves_history{std::move(moves_history)}
-    , is_mate{}
-    , move_num{}
-    , playing_white{}
+    , is_mate{is_mate}
+    , move_num{move_num}
+    , playing_white{playing_white}
   {}
 
   std::string board_mask;
@@ -273,7 +273,7 @@ using to_client_messages_t =
   boost::mpl::vector<some_datagram_t, message_received_t, get_login_t, login_response_t, is_client_lost_t, opponent_lost_t, inf_request_t, incorrect_log_t, game_inf_t>;
 
 template<typename mpl_vector, typename T>
-concept mpl_vector_has_type = !std::same_as<typename boost::mpl::find<mpl_vector, T>::type, typename boost::mpl::end<mpl_vector>::type>;
+concept mpl_vector_has_type = !std::same_as<typename boost::mpl::find<mpl_vector, std::decay_t<T>>::type, typename boost::mpl::end<mpl_vector>::type>;
 
 template<typename T, typename... U>
 concept one_of = (std::same_as<T, U> || ...);

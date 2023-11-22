@@ -77,16 +77,18 @@ struct message_handler_t::impl_t
 
   void board_updated(const board_logic_t& board, const player_t& player)
   {
-    server_.send(get_board_state(board, player.playing_white), player.uuid);
-
     const auto opp_uuid = games_manager_.opponent_uuid(player.uuid);
     if (!opp_uuid)
     {
-      SPDLOG_INFO("No opponent found for player={}", player);
+      SPDLOG_ERROR("No opponent found for player={}", player);
       return;
     }
 
-    server_.send(get_board_state(board, !player.playing_white), opp_uuid.value());
+    msg::game_inf_t board_state = get_board_state(board, player.playing_white);
+    server_.send(board_state, player.uuid);
+
+    board_state.playing_white = !player.playing_white;
+    server_.send(std::move(board_state), opp_uuid.value());
   }
 
   void exec_on_board_and_send_update(const board_logic_t::uuid_t& board_uuid, player_t& player, const std::function<void(board_logic_t&)>& extra_logic)

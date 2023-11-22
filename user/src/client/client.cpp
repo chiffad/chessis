@@ -13,6 +13,7 @@
 namespace chess::cl {
 
 namespace {
+const int CONNECTION_WAIT_TIME = 20;
 const int RESPONSE_WAIT_TIME = 500;
 const int CHECK_CONNECT_TIME = 5000;
 } // namespace
@@ -166,13 +167,13 @@ client_t::impl_t::connect_state_t::connect_state_t(client_t::impl_t& client, std
   client_.socket_.bind();
   SPDLOG_DEBUG("Trying to connect to the server");
   establish_connection(false);
-  resend_hello_server_timer_.start(RESPONSE_WAIT_TIME);
+  resend_hello_server_timer_.start(CONNECTION_WAIT_TIME);
 }
 
 void client_t::impl_t::connect_state_t::establish_connection(const bool prev_serial_needed)
 {
   connection_strategy_->exec(client_.endpoint_);
-  SPDLOG_INFO("Try to establish connection on address={}", client_.endpoint_);
+  SPDLOG_TRACE("Try to establish connection on address={}", client_.endpoint_);
   client_.write_datagram(msg::to_some_datagram(msg::hello_server_t{}), prev_serial_needed);
 }
 
