@@ -18,6 +18,7 @@ public:
 public:
   clients_holder_t(io_service_t& io_service, const connection_status_signal_t::slot_type& subscriber);
   client_t& add(const client_uuid_t& uuid, const endpoint_t& addr);
+  void message_received(const endpoint_t& e, const client_uuid_t& uuid, msg::incoming_datagram_t message);
 
   std::vector<datagram_t<std::string>> datagrams_to_send();
   std::map<client_uuid_t, std::vector<msg::some_datagram_t>> datagrams_to_process();
@@ -25,12 +26,12 @@ public:
   client_t& at(const client_uuid_t& addr);
   const client_t& at(const client_uuid_t& uuid) const;
 
-  client_t& at(const endpoint_t& uuid);
-  const client_t& at(const endpoint_t& addr) const;
+private:
+  void client_connection_changed(const client_uuid_t& uuid, bool online);
+  std::shared_ptr<client_t> add_client(const client_uuid_t& uuid, const endpoint_t& addr);
 
 private:
   io_service_t& io_service_;
-  std::map<endpoint_t, std::shared_ptr<client_t>> address_to_cl_;
   std::map<client_uuid_t, std::shared_ptr<client_t>> uuid_to_cl_;
   connection_status_signal_t::slot_type subscriber_;
 };

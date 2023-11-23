@@ -210,7 +210,9 @@ void base_client_t::impl_t::check_message_received()
 
   if (msg::id_v<msg::is_client_lost_t> == last_send_message_.type && ++num_of_restarts == 3)
   {
+    SPDLOG_INFO("Client on address={} went offline!", address_);
     set_connection_status(false);
+    return;
   }
 
   start_response_timer();

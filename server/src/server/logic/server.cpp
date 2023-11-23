@@ -37,7 +37,7 @@ struct server_t::impl_t
     try
     {
       auto tokenized_msg = msg::init<msg::tokenized_msg_t>(mess);
-      clients_holder_.at(chess::common::from_msg_token(tokenized_msg.token)).message_received(last_mess_sender_, std::move(tokenized_msg.data));
+      clients_holder_.message_received(last_mess_sender_, chess::common::from_msg_token(tokenized_msg.token), std::move(tokenized_msg.data));
     }
     catch (const std::exception& ex)
     {
