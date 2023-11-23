@@ -31,7 +31,7 @@ client_t& clients_holder_t::add(const client_uuid_t& uuid, const endpoint_t& add
 
   SPDLOG_INFO("Add new client on address={}; uuid={}!", addr, uuid);
   auto cl = std::make_shared<client_t>(io_service_, uuid, addr);
-  cl->connect_connection_status_changed([cl, this](const bool online) { subscriber_(*cl, online); });
+  cl->connect_connection_status_changed([uuid, this](const bool online) { subscriber_(uuid, online); });
   address_to_cl_[addr] = cl;
   uuid_to_cl_[uuid] = cl;
   return *cl;

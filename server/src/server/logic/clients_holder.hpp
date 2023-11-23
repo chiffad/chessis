@@ -13,7 +13,7 @@ namespace chess::server::logic {
 class clients_holder_t
 {
 public:
-  using connection_status_signal_t = boost::signals2::signal<void(const client_t&, bool)>;
+  using connection_status_signal_t = boost::signals2::signal<void(const client_uuid_t&, bool)>;
 
 public:
   clients_holder_t(io_service_t& io_service, const connection_status_signal_t::slot_type& subscriber);

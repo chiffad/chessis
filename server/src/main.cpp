@@ -20,7 +20,7 @@ try
   std::unique_ptr<chess::logic::message_handler_t> handler;
   chess::server::server_t server{
     io_service, users_data_manager,
-    [&](const chess::server::logic::client_t& cl, bool online) { io_service.post([uuid = cl.uuid(), online, &handler]() { handler->user_connection_changed(uuid, online); }); },
+    [&](const chess::client_uuid_t& uuid, bool online) { io_service.post([uuid, online, &handler]() { handler->user_connection_changed(std::move(uuid), online); }); },
     [&](chess::client_uuid_t uuid) { io_service.post([uuid = std::move(uuid), &handler]() { handler->user_connected(std::move(uuid)); }); }};
 
   chess::logic::games_manager_t games_manager{io_service};
