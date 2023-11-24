@@ -12,11 +12,9 @@ class server_t
 {
 public:
   using client_connection_changed_callback_t = chess::server::logic::clients_holder_t::connection_status_signal_t::slot_type;
-  using client_authenticated_callback_t = std::function<void(client_uuid_t)>;
 
 public:
-  server_t(io_service_t& io_service, user_data::users_data_manager_t& users_data_manager, const client_connection_changed_callback_t& client_connection_changed,
-           const client_authenticated_callback_t& client_authenticated);
+  server_t(io_service_t& io_service, user_data::users_data_manager_t& users_data_manager, const client_connection_changed_callback_t& client_connection_changed);
   void process();
   std::map<client_uuid_t, std::vector<msg::some_datagram_t>> read();
 

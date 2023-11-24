@@ -11,7 +11,7 @@ namespace chess::logic {
 namespace {
 
 template<typename T>
-concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagram_t, msg::message_received_t, msg::is_server_lost_t, msg::tokenized_msg_t, msg::login_t>;
+concept one_of_msg_to_ignore = msg::one_of<T, msg::some_datagram_t, msg::message_received_t, msg::is_server_lost_t, msg::tokenized_msg_t, msg::login_t, msg::hello_server_t>;
 
 inline msg::game_inf_t get_board_state(const board_logic_t& d, const bool playing_white)
 {
@@ -75,6 +75,12 @@ struct message_handler_t::impl_t
     board_updated(games_manager_.board(board_uuid), player);
   }
 
+  void send_board_state(const board_logic_t& board, const player_t& player)
+  {
+    msg::game_inf_t board_state = get_board_state(board, player.playing_white);
+    server_.send(board_state, player.uuid);
+  }
+
   void board_updated(const board_logic_t& board, const player_t& player)
   {
     const auto opp_uuid = games_manager_.opponent_uuid(player.uuid);
@@ -84,11 +90,8 @@ struct message_handler_t::impl_t
       return;
     }
 
-    msg::game_inf_t board_state = get_board_state(board, player.playing_white);
-    server_.send(board_state, player.uuid);
-
-    board_state.playing_white = !player.playing_white;
-    server_.send(std::move(board_state), opp_uuid.value());
+    send_board_state(board, player);
+    send_board_state(board, games_manager_.player(opp_uuid.value()));
   }
 
   void exec_on_board_and_send_update(const board_logic_t::uuid_t& board_uuid, player_t& player, const std::function<void(board_logic_t&)>& extra_logic)
@@ -107,19 +110,6 @@ template<>
 void message_handler_t::impl_t::process_mess<boost::mpl::end<msg::to_server_messages_t>::type>(const msg::some_datagram_t& datagram, player_t& player)
 {
   SPDLOG_ERROR("No type found for datagram type={}; player={};", datagram.type, player);
-}
-
-template<>
-void message_handler_t::impl_t::handle<msg::hello_server_t>(const msg::some_datagram_t& datagram, player_t& player)
-{
-  SPDLOG_DEBUG("tactic for hello_server_t;");
-
-  auto board_uuid_opt = games_manager_.board_uuid(player.uuid);
-  if (!board_uuid_opt) return;
-
-  SPDLOG_INFO("found board={} for player={}", board_uuid_opt.value(), player.uuid);
-  msg::game_inf_t board_state = get_board_state(games_manager_.board(board_uuid_opt.value()), player.playing_white);
-  server_.send(std::move(board_state), player.uuid);
 }
 
 template<>
@@ -221,19 +211,22 @@ catch (const std::exception& ex)
 void message_handler_t::user_connection_changed(const client_uuid_t& uuid, const bool online)
 {
   SPDLOG_DEBUG("Client with uuid={} connection changed online={}", uuid, online);
-  if (online) return;
+  if (online)
+  { // i.e. connected or reconnected
+    const auto& player = impl_->games_manager_.add_player(std::move(uuid));
+
+    auto board_uuid_opt = impl_->games_manager_.board_uuid(player.uuid);
+    if (!board_uuid_opt) return;
+
+    SPDLOG_INFO("found board={} for player={}", board_uuid_opt.value(), player.uuid);
+    impl_->send_board_state(impl_->games_manager_.board(board_uuid_opt.value()), player);
+  }
 
   const auto opp_uuid = impl_->games_manager_.opponent_uuid(uuid);
   if (opp_uuid)
   {
     impl_->server_.send(msg::opponent_lost_t(), opp_uuid.value());
   }
-}
-
-void message_handler_t::user_connected(client_uuid_t uuid)
-{
-  SPDLOG_INFO("New player! uuid={}", uuid);
-  impl_->games_manager_.add_player(std::move(uuid));
 }
 
 } // namespace chess::logic

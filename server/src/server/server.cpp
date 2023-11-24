@@ -2,13 +2,9 @@
 
 namespace chess::server {
 
-server_t::server_t(io_service_t& io_service, user_data::users_data_manager_t& users_data_manager, const client_connection_changed_callback_t& client_connection_changed,
-                   const client_authenticated_callback_t& client_authenticated)
+server_t::server_t(io_service_t& io_service, user_data::users_data_manager_t& users_data_manager, const client_connection_changed_callback_t& client_connection_changed)
   : logic_server_{io_service, client_connection_changed}
-  , authentication_server_{io_service, users_data_manager, logic_server_.address(), [client_authenticated, this](const endpoint_t& addr, chess::client_uuid_t uuid) {
-                             logic_server_.add_client(uuid, addr);
-                             client_authenticated(std::move(uuid));
-                           }}
+  , authentication_server_{io_service, users_data_manager, logic_server_.address(), [this](const auto& addr, auto uuid) { logic_server_.add_client(std::move(uuid), addr); }}
 {}
 
 void server_t::process()

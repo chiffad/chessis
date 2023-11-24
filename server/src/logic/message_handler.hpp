@@ -23,7 +23,6 @@ public:
 
   void process_server_message(const client_uuid_t& uuid, const msg::some_datagram_t& message);
   void user_connection_changed(const client_uuid_t& uuid, bool online);
-  void user_connected(client_uuid_t uuid);
 
 private:
   struct impl_t;

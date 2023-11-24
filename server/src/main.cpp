@@ -18,10 +18,9 @@ try
   chess::server::user_data::users_data_manager_t users_data_manager;
 
   std::unique_ptr<chess::logic::message_handler_t> handler;
-  chess::server::server_t server{
-    io_service, users_data_manager,
-    [&](const chess::client_uuid_t& uuid, bool online) { io_service.post([uuid, online, &handler]() { handler->user_connection_changed(std::move(uuid), online); }); },
-    [&](chess::client_uuid_t uuid) { io_service.post([uuid = std::move(uuid), &handler]() { handler->user_connected(std::move(uuid)); }); }};
+  chess::server::server_t server{io_service, users_data_manager, [&](const chess::client_uuid_t& uuid, bool online) {
+                                   io_service.post([uuid, online, &handler]() { handler->user_connection_changed(std::move(uuid), online); });
+                                 }};
 
   chess::logic::games_manager_t games_manager{io_service};
   handler = std::make_unique<chess::logic::message_handler_t>(games_manager, server, users_data_manager);

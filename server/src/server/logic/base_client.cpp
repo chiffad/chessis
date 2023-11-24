@@ -148,24 +148,26 @@ base_client_t::impl_t::impl_t(io_service_t& io_serv, const endpoint_t& addr)
 bool base_client_t::impl_t::default_preprocess_and_is_futher_processing_needed(const msg::incoming_datagram_t& datagram)
 try
 {
-  start_connection_timer();
-  set_connection_status(true);
-
+  bool futher_processing_needed = false;
   switch (check_ser_num(datagram))
   {
-    case received_serial_num_error_t::prev: add_for_send(msg::message_received_t{}, true); return false;
-    case received_serial_num_error_t::wrong: return false;
-    default: received_serial_num_ = datagram.ser_num;
+    case received_serial_num_error_t::prev: add_for_send(msg::message_received_t{}, true); break;
+    case received_serial_num_error_t::wrong: break;
+    default:
+    {
+      received_serial_num_ = datagram.ser_num;
+      if (datagram.data.type == msg::id_v<msg::message_received_t>) prev_message_received_ = true;
+      else
+      {
+        add_for_send(msg::message_received_t{});
+        futher_processing_needed = true;
+      }
+    }
   }
 
-  if (datagram.data.type == msg::id_v<msg::message_received_t>)
-  {
-    prev_message_received_ = true;
-    return false;
-  }
-
-  add_for_send(msg::message_received_t{});
-  return true;
+  start_connection_timer();
+  set_connection_status(true); // we should update status only after response as after this signal server logic could send messages
+  return futher_processing_needed;
 }
 catch (const std::exception& ex)
 {
