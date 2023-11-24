@@ -78,7 +78,9 @@ struct message_handler_t::impl_t
   void client_reconnected(const user_data::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)
   {
     SPDLOG_INFO("Recconect client={} on addr={}", creds, endpoint);
-    send_login_reponse(users_data_manager_.user(creds.login).uuid(), endpoint, ser_num);
+    const auto uuid = users_data_manager_.user(creds.login).uuid();
+    send_login_reponse(uuid, endpoint, ser_num);
+    client_authenticated_callback_(endpoint, uuid);
   }
 
   void new_client(const user_data::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)

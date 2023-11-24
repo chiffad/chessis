@@ -50,6 +50,7 @@ void clients_holder_t::message_received(const endpoint_t& e, const client_uuid_t
     return;
   }
 
+  // TODO: what to do with players in logic part? We shoud delete them as well
   add_client(uuid, e)->message_received(e, std::move(message));
 }
 

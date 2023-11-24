@@ -114,8 +114,12 @@ void message_handler_t::impl_t::handle<msg::hello_server_t>(const msg::some_data
 {
   SPDLOG_DEBUG("tactic for hello_server_t;");
 
-  // TODO check is there game in progress for this player update board
-  // start_new_game(player);
+  auto board_uuid_opt = games_manager_.board_uuid(player.uuid);
+  if (!board_uuid_opt) return;
+
+  SPDLOG_INFO("found board={} for player={}", board_uuid_opt.value(), player.uuid);
+  msg::game_inf_t board_state = get_board_state(games_manager_.board(board_uuid_opt.value()), player.playing_white);
+  server_.send(std::move(board_state), player.uuid);
 }
 
 template<>
