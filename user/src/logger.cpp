@@ -11,7 +11,7 @@
 namespace chess::logger {
 
 namespace {
-const spdlog::level::level_enum DEFAULT_LOG_LVL = spdlog::level::trace;
+const spdlog::level::level_enum DEFAULT_LOG_LVL = spdlog::level::debug;
 }
 
 logger_t& logger_t::get()

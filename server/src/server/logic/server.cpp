@@ -84,7 +84,7 @@ void server_t::process()
 {
   for (const auto& datagram : impl_->clients_holder_.datagrams_to_send())
   {
-    SPDLOG_INFO("send datagram={}", datagram);
+    SPDLOG_TRACE("send={}", datagram);
     impl_->socket_.async_send_to(boost::asio::buffer(datagram.message), datagram.address, [](auto /*_1*/, auto /*_2*/) {});
   }
 }

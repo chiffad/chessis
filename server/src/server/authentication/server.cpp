@@ -43,7 +43,7 @@ struct server_t::impl_t
 
   void send(const std::string& message, const endpoint_t& destination)
   {
-    SPDLOG_INFO("send={}; to={}", message, destination);
+    SPDLOG_TRACE("send={}; to={}", message, destination);
     socket_.async_send_to(boost::asio::buffer(message), destination, [](auto, auto) {});
   }
 

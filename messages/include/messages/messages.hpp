@@ -256,21 +256,22 @@ SIMPLE_MSG(is_client_lost_t);
 SIMPLE_MSG(get_login_t);
 SIMPLE_MSG(incorrect_log_t);
 SIMPLE_MSG(opponent_lost_t);
+SIMPLE_MSG(opponent_online_t);
 SIMPLE_MSG(opponent_inf_t);
 SIMPLE_MSG(my_inf_t);
 SIMPLE_MSG(back_move_t);
 SIMPLE_MSG(new_game_t);
 #undef SIMPLE_MSG
 
-using messages_t =
-  boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, login_response_t, incorrect_log_t,
-                     move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, incoming_datagram_t, some_datagram_t, tokenized_msg_t>;
+using messages_t = boost::mpl::vector<hello_server_t, message_received_t, is_server_lost_t, is_client_lost_t, opponent_inf_t, my_inf_t, get_login_t, login_t, login_response_t,
+                                      incorrect_log_t, move_t, back_move_t, go_to_history_t, game_inf_t, new_game_t, inf_request_t, opponent_lost_t, opponent_online_t,
+                                      incoming_datagram_t, some_datagram_t, tokenized_msg_t>;
 
 using to_server_messages_t = boost::mpl::vector<some_datagram_t, message_received_t, is_server_lost_t, hello_server_t, login_t, opponent_inf_t, my_inf_t, move_t, back_move_t,
                                                 go_to_history_t, new_game_t, tokenized_msg_t>;
 
-using to_client_messages_t =
-  boost::mpl::vector<some_datagram_t, message_received_t, get_login_t, login_response_t, is_client_lost_t, opponent_lost_t, inf_request_t, incorrect_log_t, game_inf_t>;
+using to_client_messages_t = boost::mpl::vector<some_datagram_t, message_received_t, get_login_t, login_response_t, is_client_lost_t, opponent_lost_t, opponent_online_t,
+                                                inf_request_t, incorrect_log_t, game_inf_t>;
 
 template<typename mpl_vector, typename T>
 concept mpl_vector_has_type = !std::same_as<typename boost::mpl::find<mpl_vector, std::decay_t<T>>::type, typename boost::mpl::end<mpl_vector>::type>;

@@ -202,6 +202,7 @@ void menu_layout_t::set_connect_status(const connection_status_t status)
       break;
     case connection_status_t::server_lost: connection_status_ = "Disconnected"; break;
     case connection_status_t::opponent_lost: connection_status_ = "Opponent disconnected"; break;
+    case connection_status_t::opponent_online: connection_status_ = "Connect"; break;
     default: SPDLOG_ERROR("Unknown status"); return;
   }
   emit connection_status_changed();

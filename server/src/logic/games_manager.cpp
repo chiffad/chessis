@@ -21,8 +21,13 @@ const board_logic_t& games_manager_t::board(const board_logic_t::uuid_t& uuid) c
 
 player_t& games_manager_t::add_player(const client_uuid_t& uuid)
 {
-  free_players_.insert(uuid);
-  return players_.add(uuid);
+  const auto add_res = players_.add(uuid);
+  if (add_res.second)
+  {
+    // TODO: add player to free player only when it press start game
+    free_players_.insert(uuid);
+  }
+  return add_res.first->second;
 }
 
 bool games_manager_t::count(const client_uuid_t& uuid) const

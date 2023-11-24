@@ -46,4 +46,9 @@ void message_processor_t::process(const msg::opponent_lost_t /*opp_lst*/)
   menu_layout_.set_connect_status(menu_layout_t::connection_status_t::opponent_lost);
 }
 
+void message_processor_t::process(const msg::opponent_online_t /*opp_lst*/)
+{
+  menu_layout_.set_connect_status(menu_layout_t::connection_status_t::opponent_online);
+}
+
 } // namespace chess::controller

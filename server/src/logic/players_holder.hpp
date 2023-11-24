@@ -13,7 +13,7 @@ class players_holder_t : private player_arr_t
 {
 public:
   explicit players_holder_t();
-  player_t& add(const client_uuid_t& addr);
+  std::pair<player_arr_t::iterator, bool> add(const client_uuid_t& addr);
 
   using player_arr_t::at;
   using player_arr_t::begin;

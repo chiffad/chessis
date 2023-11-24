@@ -68,6 +68,7 @@ GEN_PRINT_FN(is_client_lost_t);
 GEN_PRINT_FN(get_login_t);
 GEN_PRINT_FN(incorrect_log_t);
 GEN_PRINT_FN(opponent_lost_t);
+GEN_PRINT_FN(opponent_online_t);
 GEN_PRINT_FN(opponent_inf_t);
 GEN_PRINT_FN(my_inf_t);
 GEN_PRINT_FN(back_move_t);

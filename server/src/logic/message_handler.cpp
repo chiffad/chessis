@@ -225,7 +225,8 @@ void message_handler_t::user_connection_changed(const client_uuid_t& uuid, const
   const auto opp_uuid = impl_->games_manager_.opponent_uuid(uuid);
   if (opp_uuid)
   {
-    impl_->server_.send(msg::opponent_lost_t(), opp_uuid.value());
+    if (online) impl_->server_.send(msg::opponent_online_t(), opp_uuid.value());
+    else impl_->server_.send(msg::opponent_lost_t(), opp_uuid.value());
   }
 }
 

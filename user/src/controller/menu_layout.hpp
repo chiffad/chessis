@@ -36,7 +36,8 @@ public:
   {
     server_available,
     server_lost,
-    opponent_lost
+    opponent_lost,
+    opponent_online
   };
 
 public:
