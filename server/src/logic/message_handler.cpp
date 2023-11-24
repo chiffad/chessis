@@ -22,11 +22,18 @@ inline msg::game_inf_t get_board_state(const board_logic_t& d, const bool playin
 
 struct message_handler_t::impl_t
 {
-  impl_t(games_manager_t& games_manager, server::server_t& server, const server::user::users_data_manager_t& users_data_manager)
+  impl_t(games_manager_t& games_manager, server::server_t& server, const server::user::users_data_manager_t& users_data_manager,
+         server::user::user_status_monitor_t& user_status_monitor)
     : games_manager_{games_manager}
     , server_{server}
     , users_data_manager_{users_data_manager}
-  {}
+    , user_status_monitor_{user_status_monitor}
+  {
+    user_status_changed_connection_ =
+      user_status_monitor_.connect_user_status_changed([&](const chess::client_uuid_t& uuid, bool online) { user_connection_changed(uuid, online); });
+  }
+
+  ~impl_t() { user_status_changed_connection_.disconnect(); }
 
   void process_mess_begin(const msg::some_datagram_t& datagram, player_t& player)
   {
@@ -101,9 +108,33 @@ struct message_handler_t::impl_t
     board_updated(board, player);
   }
 
+  void user_connection_changed(const client_uuid_t& uuid, const bool online)
+  {
+    SPDLOG_DEBUG("Client with uuid={} connection changed online={}", uuid, online);
+    if (online)
+    { // i.e. connected or reconnected
+      const auto& player = games_manager_.add_player(std::move(uuid));
+
+      auto board_uuid_opt = games_manager_.board_uuid(player.uuid);
+      if (!board_uuid_opt) return;
+
+      SPDLOG_INFO("found board={} for player={}", board_uuid_opt.value(), player.uuid);
+      send_board_state(games_manager_.board(board_uuid_opt.value()), player);
+    }
+
+    const auto opp_uuid = games_manager_.opponent_uuid(uuid);
+    if (opp_uuid)
+    {
+      if (online) server_.send(msg::opponent_online_t(), opp_uuid.value());
+      else server_.send(msg::opponent_lost_t(), opp_uuid.value());
+    }
+  }
+
   games_manager_t& games_manager_;
   server::server_t& server_;
   const server::user::users_data_manager_t& users_data_manager_;
+  server::user::user_status_monitor_t& user_status_monitor_;
+  server::user::user_status_monitor_t::connection_t user_status_changed_connection_;
 };
 
 template<>
@@ -185,8 +216,9 @@ void message_handler_t::impl_t::handle<msg::new_game_t>(const msg::some_datagram
   start_new_game(player);
 }
 
-message_handler_t::message_handler_t(games_manager_t& games_manager, server::server_t& server, server::user::users_data_manager_t& users_data_manager)
-  : impl_(std::make_unique<impl_t>(games_manager, server, users_data_manager))
+message_handler_t::message_handler_t(games_manager_t& games_manager, server::server_t& server, server::user::users_data_manager_t& users_data_manager,
+                                     server::user::user_status_monitor_t& user_status_monitor)
+  : impl_(std::make_unique<impl_t>(games_manager, server, users_data_manager, user_status_monitor))
 {}
 
 message_handler_t::~message_handler_t() = default;
@@ -206,28 +238,6 @@ catch (const std::exception& ex)
 {
   SPDLOG_CRITICAL("Exception during server message={} processing for user={}", message, uuid);
   throw;
-}
-
-void message_handler_t::user_connection_changed(const client_uuid_t& uuid, const bool online)
-{
-  SPDLOG_DEBUG("Client with uuid={} connection changed online={}", uuid, online);
-  if (online)
-  { // i.e. connected or reconnected
-    const auto& player = impl_->games_manager_.add_player(std::move(uuid));
-
-    auto board_uuid_opt = impl_->games_manager_.board_uuid(player.uuid);
-    if (!board_uuid_opt) return;
-
-    SPDLOG_INFO("found board={} for player={}", board_uuid_opt.value(), player.uuid);
-    impl_->send_board_state(impl_->games_manager_.board(board_uuid_opt.value()), player);
-  }
-
-  const auto opp_uuid = impl_->games_manager_.opponent_uuid(uuid);
-  if (opp_uuid)
-  {
-    if (online) impl_->server_.send(msg::opponent_online_t(), opp_uuid.value());
-    else impl_->server_.send(msg::opponent_lost_t(), opp_uuid.value());
-  }
 }
 
 } // namespace chess::logic

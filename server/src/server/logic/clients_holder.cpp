@@ -33,7 +33,7 @@ std::shared_ptr<client_t> clients_holder_t::add_client(const client_uuid_t& uuid
 
 void clients_holder_t::client_connection_changed(const client_uuid_t& uuid, const bool online)
 {
-  user_status_monitor_.update_status(uuid, online);
+  io_service_.post([=, this]() { user_status_monitor_.update_status(uuid, online); });
 
   if (online) return;
 

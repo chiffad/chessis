@@ -9,8 +9,9 @@ class user_status_monitor_t
 {
 public:
   using user_status_changed_t = boost::signals2::signal<void(const client_uuid_t&, bool /*online*/)>;
+  using connection_t = boost::signals2::connection;
 
-  boost::signals2::connection connect_user_status_changed(const user_status_changed_t::slot_type& subscriber);
+  connection_t connect_user_status_changed(const user_status_changed_t::slot_type& subscriber);
   bool status(const client_uuid_t& uuid);
   void update_status(const client_uuid_t& uuid, bool status);
 

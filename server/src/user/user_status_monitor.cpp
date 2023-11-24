@@ -2,7 +2,7 @@
 
 namespace chess::server::user {
 
-boost::signals2::connection user_status_monitor_t::connect_user_status_changed(const user_status_changed_t::slot_type& subscriber)
+user_status_monitor_t::connection_t user_status_monitor_t::connect_user_status_changed(const user_status_changed_t::slot_type& subscriber)
 {
   return user_status_changed_signal_.connect(subscriber);
 }

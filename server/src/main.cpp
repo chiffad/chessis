@@ -21,10 +21,8 @@ try
 
   chess::server::server_t server{io_service, users_data_manager, user_status_monitor};
   chess::logic::games_manager_t games_manager{io_service};
-  chess::logic::message_handler_t handler{games_manager, server, users_data_manager};
+  chess::logic::message_handler_t handler{games_manager, server, users_data_manager, user_status_monitor};
 
-  const auto user_status_changed_connection = user_status_monitor.connect_user_status_changed(
-    [&](const chess::client_uuid_t& uuid, bool online) { io_service.post([uuid, online, &handler]() { handler.user_connection_changed(std::move(uuid), online); }); });
   while (true)
   {
     io_service.run_one();
@@ -39,8 +37,6 @@ try
 
     server.process();
   }
-
-  user_status_changed_connection.disconnect();
 
   return 0;
 }
