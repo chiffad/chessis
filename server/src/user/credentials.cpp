@@ -1,6 +1,6 @@
-#include "user_data/credentials.hpp"
+#include "user/credentials.hpp"
 
-namespace chess::server::user_data {
+namespace chess::server::user {
 
 std::ostream& operator<<(std::ostream& os, const credentials_t& c)
 {

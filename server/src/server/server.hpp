@@ -14,7 +14,7 @@ public:
   using client_connection_changed_callback_t = chess::server::logic::clients_holder_t::connection_status_signal_t::slot_type;
 
 public:
-  server_t(io_service_t& io_service, user_data::users_data_manager_t& users_data_manager, const client_connection_changed_callback_t& client_connection_changed);
+  server_t(io_service_t& io_service, user::users_data_manager_t& users_data_manager, const client_connection_changed_callback_t& client_connection_changed);
   void process();
   std::map<client_uuid_t, std::vector<msg::some_datagram_t>> read();
 

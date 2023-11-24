@@ -1,6 +1,6 @@
-#include "user_data/user_data.hpp"
+#include "user/user_data.hpp"
 
-namespace chess::server::user_data {
+namespace chess::server::user {
 
 user_data_t::user_data_t(client_uuid_t uuid, credentials_t credentials)
   : elo_rating_{1200}
@@ -38,4 +38,4 @@ bool operator==(const user_data_t& lhs, const user_data_t& rhs)
   return lhs.uuid() == rhs.uuid();
 }
 
-} // namespace chess::server::user_data
+} // namespace chess::server::user

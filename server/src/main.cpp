@@ -3,7 +3,7 @@
 #include "logic/games_manager.hpp"
 #include "logic/message_handler.hpp"
 #include "server/server.hpp"
-#include "user_data/users_data_manager.hpp"
+#include "user/users_data_manager.hpp"
 
 #include <boost/asio.hpp>
 #include <exception>
@@ -15,7 +15,7 @@ try
   chess::logger::logger_t::get().init();
 
   chess::io_service_t io_service;
-  chess::server::user_data::users_data_manager_t users_data_manager;
+  chess::server::user::users_data_manager_t users_data_manager;
 
   std::unique_ptr<chess::logic::message_handler_t> handler;
   chess::server::server_t server{io_service, users_data_manager, [&](const chess::client_uuid_t& uuid, bool online) {

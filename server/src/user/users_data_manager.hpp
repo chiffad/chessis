@@ -1,10 +1,10 @@
 #pragma once
 
 #include "common/helper.hpp"
-#include "user_data/credentials.hpp"
-#include "user_data/user_data.hpp"
+#include "user/credentials.hpp"
+#include "user/user_data.hpp"
 
-namespace chess::server::user_data {
+namespace chess::server::user {
 
 class users_data_manager_t
 {
@@ -31,4 +31,4 @@ private:
   std::unique_ptr<impl_t> impl_;
 };
 
-} // namespace chess::server::user_data
+} // namespace chess::server::user

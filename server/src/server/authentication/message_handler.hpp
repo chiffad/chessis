@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/helper.hpp"
-#include "user_data/users_data_manager.hpp"
+#include "user/users_data_manager.hpp"
 
 #include <functional>
 #include <memory>
@@ -17,8 +17,8 @@ public:
   // TODO: add client_reconnected_callback for already known clients by id\pwd
 
 public:
-  message_handler_t(user_data::users_data_manager_t& users_data_manager, const endpoint_t& logic_server_endpoint,
-                    const client_authenticated_callback_t& client_authenticated_callback, const send_to_client_callback_t& send_to_client);
+  message_handler_t(user::users_data_manager_t& users_data_manager, const endpoint_t& logic_server_endpoint, const client_authenticated_callback_t& client_authenticated_callback,
+                    const send_to_client_callback_t& send_to_client);
   message_handler_t(const message_handler_t&) = delete;
   message_handler_t(message_handler_t&&) = default;
   message_handler_t& operator=(const message_handler_t&) = delete;

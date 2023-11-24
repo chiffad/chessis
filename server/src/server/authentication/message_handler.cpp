@@ -1,7 +1,7 @@
 #include "server/authentication/message_handler.hpp"
 #include "messages/messages.hpp"
-#include "user_data/credentials.hpp"
-#include "user_data/session_token_generator.hpp"
+#include "user/credentials.hpp"
+#include "user/session_token_generator.hpp"
 
 #include <boost/mpl/begin_end.hpp>
 #include <spdlog/spdlog.h>
@@ -19,7 +19,7 @@ concept one_of_authentication_msg = msg::mpl_vector_has_type<authentication_mess
 
 struct message_handler_t::impl_t
 {
-  impl_t(user_data::users_data_manager_t& users_data_manager, const endpoint_t logic_server_endpoint, const client_authenticated_callback_t client_authenticated_callback,
+  impl_t(user::users_data_manager_t& users_data_manager, const endpoint_t logic_server_endpoint, const client_authenticated_callback_t client_authenticated_callback,
          const send_to_client_callback_t& send_to_client_callback)
     : users_data_manager_{users_data_manager}
     , logic_server_endpoint_{logic_server_endpoint}
@@ -55,13 +55,13 @@ struct message_handler_t::impl_t
 
   void handle(const msg::login_t& msg, const endpoint_t& sender, const uint64_t ser_num)
   {
-    const user_data::credentials_t creds = {msg.login, msg.pwd};
+    const user::credentials_t creds = {msg.login, msg.pwd};
     SPDLOG_INFO("Handle login requested from address={}; creds={}", sender, creds);
 
     switch (users_data_manager_.known(creds))
     {
-      case user_data::users_data_manager_t::known_user_res_t::known: client_reconnected(creds, sender, ser_num); break;
-      case user_data::users_data_manager_t::known_user_res_t::unknown: new_client(creds, sender, ser_num); break;
+      case user::users_data_manager_t::known_user_res_t::known: client_reconnected(creds, sender, ser_num); break;
+      case user::users_data_manager_t::known_user_res_t::unknown: new_client(creds, sender, ser_num); break;
       default:
       {
         SPDLOG_INFO("Not valid creds={} from addr={}", creds, sender);
@@ -75,7 +75,7 @@ struct message_handler_t::impl_t
     send_to_client(msg::login_response_t{session_token_generator_.gen(uuid), logic_server_endpoint_.address().to_string(), logic_server_endpoint_.port()}, endpoint, ser_num);
   }
 
-  void client_reconnected(const user_data::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)
+  void client_reconnected(const user::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)
   {
     SPDLOG_INFO("Recconect client={} on addr={}", creds, endpoint);
     const auto uuid = users_data_manager_.user(creds.login).uuid();
@@ -83,7 +83,7 @@ struct message_handler_t::impl_t
     client_authenticated_callback_(endpoint, uuid);
   }
 
-  void new_client(const user_data::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)
+  void new_client(const user::credentials_t& creds, const endpoint_t& endpoint, const uint64_t ser_num)
   {
     const auto client_uuid = users_data_manager_.add_user(creds).uuid();
     SPDLOG_INFO("Add new client! client_uuid={}; endpoint={}; creds={}", client_uuid, endpoint, creds);
@@ -92,8 +92,8 @@ struct message_handler_t::impl_t
     client_authenticated_callback_(endpoint, client_uuid);
   }
 
-  chess::server::user_data::session_token_generator_t session_token_generator_;
-  user_data::users_data_manager_t& users_data_manager_;
+  chess::server::user::session_token_generator_t session_token_generator_;
+  user::users_data_manager_t& users_data_manager_;
 
   const endpoint_t logic_server_endpoint_;
   const client_authenticated_callback_t client_authenticated_callback_;
@@ -106,7 +106,7 @@ void message_handler_t::impl_t::process<boost::mpl::end<authentication_messages_
   SPDLOG_ERROR("No type found for datagram type={}; sender={};", datagram.type, sender);
 }
 
-message_handler_t::message_handler_t(user_data::users_data_manager_t& users_data_manager, const endpoint_t& logic_server_endpoint,
+message_handler_t::message_handler_t(user::users_data_manager_t& users_data_manager, const endpoint_t& logic_server_endpoint,
                                      const client_authenticated_callback_t& client_authenticated_callback, const send_to_client_callback_t& send_to_client)
   : impl_(std::make_unique<impl_t>(users_data_manager, logic_server_endpoint, client_authenticated_callback, send_to_client))
 {}

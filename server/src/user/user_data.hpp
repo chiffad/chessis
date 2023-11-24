@@ -1,11 +1,11 @@
 #pragma once
 
 #include "common/helper.hpp"
-#include "user_data/credentials.hpp"
+#include "user/credentials.hpp"
 
 #include "spdlog/fmt/ostr.h"
 
-namespace chess::server::user_data {
+namespace chess::server::user {
 
 class user_data_t
 {
@@ -26,4 +26,4 @@ private:
 std::ostream& operator<<(std::ostream& os, const user_data_t& c);
 bool operator==(const user_data_t& lhs, const user_data_t& rhs);
 
-} // namespace chess::server::user_data
+} // namespace chess::server::user

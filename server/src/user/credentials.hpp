@@ -3,7 +3,7 @@
 #include "spdlog/fmt/ostr.h"
 #include <string>
 
-namespace chess::server::user_data {
+namespace chess::server::user {
 
 struct credentials_t
 {

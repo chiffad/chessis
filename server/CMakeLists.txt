@@ -38,13 +38,13 @@ add_executable(${TARGET_NAME}
   src/common/logger.cpp 
   src/common/unique_id_generator.hpp
   src/common/unique_id_generator.cpp 
-  src/user_data/users_data_manager.hpp 
-  src/user_data/users_data_manager.cpp
-  src/user_data/session_token_generator.hpp 
-  src/user_data/credentials.hpp
-  src/user_data/credentials.cpp  
-  src/user_data/user_data.hpp 
-  src/user_data/user_data.cpp 
+  src/user/users_data_manager.hpp 
+  src/user/users_data_manager.cpp
+  src/user/session_token_generator.hpp 
+  src/user/credentials.hpp
+  src/user/credentials.cpp  
+  src/user/user_data.hpp 
+  src/user/user_data.cpp 
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

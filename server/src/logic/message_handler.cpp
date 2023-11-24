@@ -22,7 +22,7 @@ inline msg::game_inf_t get_board_state(const board_logic_t& d, const bool playin
 
 struct message_handler_t::impl_t
 {
-  impl_t(games_manager_t& games_manager, server::server_t& server, const server::user_data::users_data_manager_t& users_data_manager)
+  impl_t(games_manager_t& games_manager, server::server_t& server, const server::user::users_data_manager_t& users_data_manager)
     : games_manager_{games_manager}
     , server_{server}
     , users_data_manager_{users_data_manager}
@@ -103,7 +103,7 @@ struct message_handler_t::impl_t
 
   games_manager_t& games_manager_;
   server::server_t& server_;
-  const server::user_data::users_data_manager_t& users_data_manager_;
+  const server::user::users_data_manager_t& users_data_manager_;
 };
 
 template<>
@@ -185,7 +185,7 @@ void message_handler_t::impl_t::handle<msg::new_game_t>(const msg::some_datagram
   start_new_game(player);
 }
 
-message_handler_t::message_handler_t(games_manager_t& games_manager, server::server_t& server, server::user_data::users_data_manager_t& users_data_manager)
+message_handler_t::message_handler_t(games_manager_t& games_manager, server::server_t& server, server::user::users_data_manager_t& users_data_manager)
   : impl_(std::make_unique<impl_t>(games_manager, server, users_data_manager))
 {}
 

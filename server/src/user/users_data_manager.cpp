@@ -1,4 +1,4 @@
-#include "user_data/users_data_manager.hpp"
+#include "user/users_data_manager.hpp"
 #include "common/unique_id_generator.hpp"
 
 #include <map>
@@ -6,7 +6,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace chess::server::user_data {
+namespace chess::server::user {
 
 namespace {
 
@@ -93,4 +93,4 @@ catch (const std::exception& ex)
   throw std::logic_error("Can not return credentials for user uuid=" + to_string(uuid) + " as this user not present!");
 }
 
-} // namespace chess::server::user_data
+} // namespace chess::server::user

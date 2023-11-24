@@ -15,7 +15,7 @@ public:
   using client_authenticated_callback_t = message_handler_t::client_authenticated_callback_t;
 
 public:
-  server_t(io_service_t& io_serv, user_data::users_data_manager_t& users_data_manager, const endpoint_t& authenticated_clients_server_endpoint,
+  server_t(io_service_t& io_serv, user::users_data_manager_t& users_data_manager, const endpoint_t& authenticated_clients_server_endpoint,
            const client_authenticated_callback_t& callback);
   server_t(const server_t&) = delete;
   server_t& operator=(const server_t&) = delete;
