@@ -14,7 +14,7 @@ namespace chess::server::logic {
 class server_t
 {
 public:
-  server_t(io_service_t& io_serv, const clients_holder_t::connection_status_signal_t::slot_type& subscriber);
+  server_t(io_service_t& io_serv, user::user_status_monitor_t& user_status_monitor);
   server_t(const server_t&) = delete;
   server_t& operator=(const server_t&) = delete;
   server_t(server_t&&) = default;

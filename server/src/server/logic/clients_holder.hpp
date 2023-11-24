@@ -3,6 +3,7 @@
 #include "common/helper.hpp"
 #include "server/datagram.hpp"
 #include "server/logic/client.hpp"
+#include "user/user_status_monitor.hpp"
 
 #include <map>
 #include <memory>
@@ -13,10 +14,7 @@ namespace chess::server::logic {
 class clients_holder_t
 {
 public:
-  using connection_status_signal_t = boost::signals2::signal<void(const client_uuid_t&, bool)>;
-
-public:
-  clients_holder_t(io_service_t& io_service, const connection_status_signal_t::slot_type& subscriber);
+  clients_holder_t(io_service_t& io_service, user::user_status_monitor_t& user_status_monitor);
   client_t& add(const client_uuid_t& uuid, const endpoint_t& addr);
   void message_received(const endpoint_t& e, const client_uuid_t& uuid, msg::incoming_datagram_t message);
 
@@ -33,7 +31,7 @@ private:
 private:
   io_service_t& io_service_;
   std::map<client_uuid_t, std::shared_ptr<client_t>> uuid_to_cl_;
-  connection_status_signal_t::slot_type subscriber_;
+  user::user_status_monitor_t& user_status_monitor_;
 };
 
 } // namespace chess::server::logic

@@ -45,6 +45,8 @@ add_executable(${TARGET_NAME}
   src/user/credentials.cpp  
   src/user/user_data.hpp 
   src/user/user_data.cpp 
+  src/user/user_status_monitor.hpp
+  src/user/user_status_monitor.cpp 
 )
 
 set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

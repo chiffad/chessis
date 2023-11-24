@@ -3,9 +3,9 @@
 
 namespace chess::server::logic {
 
-clients_holder_t::clients_holder_t(io_service_t& io_service, const connection_status_signal_t::slot_type& subscriber)
+clients_holder_t::clients_holder_t(io_service_t& io_service, user::user_status_monitor_t& user_status_monitor)
   : io_service_(io_service)
-  , subscriber_{subscriber}
+  , user_status_monitor_{user_status_monitor}
 {}
 
 client_t& clients_holder_t::add(const client_uuid_t& uuid, const endpoint_t& addr)
@@ -33,7 +33,7 @@ std::shared_ptr<client_t> clients_holder_t::add_client(const client_uuid_t& uuid
 
 void clients_holder_t::client_connection_changed(const client_uuid_t& uuid, const bool online)
 {
-  subscriber_(uuid, online);
+  user_status_monitor_.update_status(uuid, online);
 
   if (online) return;
 

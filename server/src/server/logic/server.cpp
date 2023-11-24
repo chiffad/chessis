@@ -9,9 +9,9 @@ namespace chess::server::logic {
 
 struct server_t::impl_t
 {
-  impl_t(io_service_t& io_serv, const clients_holder_t::connection_status_signal_t::slot_type& subscriber)
+  impl_t(io_service_t& io_serv, user::user_status_monitor_t& user_status_monitor)
     : socket_{io_serv}
-    , clients_holder_{io_serv, subscriber}
+    , clients_holder_{io_serv, user_status_monitor}
   {
     while (!socket_.is_open())
     {
@@ -59,8 +59,8 @@ struct server_t::impl_t
   endpoint_t last_mess_sender_;
 };
 
-server_t::server_t(io_service_t& io_serv, const clients_holder_t::connection_status_signal_t::slot_type& subscriber)
-  : impl_(std::make_unique<impl_t>(io_serv, subscriber))
+server_t::server_t(io_service_t& io_serv, user::user_status_monitor_t& user_status_monitor)
+  : impl_(std::make_unique<impl_t>(io_serv, user_status_monitor))
 {}
 
 server_t::~server_t() = default;

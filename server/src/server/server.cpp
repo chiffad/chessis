@@ -2,8 +2,8 @@
 
 namespace chess::server {
 
-server_t::server_t(io_service_t& io_service, user::users_data_manager_t& users_data_manager, const client_connection_changed_callback_t& client_connection_changed)
-  : logic_server_{io_service, client_connection_changed}
+server_t::server_t(io_service_t& io_service, user::users_data_manager_t& users_data_manager, user::user_status_monitor_t& user_status_monitor)
+  : logic_server_{io_service, user_status_monitor}
   , authentication_server_{io_service, users_data_manager, logic_server_.address(), [this](const auto& addr, auto uuid) { logic_server_.add_client(std::move(uuid), addr); }}
 {}
 
