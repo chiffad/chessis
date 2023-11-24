@@ -72,6 +72,10 @@ struct client_t::impl_t
   server_status_changed_callback_t server_status_changed_callback_;
   std::unique_ptr<connection_strategy_t> connection_strategy_;
   std::shared_ptr<state_t> state_;
+
+  void set_server_connection_status(bool online);
+
+  bool server_online_ = false;
 };
 
 client_t::client_t(const message_received_callback_t& callback, const client_t::server_status_changed_callback_t& server_status_changed,
@@ -97,6 +101,7 @@ client_t::impl_t::impl_t(const client_t::message_received_callback_t& callback, 
   , message_received_callback_(callback)
   , server_status_changed_callback_(server_status_changed)
   , connection_strategy_{std::move(connection_strategy)}
+  , server_online_{false}
 {
   QObject::connect(&response_checker_timer_, &QTimer::timeout, [&]() { resend_prev_message(); });
   QObject::connect(&server_alive_timer_, &QTimer::timeout, [&]() { state_->send(msg::to_some_datagram(msg::is_server_lost_t{}), false); });
@@ -125,7 +130,7 @@ void client_t::impl_t::resend_prev_message()
 
   if (++num_of_restarts == 5 || msg::id_v<msg::is_server_lost_t> == last_send_message_.type)
   {
-    server_status_changed_callback_(false);
+    set_server_connection_status(false);
   }
 }
 
@@ -146,6 +151,14 @@ bool client_t::impl_t::validate_serial_num(const msg::incoming_datagram_t& datag
 void client_t::impl_t::write_datagram(msg::some_datagram_t data, const bool prev_serial_needed)
 {
   socket_.write({endpoint_, prepare_msg_fn_(std::move(data), prev_serial_needed ? send_sequence_num_ : ++send_sequence_num_, received_sequence_num_ + 1)});
+}
+
+void client_t::impl_t::set_server_connection_status(bool online)
+{
+  if (online == server_online_) return;
+
+  server_online_ = true;
+  server_status_changed_callback_(server_online_);
 }
 
 //============================ state_t ============================
@@ -197,7 +210,7 @@ void client_t::impl_t::connect_state_t::read()
   client_.endpoint_.port = data.endpoint.port;
   resend_hello_server_timer_.stop();
 
-  client_.server_status_changed_callback_(true);
+  client_.set_server_connection_status(true);
 
   auto self = shared_from_this(); // set_new_state will change current state on new one
   client_.set_new_state(std::make_shared<connected_state_t>(client_));
@@ -245,7 +258,7 @@ void client_t::impl_t::connected_state_t::read()
   if (msg::id_v<msg::message_received_t> == datagram.data.type)
   {
     client_.prev_message_sent_ = true;
-    client_.server_status_changed_callback_(true);
+    client_.set_server_connection_status(true);
     return;
   }
 
