@@ -27,7 +27,6 @@ public:
   std::optional<client_uuid_t> opponent_uuid(const client_uuid_t& player) const;
   std::optional<client_uuid_t> free_player_uuid(const client_uuid_t& not_this) const;
   std::optional<board_logic_t::uuid_t> board_uuid(const client_uuid_t& player_uuid) const;
-  // TODO: check possibility to acnowledge player with inprogress board_id
 
 private:
   void book_players(const client_uuid_t& player_1, const client_uuid_t& player_2, const board_logic_t::uuid_t& board_uuid);
